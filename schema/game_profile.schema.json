@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Nimdy/detect-FPS-hackers/schema/game_profile.schema.json",
+  "title": "FPS baseline game profile",
+  "type": "object",
+  "required": ["game_id"],
+  "properties": {
+    "game_id": { "type": "string" },
+    "notes": { "type": "string" },
+    "min_shots": { "type": "integer", "minimum": 1 },
+    "min_hits_for_headshot": { "type": "integer", "minimum": 1 },
+    "min_cohort_players": { "type": "integer", "minimum": 1 },
+    "self_jump_gap": { "type": "number", "minimum": 0 },
+    "unknowable_min_samples": { "type": "integer", "minimum": 1 },
+    "unknowable_jitter_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "vendor_min_r": { "type": "number", "minimum": -1, "maximum": 1 },
+    "vendor_min_shots": { "type": "integer", "minimum": 1 },
+    "voice_min_ms": { "type": "integer", "minimum": 1 },
+    "inherit_min_events": { "type": "integer", "minimum": 1 },
+    "aim_group": { "enum": ["weapon_class", "weapon_id"] },
+    "speed_over_fraction": { "type": "number", "minimum": 0 },
+    "speed_min_run": { "type": "integer", "minimum": 1 },
+    "speed_run_gap_ms": { "type": "integer", "minimum": 1 },
+    "recoil_floor_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+    "recoil_min_spray_index": { "type": "integer", "minimum": 0 },
+    "recoil_min_run": { "type": "integer", "minimum": 1 },
+    "reference_lightest_speed_mps": { "type": ["number", "null"], "minimum": 0 },
+    "weight_classes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["max_kg"],
+        "properties": {
+          "name": { "type": "string" },
+          "max_kg": { "type": "number" },
+          "max_ground_speed_mps": { "type": ["number", "null"] },
+          "speed_multiplier": { "type": ["number", "null"] }
+        }
+      }
+    },
+    "weapons": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "min_shot_interval_ms": { "type": "integer" },
+          "interval_slack_ms": { "type": "integer" },
+          "min_intervals": { "type": "integer" },
+          "min_violations": { "type": "integer" },
+          "min_violation_rate": { "type": "number" }
+        }
+      }
+    },
+    "recoil_floors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["weapon_id", "min_pitch_deg"],
+        "properties": {
+          "weapon_id": { "type": "string" },
+          "mod_set": { "type": "array", "items": { "type": "string" } },
+          "min_pitch_deg": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "extra_metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "source", "direction"],
+        "properties": {
+          "name": { "type": "string" },
+          "source": { "type": "string" },
+          "kind": { "enum": ["primary", "supporting"] },
+          "direction": { "enum": ["high", "low"] },
+          "min_samples": { "type": "integer", "minimum": 1 },
+          "group_by": {
+            "type": "array",
+            "items": { "enum": ["skill_band", "weapon_class", "weapon_id", "build_key", "weight_class"] }
+          }
+        }
+      }
+    }
+  }
+}

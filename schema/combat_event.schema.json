@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Nimdy/detect-FPS-hackers/schema/combat_event.schema.json",
+  "title": "FPS baseline event",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["game_id", "match_id", "player_id", "t_ms"],
+  "properties": {
+    "game_id": { "type": "string", "minLength": 1 },
+    "match_id": { "type": "string", "minLength": 1 },
+    "player_id": { "type": "string", "minLength": 1 },
+    "t_ms": { "type": "integer" },
+    "utc": { "type": "string" },
+    "event_type": { "enum": ["shot", "movement"] },
+    "skill_band": { "enum": ["developing", "average", "advanced", "elite", "unrated"] },
+    "skill_prior": { "type": "number", "minimum": 0, "maximum": 1 },
+    "map_id": { "type": "string" },
+    "party_id": { "type": "string" },
+    "weapon_class": { "type": "string" },
+    "weapon_id": { "type": "string" },
+    "mod_set": { "type": "array", "items": { "type": "string" } },
+    "hit": { "type": "boolean" },
+    "hitbox": { "enum": ["head", "upper_torso", "lower_torso", "limbs"] },
+    "distance_m": { "type": "number", "minimum": 0 },
+    "through_geometry": { "type": "boolean" },
+    "loadout_weight_kg": { "type": "number", "minimum": 0 },
+    "speed_mps": { "type": "number", "minimum": 0 },
+    "on_ground": { "type": "boolean" },
+    "displacement_cause": {
+      "enum": [
+        "none", "unknown", "explosion", "knockback", "ragdoll", "vehicle",
+        "parachute", "ladder", "ability", "launch", "teleport_volume", "zipline", "admin"
+      ]
+    },
+    "expected_max_ground_speed_mps": { "type": "number", "minimum": 0 },
+    "recoil_pitch_deg": { "type": "number", "minimum": 0 },
+    "spray_index": { "type": "integer", "minimum": 0 },
+    "expected_min_recoil_pitch_deg": { "type": "number", "minimum": 0 },
+    "applied_recoil_pitch_deg": { "type": "number", "minimum": 0 },
+    "compensation_pitch_deg": { "type": "number" },
+    "hidden_track_ms": { "type": "number", "minimum": 0 },
+    "private_track_ms": { "type": "number", "minimum": 0 },
+    "wire_error_deg": { "type": "number", "minimum": 0 },
+    "picture_error_deg": { "type": "number", "minimum": 0 },
+    "interp_delay_ms": { "type": "number", "minimum": 0 },
+    "information_state": { "enum": ["visible", "audio", "unknowable"] },
+    "aim_jitter_deg": { "type": "number", "minimum": 0 },
+    "enemy_id": { "type": "string", "minLength": 1 },
+    "view_delta_deg": { "type": "number", "minimum": 0 },
+    "acquire_ms": { "type": "number", "minimum": 0 }
+  }
+}

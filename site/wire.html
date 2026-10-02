@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wire a game — fpsdet</title>
+<meta name="description" content="One JSON object per line, written by the dedicated server when it accepts the shot or the movement sample. The client does not post its own stats.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="fpsdet.css">
+</head>
+<body>
+<header class="shell">
+  <nav class="mast" aria-label="Site">
+    <a class="mark" href="index.html">fpsdet</a>
+    <a href="index.html">What this is</a>
+    <a href="scoring.html">Scoring</a>
+    <a href="wire.html" aria-current="page">Wire a game</a>
+    <a href="games.html">Games</a>
+    <a href="source.html">Source</a>
+    <a href="../demo/board.html">Desk</a>
+    <p class="rule">Automated action: none</p>
+  </nav>
+  <p class="kicker">Wire a game</p>
+  <h1>The server writes one line.</h1>
+  <p class="lede">Emit from the dedicated server, at the moment it accepts the shot or the movement sample, using the server's hit and the server's clock. One JSON object per line. Do not have the client POST its own stats. This does not end cheating.</p>
+</header>
+<main class="shell">
+  <h2>Required on every line</h2>
+  <div class="measure">
+    <p><code>game_id</code>, <code>match_id</code>, <code>player_id</code>, <code>t_ms</code>, and a rank (<code>skill_band</code>, or <code>skill_prior</code>). <code>event_type</code> defaults to <code>shot</code>. <code>player_id</code> should be a stable pseudonym. Keep the map from pseudonym to account on your side.</p>
+    <p>Send the cap and the recoil floor the server already used. Omit a field you cannot measure. A guessed number false-flags. A missing number is skipped.</p>
+  </div>
+
+  <h2>Shot</h2>
+  <pre><code>{
+  "game_id": "your-game",
+  "match_id": "m-1001",
+  "player_id": "stable-pseudonym",
+  "t_ms": 18420,
+  "utc": "2026-10-02T18:04:11Z",
+  "event_type": "shot",
+  "skill_band": "average",
+  "weapon_id": "ak-74",
+  "mod_set": ["compensator", "vertical_grip"],
+  "hit": true,
+  "hitbox": "head",
+  "distance_m": 42.5,
+  "through_geometry": false,
+  "spray_index": 6,
+  "recoil_pitch_deg": 1.4,
+  "expected_min_recoil_pitch_deg": 1.1,
+  "applied_recoil_pitch_deg": 1.8,
+  "compensation_pitch_deg": -0.4,
+  "hidden_track_ms": 0,
+  "private_track_ms": 0,
+  "wire_error_deg": 1.8,
+  "picture_error_deg": 0.4,
+  "interp_delay_ms": 100,
+  "information_state": "visible",
+  "aim_jitter_deg": 0.42,
+  "enemy_id": "enemy-4",
+  "loadout_weight_kg": 14.2,
+  "on_ground": true,
+  "speed_mps": 5.4,
+  "expected_max_ground_speed_mps": 6.1,
+  "displacement_cause": "none"
+}</code></pre>
+  <div class="measure">
+    <p><code>applied_recoil_pitch_deg</code> is the kick the server applied. <code>compensation_pitch_deg</code> is the signed view command on that same tick. Negative is a pull-down. Omit either one and the mirror check does nothing.</p>
+    <p><code>information_state</code> is <code>visible</code>, <code>audio</code>, or <code>unknowable</code>. Unknowable means this client's own line-of-sight and audio queries both failed. Audio is knowable: footsteps and a legal callout have to be labeled, or a quiet aim on a heard target becomes a radar case. Labeling a visible enemy as unknowable manufactures the case.</p>
+    <p><code>hidden_track_ms</code> is time on a mover the server had not made visible. <code>private_track_ms</code> is time on a replay of someone else's movement, placed where this client could not see or hear it. Omit either field, or send 0, when you do not have that query. A bad query manufactures the case. How those bars fire is on <a href="scoring.html">Scoring</a>.</p>
+    <p><code>wire_error_deg</code> is the angular error to the snapshot the server just sent. <code>picture_error_deg</code> is the angular error to the position the official client is drawing. <code>interp_delay_ms</code> is that delay. The sample above is closer to the picture than to the wire, which is what a person does. Omit any of the three when you cannot measure it. <code>view_delta_deg</code> is not this pair. A comparison against the wrong timeline manufactures the case.</p>
+    <p><code>through_geometry</code> is the server trace, not the client's claim. <code>hitbox</code> is <code>head</code>, <code>upper_torso</code>, <code>lower_torso</code>, <code>limbs</code>, or omitted on a miss.</p>
+  </div>
+
+  <h2>Movement</h2>
+  <div class="measure">
+    <p>Send movement on a fixed cadence. Ten hertz is enough. A speedhack between shots is invisible if you only sample on the trigger.</p>
+  </div>
+  <pre><code>{
+  "game_id": "your-game",
+  "match_id": "m-1001",
+  "player_id": "stable-pseudonym",
+  "t_ms": 19000,
+  "event_type": "movement",
+  "skill_band": "average",
+  "loadout_weight_kg": 14.2,
+  "speed_mps": 5.5,
+  "expected_max_ground_speed_mps": 6.1,
+  "on_ground": true,
+  "displacement_cause": "none"
+}</code></pre>
+  <div class="measure">
+    <p>When a grenade, a vehicle, a parachute, a ladder, a zipline, an ability, or an admin teleport moves the body, set <code>displacement_cause</code> for every sample in that window. If you do not know, send <code>unknown</code>. Unknown is dropped. A long untagged throw can look like a speedhack, and the case will say the server did not mark a cause. Only <code>none</code> on the ground is scored.</p>
+  </div>
+
+  <h2>Where the script runs</h2>
+  <div class="measure">
+    <p><strong>Unity.</strong> A dedicated-server script, not a client MonoBehaviour. <code>examples/unity/BaselineEmitter.cs</code> writes a line. Ship the lines to your collector.</p>
+    <p><strong>Unreal.</strong> From the server GameMode, after the server confirms the hit, post lag-compensation rewind, and only when <code>HasAuthority()</code> is true.</p>
+    <p><strong>Godot.</strong> The dedicated-server peer only. <code>JSON.stringify</code> one object. <code>on_ground</code> is the server body's floor state. <code>expected_max_ground_speed_mps</code> is the cap that server already applied.</p>
+    <p>Per-title fields, including what not to copy out of a community table, are on <a href="games.html">Games</a>.</p>
+  </div>
+
+  <h2>The collector</h2>
+  <div class="measure">
+    <p>Appending lines to a file is enough for a solo dev. <code>fpsdet ingest</code> partitions them into <code>lake/game=&lt;id&gt;/dt=&lt;YYYY-MM-DD&gt;/events.ndjson</code>. A studio can point the same stream at a bus it already runs. The scorer does not care how the line arrived.</p>
+    <p>Call <code>run_score</code> in-process if you would rather not shell out. Pass a cohort built from an earlier window. The lake, the queue, and the optional brief are on <a href="source.html">Source</a>.</p>
+  </div>
+  <pre><code>from fpsdet.parse import load_profile, parse_event
+from fpsdet.pipeline import run_score
+
+profile = load_profile("profiles/example-loadout.json")
+events = [parse_event(obj) for obj in batch]
+cases = run_score(events, profile, cohort, history, reports)</code></pre>
+</main>
+<footer class="shell">
+  <p>A person still reviews. This does not end cheating.</p>
+  <p class="links">
+    <a href="index.html">What this is</a>
+    <a href="scoring.html">Scoring</a>
+    <a href="games.html">Games</a>
+    <a href="source.html">Source</a>
+    <a href="../demo/board.html">Desk</a>
+  </p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "game_id": "example-loadout",
+  "notes": "Synthetic gear rules for the demo and the conformance tests. These speeds and recoil floors are not from a shipped game. Replace them with your server's own caps, or send expected_max_ground_speed_mps and expected_min_recoil_pitch_deg on each sample so a stale table cannot false-flag a perk or a new attachment.",
+  "min_shots": 40,
+  "min_hits_for_headshot": 25,
+  "min_cohort_players": 30,
+  "self_jump_gap": 0.10,
+  "aim_group": "weapon_class",
+  "speed_over_fraction": 0.08,
+  "speed_min_run": 25,
+  "speed_run_gap_ms": 400,
+  "recoil_floor_fraction": 0.25,
+  "recoil_min_spray_index": 3,
+  "recoil_min_run": 10,
+  "weight_classes": [
+    {"name": "light-3kg", "max_kg": 5, "max_ground_speed_mps": 7.2},
+    {"name": "loaded-10kg", "max_kg": 12, "max_ground_speed_mps": 5.6},
+    {"name": "heavy", "max_kg": 20, "max_ground_speed_mps": 5.4},
+    {"name": "overloaded", "max_kg": 80, "max_ground_speed_mps": 4.4}
+  ],
+  "weapons": {
+    "rifle": {
+      "min_shot_interval_ms": 90,
+      "interval_slack_ms": 15,
+      "min_intervals": 20,
+      "min_violations": 10,
+      "min_violation_rate": 0.3
+    }
+  },
+  "recoil_floors": [
+    {"weapon_id": "ak", "mod_set": [], "min_pitch_deg": 1.6},
+    {"weapon_id": "ak", "mod_set": ["compensator", "vertical_grip"], "min_pitch_deg": 0.7}
+  ],
+  "extra_metrics": [
+    {
+      "name": "ads_ms",
+      "source": "ads_ms",
+      "kind": "supporting",
+      "direction": "low",
+      "min_samples": 30,
+      "group_by": ["skill_band", "weapon_class", "weight_class"]
+    }
+  ]
+}

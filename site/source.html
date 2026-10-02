@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The files — fpsdet</title>
+<meta name="description" content="fpsdet 0.2.0. Python 3.11 or newer. No runtime dependencies. The planted desk and the tests are the behavior lock.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="fpsdet.css">
+</head>
+<body>
+<header class="shell">
+  <nav class="mast" aria-label="Site">
+    <a class="mark" href="index.html">fpsdet</a>
+    <a href="index.html">What this is</a>
+    <a href="scoring.html">Scoring</a>
+    <a href="wire.html">Wire a game</a>
+    <a href="games.html">Games</a>
+    <a href="source.html" aria-current="page">Source</a>
+    <a href="../demo/board.html">Desk</a>
+    <p class="rule">Automated action: none</p>
+  </nav>
+  <p class="kicker">Source</p>
+  <h1>The reference is the Python in this repo.</h1>
+  <p class="lede"><strong>fpsdet 0.2.0.</strong> Python 3.11 or newer. No runtime dependencies. A solo dev and a studio run the same contract. A port in another language matches when it reproduces the planted demo and <code>tests/test_fpsdet.py</code>. This does not end cheating.</p>
+</header>
+<main class="shell">
+  <h2>Run the planted matches</h2>
+  <pre><code>PYTHONPATH=src python3 -m fpsdet demo
+PYTHONPATH=src python3 -m unittest tests.test_fpsdet
+PYTHONPATH=src python3 -m fpsdet pages</code></pre>
+  <div class="measure">
+    <p><code>demo</code> writes <code>demo/board.html</code>. That page starts with a six-step walk-through, then the thirty-two planted players. The first tape is the 10 kg sprint beside the blast. <code>pages</code> writes a folder a static host can serve: these pages, and a fresh desk beside them. Nothing in that command publishes the repository.</p>
+    <p>The repository is <a href="https://github.com/Nimdy/detect-FPS-hackers">github.com/Nimdy/detect-FPS-hackers</a>. These HTML pages are the walk-through. The same contract, written for an implementer, is <code>docs/scoring.md</code>, <code>docs/integration.md</code>, <code>docs/games.md</code>, and <code>docs/operations.md</code>.</p>
+  </div>
+
+  <h2>What is in the tree</h2>
+  <table>
+    <thead>
+      <tr><th>Path</th><th>What it is</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>src/fpsdet/</td><td>The reference scorer.</td></tr>
+      <tr><td>profiles/</td><td>Curves for the synthetic loadout, and WARDOGS weight classes with no absolute sprint speed.</td></tr>
+      <tr><td>tests/</td><td>The behavior lock, including the planted demo.</td></tr>
+      <tr><td>schema/</td><td>Event and profile shapes.</td></tr>
+      <tr><td>examples/</td><td>One shot, one movement sample, a Unity emitter.</td></tr>
+      <tr><td>site/</td><td>These pages.</td></tr>
+      <tr><td>demo/board.html</td><td>The generated desk. Regenerate it. Do not hand-edit it.</td></tr>
+      <tr><td>docs/</td><td>The bars, the wire-up, the games, the lake.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Where the bytes go</h2>
+  <div class="measure">
+    <p><code>fpsdet ingest</code> appends each line to <code>lake/game=&lt;id&gt;/dt=&lt;day&gt;/events.ndjson</code>. That tree is enough for a solo dev. A studio can put the same objects in the object store it already uses and aggregate with DuckDB or ClickHouse. The case a reviewer opens is small. The shots that built it do not belong in a search index as the system of record.</p>
+    <p>Reports are a queue, not a verdict. Scan reported players first, including the clean ones. A person reads review, then watch, then clean. Two batch tells, a shared leftover and a teammate who swings before a voice, are watches. They do not become reviews.</p>
+  </div>
+
+  <h2>A brief, if you want one</h2>
+  <div class="measure">
+    <p><code>--ai</code> calls one chat completion per case that is a review, a watch, or reported. The endpoint is any server that speaks the OpenAI chat-completions shape. Set <code>FPSDET_AI_BASE_URL</code>, <code>FPSDET_AI_MODEL</code>, and <code>FPSDET_AI_API_KEY</code> when the server checks one. Player, party, and match ids are stripped before the request. The model is told not to recommend a ban and not to invent numbers. If the endpoint is down, the decision already exists. The brief cannot change it.</p>
+    <p><code>features.csv</code> is for a later model trained on your reviewers' labels. Keep the gear rules beside it. A learned score that can talk a sustained over-cap sprint out of a case has learned the wrong objective.</p>
+  </div>
+
+  <h2>Before other people send patches</h2>
+  <div class="measure">
+    <p>There is no license yet. Add one before you take contributions. Patches that describe how to build a cheat, or that weaken the innocence rules so a blast becomes a ban, are off the point of this repo. Patches that add a game's server-side fields, a profile, or a failing test for a false positive are the point.</p>
+    <p>Store a pseudonym. Do not collect raw mouse input, kernel memory, or a hardware id here. Those are a different product. Wire a ban action to your own review tool after a person looks. Do not wire it to <code>decision == review</code>.</p>
+    <p><a href="index.html#still">What still gets through</a> is part of the contract. A DMA read of the drawn frame, a capture card, a cheat that waits out the interpolation delay, a wrong timeline, and a listen server are named there on purpose.</p>
+  </div>
+</main>
+<footer class="shell">
+  <p>A person still reviews. This does not end cheating.</p>
+  <p class="links">
+    <a href="index.html">What this is</a>
+    <a href="scoring.html">Scoring</a>
+    <a href="wire.html">Wire a game</a>
+    <a href="games.html">Games</a>
+    <a href="../demo/board.html">Desk</a>
+    <a href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
+  </p>
+</footer>
+</body>
+</html>

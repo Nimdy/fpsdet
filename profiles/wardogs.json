@@ -1,0 +1,29 @@
+{
+  "game_id": "wardogs",
+  "notes": "WARDOGS weight-class shape from public gear guides (September 2026), not a studio export and not a ban table. Move penalties are community measurements: lightest 0-10 kg no move penalty, light 10-17 kg about -5%, medium 17-27 kg about -13%, heavy and super-heavy about -20%. Absolute sprint speed is intentionally unset. Speed scoring stays off until the dedicated server sends expected_max_ground_speed_mps per sample (preferred; this also covers the adrenaline pen, which reduces equipment weight class) or you set reference_lightest_speed_mps from your own server build. Do not copy another game's meters per second in here.",
+  "reference_lightest_speed_mps": null,
+  "min_shots": 40,
+  "min_cohort_players": 30,
+  "aim_group": "weapon_id",
+  "speed_over_fraction": 0.08,
+  "speed_min_run": 25,
+  "weight_classes": [
+    {"name": "lightest", "max_kg": 10, "speed_multiplier": 1.0},
+    {"name": "light", "max_kg": 17, "speed_multiplier": 0.95},
+    {"name": "medium", "max_kg": 27, "speed_multiplier": 0.87},
+    {"name": "heavy", "max_kg": 40, "speed_multiplier": 0.8},
+    {"name": "super_heavy", "max_kg": 1000, "speed_multiplier": 0.8}
+  ],
+  "weapons": {},
+  "recoil_floors": [],
+  "extra_metrics": [
+    {
+      "name": "ads_ms",
+      "source": "ads_ms",
+      "kind": "supporting",
+      "direction": "low",
+      "min_samples": 30,
+      "group_by": ["weapon_id", "weight_class"]
+    }
+  ]
+}

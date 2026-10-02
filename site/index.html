@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run the test — fpsdet</title>
+<meta name="description" content="An answer key of thirty-two planted players, and the scorer that grades them. Run one command. Expect weight-cheat review and blasted clean. Nothing here bans.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="fpsdet.css">
+</head>
+<body>
+<header class="shell">
+  <nav class="mast" aria-label="Site">
+    <a class="mark" href="index.html">fpsdet</a>
+    <a href="index.html" aria-current="page">What this is</a>
+    <a href="scoring.html">Scoring</a>
+    <a href="wire.html">Wire a game</a>
+    <a href="games.html">Games</a>
+    <a href="source.html">Source</a>
+    <a href="../demo/board.html">Desk</a>
+    <p class="rule">Automated action: none</p>
+  </nav>
+  <p class="kicker">What we are building</p>
+  <h1>Run the test before you wire a game.</h1>
+  <p class="lede"><strong>You are looking at an answer key, and the program that grades it.</strong> Thirty-two fake players. A known decision on each one. fpsdet reads JSON a dedicated server already can write, and it writes a case a person opens. It does not install on a player’s PC. It does not ban. This does not end cheating.</p>
+</header>
+<main class="shell">
+  <h2>Run this</h2>
+  <div class="measure">
+    <p>From the repo, Python 3.11 or newer. No packages to install.</p>
+  </div>
+  <pre><code>PYTHONPATH=src python3 -m fpsdet demo</code></pre>
+  <div class="measure">
+    <p>The terminal prints one line per player. The first pair is the whole pitch. The last line says the planted cases matched.</p>
+  </div>
+  <pre><code>weight-cheat    review
+blasted         clean
+
+Planted cases matched profiles/example-loadout.json.</code></pre>
+  <div class="measure">
+    <p>Then open <a href="../demo/board.html">demo/board.html</a>. That page is the same result, with the charts. The header reads 11 to open, 4 to watch, 16 clean, 1 held. Tape 01 is a 10 kg kit holding 7.1 m/s, cap 5.6, beside the same sprint tagged as a blast. The blast is clean. If those two decisions move, the scorer changed. This file is the spec. Later, <code>wire-lock</code> is a review and <code>picture-track</code> is clean. Same enemy. Same hits.</p>
+    <p>A second command shows the tool refusing to guess. <code>examples/shot.jsonl</code> is one legal shot, one legal step, and one step at 18 m/s tagged as an explosion.</p>
+  </div>
+  <pre><code>PYTHONPATH=src python3 -m fpsdet score examples/shot.jsonl --profile profiles/example-loadout.json</code></pre>
+  <pre><code>p-1044    insufficient_data</code></pre>
+  <div class="measure">
+    <p>The reason says the explosion sample was excluded. One fast sample is not a case. A case needs a sustained run. That refusal is what you want on a short log.</p>
+  </div>
+
+  <h2>What will fire</h2>
+  <div class="measure">
+    <p>Four checks. The first two are ordinary, and they work. The third catches a body the official client never drew. The fourth is two positions of a player they can see. None of them ban anyone.</p>
+    <p><strong>Gear the server already applied.</strong> A 10 kg kit sprinting at 7.1 m/s when that server’s cap for the kit is 5.6. The same speed, tagged as a blast, is not a case. Fire rate uses the gun’s own cycle. Recoil uses the floor for that build. This is not a new idea. It catches blatant speed, a macro under the legal gap, and a stock gun with no kick. A cheat that stays inside the cap, and jitters its timing by a few milliseconds, walks through it.</p>
+    <p><strong>The clock.</strong> The camera is allowed to kick. The case is the player command matching the kick the server just applied, backwards, on that same tick. Pull the same kick one shot later and it stays clean. This catches a same-tick no-recoil script. A script that waits one shot and adds a little noise stays quiet. Your server has to log both numbers, <code>applied_recoil_pitch_deg</code> and <code>compensation_pitch_deg</code>. If you do not have them, this check does nothing.</p>
+    <p><strong>A fact this client was not sent.</strong> Sustained aim on an enemy the server had not made visible, or on a replay of someone else’s real movement, turned onto another heading, where this client has no sight and no audio. There is no invisible flag. The official client drops that body before draw because it is occluded. A snapshot parser that keeps every player still sees a person running. Sustained aim on it is a review. A four-shot clip of it stays clean.</p>
+    <p>That third check can catch a cheat that aims at bodies in the server snapshot. It cannot catch a DMA read of the frame the game actually drew, or a capture card looking at pixels. Those never receive a body the official client did not draw. If the visibility query is wrong, the case is manufactured. Fix the query before you trust the case.</p>
+    <p><strong>The picture is late.</strong> Every moving player has two positions. The wire is the snapshot the server just sent. The picture is where the official client draws them, the wire position from one interpolation delay ago. A person aims at the picture. A packet aimbot aims at the wire, often the tick the snapshot arrives. The case is not “too accurate.” Both crosshairs can hit. The case is the error to the wire staying smaller than the error to the picture, across enough shots, before that delay has elapsed. Standing still makes the two positions match, and nothing fires. One shot does not fire. On the desk, <code>wire-lock</code> is the review and <code>picture-track</code> is clean.</p>
+    <p>That check still misses a capture card looking at the pixels that were drawn, a cheat that reimplements the official interpolator and waits out the delay, and a server that compares against the wrong timeline. A wrong timeline frames a legal player. A listen server can forge the fields. If you cannot measure the two errors and the delay, omit them. The check does nothing.</p>
+  </div>
+
+  <h2>What you set up on the server</h2>
+  <div class="measure">
+    <p>Nothing on the player’s machine. When the dedicated server accepts a shot or a movement sample, append one JSON object. Start with the fields you already compute to move the body.</p>
+    <ul>
+      <li><code>loadout_weight_kg</code>, <code>speed_mps</code>, <code>on_ground</code></li>
+      <li><code>expected_max_ground_speed_mps</code> — the cap that server used, after the pen, the stance, and the perks</li>
+      <li><code>displacement_cause</code> — <code>none</code> on a real sprint. <code>explosion</code>, <code>vehicle</code>, <code>parachute</code>, <code>ability</code> for the whole throw. <code>unknown</code> is dropped, not flagged</li>
+    </ul>
+    <p>Score the file with the same command as the example, pointed at your log and your profile. Legal play comes back <code>clean</code> or <code>insufficient_data</code>. A sustained sprint over the cap you sent comes back <code>review</code>. Stop there. Do not wire a ban to that word. <code>automated_action</code> is <code>none</code> so a hasty integration has to notice it.</p>
+    <p>Add the clock only when you can send the applied kick and the view command. Add the hidden-aim and replay checks only when line-of-sight and audio for that connection are queries you already trust. Add the wire-and-picture check only when the server can measure angular error to the snapshot it just sent, angular error to the position the official client is drawing, and the interpolation delay. Omit any of the three and that shot does not count. The JSON, Unity, Unreal, and Godot shapes are on <a href="wire.html">Wire a game</a>. Tarkov, Call of Duty, Battlefield, and WARDOGS are the same fields, on <a href="games.html">Games</a>. The bars are on <a href="scoring.html">Scoring</a>.</p>
+  </div>
+
+  <h2>What you have to lose</h2>
+  <div class="measure">
+    <p>An afternoon, and a log line. Cheaters are in every shooter tonight, with a kernel driver and without one. Running the planted test takes nobody off a server.</p>
+    <p>ZeroBandwidth wrote this. No studio is running it. There is no deployment to trust. Reproduce the two decisions above, then try to break them.</p>
+    <ul>
+      <li>If a legal slide, a legal mod, or a stim would have been a case, send the cap your server already used.</li>
+      <li>If you can sit on the private replay and stay clean, the rule is wrong.</li>
+      <li>If you can sit on the wire, ahead of the picture, and stay clean, the rule is wrong.</li>
+      <li>If the terminal does not print <code>weight-cheat</code> as review and <code>blasted</code> as clean, do not wire anything.</li>
+    </ul>
+  </div>
+
+  <h2 id="still">What still gets through</h2>
+  <div class="measure limits">
+    <p>An aim that never sits on a hidden mover, never sits on the replay, aims at the picture rather than the wire, and does not get quieter when that mover exists.</p>
+    <p>Aim that stays on the picture the official client draws, including a cheat that waits out the interpolation delay. Standing still, where the snapshot and the picture are the same place.</p>
+    <p>A DMA read of the frame the game actually drew, and a capture card looking at pixels.</p>
+    <p>A server that scores aim against a position that client was not shown. That manufactures the case.</p>
+    <p>A humanizer with its own noise, when that noise also matches human lag and human variance. A callout slow enough to have been a voice. A speed pulse inside the glitch filter. A kick that barely changes from shot to shot. Stamps that all land on one tick. A gun the server itself fired.</p>
+    <p>A listen server, or a game that lets the client decide the hit, can forge every field. The contract is a dedicated server. A bad visibility query manufactures the case. Fix the query.</p>
+    <p>A person still opens the file. This does not end cheating.</p>
+  </div>
+</main>
+<footer class="shell">
+  <p>ZeroBandwidth. The planted desk is generated from the same code as the score. The picture is not the score. The score reads the server's numbers. A person still reviews. This does not end cheating.</p>
+  <p class="links">
+    <a href="../demo/board.html">Desk</a>
+    <a href="scoring.html">Scoring</a>
+    <a href="wire.html">Wire a game</a>
+    <a href="games.html">Games</a>
+    <a href="source.html">Source</a>
+  </p>
+</footer>
+</body>
+</html>

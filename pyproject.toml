@@ -1,0 +1,18 @@
+[project]
+name = "fpsdet"
+version = "0.2.0"
+description = "Server-side human-play and gear-rule baselines for FPS anti-cheat"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "ZeroBandwidth" }]
+dependencies = []
+
+[project.scripts]
+fpsdet = "fpsdet.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"

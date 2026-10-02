@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a line becomes a case — fpsdet</title>
+<meta name="description" content="Gear rules from the first match. Human ceilings after enough players. review, watch, clean, or held. Automated action is none.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="fpsdet.css">
+</head>
+<body>
+<header class="shell">
+  <nav class="mast" aria-label="Site">
+    <a class="mark" href="index.html">fpsdet</a>
+    <a href="index.html">What this is</a>
+    <a href="scoring.html" aria-current="page">Scoring</a>
+    <a href="wire.html">Wire a game</a>
+    <a href="games.html">Games</a>
+    <a href="source.html">Source</a>
+    <a href="../demo/board.html">Desk</a>
+    <p class="rule">Automated action: none</p>
+  </nav>
+  <p class="kicker">Scoring</p>
+  <h1>How a line becomes a case.</h1>
+  <p class="lede">Four outcomes: <strong>review</strong>, <strong>watch</strong>, <strong>clean</strong>, or <strong>held</strong> (<code>insufficient_data</code>). <code>automated_action</code> is always <code>none</code>. <code>recommended_action</code> is <code>human_review</code>, <code>monitor</code>, or <code>none</code>. A person still decides. This does not end cheating.</p>
+</header>
+<main class="shell">
+  <h2>The decision</h2>
+  <p class="measure">Gear rules can open a review on their own. Combat rates need a thick cohort of humans first. A thin cohort does not flag. The build is reported as untrained.</p>
+  <table>
+    <thead>
+      <tr><th>Condition</th><th>Decision</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Sustained gear break</td><td>review</td></tr>
+      <tr><td>Two or more rates past the best measured human</td><td>review</td></tr>
+      <tr><td>One such rate, plus the account's own history or a supporting tell</td><td>review</td></tr>
+      <tr><td>Past the rank only, a single ceiling hit, a history jump, or two supporting families</td><td>watch</td></tr>
+      <tr><td>Something was compared, and nothing above fired</td><td>clean</td></tr>
+      <tr><td>Nothing was comparable</td><td>held</td></tr>
+    </tbody>
+  </table>
+  <p class="note">A sustained gear break is speed, fire interval, blatant or learned recoil, a same-tick recoil mirror, a metronome on a legal cycle, sustained tracking of a hidden mover, sustained aim on a private replay, aim that matches the wire snapshot ahead of the picture, or aim noise that drops only while the server says this client could not have known.</p>
+
+  <h2>Gear, from the first match</h2>
+  <div class="measure">
+    <p><strong>Speed.</strong> Only samples on the ground with <code>displacement_cause</code> of <code>none</code> are scored. The cap is <code>expected_max_ground_speed_mps</code> on that sample, else the weight curve in the profile. Over cap means faster than the cap times 1.08. The finding needs a run of at least 25 of those samples, with gaps no larger than 400 ms. A blast, a vehicle, a parachute, an ability, an unknown cause, a cause the profile has not listed, and any airborne sample are excluded. A shorter run is written down as a possible glitch. It does not open a case. The planted desk shows a 10 kg kit at 7.1 m/s, cap 5.6, beside the same sprint tagged as a blast.</p>
+    <p><strong>Fire interval.</strong> Gaps under that weapon's own minimum, past one tick of slack, and enough of them. This runs even when the aim sample is still too small to score. Stamps that all land on the server tick, and a gun the server itself fired, stay quiet.</p>
+    <p><strong>Recoil.</strong> Counted once the spray index is at least 3, and the cause is not an innocence tag. The floor is <code>expected_min_recoil_pitch_deg</code> on the shot, else the profile row for that build. A run of 10 shots under a quarter of the floor is a review. A compensated gun has a lower floor, so the same pitch can be legal. No floor and no thick cohort: untrained, not flagged. The steadiest legal player on a build is not a review.</p>
+    <p><strong>Same-tick mirror.</strong> The camera can still kick. Send the kick the server applied and the signed player command on that same tick. Review when at least 16 shots correlate at −0.90 or below, and that correlation is at least 0.25 more negative than the same series shifted one shot later. A person pulls on a later shot. A kick that barely changes from shot to shot cannot separate the two.</p>
+    <p><strong>Metronome.</strong> Fire interval catches gaps under the legal line. A macro that fires on the legal line, with no motor noise, does not. Review at 40 or more gaps, a mean on the legal side of the line, and a standard deviation of 1.0 ms or under.</p>
+  </div>
+
+  <h2>A fact this client was not given</h2>
+  <div class="measure">
+    <p><strong>Hidden tracking.</strong> <code>hidden_track_ms</code> is time, on that shot, that the aim stayed on an enemy the server had not made visible. Omit it, or send 0, and nothing happens. Review when at least 8 shots are above 0 and the sum is at least 1200 ms. One long sample is not enough. A visibility query that marks a visible enemy as hidden manufactures the case. That is an emitter bug.</p>
+    <p><strong>Private replay.</strong> <code>private_track_ms</code> uses the same bar. The body is someone else's real movement, on another heading, where this client's sight and audio queries both fail. There is no invisible flag. A short crossing stays clean. A body this client could see, labeled private, manufactures the case. The desk draws that route. The score reads only <code>private_track_ms</code>.</p>
+    <p><strong>The picture is late.</strong> <code>wire_error_deg</code> is the error to the snapshot the server just sent. <code>picture_error_deg</code> is the error to the position the official client draws, one <code>interp_delay_ms</code> earlier. Omit any of the three and that shot does not count. A shot counts as wire-led when the delay has started, the picture is at least 0.20° farther than the wire, and the wire error is at most 0.35 of the picture error. That gap is a separation floor, not an accuracy ceiling. The same bar applies: 8 wire-led shots and 1200 ms of summed delay. Standing still does nothing. One shot does nothing. The same hits on the picture stay clean. A server that scores the wrong timeline manufactures the case. There is no new profile knob. This runs even when the aim sample is still too small to score.</p>
+    <p><strong>Unknowable smoothness.</strong> <code>information_state</code> is <code>visible</code>, <code>audio</code>, or <code>unknowable</code>. Audio is knowable. Review when both sides have at least 12 samples, the knowable median is at least 0.05°, and the unknowable median is at or under 0.35 of that. A player who is smooth the whole time stays clean. A wrong <code>unknowable</code> label manufactures the case.</p>
+  </div>
+
+  <h2>After the decision</h2>
+  <div class="measure">
+    <p><strong>The same leftover.</strong> Subtract the server kick and the previous kick. What remains is compared across accounts, at least 32 shots, correlation at or above 0.85. A match is a watch, not a review. If one account is already a review, the other moves up the scan. If neither is a review, both are watches.</p>
+    <p><strong>A teammate, before a voice.</strong> Only after someone in the party is already a review for a hidden mover. Four or more swings on that same still-hidden enemy, under 350 ms, are a watch. A lag long enough to have been a voice stays clean.</p>
+    <p><strong>Reports.</strong> They change queue order. They do not change the decision, and they are not in the seal. A brigade can make you look today. It cannot convict anyone.</p>
+    <p><strong>The seal.</strong> SHA-256 of the player, the game, the decision, and the reasons. Edit a reason and the hash changes. It identifies the packet a reviewer saw. It is not a ban.</p>
+    <p><strong>Human ceilings.</strong> One number per player, leave-one-out, in that rank and on that weapon. The cohort is thick at 30 players after the subject is removed. The bound is a one-sided 95% Wilson lower bound. Past the best measured human is review-grade. Past the rank only is a watch. A hot ten-shot game has a wide bound and does not clear a maximum.</p>
+    <p>The precise bars, every default, are <a href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/scoring.md">docs/scoring.md</a> in the repository. The planted answers are on <a href="../demo/board.html">the desk</a>.</p>
+  </div>
+</main>
+<footer class="shell">
+  <p>A person still reviews. This does not end cheating.</p>
+  <p class="links">
+    <a href="index.html">What this is</a>
+    <a href="wire.html">Wire a game</a>
+    <a href="games.html">Games</a>
+    <a href="source.html">Source</a>
+    <a href="../demo/board.html">Desk</a>
+  </p>
+</footer>
+</body>
+</html>

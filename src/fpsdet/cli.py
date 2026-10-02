@@ -1,0 +1,273 @@
+"""Command line. `python -m fpsdet demo` is the whole tour."""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import os
+import sys
+from pathlib import Path
+
+from .ai_triage import openai_compatible_transport, triage_case
+from .baseline import build_cohorts
+from .casefile import safe_name, write_case
+from .lake import ingest_lines, read_lines
+from .parse import iter_events, load_events, load_profile
+from .persist import (
+    case_to_dict,
+    cohort_from_dict,
+    cohort_to_dict,
+    history_from_dict,
+    history_to_dict,
+    load_reports,
+    read_json,
+    write_json,
+)
+from .pipeline import run_score
+from .priority import review_order, scan_order
+from .summarize import summarize
+from .board import write_board
+from .pages import write_pages
+from .signals import poison_alarms
+from .synthetic import build_demo, demo_rows
+from .models import HistoryWindow
+
+
+def _print_cases(cases) -> None:
+    print(f"{'player':<22} {'decision':<18} {'reports':>7}  why")
+    for case in review_order(cases):
+        why = case.reasons[0] if case.reasons else (case.observations[0] if case.observations else "")
+        print(f"{case.player_id:<22} {case.decision:<18} {case.reports:7d}  {why[:88]}")
+
+
+def _write_outputs(cases, out: str, *, ai: bool) -> None:
+    folder = Path(out)
+    folder.mkdir(parents=True, exist_ok=True)
+    if ai:
+        _attach_ai(cases)
+    for case in cases:
+        write_case(folder, case)
+    scan = [case_to_dict(case) for case in scan_order(cases)]
+    review = [case_to_dict(case) for case in review_order(cases)]
+    write_json(folder / "scan-index.json", {"order": "reports_first", "cases": scan})
+    write_json(folder / "review-index.json", {"order": "evidence_first", "cases": review})
+    _write_features(cases, folder / "features.csv")
+
+
+def _attach_ai(cases) -> None:
+    base = os.environ.get("FPSDET_AI_BASE_URL", "")
+    model = os.environ.get("FPSDET_AI_MODEL", "")
+    key = os.environ.get("FPSDET_AI_API_KEY", "")
+    if not base or not model:
+        raise SystemExit("Set FPSDET_AI_BASE_URL and FPSDET_AI_MODEL. FPSDET_AI_API_KEY if the endpoint requires one.")
+    transport = openai_compatible_transport(base, key, model)
+    for case in cases:
+        if case.decision not in {"review", "watch"} and case.reports <= 0:
+            continue
+        case.ai_brief = triage_case(case_to_dict(case), transport, redact_ids=True)
+
+
+def _write_features(cases, path: Path) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=[
+                "player_id",
+                "decision",
+                "recommended_action",
+                "reports",
+                "skill_band",
+                "reason_count",
+                "speed_sustained",
+                "untrained",
+            ],
+        )
+        writer.writeheader()
+        for case in cases:
+            writer.writerow(
+                {
+                    "player_id": case.player_id,
+                    "decision": case.decision,
+                    "recommended_action": case.recommended_action,
+                    "reports": case.reports,
+                    "skill_band": case.skill_band,
+                    "reason_count": len(case.reasons),
+                    "speed_sustained": bool(case.speed and case.speed.sustained),
+                    "untrained": "|".join(case.untrained),
+                }
+            )
+
+
+def _events_from_args(path: str | None, lake: str | None, game: str | None):
+    if path and lake:
+        raise SystemExit("Pass an events file or a lake, not both.")
+    if lake:
+        lines = read_lines(lake, game_id=game)
+        return iter_events(lines)
+    if not path:
+        raise SystemExit("Pass an events file or --lake.")
+    return load_events(path)
+
+
+def _history_from_records(records) -> list[HistoryWindow]:
+    windows = []
+    for record in records:
+        for weapon in record.weapons:
+            windows.append(
+                HistoryWindow(
+                    record.player_id,
+                    weapon.weapon_key,
+                    weapon.skill_band,
+                    weapon.shots,
+                    weapon.hits,
+                )
+            )
+    return windows
+
+
+def cmd_demo(args: argparse.Namespace) -> int:
+    demo = build_demo()
+    desk = write_board(demo, Path(args.out) / "board.html" if args.out else None)
+    print(demo_rows(demo))
+    print()
+    print(f"Review desk: {desk}")
+    print("Open that file in a browser. The first tape is the 10 kg sprint beside the same sprint tagged as a blast.")
+    if demo.failures:
+        print("DEMO FAILED")
+        for failure in demo.failures:
+            print(f"- {failure}")
+        return 2
+    print("Planted cases matched profiles/example-loadout.json.")
+    if args.out:
+        _write_outputs(demo.cases, args.out, ai=False)
+        print(f"Wrote case files to {args.out}")
+    return 0
+
+
+def cmd_pages(args: argparse.Namespace) -> int:
+    demo = build_demo()
+    if demo.failures:
+        print("DEMO FAILED")
+        for failure in demo.failures:
+            print(f"- {failure}")
+        return 2
+    dest = write_pages(demo, args.out)
+    print(f"Site: {dest}")
+    print("The site pages and a fresh board.html are in that folder.")
+    return 0
+
+
+def cmd_baseline(args: argparse.Namespace) -> int:
+    profile = load_profile(args.profile)
+    events, errors = _events_from_args(args.events, args.lake, args.game)
+    for error in errors:
+        print(error, file=sys.stderr)
+    records = summarize(events, profile)
+    table = build_cohorts(records, profile)
+    if args.previous:
+        previous = cohort_from_dict(read_json(args.previous))
+        alarms = poison_alarms(
+            previous,
+            table,
+            jump=profile.poison_jump,
+            min_players=profile.min_cohort_players,
+        )
+        table.integrity = {"status": "poison_risk" if alarms else "ok", "alarms": alarms}
+        for alarm in alarms:
+            print(f"POISON RISK {alarm}", file=sys.stderr)
+    write_json(args.out, cohort_to_dict(table))
+    if args.history:
+        write_json(args.history, history_to_dict(_history_from_records(records)))
+    print(f"Wrote baseline {args.out} from {len(records)} players")
+    return 0
+
+
+def cmd_score(args: argparse.Namespace) -> int:
+    profile = load_profile(args.profile)
+    events, errors = _events_from_args(args.events, args.lake, args.game)
+    for error in errors:
+        print(error, file=sys.stderr)
+    cohort = cohort_from_dict(read_json(args.cohort)) if args.cohort else None
+    if cohort is not None and cohort.integrity.get("status") == "poison_risk":
+        print(
+            "POISON RISK: this cohort's human ceiling moved. Freeze the last cohort you still trust.",
+            file=sys.stderr,
+        )
+        for alarm in cohort.integrity.get("alarms") or []:
+            print(f"- {alarm}", file=sys.stderr)
+    history = history_from_dict(read_json(args.history)) if args.history else []
+    reports = load_reports(read_json(args.reports)) if args.reports else {}
+    if args.reported_only:
+        wanted = {pid for pid, count in reports.items() if count > 0}
+        events = [event for event in events if event.player_id in wanted]
+    cases = run_score(events, profile, cohort, history, reports)
+    _print_cases(cases)
+    if args.out:
+        _write_outputs(cases, args.out, ai=args.ai)
+        print(f"Wrote {len(cases)} cases to {args.out}")
+    elif args.ai:
+        _attach_ai(cases)
+        for case in review_order(cases):
+            if case.ai_brief:
+                print(f"\n{case.player_id}: {case.ai_brief}")
+    return 0
+
+
+def cmd_ingest(args: argparse.Namespace) -> int:
+    lines = Path(args.events).read_text(encoding="utf-8").splitlines()
+    result = ingest_lines(lines, args.lake, default_dt=args.dt)
+    print(f"Wrote {result['written']} events, skipped {result['skipped']}")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="fpsdet", description="Human-play and gear-rule baselines for FPS servers.")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    demo = sub.add_parser("demo", help="Run the planted matches and print decisions")
+    demo.add_argument("--out", help="Also write HTML and JSON cases here")
+    demo.set_defaults(func=cmd_demo)
+
+    pages = sub.add_parser("pages", help="Write the public pages and a fresh desk into one folder")
+    pages.add_argument("--out", help="Destination folder. Default is ./_site")
+    pages.set_defaults(func=cmd_pages)
+
+    baseline = sub.add_parser("baseline", help="Train a cohort file from a clean window")
+    baseline.add_argument("events", nargs="?", help="NDJSON events")
+    baseline.add_argument("--lake")
+    baseline.add_argument("--game")
+    baseline.add_argument("--profile", required=True)
+    baseline.add_argument("--out", required=True)
+    baseline.add_argument("--history", help="Also write per-player shot totals for the next window")
+    baseline.add_argument("--previous", help="Prior cohort. A ceiling that jumped is stamped poison_risk")
+    baseline.set_defaults(func=cmd_baseline)
+
+    score = sub.add_parser("score", help="Score events into cases. Does not ban.")
+    score.add_argument("events", nargs="?", help="NDJSON events")
+    score.add_argument("--lake")
+    score.add_argument("--game")
+    score.add_argument("--profile", required=True)
+    score.add_argument("--cohort", help="Frozen baseline from `fpsdet baseline`")
+    score.add_argument("--history")
+    score.add_argument("--reports", help="JSON map of player_id to report count. Priority, not proof.")
+    score.add_argument("--reported-only", action="store_true", help="Only score players who have reports")
+    score.add_argument("--out")
+    score.add_argument("--ai", action="store_true", help="Attach a brief from any OpenAI-compatible endpoint")
+    score.set_defaults(func=cmd_score)
+
+    ingest = sub.add_parser("ingest", help="Append NDJSON into the lake")
+    ingest.add_argument("events")
+    ingest.add_argument("--lake", required=True)
+    ingest.add_argument("--dt", help="UTC day YYYY-MM-DD when events have no utc field")
+    ingest.set_defaults(func=cmd_ingest)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
