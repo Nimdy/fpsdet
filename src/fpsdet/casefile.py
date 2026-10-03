@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import html
 from pathlib import Path
 
@@ -96,8 +97,17 @@ Reports: {case.reports}. Rank band: {html.escape(case.skill_band)}.</p>
 
 
 def safe_name(player_id: str) -> str:
-    cleaned = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in player_id)
-    return (cleaned or "player")[:80]
+    """A file name no other player id can share, on any filesystem.
+
+    ``p 1`` and ``p_1`` clean to the same text, and ``Bob`` and ``bob`` are one
+    file on Windows and macOS. Those ids get a short hash of the real id.
+    """
+    cleaned = "".join(ch if ch.isascii() and (ch.isalnum() or ch in "._-") else "_" for ch in player_id)
+    name = (cleaned or "player")[:80]
+    if name != player_id or name != name.lower():
+        digest = hashlib.sha256(player_id.encode("utf-8")).hexdigest()[:10]
+        name = f"{name[:69]}-{digest}"
+    return name
 
 
 def write_case(directory: str | Path, case: Case) -> None:

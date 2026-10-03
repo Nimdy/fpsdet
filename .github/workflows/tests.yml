@@ -1,0 +1,36 @@
+# Runs the behavior lock and the planted demo on every push to main and every pull request.
+# The run fails when a test fails, when a planted decision moves (`fpsdet demo` exits 2
+# and prints DEMO FAILED), or when the committed demo/board.html no longer matches what
+# the scorer writes. If the last step fails, run the demo locally and commit the new board.
+
+name: Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Unit tests
+        run: PYTHONPATH=src python -m unittest tests.test_fpsdet -v
+      - name: Planted demo
+        # Writes demo/board.html. Exits non-zero if any planted case got the wrong decision.
+        run: PYTHONPATH=src python -m fpsdet demo
+      - name: Committed desk is current
+        run: git diff --exit-code demo/board.html

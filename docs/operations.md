@@ -33,7 +33,7 @@ Those two batch tells are watches. They do not become reviews, and they do not c
 - `FPSDET_AI_MODEL`
 - `FPSDET_AI_API_KEY` — omit for a local server that does not check one
 
-The default transport speaks the OpenAI chat-completions shape, which is what most hosted APIs and local servers already speak. Another vendor is a function `(request_dict) -> text`. `fpsdet.ai_triage.triage_case` is that hook. Pass `redact_ids=False` only on a machine you trust; the default strips player id, party ids, and match ids before the request is built.
+The default transport speaks the OpenAI chat-completions shape, which is what most hosted APIs and local servers already speak. Another vendor is a function `(request_dict) -> text`. `fpsdet.ai_triage.triage_case` is that hook. Pass `redact_ids=False` only on a machine you trust. By default, before the request is built, every player id the case mentions is replaced with an alias. That covers the player's own id and other accounts named by the batch checks (the leftover twin, the teammate's partner); pass the batch's ids as `known_ids`. Party ids, match ids, and the seal are removed.
 
 The system prompt tells the model not to recommend a ban and not to invent numbers. The brief is stored on the case as `ai_brief`. If the endpoint is down, fix the endpoint. The statistical decision already exists without it.
 
@@ -50,10 +50,12 @@ Export only pseudonyms. Do not put the feature file on a vendor's multi-tenant t
 This is not legal advice. It is the shape that keeps the tool usable.
 
 - Store a pseudonym. Keep the account map on your side.
-- The reference AI path does not receive the pseudonym.
+- The reference AI path does not receive the pseudonym, or any other account the case names.
 - Do not collect raw mouse HID, kernel memory, or a hardware id here. Those are a different product, with a different privacy cost, and this detector does not need them.
 - Keep raw shots only as long as you need to rebuild a case. Cohorts and case files are the long-lived objects. A 14 to 30 day raw window is a reasonable starting point for a live game.
 - A case is the appeal packet: the metric, the bound, the human line it was compared to, the sample size, the cap source, how many samples were excluded as blasts or vehicles, the match ids, and the sentence that this is not a ban. `seal` is the SHA-256 of the player, the game, the decision, and the reasons. Reports are not in it. A changed finding is a different packet. Your replay store, which you already have, is how a reviewer watches the match.
+
+[players.md](players.md) is a page you can link for players: what is recorded, how a case is reviewed, how to appeal, and a notice template.
 
 Wire a ban action to your own review tool after a person looks. Do not wire it to `decision == review`. The field `automated_action` is `none` so that a hasty integration has to notice it.
 

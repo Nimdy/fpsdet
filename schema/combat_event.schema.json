@@ -44,6 +44,7 @@
     "picture_error_deg": { "type": "number", "minimum": 0 },
     "interp_delay_ms": { "type": "number", "minimum": 0 },
     "information_state": { "enum": ["visible", "audio", "unknowable"] },
+    "since_perceived_ms": { "type": "number", "minimum": 0 },
     "aim_jitter_deg": { "type": "number", "minimum": 0 },
     "enemy_id": { "type": "string", "minLength": 1 },
     "view_delta_deg": { "type": "number", "minimum": 0 },

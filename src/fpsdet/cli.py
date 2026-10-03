@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import os
 import sys
 from pathlib import Path
@@ -16,6 +17,7 @@ from .parse import iter_events, load_events, load_profile
 from .persist import (
     case_to_dict,
     cohort_from_dict,
+    event_to_dict,
     cohort_to_dict,
     history_from_dict,
     history_to_dict,
@@ -61,10 +63,11 @@ def _attach_ai(cases) -> None:
     if not base or not model:
         raise SystemExit("Set FPSDET_AI_BASE_URL and FPSDET_AI_MODEL. FPSDET_AI_API_KEY if the endpoint requires one.")
     transport = openai_compatible_transport(base, key, model)
+    batch = [case.player_id for case in cases]
     for case in cases:
         if case.decision not in {"review", "watch"} and case.reports <= 0:
             continue
-        case.ai_brief = triage_case(case_to_dict(case), transport, redact_ids=True)
+        case.ai_brief = triage_case(case_to_dict(case), transport, redact_ids=True, known_ids=batch)
 
 
 def _write_features(cases, path: Path) -> None:
@@ -141,6 +144,18 @@ def cmd_demo(args: argparse.Namespace) -> int:
     if args.out:
         _write_outputs(demo.cases, args.out, ai=False)
         print(f"Wrote case files to {args.out}")
+    return 0
+
+
+def cmd_sample(args: argparse.Namespace) -> int:
+    demo = build_demo()
+    target = Path(args.out)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    rows = demo.population + demo.events
+    with target.open("w", encoding="utf-8") as handle:
+        for event in rows:
+            handle.write(json.dumps(event_to_dict(event), separators=(",", ":")) + "\n")
+    print(f"Wrote {len(rows)} events to {target}: a synthetic population and the planted players.")
     return 0
 
 
@@ -227,6 +242,10 @@ def build_parser() -> argparse.ArgumentParser:
     demo = sub.add_parser("demo", help="Run the planted matches and print decisions")
     demo.add_argument("--out", help="Also write HTML and JSON cases here")
     demo.set_defaults(func=cmd_demo)
+
+    sample = sub.add_parser("sample", help="Write the planted week as NDJSON, to try ingest, baseline, and score")
+    sample.add_argument("--out", required=True, help="NDJSON file to write")
+    sample.set_defaults(func=cmd_sample)
 
     pages = sub.add_parser("pages", help="Write the public pages and a fresh desk into one folder")
     pages.add_argument("--out", help="Destination folder. Default is ./_site")

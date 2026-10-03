@@ -103,16 +103,21 @@ class GameProfile:
     mirror_max_r: float = -0.90
     mirror_lag_shots: int = 1
     mirror_lag_gap: float = 0.25
+    # "learnable": the kick repeats by spray_index and players can memorise it.
+    # "random": every shot's kick is drawn fresh, so nobody can anticipate it.
+    recoil_pattern: str = "learnable"
     metronome_min_gaps: int = 40
     metronome_max_std_ms: float = 1.0
     tick_ms: int | None = None
     hidden_track_min_ms: float = 1200
     hidden_track_min_samples: int = 8
+    hidden_grace_ms: float = 1000
     poison_jump: float = 0.08
     unknowable_min_samples: int = 12
     unknowable_jitter_ratio: float = 0.35
     vendor_min_r: float = 0.85
     vendor_min_shots: int = 32
+    vendor_min_points: int = 24
     voice_min_ms: int = 350
     inherit_min_events: int = 4
     reference_lightest_speed_mps: float | None = None
@@ -200,6 +205,7 @@ class Event:
     picture_error_deg: float | None = None
     interp_delay_ms: float | None = None
     information_state: str | None = None
+    since_perceived_ms: float | None = None
     aim_jitter_deg: float | None = None
     enemy_id: str | None = None
     view_delta_deg: float | None = None
@@ -235,10 +241,13 @@ class WeaponSummary:
     interp_delay_ms: list[float] = field(default_factory=list)
     knowable_jitter: list[float] = field(default_factory=list)
     unknowable_jitter: list[float] = field(default_factory=list)
-    hidden_contacts: list[tuple[int, str]] = field(default_factory=list)
+    # (match_id, t_ms, enemy_id). t_ms only compares inside one match.
+    hidden_contacts: list[tuple[str, int, str]] = field(default_factory=list)
     view_deltas: list[float] = field(default_factory=list)
     acquire_ms: list[float] = field(default_factory=list)
     match_ids: set[str] = field(default_factory=set)
+    # match_id -> [shots, hits, head_known_hits, head_hits]. Shots in one match are not independent.
+    per_match: dict[str, list[int]] = field(default_factory=dict)
 
 
 @dataclass
@@ -269,6 +278,7 @@ class RecoilSummary:
     untrained: bool = False
     applied: list[float] = field(default_factory=list)
     compensation: list[float] = field(default_factory=list)
+    spray: list[int | None] = field(default_factory=list)
 
 
 @dataclass

@@ -1,0 +1,112 @@
+name: False positive
+description: Honest play was scored as review or watch. Show the case and why the play was innocent.
+title: "[false positive] "
+labels: ["false-positive"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form when fpsdet flagged play you believe was honest. These reports are the most useful thing you can send.
+
+        **Before you paste anything, replace every id that could point to a real person** (player id, account name, party id, match id, IP) with a made-up one, such as `player-a`, `party-1`, `match-1`. Keep the replacements consistent, so the same player has the same fake id everywhere.
+
+        If you found a way to make the scorer flag *someone else* on purpose, or a way for a cheat to get through, do not file it here. Report it privately: see the [security policy](https://github.com/Nimdy/detect-FPS-hackers/security/policy).
+
+  - type: input
+    id: game
+    attributes:
+      label: Game
+      description: The game the events came from. Write "fpsdet demo" if it is a planted demo player.
+      placeholder: your-game
+    validations:
+      required: true
+
+  - type: input
+    id: profile
+    attributes:
+      label: Profile
+      description: The profile file used to score, for example `profiles/example-loadout.json`. If it is your own profile, paste the relevant part in the case box below.
+      placeholder: profiles/example-loadout.json
+    validations:
+      required: true
+
+  - type: dropdown
+    id: check
+    attributes:
+      label: Which check fired
+      description: Pick every check named in the case's `reasons` or `observations`. Pick "Other" and say which in the explanation if none fit.
+      multiple: true
+      options:
+        - Ground speed over the gear cap (speed)
+        - Recoil under the build floor (no-recoil)
+        - Fire rate faster than the weapon cycle
+        - Fire interval with no variation (metronome)
+        - Command matched the server kick on the same tick (mirror)
+        - Same leftover command as another account (clone)
+        - Aim stayed on a hidden mover (hidden_track_ms)
+        - Aim noise dropped while the target was unknowable (information_state)
+        - Teammate swung on a hidden enemy faster than a voice
+        - Aim stayed on a private replay (private_track_ms)
+        - Aim matched the wire snapshot ahead of the picture
+        - Accuracy or headshot rate past the best measured humans
+        - Above this rank, or above this account's own history
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: decision
+    attributes:
+      label: Decision
+      options:
+        - review
+        - watch
+    validations:
+      required: true
+
+  - type: textarea
+    id: case
+    attributes:
+      label: Case JSON (ids replaced)
+      description: The case file `fpsdet score --out` wrote for this player (`<player>.json`). Remove `ai_brief` if it names anyone.
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: explanation
+    attributes:
+      label: The innocent explanation
+      description: |
+        What the player was really doing, and why the server data made it look like a cheat. Examples:
+        - a memorised spray pattern on a gun with a learnable pattern;
+        - tracking an enemy by sound (footsteps, a reload) that the server did not label `audio`;
+        - a ragdoll, explosion, vehicle or launch the server did not tag in `displacement_cause`;
+        - a perk, stim, or stance whose speed cap the server did not send in `expected_max_ground_speed_mps`;
+        - a teammate callout, or a pre-aim at a common angle.
+    validations:
+      required: true
+
+  - type: textarea
+    id: twin
+    attributes:
+      label: Innocent twin sample (optional, but the fastest way to a fix)
+      description: |
+        A few event lines (one JSON object per line) of the honest play that produced the case, ids replaced. The smallest set that still gets flagged is best. If you can, also add the same play with one thing changed so it reads as innocent (for example, the same sprint with `displacement_cause` set). The project's rule is to plant the cheater and its innocent twin as a test before changing a check.
+      render: json
+
+  - type: input
+    id: version
+    attributes:
+      label: fpsdet version or commit
+      placeholder: 0.2.0, or a commit hash
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before you submit
+      options:
+        - label: I replaced every player id, account name, party id, match id, and IP that could identify a real person.
+          required: true
+        - label: This report is about honest play. It contains no cheat code and no steps for getting a cheat past a check.
+          required: true

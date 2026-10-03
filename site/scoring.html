@@ -49,7 +49,7 @@
       </thead>
       <tbody>
         <tr><td class="border-b border-line py-3 pr-6">Sustained gear break</td><td class="border-b border-line py-3 pr-6 font-mono text-review">review</td></tr>
-        <tr><td class="border-b border-line py-3 pr-6">Two or more rates past the best measured human</td><td class="border-b border-line py-3 pr-6 font-mono text-review">review</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6">Two or more kinds of number past every measured human</td><td class="border-b border-line py-3 pr-6 font-mono text-review">review</td></tr>
         <tr><td class="border-b border-line py-3 pr-6">One such rate, plus the account's own history or a supporting tell</td><td class="border-b border-line py-3 pr-6 font-mono text-review">review</td></tr>
         <tr><td class="border-b border-line py-3 pr-6">Past the rank only, a single ceiling hit, a history jump, or two supporting families</td><td class="border-b border-line py-3 pr-6 font-mono text-watch">watch</td></tr>
         <tr><td class="border-b border-line py-3 pr-6">Something was compared, and nothing above fired</td><td class="border-b border-line py-3 pr-6 font-mono text-clean">clean</td></tr>
@@ -189,7 +189,7 @@
     </article>
     <article class="rounded-xl border border-line panel p-5">
       <h3 class="m-0 text-base font-medium">Same-tick mirror.</h3>
-      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The camera can still kick. Send the kick the server applied and the signed player command on that same tick. Review when at least 16 shots correlate at −0.90 or below, and that correlation is at least 0.25 more negative than the same series shifted one shot later. A person pulls on a later shot. A kick that barely changes from shot to shot cannot separate the two.</p>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The camera can still kick. Send the kick the server applied and the signed player command on that same tick. Review when at least 16 shots correlate at −0.90 or below, and that correlation is at least 0.25 more negative than the same series shifted one shot later. A person pulls on a later shot. In a game with a fixed spray pattern, practiced players pull it on time, so the average kick and command at each spray index are removed first and only the part of the kick that changes between sprays is tested. With too few sprays the check waits, unless the profile says every kick is random.</p>
     </article>
     <article class="rounded-xl border border-line panel p-5 max-lg:col-span-1">
       <h3 class="m-0 text-base font-medium">Metronome.</h3>
@@ -201,7 +201,7 @@
   <div class="mt-6 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
     <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Hidden tracking.</h3>
-      <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">hidden_track_ms</code> is time, on that shot, that the aim stayed on an enemy the server had not made visible. Omit it, or send 0, and nothing happens. Review when at least 8 shots are above 0 and the sum is at least 1200 ms. One long sample is not enough. A visibility query that marks a visible enemy as hidden manufactures the case. That is an emitter bug.</p>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">hidden_track_ms</code> is time, on that shot, since the previous shot, that the aim stayed on an enemy this client could neither see nor hear. Omit it, or send 0, and nothing happens. Audio-labeled shots, and shots within a second of last seeing or hearing that enemy, do not count: following footsteps or a body that just ducked out of sight is human. Review when at least 8 shots are above 0 and the sum is at least 1200 ms. One long sample is not enough. A visibility query that marks a visible enemy as hidden manufactures the case. That is an emitter bug.</p>
     </article>
     <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Private replay.</h3>
@@ -221,11 +221,11 @@
   <div class="mt-6 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
     <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">The same leftover.</h3>
-      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Subtract the server kick and the previous kick. What remains is compared across accounts, at least 32 shots, correlation at or above 0.85. A match is a watch, not a review. If one account is already a review, the other moves up the scan. If neither is a review, both are watches.</p>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Subtract the server kick and the previous kick. What remains is averaged per spray index and compared across accounts on the same build, at least 24 shared spray indices, correlation at or above 0.85. A match is a watch, not a review. If one account is already a review, the other moves up the scan. If neither is a review, both are watches.</p>
     </article>
     <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">A teammate, before a voice.</h3>
-      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Only after someone in the party is already a review for a hidden mover. Four or more swings on that same still-hidden enemy, under 350 ms, are a watch. A lag long enough to have been a voice stays clean.</p>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Only after someone in the party is already a review for a hidden mover. Four or more swings on that same still-hidden enemy, in the same match, under 350 ms, are a watch. A lag long enough to have been a voice stays clean.</p>
     </article>
     <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Reports.</h3>
@@ -237,7 +237,7 @@
     </article>
     <article class="rounded-xl border border-line p-5 max-xl:col-span-2 max-md:col-span-1">
       <h3 class="m-0 text-base font-medium">Human ceilings.</h3>
-      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">One number per player, leave-one-out, in that rank and on that weapon. The cohort is thick at 30 players after the subject is removed. The bound is a one-sided 95% Wilson lower bound. Past the best measured human is review-grade. Past the rank only is a watch. A hot ten-shot game has a wide bound and does not clear a maximum.</p>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">One number per player, leave-one-out, in that rank and on that weapon. The cohort is thick at 30 players after the subject is removed. The bound is a one-sided 95% Wilson lower bound, widened when the rate swings between matches more than chance. Past every measured human is review-grade; the same number on two guns counts once. Past the rank only is a watch. A hot ten-shot game has a wide bound and does not clear a maximum.</p>
     </article>
   </div>
   <p class="m-0 mt-6">The precise bars, every default, are <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/scoring.md">docs/scoring.md</a> in the repository. The planted answers are on <a class="text-ink underline decoration-line underline-offset-4" href="../demo/board.html">the desk</a>.</p>

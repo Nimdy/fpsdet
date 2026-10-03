@@ -124,8 +124,38 @@ def analyze_speed(events: list[Event], profile: GameProfile) -> SpeedReport:
     return report
 
 
+def _shot_gaps(shots: list[Event]) -> dict[int, int]:
+    """Time since this player's previous shot in the same match, keyed by id(event)."""
+    gaps: dict[int, int] = {}
+    ordered = sorted(shots, key=lambda ev: (ev.match_id, ev.t_ms))
+    for prev, nxt in zip(ordered, ordered[1:]):
+        if prev.match_id == nxt.match_id:
+            gaps[id(nxt)] = nxt.t_ms - prev.t_ms
+    return gaps
+
+
+def _windowed(value: float | None, gap: int | None) -> float | None:
+    """A per-shot track time covers only the time since the previous shot.
+
+    An emitter that sends a running total would count the same second once per
+    shot in a spray. Cutting each value back to its own window makes that
+    harmless, and leaves a correct emitter unchanged.
+    """
+    if value is None or value <= 0:
+        return None
+    if gap is not None:
+        value = min(value, float(gap))
+    return value if value > 0 else None
+
+
+def _recently_perceived(event: Event, profile: GameProfile) -> bool:
+    """This client saw or heard that enemy a moment ago. Tracking where they went is human."""
+    return event.since_perceived_ms is not None and event.since_perceived_ms < profile.hidden_grace_ms
+
+
 def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> list[WeaponSummary]:
     shots = [ev for ev in events if ev.event_type == "shot"]
+    gaps = _shot_gaps(shots)
     groups: dict[str, list[Event]] = defaultdict(list)
     for event in shots:
         groups[aim_key(event, profile)].append(event)
@@ -140,12 +170,17 @@ def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> l
         for event in rows:
             summary.shots += 1
             summary.match_ids.add(event.match_id)
+            tally = summary.per_match.setdefault(event.match_id, [0, 0, 0, 0])
+            tally[0] += 1
             if event.hit:
                 summary.hits += 1
+                tally[1] += 1
                 if event.hitbox is not None:
                     summary.head_known_hits += 1
+                    tally[2] += 1
                     if event.hitbox.lower() == "head":
                         summary.head_hits += 1
+                        tally[3] += 1
             if event.distance_m is not None:
                 summary.distances.append(event.distance_m)
             if event.through_geometry is not None:
@@ -156,10 +191,16 @@ def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> l
                 summary.view_deltas.append(event.view_delta_deg)
             if event.acquire_ms is not None:
                 summary.acquire_ms.append(event.acquire_ms)
-            if event.hidden_track_ms is not None and event.hidden_track_ms > 0:
-                summary.hidden_track_ms.append(event.hidden_track_ms)
-            if event.private_track_ms is not None and event.private_track_ms > 0:
-                summary.private_track_ms.append(event.private_track_ms)
+            gap = gaps.get(id(event))
+            recent = _recently_perceived(event, profile)
+            # Sound is knowable. Following footsteps through a wall, or a body
+            # that just broke line of sight, is a player, not a wallhack.
+            hidden = _windowed(event.hidden_track_ms, gap)
+            if hidden is not None and event.information_state != "audio" and not recent:
+                summary.hidden_track_ms.append(hidden)
+            private = _windowed(event.private_track_ms, gap)
+            if private is not None:
+                summary.private_track_ms.append(private)
             if (
                 event.wire_error_deg is not None
                 and event.picture_error_deg is not None
@@ -168,12 +209,14 @@ def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> l
                 summary.wire_error_deg.append(event.wire_error_deg)
                 summary.picture_error_deg.append(event.picture_error_deg)
                 summary.interp_delay_ms.append(event.interp_delay_ms)
-            if event.aim_jitter_deg is not None and event.information_state == "unknowable":
+            # Inside the grace window an unknowable label is not yet evidence either way.
+            unknowable = event.information_state == "unknowable" and not recent
+            if event.aim_jitter_deg is not None and unknowable:
                 summary.unknowable_jitter.append(event.aim_jitter_deg)
             elif event.aim_jitter_deg is not None and event.information_state in {"visible", "audio"}:
                 summary.knowable_jitter.append(event.aim_jitter_deg)
-            if event.information_state == "unknowable" and event.enemy_id:
-                summary.hidden_contacts.append((event.t_ms, event.enemy_id))
+            if unknowable and event.enemy_id:
+                summary.hidden_contacts.append((event.match_id, event.t_ms, event.enemy_id))
             phys_id = event.weapon_id or event.weapon_class
             by_match[(event.match_id, phys_id)].append(event)
         for grouped in by_match.values():
@@ -230,6 +273,7 @@ def _recoil_summaries(events: list[Event], profile: GameProfile, band: str) -> l
             ):
                 summary.applied.append(event.applied_recoil_pitch_deg)
                 summary.compensation.append(event.compensation_pitch_deg)
+                summary.spray.append(event.spray_index)
             if not eligible or event.recoil_pitch_deg is None:
                 run = 0
                 prev = event

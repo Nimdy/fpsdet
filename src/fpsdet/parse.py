@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .models import (
     BANDS,
+    INNOCENT_CAUSES,
     Event,
     ExtraMetric,
     GameProfile,
@@ -54,6 +55,7 @@ _RESERVED = {
     "picture_error_deg",
     "interp_delay_ms",
     "information_state",
+    "since_perceived_ms",
     "aim_jitter_deg",
     "enemy_id",
     "view_delta_deg",
@@ -65,6 +67,7 @@ _RESERVED = {
 
 
 _INFO_STATES = {"visible", "audio", "unknowable"}
+_RECOIL_PATTERNS = {"learnable", "random"}
 
 
 def _information_state(obj: dict) -> str | None:
@@ -173,6 +176,7 @@ def parse_event(obj: dict) -> Event:
         picture_error_deg=_num(obj, "picture_error_deg"),
         interp_delay_ms=_num(obj, "interp_delay_ms"),
         information_state=_information_state(obj),
+        since_perceived_ms=_num(obj, "since_perceived_ms"),
         aim_jitter_deg=_num(obj, "aim_jitter_deg"),
         enemy_id=_str(obj, "enemy_id"),
         view_delta_deg=_num(obj, "view_delta_deg"),
@@ -258,9 +262,10 @@ def profile_from_dict(obj: dict) -> GameProfile:
         )
         floors[floor.build_key] = floor
     causes = obj.get("innocent_causes")
-    from .models import INNOCENT_CAUSES
-
     innocent = frozenset(str(c) for c in causes) if causes is not None else INNOCENT_CAUSES
+    pattern = str(obj.get("recoil_pattern") or "learnable")
+    if pattern not in _RECOIL_PATTERNS:
+        raise ParseError("recoil_pattern must be learnable or random")
     ref = obj.get("reference_lightest_speed_mps")
     return GameProfile(
         game_id=str(obj.get("game_id") or "unknown"),
@@ -279,6 +284,7 @@ def profile_from_dict(obj: dict) -> GameProfile:
         mirror_max_r=float(obj.get("mirror_max_r") if obj.get("mirror_max_r") is not None else -0.90),
         mirror_lag_shots=int(obj.get("mirror_lag_shots") if obj.get("mirror_lag_shots") is not None else 1),
         mirror_lag_gap=float(obj.get("mirror_lag_gap") if obj.get("mirror_lag_gap") is not None else 0.25),
+        recoil_pattern=pattern,
         metronome_min_gaps=int(obj.get("metronome_min_gaps") or 40),
         metronome_max_std_ms=float(
             obj.get("metronome_max_std_ms") if obj.get("metronome_max_std_ms") is not None else 1.0
@@ -286,6 +292,7 @@ def profile_from_dict(obj: dict) -> GameProfile:
         tick_ms=int(obj["tick_ms"]) if obj.get("tick_ms") is not None else None,
         hidden_track_min_ms=float(obj.get("hidden_track_min_ms") or 1200),
         hidden_track_min_samples=int(obj.get("hidden_track_min_samples") or 8),
+        hidden_grace_ms=float(obj.get("hidden_grace_ms") if obj.get("hidden_grace_ms") is not None else 1000),
         poison_jump=float(obj.get("poison_jump") if obj.get("poison_jump") is not None else 0.08),
         unknowable_min_samples=int(obj.get("unknowable_min_samples") or 12),
         unknowable_jitter_ratio=float(
@@ -295,6 +302,7 @@ def profile_from_dict(obj: dict) -> GameProfile:
         ),
         vendor_min_r=float(obj.get("vendor_min_r") if obj.get("vendor_min_r") is not None else 0.85),
         vendor_min_shots=int(obj.get("vendor_min_shots") or 32),
+        vendor_min_points=int(obj.get("vendor_min_points") or 24),
         voice_min_ms=int(obj.get("voice_min_ms") or 350),
         inherit_min_events=int(obj.get("inherit_min_events") or 4),
         reference_lightest_speed_mps=float(ref) if ref is not None else None,
@@ -320,6 +328,5 @@ def aim_key(event: Event, profile: GameProfile) -> str:
 def recoil_floor_for(event: Event, profile: GameProfile) -> float | None:
     if event.expected_min_recoil_pitch_deg is not None:
         return event.expected_min_recoil_pitch_deg
-    return profile.recoil_floors.get(build_key(event.weapon_id, event.mod_set)).min_pitch_deg if (
-        build_key(event.weapon_id, event.mod_set) in profile.recoil_floors
-    ) else None
+    floor = profile.recoil_floors.get(build_key(event.weapon_id, event.mod_set))
+    return None if floor is None else floor.min_pitch_deg

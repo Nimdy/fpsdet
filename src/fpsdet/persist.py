@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import json
+from dataclasses import fields
 from pathlib import Path
 
 from .baseline import CohortTable
-from .models import Case, HistoryWindow, MetricView
+from .models import Case, Event, HistoryWindow, MetricView
 
 
 def cohort_to_dict(table: CohortTable) -> dict:
@@ -139,8 +140,24 @@ def case_to_dict(case: Case) -> dict:
     }
 
 
+def event_to_dict(event: Event) -> dict:
+    """One NDJSON line, the shape a dedicated server writes. Unset fields are left out."""
+    row: dict = {}
+    for spec in fields(Event):
+        if spec.name == "extras":
+            continue
+        value = getattr(event, spec.name)
+        if value is None or (spec.name == "mod_set" and not value):
+            continue
+        row[spec.name] = list(value) if spec.name == "mod_set" else value
+    row.update(event.extras)
+    return row
+
+
 def write_json(path: str | Path, obj: dict) -> None:
-    Path(path).write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
 
 
 def read_json(path: str | Path) -> dict:

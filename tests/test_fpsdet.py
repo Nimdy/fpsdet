@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import math
+import random
 import tempfile
 import unittest
 from pathlib import Path
@@ -24,8 +27,10 @@ from fpsdet.models import (
     WeaponRule,
     WeaponSummary,
 )
-from fpsdet.parse import ParseError, load_profile, parse_event
-from fpsdet.persist import case_to_dict
+from fpsdet.casefile import safe_name
+from fpsdet.cli import main as cli_main
+from fpsdet.parse import ParseError, load_events, load_profile, parse_event, profile_from_dict
+from fpsdet.persist import case_to_dict, write_json
 from fpsdet.pipeline import run_score
 from fpsdet.priority import review_order, scan_order
 from fpsdet.score import annotate_inheritance, annotate_vendors, assess_player
@@ -36,12 +41,13 @@ from fpsdet.signals import (
     metronome_break,
     private_break,
     mirror_break,
+    mirror_check,
     pearson,
     poison_alarms,
     smoothness_break,
     wire_break,
 )
-from fpsdet.statsutil import percentile, wilson_lower
+from fpsdet.statsutil import clustered_lower, design_effect, percentile, wilson_lower
 from fpsdet.summarize import summarize
 from fpsdet.board import render_board
 from fpsdet.synthetic import PROFILE_PATH, ROOT, build_demo
@@ -1220,9 +1226,10 @@ class SignalTest(unittest.TestCase):
         voiced = _bare_case("callout", "clean")
         alone = _bare_case("solo", "clean")
         alone.party_ids = ["other"]
+        elsewhere = _bare_case("elsewhere", "clean")
         stored = cheater.seal
 
-        def record(player_id: str, party: str, contacts: list[tuple[int, str]]) -> PlayerRecord:
+        def record(player_id: str, party: str, contacts: list[tuple[str, int, str]]) -> PlayerRecord:
             return PlayerRecord(
                 player_id=player_id,
                 game_id="t",
@@ -1240,12 +1247,14 @@ class SignalTest(unittest.TestCase):
 
         stamps = [1000, 2000, 3000, 4000]
         annotate_inheritance(
-            [cheater, fast, voiced, alone],
+            [cheater, fast, voiced, alone, elsewhere],
             [
-                record("wall", "stack", [(stamp, "mover-1") for stamp in stamps]),
-                record("friend", "stack", [(stamp + 40, "mover-1") for stamp in stamps]),
-                record("callout", "stack", [(stamp + 800, "mover-1") for stamp in stamps]),
-                record("solo", "other", [(stamp + 40, "mover-1") for stamp in stamps]),
+                record("wall", "stack", [("m", stamp, "mover-1") for stamp in stamps]),
+                record("friend", "stack", [("m", stamp + 40, "mover-1") for stamp in stamps]),
+                record("callout", "stack", [("m", stamp + 800, "mover-1") for stamp in stamps]),
+                record("solo", "other", [("m", stamp + 40, "mover-1") for stamp in stamps]),
+                # Same party, same enemy, same clock reading, a different match. t_ms restarted.
+                record("elsewhere", "stack", [("m2", stamp + 40, "mover-1") for stamp in stamps]),
             ],
             self.profile,
         )
@@ -1262,6 +1271,8 @@ class SignalTest(unittest.TestCase):
         self.assertEqual(voiced.reasons, [])
         self.assertEqual(alone.decision, "clean")
         self.assertEqual(alone.inherit_lags_ms, [])
+        self.assertEqual(elsewhere.decision, "clean")
+        self.assertEqual(elsewhere.inherit_lags_ms, [])
 
     def test_poison_alarm_fires_only_when_the_ceiling_jumps(self):
         previous = CohortTable()
@@ -1275,6 +1286,310 @@ class SignalTest(unittest.TestCase):
         self.assertTrue(any("accuracy" in alarm and "38%" in alarm and "95%" in alarm for alarm in alarms))
         self.assertEqual(poison_alarms(previous, previous, jump=0.08, min_players=30), [])
 
+
+
+# A fixed 25-round pattern: it climbs, then swings. Players of CS-style games learn this by heart.
+_PATTERN = [0.0, 1.6, 1.9, 2.1, 1.8, 1.2, 0.4, 1.5, 0.2, 1.1, 0.3, 1.4, 0.1,
+            0.9, 1.6, 0.2, 1.0, 0.3, 1.3, 0.2, 0.8, 1.5, 0.1, 1.2, 0.4]
+
+
+def _sprays(lengths: list[int], kick, command) -> RecoilSummary:
+    """kick(k, rng) and command(k, kick_now, kick_before, rng) per shot, k = spray_index."""
+    rng = random.Random(11)
+    applied, commands, spray = [], [], []
+    for length in lengths:
+        before = 0.0
+        for k in range(length):
+            now = kick(k, rng)
+            applied.append(now)
+            commands.append(command(k, now, before, rng))
+            spray.append(k)
+            before = now
+    return RecoilSummary(
+        build_key="ak|", weapon_key="rifle", skill_band="average",
+        applied=applied, compensation=commands, spray=spray,
+    )
+
+
+class InnocentTwinTest(unittest.TestCase):
+    """Each check here once framed an honest player. The twin pins the fix."""
+
+    def setUp(self):
+        self.learnable = GameProfile(game_id="t")
+        self.random_kick = GameProfile(game_id="t", recoil_pattern="random")
+
+    def test_a_memorised_spray_is_not_a_mirror_script(self):
+        def kick(k, rng):
+            return _PATTERN[k] * rng.uniform(0.97, 1.03)
+
+        def memorised(k, now, before, rng):
+            # Pulls on time because they know shot k, not because they read the kick.
+            prev = _PATTERN[k - 1] if k else 0.0
+            return -(0.9 * _PATTERN[k] + 0.1 * prev) * rng.uniform(0.85, 1.05) + rng.gauss(0, 0.12)
+
+        human = _sprays([25, 22, 25, 18, 25], kick, memorised)
+        self.assertEqual(mirror_check(human, self.learnable), (None, None))
+        # The old raw test, which assumes nobody can anticipate the kick, frames them.
+        raw = RecoilSummary("ak|", "rifle", "average", applied=human.applied, compensation=human.compensation)
+        found, _ = mirror_check(raw, self.random_kick)
+        self.assertIn("same tick", found)
+
+    def test_a_script_in_a_pattern_game_is_still_a_mirror(self):
+        def kick(k, rng):
+            return _PATTERN[k] * rng.uniform(0.8, 1.2)
+
+        def script(k, now, before, rng):
+            return -now + rng.gauss(0, 0.01)
+
+        found, note = mirror_check(_sprays([25, 22, 25, 18, 25], kick, script), self.learnable)
+        self.assertIsNone(note)
+        self.assertIn("same tick", found)
+        self.assertIn("spray pattern was removed", found)
+
+    def test_too_few_sprays_waits_unless_the_kick_is_random(self):
+        kicks = _kicks(48)
+        script = [-kick for kick in kicks]
+        one_spray = RecoilSummary("ak|", "rifle", "average", applied=kicks, compensation=script, spray=list(range(48)))
+        found, note = mirror_check(one_spray, self.learnable)
+        self.assertIsNone(found)
+        self.assertIn("recoil_pattern", note)
+        found, note = mirror_check(one_spray, self.random_kick)
+        self.assertIn("same tick", found)
+        self.assertIsNone(note)
+
+    def test_recoil_pattern_must_be_known(self):
+        self.assertEqual(profile_from_dict({"game_id": "g"}).recoil_pattern, "learnable")
+        self.assertEqual(profile_from_dict({"game_id": "g", "recoil_pattern": "random"}).recoil_pattern, "random")
+        with self.assertRaises(ParseError):
+            profile_from_dict({"game_id": "g", "recoil_pattern": "fixed"})
+
+    def _elite(self) -> tuple[CohortTable, GameProfile]:
+        profile = GameProfile(game_id="t", min_shots=40, min_hits_for_headshot=25, min_cohort_players=30)
+        table = CohortTable()
+        for key in ("rifle", "smg"):
+            for index in range(40):
+                table.add("elite", key, "accuracy", f"e{index}", 0.30 + index * 0.004)
+                table.add("elite", key, "headshot_rate", f"e{index}", 0.35 + index * 0.004)
+                table.add("elite", key, "median_distance", f"e{index}", 30.0 + index * 0.5)
+        return table, profile
+
+    def _weapon(self, key: str, shots: int, hits: int, heads: int, distance: float) -> WeaponSummary:
+        weapon = _rifle("x", "elite", shots, hits, heads, distance)
+        weapon.weapon_key = key
+        weapon.weapon_class = key
+        return weapon
+
+    def test_long_range_in_the_top_five_percent_is_not_past_every_human(self):
+        table, profile = self._elite()
+        # 49 m is past the elite p95 (48.5) and inside the farthest elite (49.5).
+        weapon = self._weapon("rifle", 400, 240, 96, 49.0)
+        record = PlayerRecord("long", "t", "elite", weapons=[weapon])
+        case = assess_player(record, table, profile)
+        view = next(row for row in case.metrics if row.name == "median_distance")
+        self.assertFalse(view.beyond_human)
+        self.assertEqual(view.ceiling_extreme, 49.5)
+        # Accuracy past every elite is one kind of number. One kind is a watch.
+        self.assertEqual(case.decision, "watch", case.reasons)
+        far = PlayerRecord("far", "t", "elite", weapons=[self._weapon("rifle", 400, 240, 96, 60.0)])
+        self.assertEqual(assess_player(far, table, profile).decision, "review")
+
+    def test_the_same_number_on_two_guns_is_one_finding(self):
+        table, profile = self._elite()
+        record = PlayerRecord(
+            "best", "t", "elite",
+            weapons=[self._weapon("rifle", 400, 240, 96, 35.0), self._weapon("smg", 400, 240, 96, 35.0)],
+        )
+        case = assess_player(record, table, profile)
+        self.assertEqual(sum(1 for row in case.metrics if row.beyond_human), 2)
+        self.assertEqual(case.decision, "watch", case.reasons)
+
+    def test_one_hot_match_does_not_carry_the_bound(self):
+        table, profile = self._elite()
+        weapon = self._weapon("rifle", 400, 202, 80, 35.0)
+        # Nine ordinary matches and one where everything hit. Same total as a steady 50%.
+        weapon.per_match = {f"m{i}": [40, 18, 0, 0] for i in range(9)}
+        weapon.per_match["hot"] = [40, 40, 0, 0]
+        case = assess_player(PlayerRecord("streak", "t", "elite", weapons=[weapon]), table, profile)
+        view = next(row for row in case.metrics if row.name == "accuracy")
+        self.assertFalse(view.beyond_human)
+        self.assertTrue(any("varies between matches" in note for note in case.observations))
+        steady = self._weapon("rifle", 400, 202, 80, 35.0)
+        steady.per_match = {f"m{i}": [40, 20 + (i % 2), 0, 0] for i in range(10)}
+        steady_view = next(
+            row for row in assess_player(PlayerRecord("steady", "t", "elite", weapons=[steady]), table, profile).metrics
+            if row.name == "accuracy"
+        )
+        self.assertTrue(steady_view.beyond_human)
+
+    def test_design_effect(self):
+        self.assertEqual(design_effect([(40, 12)] * 10), 1.0)
+        self.assertEqual(design_effect([(40, 40)] * 3 + [(40, 0)]), 1.0)  # too few matches to tell
+        streaky = [(40, 8)] * 9 + [(40, 40)]
+        self.assertGreater(design_effect(streaky), 3.0)
+        self.assertLess(clustered_lower(112, 400, design_effect(streaky)), wilson_lower(112, 400))
+
+    def _shots(self, **fields) -> list[Event]:
+        rows = []
+        count = fields.pop("count", 20)
+        gap = fields.pop("gap", 140)
+        values = fields.pop("hidden", [80.0] * count)
+        for index in range(count):
+            rows.append(
+                Event(
+                    game_id="t", match_id="m", player_id="p", t_ms=index * gap, event_type="shot",
+                    skill_band="average", weapon_class="rifle", hidden_track_ms=values[index], **fields,
+                )
+            )
+        return rows
+
+    def _hidden(self, events: list[Event]) -> list[float]:
+        return summarize(events, GameProfile(game_id="t"))[0].weapons[0].hidden_track_ms
+
+    def test_following_footsteps_through_a_wall_is_not_a_wallhack(self):
+        self.assertEqual(len(self._hidden(self._shots(information_state="unknowable"))), 20)
+        self.assertEqual(self._hidden(self._shots(information_state="audio")), [])
+
+    def test_tracking_a_body_that_just_broke_line_of_sight_is_human(self):
+        self.assertEqual(self._hidden(self._shots(since_perceived_ms=300.0)), [])
+        self.assertEqual(len(self._hidden(self._shots(since_perceived_ms=4000.0))), 20)
+
+    def test_a_running_total_is_not_counted_once_per_shot(self):
+        # 800 ms on a hidden body, reported as a running total on eight shots 100 ms apart.
+        events = self._shots(count=8, gap=100, hidden=[100.0 * (i + 1) for i in range(8)])
+        windowed = self._hidden(events)
+        self.assertEqual(sum(windowed), 800.0)
+        weapon = summarize(events, GameProfile(game_id="t"))[0].weapons[0]
+        self.assertIsNone(hidden_break(weapon, GameProfile(game_id="t")))
+
+    def test_a_server_with_no_ranks_still_has_a_ceiling(self):
+        profile = GameProfile(game_id="t", min_shots=40, min_hits_for_headshot=25, min_cohort_players=30)
+        table = CohortTable()
+        for index in range(40):
+            table.add("unrated", "rifle", "accuracy", f"u{index}", 0.15 + index * 0.004)
+            table.add("unrated", "rifle", "headshot_rate", f"u{index}", 0.20 + index * 0.004)
+
+        def case(hits: int, heads: int):
+            weapon = _rifle("x", "unrated", 200, hits, heads)
+            return assess_player(PlayerRecord("x", "t", "unrated", weapons=[weapon]), table, profile)
+
+        self.assertEqual(case(185, 160).decision, "review")
+        honest = case(50, 12)
+        self.assertEqual(honest.decision, "clean")
+        self.assertTrue(any("No skill_band" in note for note in honest.observations))
+
+
+class VendorAlignmentTest(unittest.TestCase):
+    def test_a_humanizer_table_lines_up_by_spray_index(self):
+        profile = GameProfile(game_id="t")
+        rng = random.Random(5)
+        table = [rng.uniform(-0.4, 0.4) for _ in range(30)]
+
+        def customer(seed: int, lengths: list[int], build: str = "ak|") -> RecoilSummary:
+            local = random.Random(seed)
+            applied, command, spray = [], [], []
+            for length in lengths:
+                for k in range(length):
+                    kick = local.uniform(0.8, 2.4)
+                    applied.append(kick)
+                    command.append(-kick + table[k] + local.gauss(0, 0.02))
+                    spray.append(k)
+            return RecoilSummary(build, "rifle", "average", applied=applied, compensation=command, spray=spray)
+
+        def honest(seed: int, lengths: list[int]) -> RecoilSummary:
+            local = random.Random(seed)
+            applied, command, spray = [], [], []
+            before = 1.6
+            for length in lengths:
+                for k in range(length):
+                    kick = local.uniform(0.8, 2.4)
+                    applied.append(kick)
+                    command.append(-0.45 * before + local.gauss(0, 0.3))
+                    spray.append(k)
+                    before = kick
+            return RecoilSummary("ak|", "rifle", "average", applied=applied, compensation=command, spray=spray)
+
+        def record(player_id: str, recoil: RecoilSummary) -> PlayerRecord:
+            return PlayerRecord(player_id, "t", "average", recoils=[recoil])
+
+        # Different spray lengths and a different first spray: the log positions never line up.
+        first = customer(1, [30, 30, 30, 30])
+        second = customer(2, [12, 30, 25, 30, 28])
+        other_gun = customer(3, [30, 30, 30], build="m4|")
+        stranger = honest(4, [30, 26, 30, 30])
+        cases = {pid: _bare_case(pid, "clean") for pid in ("first", "second", "other-gun", "stranger")}
+        annotate_vendors(
+            list(cases.values()),
+            [record("first", first), record("second", second),
+             record("other-gun", other_gun), record("stranger", stranger)],
+            profile,
+        )
+        self.assertEqual(cases["first"].vendor_twin, "second")
+        self.assertEqual(cases["second"].decision, "watch")
+        self.assertEqual(cases["other-gun"].decision, "clean")
+        self.assertEqual(cases["stranger"].decision, "clean")
+
+        # Without spray_index the same pair is only lined up by log position, and is missed.
+        blind = {pid: _bare_case(pid, "clean") for pid in ("first", "second")}
+        annotate_vendors(
+            list(blind.values()),
+            [
+                record("first", RecoilSummary("ak|", "rifle", "average", applied=first.applied, compensation=first.compensation)),
+                record("second", RecoilSummary("ak|", "rifle", "average", applied=second.applied, compensation=second.compensation)),
+            ],
+            profile,
+        )
+        self.assertEqual(blind["second"].decision, "clean")
+
+
+class PlumbingTest(unittest.TestCase):
+    def test_ai_brief_strips_every_account_the_case_names(self):
+        payload = {
+            "player_id": "average-joe",
+            "decision": "watch",
+            "reasons": ["leftover command matches rage (r 0.97), who is already a review in this batch"],
+            "observations": ["average accuracy, rage-adjacent wording stays"],
+            "vendor_twin": "rage",
+            "seal": "abc",
+            "party_ids": ["stack"],
+            "match_ids": ["m"],
+        }
+        hidden = redact_case(payload, ["average-joe", "rage", "someone-else"])
+        blob = json.dumps(hidden)
+        self.assertNotIn("average-joe", blob)
+        self.assertNotIn("matches rage", blob)
+        self.assertEqual(hidden["vendor_twin"], "player-A")
+        self.assertIn("leftover command matches player-A", hidden["reasons"][0])
+        # An id inside another word is not an id.
+        self.assertIn("average accuracy", hidden["observations"][0])
+        self.assertIn("rage-adjacent", hidden["observations"][0])
+        self.assertEqual(hidden["seal"], "")
+        self.assertEqual(payload["vendor_twin"], "rage")  # the case itself is untouched
+
+    def test_case_files_never_share_a_name(self):
+        ids = ["p 1", "p_1", "Bob", "bob", "x" * 90, "x" * 89 + "y", "émile", "emile"]
+        names = [safe_name(pid) for pid in ids]
+        self.assertEqual(len({name.lower() for name in names}), len(ids))
+        self.assertEqual(safe_name("p_1"), "p_1")
+        self.assertTrue(all(len(name) <= 80 for name in names))
+
+    def test_baseline_output_folder_is_created(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "baselines" / "week.json"
+            write_json(target, {"ok": True})
+            self.assertTrue(target.is_file())
+
+    def test_sample_week_round_trips_through_the_parser(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "week.ndjson"
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(cli_main(["sample", "--out", str(target)]), 0)
+            events, errors = load_events(target)
+            self.assertEqual(errors, [])
+            players = {event.player_id for event in events}
+            self.assertIn("weight-cheat", players)
+            self.assertTrue(any(player.startswith("pop-elite") for player in players))
+            moved = [event for event in events if event.player_id == "blasted" and event.event_type == "movement"]
+            self.assertTrue(moved and all(event.displacement_cause == "explosion" for event in moved))
 
 if __name__ == "__main__":
     unittest.main()

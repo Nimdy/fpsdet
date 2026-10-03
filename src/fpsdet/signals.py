@@ -13,9 +13,10 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+from collections import defaultdict
 
 from .baseline import CohortTable, sample_std
-from .models import Case, GameProfile, WeaponSummary
+from .models import Case, GameProfile, RecoilSummary, WeaponSummary
 from .statsutil import median
 
 
@@ -64,6 +65,58 @@ def mirror_break(applied: list[float], command: list[float], profile: GameProfil
     return (
         f"player command matched the server kick on the same tick "
         f"(r {same_tick:.2f}) and was looser at a human lag (r {lagged_text}), {count} shots"
+    )
+
+
+# A spray index needs this many sprays before its usual kick is known.
+PATTERN_MIN_SPRAYS = 3
+
+
+def _by_spray(spray: list[int | None], count: int) -> dict[int, list[int]] | None:
+    if len(spray) < count or any(index is None for index in spray[:count]):
+        return None
+    groups: dict[int, list[int]] = defaultdict(list)
+    for position in range(count):
+        groups[spray[position]].append(position)  # type: ignore[index]
+    return groups
+
+
+def mirror_check(recoil: RecoilSummary, profile: GameProfile) -> tuple[str | None, str | None]:
+    """Run the mirror test on the part of the kick a person could not have learned.
+
+    A memorised spray pattern is anticipated on the same tick by a practiced
+    player, so the raw kick would frame them. Subtract the average kick and the
+    average command at each spray_index, and what is left is the part of the
+    kick that changes from spray to spray. Nobody can anticipate that. A
+    script that reads it still cancels it on the same tick.
+
+    Returns (finding, note). The note says why the test did not run.
+    """
+    count = min(len(recoil.applied), len(recoil.compensation))
+    if count < profile.mirror_min_shots:
+        return None, None
+    applied = recoil.applied[:count]
+    command = recoil.compensation[:count]
+    groups = _by_spray(recoil.spray, count)
+    if groups is not None:
+        known = {index: rows for index, rows in groups.items() if len(rows) >= PATTERN_MIN_SPRAYS}
+        keep = sorted(position for rows in known.values() for position in rows)
+        if len(keep) >= profile.mirror_min_shots:
+            kick_mean = {i: sum(applied[p] for p in rows) / len(rows) for i, rows in known.items()}
+            cmd_mean = {i: sum(command[p] for p in rows) / len(rows) for i, rows in known.items()}
+            spray = recoil.spray
+            kick_left = [applied[p] - kick_mean[spray[p]] for p in keep]  # type: ignore[index]
+            cmd_left = [command[p] - cmd_mean[spray[p]] for p in keep]  # type: ignore[index]
+            found = mirror_break(kick_left, cmd_left, profile)
+            if found:
+                found += ", after the spray pattern was removed"
+            return found, None
+    if profile.recoil_pattern == "random":
+        return mirror_break(applied, command, profile), None
+    return None, (
+        f"{recoil.build_key} mirror check needs {PATTERN_MIN_SPRAYS} sprays that reach the same "
+        "spray_index, so a memorised pattern is not mistaken for a script. "
+        "Set recoil_pattern to random only if every kick is drawn fresh."
     )
 
 
@@ -154,8 +207,8 @@ def wire_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     if total < profile.hidden_track_min_ms:
         return None
     return (
-        f"{weapon.weapon_key} aim matched the wire snapshot {total:.0f} ms "
-        f"ahead of the picture across {len(led)} shots"
+        f"{weapon.weapon_key} aim matched the wire snapshot instead of the drawn picture on "
+        f"{len(led)} shots ({total:.0f} ms of interpolation delay in total)"
     )
 
 
@@ -229,6 +282,27 @@ def command_residual(applied: list[float], command: list[float]) -> list[float] 
     if sample_std(residual) < 1e-4:
         return None
     return residual
+
+
+def leftover_signature(recoil: RecoilSummary) -> tuple[dict[tuple[str, int], float], int] | None:
+    """The leftover, keyed so two accounts line up shot for shot.
+
+    With spray_index, each point is the average leftover at that spray index,
+    so a humanizer table lines up across accounts whatever their spray lengths
+    or where their logs start. Without it, points are keyed by position in the
+    log, which only lines up a replay that starts at the same shot.
+    Returns (points, leftover samples).
+    """
+    residual = command_residual(recoil.applied, recoil.compensation)
+    if residual is None:
+        return None
+    count = min(len(recoil.applied), len(recoil.compensation))
+    if _by_spray(recoil.spray, count) is None:
+        return {("position", index): value for index, value in enumerate(residual, start=1)}, len(residual)
+    sums: dict[int, list[float]] = defaultdict(list)
+    for position, value in enumerate(residual, start=1):
+        sums[recoil.spray[position]].append(value)  # type: ignore[index]
+    return {("spray", index): sum(rows) / len(rows) for index, rows in sums.items()}, len(residual)
 
 
 def _solve3(

@@ -8,7 +8,7 @@ The reference implementation is `src/fpsdet/`. A port in C#, C++, or Go is compa
 
 A cohort is one number per player, not one number per shot. The keys are rank band, weapon key, and metric.
 
-Rank comes from the matchmaker (`skill_band`, or `skill_prior` cut at 0.30 / 0.70 / 0.95 into developing, average, advanced, elite). It is the band they queued in. It is not computed from the stats under test.
+Rank comes from the matchmaker (`skill_band`, or `skill_prior` cut at 0.30 / 0.70 / 0.95 into developing, average, advanced, elite). It is the band they queued in. It is not computed from the stats under test. A line with neither field is `unrated`. A server with no matchmaker, such as a community server, is one `unrated` band: every player is compared with everyone else on that server, and the case says so.
 
 Weapon key is `weapon_class` unless the profile sets `"aim_group": "weapon_id"`. Recoil and builds use `weapon_id|mod,mod` with mods sorted. That is the build key.
 
@@ -18,13 +18,17 @@ Percentile is nearest-rank: sort ascending, rank = ceil(q × n), 1-based, clampe
 
 A distribution is thick enough when it still has `min_cohort_players` values after removal (default 30). A thin distribution does not flag. The build is reported as untrained.
 
-The human ceiling is the highest band that is thick for that metric (elite, then advanced, then average, then developing).
+The human ceiling is the highest band that is thick for that metric (elite, then advanced, then average, then developing, then `unrated`).
+
+How many players that takes: `min_cohort_players` (default 30) per band and weapon key, each with at least `min_shots` (default 40) shots on that weapon in the window. A community server with 40 regulars and no ranks trains one band per weapon in a week or two. A ranked game needs 30 per band before that band is its own ceiling. Until then the build is listed as untrained and nothing on it is flagged.
 
 ## Rates
 
 Accuracy is hits / shots. Headshot rate is head hits / hits whose hitbox was sent, and it is skipped unless at least `min_hits_for_headshot` hits have a hitbox and those cover at least 90% of hits. Geometry rate is the same shape.
 
 The bound is the one-sided 95% Wilson lower bound, z = 1.6448536269514722.
+
+Shots are not independent. A player who has one hot match moves every shot in it together. When a player has at least 5 matches on that weapon, the per-match rates give a design effect: the Pearson dispersion `sum((k - n·p)^2 / (n·p·(1-p))) / (matches - 1)`, floored at 1. The Wilson bound is taken on `hits / deff` successes out of `shots / deff` trials. One hot match widens the bound; ten steady matches leave it alone. With fewer than 5 matches the plain bound is used. A design effect of 1.5 or more is written on the case.
 
 - Past the rank: lower bound > the rank band's p95.
 - Past the best measured human: lower bound > the ceiling band's maximum.
@@ -35,25 +39,27 @@ Past the best human is the review-grade flag. Past the rank only is a watch-grad
 
 Distance and declared `extra_metrics` use the player's median.
 
-- High direction, past the rank: median > own p95. Past humans: median > ceiling p95.
-- Low direction, past the rank: median < own p05. Past humans: median < ceiling p05.
+- High direction, past the rank: median > own p95. Past humans: median > the ceiling band's maximum.
+- Low direction, past the rank: median < own p05. Past humans: median < the ceiling band's minimum.
+
+Past humans means past every human measured, the same bar the rates use. The top band's p95 is crossed by one player in twenty on every metric, and the best players are good at all of them at once. An `extra_metrics` row has one distribution (its `group_by`), so its tail is p95/p05 and past humans is its maximum/minimum.
 
 View-angle p95 and acquire-time median are supporting tells. Acquire median and acquire standard deviation count as one family, so a single timing habit cannot masquerade as two findings. They are only computed when you send `view_delta_deg` or `acquire_ms`, and `acquire_ms` is only meaningful when the server actually knows the target became visible. Omit it otherwise. Sound, utility, and a pre-aimed angle are not reaction time.
 
 ## Decision
 
-Count review-grade primary flags (`beyond_human`) and watch-grade flags (`beyond_band`).
+Count the kinds of number that are past every human (accuracy, headshot rate, median distance, geometry rate, each primary extra) and the watch-grade flags (`beyond_band`). The same kind on two weapons is one kind. The best human in a population is usually the best on every gun, and leave-one-out compares them to the second best each time.
 
 | Condition | Decision |
 | --- | --- |
 | Sustained gear-rule break (speed, fire interval, blatant or learned recoil, a same-tick recoil mirror, a metronome on a legal cycle, sustained tracking of a hidden mover, sustained aim on a private replay, aim that matches the wire snapshot ahead of the picture, or aim noise that drops only while the server says this client could not have known) | review |
-| Two or more review-grade combat flags | review |
-| One review-grade combat flag, and the account broke its own history or a supporting tell agrees | review |
-| Any watch-grade flag, a single review-grade flag, an account-history break, or two supporting families | watch |
+| Two or more kinds of number past every human | review |
+| One kind past every human, and the account broke its own history or a supporting tell agrees | review |
+| Any watch-grade flag, one kind past every human, an account-history break, or two supporting families | watch |
 | At least one metric was actually compared, and nothing above fired | clean |
 | Nothing was comparable (short sample, thin cohort, no cap) | insufficient_data |
 
-An account-history break is the same weapon and the same rank band: Wilson lower bound of this window minus Wilson upper bound of the player's own earlier windows is at least `self_jump_gap` (default 0.10), and both windows have at least `min_shots`. A rank change does not count, because the band no longer matches.
+An account-history break is the same weapon and the same rank band: Wilson lower bound of this window (with its design effect) minus Wilson upper bound of the player's own earlier windows is at least `self_jump_gap` (default 0.10), and both windows have at least `min_shots`. A rank change does not count, because the band no longer matches.
 
 ## Speed
 
@@ -87,7 +93,17 @@ Set the interval to the minimum legal gap between accepted shots. For a burst we
 
 The no-recoil rule sees the camera. A script can cancel the kick and write a legal pitch back, so `recoil_pitch_deg` stays above the floor. Send `applied_recoil_pitch_deg` (the kick the server applied) and `compensation_pitch_deg` (the signed player command on that tick, negative for a pull-down). Both are required. Spray index does not gate this pair. The first shots count.
 
-Review when there are at least `mirror_min_shots` (default 16), the Pearson correlation of the command against the applied kick is at or below `mirror_max_r` (default −0.90), and that same-tick correlation is at least `mirror_lag_gap` (default 0.25) more negative than the correlation at `mirror_lag_shots` (default 1). A flat kick has no variance and is not a mirror. A person who pulls down does it on a later shot, so the lagged correlation is the tighter one and the case stays quiet. A kick pattern that barely changes from shot to shot cannot separate the two lags.
+Review when there are at least `mirror_min_shots` (default 16), the Pearson correlation of the command against the applied kick is at or below `mirror_max_r` (default −0.90), and that same-tick correlation is at least `mirror_lag_gap` (default 0.25) more negative than the correlation at `mirror_lag_shots` (default 1). A flat kick has no variance and is not a mirror. A person who pulls down does it on a later shot, so the lagged correlation is the tighter one and the case stays quiet.
+
+That is only true of a kick nobody can predict. In a game with a fixed spray pattern (CS-style, Valorant-style), practiced players memorise it and pull on the same tick. On the raw kick they look exactly like the script. So the test runs on what is left after the pattern is removed:
+
+1. Send `spray_index` (0 for the first round of a spray) with the kick and the command.
+2. For every spray index reached by at least 3 sprays, subtract the mean kick and the mean command at that index.
+3. Run the test above on those leftovers, in shot order, when at least `mirror_min_shots` remain.
+
+The leftover kick is the part that changes from spray to spray. Nobody can anticipate it. A script that reads the kick still cancels it on the same tick, so its correlation stays near −1. A pure fixed pattern with no randomness leaves nothing to test and the check stays quiet; that game has to rely on the recoil floor.
+
+When the sprays are too few, or `spray_index` is missing, the profile decides. `recoil_pattern: "learnable"` (the default) skips the check and writes why on the case. `recoil_pattern: "random"` runs the test on the raw kick, which is right only when every kick is drawn fresh (Tarkov-style). A wrong `random` frames every player who learned the pattern.
 
 ## Metronome
 
@@ -97,7 +113,15 @@ If the mean is under the legal line, this rule returns nothing and the fire-inte
 
 ## Hidden tracking
 
-`hidden_track_ms` is time, on that shot, that the aim stayed in a tight cone of an enemy the server had not made visible. Omit the field, or send 0, and nothing happens. Review when at least `hidden_track_min_samples` (default 8) shots have time above 0 and the sum is at least `hidden_track_min_ms` (default 1200). One long sample is not enough. Corner pre-aim is `acquire_ms`, not this. A visibility query that marks a visible enemy as hidden manufactures the case. That is an emitter bug. This check runs even when the aim sample is still too small to score.
+`hidden_track_ms` is time, since this player's previous shot in the match, that the aim stayed in a tight cone of an enemy this client could neither see nor hear. Omit the field, or send 0, and nothing happens.
+
+Three things are not a wallhack, and the scorer drops them:
+
+- **Sound.** A shot labeled `information_state: "audio"` does not count. Following footsteps through a wall is a skill.
+- **A body that just broke line of sight.** Send `since_perceived_ms`, the time since this client last saw or heard that enemy. Under `hidden_grace_ms` (default 1000) the shot does not count. Tracking where someone just went, or spraying the cover they ducked behind, is human. The same grace keeps those shots out of the unknowable smoothness sample and the teammate check.
+- **A running total.** Each value is cut to the time since the player's previous shot in that match. An emitter that sends a running total cannot count the same second once per shot in a spray.
+
+Review when at least `hidden_track_min_samples` (default 8) shots have time above 0 and the sum is at least `hidden_track_min_ms` (default 1200). One long sample is not enough. Corner pre-aim is `acquire_ms`, not this. A visibility query that marks a visible enemy as hidden manufactures the case. That is an emitter bug. This check runs even when the aim sample is still too small to score.
 
 ## Private replay
 
@@ -121,13 +145,17 @@ Review when both sides have at least `unknowable_min_samples` (default 12), the 
 
 ## Shared leftover
 
-After the case decisions exist, each player's command is fit to `1 + applied kick + previous kick`. What remains is the leftover. Two leftovers are compared on their overlapping prefix when both are at least `vendor_min_shots` long (default 32). Pearson correlation at or above `vendor_min_r` (default 0.85) is a match.
+After the case decisions exist, each player's command is fit to `1 + applied kick + previous kick`. What remains is the leftover. A player needs at least `vendor_min_shots` (default 32) leftover samples on a build.
+
+Only accounts on the same build key are compared; a leftover belongs to a gun. With `spray_index`, each account's leftover is averaged per spray index, and two accounts are compared on the spray indices both have, when there are at least `vendor_min_points` (default 24). That lines up a humanizer table whatever the spray lengths or where the logs start. Without `spray_index`, leftovers are compared on their overlapping prefix of at least `vendor_min_shots`, which only lines up a replay that started on the same shot. When a build has at least `min_cohort_players` accounts, the mean leftover at each index is removed first, so a habit every human on that gun shares is not a match. Pearson correlation at or above `vendor_min_r` (default 0.85) is a match. Twenty-four points at 0.85 is about six standard deviations for unrelated noise.
+
+Every pair inside a build is compared. That is fine for a community server and slow for a studio's whole population. Run it per build, per region, or only against accounts that are already a review.
 
 A match does not make a review. If either account is already a review, the other becomes a watch and moves up the non-reported scan (`queue_rank` 2). The confirmed account gets an observation only, so its seal stays. If neither is a review, both become watches and the reason says nobody in the pair is a review yet. A flat leftover, a series shorter than the minimum, and independent noise do not match. Comparing the raw command to the raw kick correlates two humans through the kick itself, so that comparison is not used.
 
 ## Voice-speed teammate
 
-Only a player who is already a review for a hidden mover can start this. For each party member, each of their unknowable contacts on the same `enemy_id` is lagged against the latest cheater contact at or before that time. Every such lag is stored, including the ones that are not a finding.
+Only a player who is already a review for a hidden mover can start this. For each party member, each of their unknowable contacts on the same `enemy_id`, in the same `match_id`, is lagged against the latest cheater contact at or before that time. `t_ms` restarts each match, so contacts in different matches are never compared. Every such lag is stored, including the ones that are not a finding.
 
 A watch fires when at least `inherit_min_events` (default 4) of those lags are at least 0 and under `voice_min_ms` (default 350). The teammate who was clean or `insufficient_data` becomes a watch (`queue_rank` 1). A player who is already a review is not changed. A lag long enough for a voice stays stored and stays clean. No confirmed hidden-mover partner means no lags and no watch.
 

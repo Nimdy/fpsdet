@@ -1,0 +1,65 @@
+name: Game profile or server fields
+description: Propose a profile for a game, or a field a dedicated server can send.
+title: "[profile] "
+labels: ["profile"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        fpsdet only reads what a dedicated server writes. A good proposal says which value the server already computes, when it is known, and which honest play could look like a cheat on that value.
+
+        Only send numbers you are allowed to share: your own measurements, your own server, or a public source with a date. Do not paste a studio's private data.
+
+  - type: input
+    id: game
+    attributes:
+      label: Game or engine
+      placeholder: your-game, or "any Unreal shooter"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What you are proposing
+      multiple: true
+      options:
+        - A new profile in profiles/
+        - A change to an existing profile
+        - A new field on the event (schema/combat_event.schema.json)
+        - A new displacement_cause value
+        - An extra_metrics row (a number scored against human baselines)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: fields
+    attributes:
+      label: Server fields
+      description: For each value, give the field name, unit, when the server knows it (every shot, every movement sample, once per match), and how the server computes it.
+      placeholder: |
+        stamina_pct — 0..100 — every movement sample — read from the server's character component after the tick
+    validations:
+      required: true
+
+  - type: textarea
+    id: innocent
+    attributes:
+      label: Honest play that could look like a cheat
+      description: Perks, stims, vehicles, knockback, attachments, stances, server corrections. Every field needs an answer to "what legal play could break this?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Where the numbers come from
+      description: Your own measurements, your own server, or public sources with a date. Say which numbers are guesses.
+
+  - type: textarea
+    id: profile
+    attributes:
+      label: Proposed profile or event sample (optional)
+      description: Profile JSON, or a few event lines with ids replaced.
+      render: json

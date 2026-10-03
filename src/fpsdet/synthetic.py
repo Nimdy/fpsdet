@@ -62,6 +62,7 @@ class Demo:
     failures: list[str]
     events: list[Event] = field(default_factory=list)
     anchors: dict = field(default_factory=dict)
+    population: list[Event] = field(default_factory=list)
 
 
 def _event(**kwargs) -> Event:
@@ -521,6 +522,7 @@ def build_demo(seed: int = 1) -> Demo:
         "average",
         hidden_ms=80,
         party_id="stack-radar",
+        match_id="radar-window",
         enemy_id="mover-1",
         information="unknowable",
     )
@@ -555,7 +557,7 @@ def build_demo(seed: int = 1) -> Demo:
                 t_ms=burst_end + 800 + index * 60,
                 skill_band="average",
                 party_id="stack-radar",
-                match_id="callout-window",
+                match_id="radar-window",
                 enemy_id="mover-1",
                 information_state="unknowable",
                 hidden_track_ms=40,
@@ -779,7 +781,7 @@ def build_demo(seed: int = 1) -> Demo:
         if cohorts.dist("elite", "rifle", "median_distance", None)
         else None,
     }
-    return Demo(profile, cases, failures, events=subjects, anchors=anchors)
+    return Demo(profile, cases, failures, events=subjects, anchors=anchors, population=background)
 
 
 def demo_rows(demo: Demo) -> str:

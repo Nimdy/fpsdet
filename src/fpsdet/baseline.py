@@ -38,7 +38,8 @@ class CohortTable:
     def ceiling_band(
         self, key: str, metric: str, exclude: str | None, min_players: int
     ) -> str | None:
-        for band in reversed(BANDS):
+        """The highest rated band with enough players. A server that sends no rank is one band."""
+        for band in (*reversed(BANDS), "unrated"):
             if len(self.series(band, key, metric, exclude)) >= min_players:
                 return band
         return None

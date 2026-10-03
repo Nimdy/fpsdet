@@ -1,87 +1,28 @@
 # detect-FPS-hackers
 
-An answer key, and the scorer that grades it. Thirty-two fake players. A known decision on each one. The tool reads JSON a dedicated server already can write and writes a case a person opens. It does not install on a player's PC. It does not ban.
+**fpsdet** is server-side anti-cheat evidence for first-person shooters. Your dedicated game server writes one JSON line per shot and per movement sample. fpsdet scores each player against the game's own rules, against the best humans you have measured, and against what that player's client could have known, then writes a case file for a person to review.
+
+- It runs on the server's logs. Nothing is installed on a player's PC.
+- It never bans. Every case has `automated_action: "none"`; a person decides.
+- It needs a dedicated server that decides hits itself. A listen server or client-side hit detection can forge every field.
+- It is plain Python 3.11+ with no dependencies.
+
+It is for indie and small studios, community server operators, and anyone who wants to check how a server can see a cheat that left the PC.
+
+## Try it in two minutes
 
 ```bash
 PYTHONPATH=src python3 -m fpsdet demo
 ```
 
-Expect `weight-cheat` as review and `blasted` as clean. The last line is `Planted cases matched profiles/example-loadout.json.` Then open `demo/board.html`. The header is 11 to open, 4 to watch, 16 clean, 1 held. Tape 01 is a 10 kg kit at 7.1 m/s beside the same sprint tagged as a blast. If those two decisions move, the scorer changed. The later pair is `wire-lock` as review and `picture-track` as clean: same enemy, same hits, one crosshair on the snapshot and one on the picture the client draws.
+That scores 32 planted players with a known answer each. Eleven are cheats that should be reviewed, four should be watched, sixteen are honest players (most of them look suspicious at first glance), and one has too little data. The last line is `Planted cases matched profiles/example-loadout.json.` If a decision moves, the scorer changed.
+
+Then open `demo/board.html` in a browser, the review desk. It works offline. Its header reads 11 to open, 4 to watch, 16 clean, 1 held. Press j and k to move between the worked examples ("tapes"). Tape 01 is a 10 kg kit sprinting at 7.1 m/s beside the same sprint tagged as an explosion: the first is a review, the second is clean.
+
+## Run the whole pipeline on a sample week
 
 ```bash
-PYTHONPATH=src python3 -m fpsdet score examples/shot.jsonl --profile profiles/example-loadout.json
-```
-
-That file is one legal shot, one legal step, and one 18 m/s step tagged as an explosion. Expect `p-1044` as `insufficient_data`. The explosion is excluded. One fast sample is not a case.
-
-Gear checks are ordinary: the server's own speed cap, the gun's own cycle, the recoil floor of that build. They catch blatant cheats and miss anything that stays inside the cap and jitters its timing. The clock catches a command that cancels the server's own kick on the same tick, and stays quiet when the same pull happens one shot later. You need both numbers logged or that check does nothing. The third check is sustained aim on a body this client was not allowed to see or hear. It can catch a cheat that aims at every body in the snapshot. It cannot catch a DMA read of the drawn frame or a capture card. The fourth check is the two positions of a player they can see. The wire is the snapshot the server just sent. The picture is where the official client draws them, one interpolation delay later. A person aims at the picture. Sustained aim that is closer to the wire, before that delay has elapsed, is a review. The same hits on the picture stay clean. Standing still is not a signal. A capture card, a cheat that waits out the interpolator, a server that scores the wrong timeline, and a listen server still get through. A person still reviews. `automated_action` is `none`.
-
-The 2021 essay is archived at [docs/archive/2021-whitepaper.md](docs/archive/2021-whitepaper.md). The z-score sum, the universal weapon tables, and DynamoDB-as-the-lake are retired.
-
-The desk is one HTML file and does not need a network. It shares type with the site when `site/fpsdet.css` is available. j and k move through the tapes. The row at the top is the rest of the site. The first tape stays the 10 kg sprint. Eleven of the thirty-two players are a review: the weight break, the stock rifle with no kick, a legal camera whose command is the server kick flipped on the same tick, the fire-rate macro, a legal cycle with no variation, aim that tracked a hidden mover, the aimer past every measured elite, aim noise that drops only while the server says this client could not have known, a second same-tick cancel whose leftover is what another account is carrying, aim that stayed on a private replay while every public chart stayed ordinary, and aim that matched the wire snapshot ahead of the picture. The same kick pulled one shot late, a corner that was only pre-aimed, aim that is smooth all the time, aim that got quiet because the player could hear the target, a callout slow enough to have been a voice, a fight on the enemy this client could see, the same hits stuck to the picture, the blast, the two-frame glitch, the adrenaline pen, and the modded gun stay clean. A second account with that leftover, and a teammate who swings the hidden enemy faster than a voice, are watches.
-
-## The public pages
-
-`site/index.html` says what this is. `site/scoring.html` is how a line becomes a case. `site/wire.html` is the JSON a dedicated server writes. `site/games.html` is Tarkov, Call of Duty, Battlefield, and WARDOGS. `site/source.html` is the files and the commands. From the repo, each of them links to `demo/board.html`. The desk links back. The pages say why a dedicated server can see a cheat that left the PC, what still gets through, and ask people to break the planted cases. They do not ban anyone. This does not end cheating.
-
-```bash
-PYTHONPATH=src python3 -m fpsdet pages
-```
-
-That writes those pages and a fresh `board.html` into `_site/`. `.github/workflows/pages.yml` publishes that folder to GitHub Pages on a push to `main`. Turn the source on once: repository Settings → Pages → Build and deployment → Source → GitHub Actions. The address is `https://nimdy.github.io/detect-FPS-hackers/`.
-
-## The signal
-
-Cheats change the software. The player still has to move and shoot inside the gear they have equipped. Once a baseline exists for that rank, that weapon, and that build, a sustained number is evidence.
-
-Two checks, in order:
-
-1. **Gear rules, from day one.** The server already knows the speed cap for this weight and stance, the refire time of this weapon, and the recoil floor of this mod set. A 10 kg kit that sprints like a 3 kg kit, a rifle that cycles faster than its own bolt, or a stock gun with no kick, held long enough to be a pattern, is a case. A blast, a ragdoll, a vehicle, a parachute, an ability, or a two-frame glitch is not.
-2. **Human baselines, after you have players.** Accuracy, headshot rate, engagement distance, and any extra number you add (ADS time, sway, stamina) are scored against people in the same rank and against the best humans you have actually measured. Beating your rank while staying inside those humans is a watch: a smurf or a good player. Clearing the best measured humans on more than one rate is a review.
-
-Player reports do not add to the score. They move that player to the front of the scan queue, clean numbers included. A brigade can make you look today. It cannot convict anyone.
-
-## What the kernel cannot see
-
-A kernel driver watches a process on the player's PC. A DMA card, a second PC, and a capture card put the cheat on a machine that driver is not running on. The dedicated server never sees that process. It sees the command stream it accepted, and it already knows facts that client was not supposed to have: who was visible, who made a sound, and when.
-
-Another cutoff on speed, recoil, or accuracy will be humanized. The part worth keeping is the clock. A person acts late. A script acts on the server's own kick, on a target the server has not revealed yet, or on the snapshot before the picture has caught up. Five checks use that, and only when the server already knows the fact:
-
-1. **Aim noise, only while nothing was knowable.** If the aim gets quieter only on shots the server marks `unknowable`, that is a review. Visible and audio are the knowable baseline. A player who is smooth the whole time stays clean. Omit the label and the sample is skipped. A wrong `unknowable` label manufactures the case.
-2. **The same leftover, across customers.** Subtract the server kick and the previous kick. What remains is the humanizer. The same leftover on two accounts does not convict anyone. If one of them is already a review, the other moves up the scan as a watch. If neither is a review, both are watches.
-3. **A teammate who moves before a voice could.** Only after someone in the party is already a review for tracking a hidden mover. Swings on that same still-hidden enemy, faster than `voice_min_ms` (default 350), are a watch. A human callout delay stays clean.
-4. **A private replay.** The server plays someone else's real movement on a different heading, where this client has no sight and no audio, and it does not mark the body invisible. Sustained aim on that path is a review. The speed, recoil, and accuracy charts are allowed to look ordinary. A short crossing stays clean. A body this client could see, labeled private, manufactures the case.
-5. **The picture is late.** The server measures angular error to the snapshot it just sent, angular error to the position the official client is drawing, and the interpolation delay. Sustained aim that explains the wire and not the picture is a review. The same hits on the picture stay clean. Standing still is nothing. There is no new accuracy cutoff and no new profile knob. A server that scores the wrong timeline manufactures the case.
-
-A person still opens the case. `automated_action` stays `none`. This does not end cheating. It is the evidence that is left once the cheat has left the PC.
-
-## Run the planted matches
-
-```bash
-PYTHONPATH=src python3 -m fpsdet demo
-PYTHONPATH=src python3 -m unittest tests.test_fpsdet
-```
-
-`fpsdet demo` writes `demo/board.html` and prints the same decisions in the terminal. That planted set is the spec: a rage aimer, a 10 kg player sprinting at the 3 kg cap, a no-recoil stock rifle, a legal camera whose command cancels the server kick on the same tick, the same kicks pulled one shot late, a fire-rate macro, a legal cycle with zero variation, aim that tracked a hidden mover, a pre-aimed corner with none of that time, aim noise that drops only while the target was unknowable, the same drop while the target was audible, aim that is smooth on both sides, a same-tick cancel whose leftover another account is carrying, that second account, a teammate who swings the hidden enemy 40 ms later, a teammate whose swings are slow enough to have been a callout, aim that stayed on a private replay of someone else's movement, a fight on a visible enemy that only clips that path, aim that matched the wire snapshot ahead of the picture on a visible enemy, the same hits stuck to that picture, a legal heavy runner, an explosion throw, a two-frame glitch, an adrenaline-style server cap, a modded gun whose lower recoil is legal, a brand-new gun with no baseline yet, a reported player whose aim is ordinary, a rank outlier, an account that stopped looking like itself, and a 10-shot sample that is refused.
-
-`review` means a person should open it. `watch` means monitor, and look now if they were reported. `insufficient_data` means the window is too small or the build has no humans yet. `automated_action` is always `none`.
-
-## Wire it to a game
-
-The dedicated server writes one JSON object per shot and, for movement, per sample. [docs/integration.md](docs/integration.md) has Unity, Unreal, and Godot shapes. [docs/games.md](docs/games.md) maps Escape from Tarkov, Call of Duty, Battlefield, and WARDOGS onto the same fields. [profiles/example-loadout.json](profiles/example-loadout.json) is a synthetic weight-and-recoil game. [profiles/wardogs.json](profiles/wardogs.json) holds the public WARDOGS weight classes with sprint speed left unset until your server fills it.
-
-Preferred over any curve we ship: send the cap the server used for that sample.
-
-- `expected_max_ground_speed_mps` wins over the weight table. That is how an adrenaline pen, a perk, tac-sprint, or a slide stays legal.
-- `expected_min_recoil_pitch_deg` wins over the mod table. A new attachment does not need a profile edit before it is safe.
-- `displacement_cause` is `none` during a normal sprint, and `explosion`, `knockback`, `ragdoll`, `vehicle`, `parachute`, `ability`, `launch`, `ladder`, `zipline`, `teleport_volume`, or `admin` when the game already knows why the body moved. `unknown` is dropped, not flagged.
-- `on_ground` must be true for a sprint to count. Jumps and throws through the air are not ground speed.
-
-A listen server whose host is the client can forge every one of these fields. Run this on a dedicated server that decides hits itself. Client-authoritative hit detection will lie, and the baseline will learn the lie.
-
-## Train a baseline, then score
-
-```bash
+PYTHONPATH=src python3 -m fpsdet sample --out week.ndjson
 PYTHONPATH=src python3 -m fpsdet ingest week.ndjson --lake ./lake --dt 2026-10-02
 PYTHONPATH=src python3 -m fpsdet baseline --lake ./lake \
   --profile profiles/example-loadout.json \
@@ -90,50 +31,118 @@ PYTHONPATH=src python3 -m fpsdet baseline --lake ./lake \
 PYTHONPATH=src python3 -m fpsdet score --lake ./lake \
   --profile profiles/example-loadout.json \
   --cohort baselines/week.json \
-  --history baselines/previous-players.json \
-  --reports reports.json \
+  --reports examples/reports.json \
   --out cases/
 ```
 
-`cases/` gets one JSON file and one offline HTML page per player, plus `scan-index.json` (reported players first) and `review-index.json` (evidence first) and `features.csv` for whatever model you want to train later.
+1. `sample` writes a synthetic population of 144 players plus the 32 planted ones, about 32,500 events.
+2. `ingest` files them into a lake.
+3. `baseline` learns what humans on each rank and weapon look like.
+4. `score` writes the cases.
 
-`--reported-only` scores the reported accounts and leaves the rest of the lake for the batch. That is the expensive pass. The statistical pass itself is a count, not a model call.
+`cases/` gets one JSON file and one offline HTML page per player. It also gets `scan-index.json` (reported players first), `review-index.json` (strongest evidence first) and `features.csv`.
 
-Add a stat by sending the number and declaring it. No code change:
+Next week, score the new events against this week's baseline and pass `--history baselines/week-players.json`. An account whose accuracy jumps well past its own history then becomes a watch. This sample has no earlier week, so `account-changed` stays clean here.
 
-```json
-"extra_metrics": [
-  {
-    "name": "ads_ms",
-    "source": "ads_ms",
-    "kind": "supporting",
-    "direction": "low",
-    "min_samples": 30,
-    "group_by": ["skill_band", "weapon_class", "weight_class"]
-  }
-]
-```
+`--reported-only` scores just the reported accounts, for a quick pass between batches. `features.csv` is there for whatever model your team trains once reviewers have labelled cases. Labels come first: an unsupervised model on unlabelled play mostly rediscovers your best humans.
 
-A new weapon or mod set with no curve and fewer humans than `min_cohort_players` is listed as untrained and is not flagged. The lake is the training set. After the cohort fills in, that build starts scoring. Set `"aim_group": "weapon_id"` when each gun should have its own aim baseline instead of sharing a class.
+## What it checks
 
-Freeze the cohort on a window you still trust. If a rank is already mostly cheating, the ceiling becomes the cheat and the detector goes quiet. Refit after you remove those accounts. Scoring a file against itself prints a warning, because the players under review are inside the baseline. Leave-one-out keeps a single outlier from hiding inside their own number. It does not save a poisoned population.
+**Gear rules**, from day one, from numbers the server already has:
 
-Pass the last trusted cohort when you build the next one:
+1. **Speed.** Ground speed over the cap for this loadout weight, held for 25 consecutive samples.
+2. **Fire rate.** Shots faster than the gun's own cycle.
+3. **Metronome.** Legal shot timing with no human variation (a macro).
+4. **Recoil floor.** Recoil far under the minimum for that weapon and attachments (no-recoil).
+5. **Recoil mirror.** The player's view command cancels the server's kick on the same tick. A person reacts a shot later. In games with a fixed spray pattern, the pattern is removed first, because practiced players pull it on time.
+
+**Human baselines**, once you have players: accuracy, headshot rate, engagement distance, shots through geometry, and any number you declare. These are compared with the player's rank and with the best humans measured. Better than your rank but inside the best humans is a **watch** (a smurf or a good player). Past every measured human on two kinds of number is a **review**.
+
+**Information checks** use what the server knows about what this client could see and hear:
+
+1. **Hidden mover.** Sustained aim on an enemy this client could neither see nor hear.
+2. **Quiet aim.** Aim noise that drops only while the target is unknowable to this client.
+3. **Private replay.** A body the server plays only where this client cannot perceive it. Aim that stays on it is a review.
+4. **Wire, not picture.** The client draws enemies one interpolation delay late. A person aims at the drawn picture; a packet aimbot aims at the newer snapshot.
+
+**Batch checks** look across players:
+
+1. **Shared leftover.** Two accounts whose recoil command, after the kick is removed, carries the same humanizer signature become watches.
+2. **Faster than a voice.** A teammate of a confirmed wallhacker who swings the same hidden enemy within 350 ms, faster than a callout, becomes a watch.
+
+Player reports never add to the score. They only move a player to the front of the scan queue. A brigade can make you look; it cannot convict anyone.
+
+[docs/scoring.md](docs/scoring.md) has every bar precisely enough to reimplement.
+
+## Protecting honest players
+
+Most of this code exists so that an honest player is not flagged. Each rule below has a planted honest twin in the demo or the tests.
+
+- **Physics you forgot to tag.** Explosions, knockback, vehicles, ladders and similar causes are excluded. An untagged one-frame spike is a glitch, not a case.
+- **Perks and attachments.** If the server sends the cap or floor it actually used, that wins over any table in the profile.
+- **A memorised spray pattern.** The mirror check uses only the part of the kick that changes between sprays.
+- **Sound.** Tracking footsteps through a wall is a skill. Shots labeled `audio` never count as hidden tracking.
+- **A target who just ducked out of sight.** Within `hidden_grace_ms` (default 1 s) of last seeing or hearing them, it is not hidden tracking.
+- **The best player in the game.** A number counts as "past every human" only beyond the best human measured, not the top 5%. The same number on several guns counts once.
+- **One hot match.** Shots in one match are not independent. A rate that swings between matches gets a wider bound.
+- **New guns and thin data.** A weapon or build with fewer than 30 measured humans is listed as untrained, and its human-baseline numbers are not flagged.
+
+## What still gets through
+
+This does not end cheating:
+
+- A DMA read of the frame the game actually drew.
+- A capture-card aimbot looking at pixels.
+- A cheat that waits out the interpolation delay.
+- An assist that copies human timing, human noise and human lag.
+- A wallhack that never aims at a hidden enemy.
+- A server that labels a visible enemy as hidden manufactures cases. That is an emitter bug, and the docs call it out field by field.
+
+## Pair it with server-side culling
+
+If the server never sends an enemy's position to a client that cannot see or hear them, wallhacks, ESP and radars have nothing to draw, even on a second PC. That is prevention. fpsdet is detection, and its information checks score what culling cannot remove:
+
+- the moment before an enemy rounds a corner,
+- sound positions,
+- what teammates share.
+
+[docs/culling.md](docs/culling.md) explains how the two fit together.
+
+## Wire it to your game
+
+The dedicated server writes one JSON object per shot and per movement sample.
+
+- [docs/integration.md](docs/integration.md) has the fields and Unity, Unreal and Godot emitters. [examples/unity/BaselineEmitter.cs](examples/unity/BaselineEmitter.cs) is a complete Unity one.
+- [docs/games.md](docs/games.md) maps the fields onto well-known games.
+- [profiles/](profiles/) holds game profiles. Replace the numbers with your server's.
+
+The smallest possible input is [examples/shot.jsonl](examples/shot.jsonl): one legal shot, one legal step, and one 18 m/s step tagged as an explosion.
 
 ```bash
-PYTHONPATH=src python3 -m fpsdet baseline --lake ./lake \
-  --profile profiles/example-loadout.json \
-  --previous baselines/week.json \
-  --out baselines/next.json
+PYTHONPATH=src python3 -m fpsdet score examples/shot.jsonl --profile profiles/example-loadout.json
 ```
 
-A thick ceiling that jumps by `poison_jump` (default 0.08) on accuracy, headshot rate, or geometry rate is stamped `poison_risk`. Score prints that and does not change a decision. No `--previous` leaves the stamp `unchecked`.
+Expect `p-1044` as `insufficient_data`. The explosion is excluded, and one sample is not a case.
 
-Each case carries `seal`, a SHA-256 of the player, the game, the decision, and the reasons. Reports and the brief are not in the hash. It identifies the packet a reviewer saw. It is not a ban.
+Start with the gear rules; they need an afternoon. The information checks need visibility and audio queries on the server, which is real engine work. Send each field only when you can measure it honestly. A missing field turns a check off. A wrong one frames players.
 
-## AI, if you want it
+Rules of thumb:
 
-Any OpenAI-compatible chat endpoint. That covers hosted APIs and a box you run yourself (vLLM, Ollama, LM Studio, a studio gateway).
+- Send the cap the server used on each sample: `expected_max_ground_speed_mps` and `expected_min_recoil_pitch_deg`.
+- Tag `displacement_cause` whenever something other than the player moved the body.
+- Send `spray_index` with recoil fields, so the pattern can be removed and humanizers line up.
+- Send a rank (`skill_band` or `skill_prior`) if you have a matchmaker. Without one, everyone on the server is one population, which is fine for a community server.
+- Set `recoil_pattern` in the profile: `learnable` (the default) for fixed spray patterns, `random` only if every kick is drawn fresh.
+
+## How many players you need
+
+A human baseline needs `min_cohort_players` (default 30) players per rank and weapon, each with at least 40 shots on that weapon in the window. A community server with 40 regulars and no ranks trains in a week or two. Until then, aim numbers are not scored and only the gear rules and information checks run.
+
+Freeze the baseline on a window you trust. If a rank is already full of cheaters, the ceiling becomes the cheat. Pass the previous baseline with `--previous`, and a ceiling that jumps is stamped `poison_risk`. Add a number without code by declaring it under `extra_metrics` in the profile.
+
+## AI briefs, if you want them
+
+`score --ai` asks any OpenAI-compatible endpoint (a hosted API, or vLLM, Ollama or LM Studio on your own box) for a plain-language brief on cases that are already `review` or `watch`, and on reported players.
 
 ```bash
 export FPSDET_AI_BASE_URL=http://127.0.0.1:11434/v1
@@ -142,58 +151,65 @@ export FPSDET_AI_API_KEY=          # omit for a local server
 PYTHONPATH=src python3 -m fpsdet score ... --ai
 ```
 
-The model writes a short brief on cases that are already `review` or `watch`, and on anyone who was reported. It receives the aggregate case with the player id, party, and match ids stripped. It does not receive the lake. It cannot change the decision. Sending raw shots to an API is the slow, expensive, leaky path. Aggregating first, then asking for language on the queue, is the fast one.
+The model receives the aggregated case only. Every player id in it, including other accounts named by the batch checks, is replaced with an alias. Party ids, match ids and the seal are removed. It never sees raw events, and it cannot change the decision.
 
-`features.csv` is there for a gradient-boosted model or whatever stack your team already trains, once reviewers have labeled cases. Unsupervised models on unlabeled play mostly rediscover your best humans. Labels first.
+## Where the data goes
 
-## Where the bytes go
+The lake is append-only NDJSON, partitioned `game=<id>/dt=<day>/events.ndjson`. A solo developer can stop there. A studio can land the same lines in object storage and aggregate with DuckDB or ClickHouse. Elasticsearch and Splunk are fine viewers for the case JSON. They are not the detector; see [dashboards/README.md](dashboards/README.md).
 
-Append-only lake, partitioned `game=<id>/dt=<day>/events.ndjson`. A solo dev can stop there. A studio can land the same lines in object storage and aggregate with DuckDB or ClickHouse. A bus (Kafka, Redpanda, NATS) is worth adding only when you already run one.
+Every pair of accounts on a build is compared for shared leftovers. That is fine for a community server and slow for a large population; [docs/scoring.md](docs/scoring.md) says how to split it.
 
-Elasticsearch and Splunk remain fine viewers if the building already pays for them. They are not the detector. The case JSON is what you index. See [dashboards/README.md](dashboards/README.md).
+## Glossary
 
-## What still gets through
-
-A wallhack that never moves the aim early, never spends time on a mover the server still has hidden, never stays on the private replay, aims at the picture rather than the wire, and does not get quieter when that mover exists, leaves no gear-rule break. `hidden_track_ms`, `private_track_ms`, `information_state`, `wire_error_deg`, `picture_error_deg`, and `interp_delay_ms` only exist when the queries that produce them are honest. A bad query, a visible enemy labeled `unknowable`, a visible body labeled private, or a comparison against a timeline the client was not shown, manufactures the case. A DMA read of the frame the game actually drew, a capture-card aimbot looking at pixels, and a cheat that reimplements the official interpolator and waits out the delay, do not have to lock the snapshot. Standing still is not a signal. Shots the server can prove went through geometry catch some of the rest, once you send `through_geometry`. Reports still jump the queue. They still do not convict anyone.
-
-An assist that matches the human mean, the human variance, a human lag, and a noise sequence of its own stays inside the rules above. Matching only the average is no longer enough for recoil or for fire rate. A shared leftover moves the second account up the scan. It does not convict them, and a unique leftover does not match. A sudden jump against that account's own history becomes a watch. Reports make it the next file you open.
-
-A callout at a human voice lag stays clean. The watch is the swing that lands before a voice could have carried the name.
-
-A server-paced full-auto (`server_paced`) and timestamps that all land on `tick_ms` are not metronomes. A kick that barely changes from shot to shot cannot separate a same-tick cancel from a one-shot-late pull.
-
-A speedhack that flickers for a few frames on purpose can hide in the glitch filter. The filter exists so a ragdoll you forgot to tag does not ban someone. Tag the cause. The bar is a sustained run (`speed_min_run`, default 25 ground samples), not a single velocity spike.
-
-A pulsed macro and a one-off physics glitch are the same shape. Sustained means consecutive samples, because a long untagged explosion would also trip a "percent of the window" rule. Fix the emitter rather than lowering the bar.
-
-A listen server whose host is the client, or a game that lets the client decide hits, can forge every field on this page. The contract is a dedicated server.
+| Term | Meaning |
+| --- | --- |
+| case | One player's decision, reasons, and numbers, as JSON plus an offline HTML page |
+| review / watch / clean / insufficient_data | A person should open it / monitor it / nothing found / too little data or no baseline yet |
+| held | The desk's word for `insufficient_data` |
+| cohort, baseline | The distribution of one number per player, per rank and weapon |
+| ceiling | The best humans measured: the highest rank band with enough players |
+| kick | The recoil the server applied to the camera on a shot |
+| command | The player's own view input on that tick |
+| leftover | The command after the kick and the previous kick are subtracted |
+| humanizer | Noise a cheat adds to look human |
+| wire / picture | The newest snapshot the server sent / where the client draws that enemy, one interpolation delay later |
+| unknowable | The server's visibility and audio checks both say this client could not perceive that enemy |
+| private replay | A body the server plays only where this client cannot see or hear it |
+| `displacement_cause` | Why the body moved, when the player did not move it: `explosion`, `vehicle`, `ladder`, … |
+| seal | SHA-256 of the player, game, decision, and reasons. It identifies the packet a reviewer saw |
+| tape | A worked example on the review desk |
 
 ## Docs
 
-- [docs/scoring.md](docs/scoring.md) — the bars, precisely enough to reimplement
-- [docs/integration.md](docs/integration.md) — dedicated server, Unity, Unreal, Godot
-- [docs/games.md](docs/games.md) — Tarkov, Call of Duty, Battlefield, WARDOGS
-- [docs/operations.md](docs/operations.md) — lake, priority, AI, privacy, appeals
+- [docs/scoring.md](docs/scoring.md): every bar, precisely enough to port
+- [docs/integration.md](docs/integration.md): the event fields and engine emitters
+- [docs/culling.md](docs/culling.md): server-side culling, and how it fits
+- [docs/games.md](docs/games.md): mapping the fields onto well-known games
+- [docs/operations.md](docs/operations.md): lake, priority, AI, privacy, appeals
+- [docs/players.md](docs/players.md): a page operators can link for their players
+
+The public site is `site/*.html`. `fpsdet pages` writes it, plus a fresh desk, into `_site/`, and `.github/workflows/pages.yml` publishes it to <https://nimdy.github.io/detect-FPS-hackers/>. The 2021 essay is archived at [docs/archive/2021-whitepaper.md](docs/archive/2021-whitepaper.md).
 
 ## Layout
 
 ```
-profiles/          game curves. Replace the numbers with your server's.
-src/fpsdet/        reference scorer, zero runtime dependencies
-tests/             the behavior lock, including the planted demo
-schema/            event and profile shapes
-examples/          one shot, one movement sample, a Unity emitter
-cases/             gitignored output
+src/fpsdet/        the scorer, no runtime dependencies
+tests/             behaviour locks, including the planted demo
+profiles/          game profiles; replace the numbers with your server's
+schema/            event and profile JSON Schemas
+examples/          a shot and movement file, report counts, a Unity emitter
+docs/              the docs listed above
+site/              the public pages
+demo/board.html    the review desk, regenerated by `fpsdet demo`
+dashboards/        notes on Elasticsearch and Splunk as viewers
 ```
 
-## Build on it
+## Contributing and security
 
-This is the baseline, not the ceiling. One JSON line goes in and a case comes out. Everything around that is a slot: a profile for your game, an `extra_metrics` row for your number, a check in `signals.py`, a model trained on `features.csv`, an AI endpoint for the brief, the desk you already run. Plant a cheater and the innocent twin first. Then write the rule that separates them.
+Read [CONTRIBUTING.md](CONTRIBUTING.md). The rule is to plant the cheater and the honest twin first, then write the rule that separates them. False-positive reports are the most useful thing you can send.
+
+Report a bypass or a way to frame an honest player privately; see [SECURITY.md](SECURITY.md). Do not post working cheat code in issues.
 
 ## License
 
-[PolyForm Small Business 1.0.0](LICENSE.md). If your company has fewer than 100 people and less than US$1M revenue last year (2019 dollars, adjusted for inflation), you can use it, change it, and ship it in your game. Past that, you need a commercial license from ZeroBandwidth. [Open an issue](https://github.com/Nimdy/detect-FPS-hackers/issues) to ask. The fonts in `site/fonts/` are under the SIL Open Font License, which sits beside them.
-
-## Before other people send patches
-
-There is no contributor agreement yet. Add one before you take contributions, so a patch can ship under the commercial license too. Patches that describe how to build a cheat, or that weaken the innocence rules so a blast becomes a ban, are off the point of this repo. Patches that add a game's server-side fields, a profile, or a failing test for a false positive are the point.
+[PolyForm Small Business 1.0.0](LICENSE.md). It is source-available, not OSI open source. Use for the benefit of a company with fewer than 100 people and less than US$1M revenue in the prior tax year (in 2019 dollars, adjusted for inflation) is permitted: you can use it, change it, and ship it in your game. Past that, you need a commercial license from ZeroBandwidth. If you are unsure whether your community or project fits, [open an issue](https://github.com/Nimdy/detect-FPS-hackers/issues) and ask. The fonts in `site/fonts/` are under the SIL Open Font License, which sits beside them.

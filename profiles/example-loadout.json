@@ -12,6 +12,7 @@
   "recoil_floor_fraction": 0.25,
   "recoil_min_spray_index": 3,
   "recoil_min_run": 10,
+  "recoil_pattern": "random",
   "weight_classes": [
     {"name": "light-3kg", "max_kg": 5, "max_ground_speed_mps": 7.2},
     {"name": "loaded-10kg", "max_kg": 12, "max_ground_speed_mps": 5.6},

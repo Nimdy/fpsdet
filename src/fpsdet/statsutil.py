@@ -41,8 +41,11 @@ def mad(values: list[float]) -> float:
     return median([abs(v - mid) for v in values])
 
 
-def wilson_bound(successes: int, n: int, *, upper: bool, z: float = Z95) -> float:
-    """One-sided 95% Wilson bound for a rate. Empty samples return 0."""
+def wilson_bound(successes: float, n: float, *, upper: bool, z: float = Z95) -> float:
+    """One-sided 95% Wilson bound for a rate. Empty samples return 0.
+
+    Counts may be fractional after a design effect has shrunk them.
+    """
     if n <= 0:
         return 0.0
     successes = max(0, min(successes, n))
@@ -55,9 +58,39 @@ def wilson_bound(successes: int, n: int, *, upper: bool, z: float = Z95) -> floa
     return min(1.0, max(0.0, value))
 
 
-def wilson_lower(successes: int, n: int) -> float:
+def wilson_lower(successes: float, n: float) -> float:
     return wilson_bound(successes, n, upper=False)
 
 
-def wilson_upper(successes: int, n: int) -> float:
+def wilson_upper(successes: float, n: float) -> float:
     return wilson_bound(successes, n, upper=True)
+
+
+# Fewer matches than this and the between-match spread is not measurable.
+DESIGN_MIN_GROUPS = 5
+
+
+def design_effect(groups: list[tuple[int, int]]) -> float:
+    """How much more a rate moves between matches than independent shots would.
+
+    ``groups`` is (trials, successes) per match. Shots in one match share an
+    opponent, a map, and a mood, so they are not independent. The Pearson
+    dispersion of the per-match rates is the factor the effective sample
+    shrinks by. Never below 1, and 1 when there are too few matches to tell.
+    """
+    rows = [(n, k) for n, k in groups if n > 0]
+    if len(rows) < DESIGN_MIN_GROUPS:
+        return 1.0
+    total = sum(n for n, _ in rows)
+    p = sum(k for _, k in rows) / total
+    if p <= 0.0 or p >= 1.0:
+        return 1.0
+    chi2 = sum((k - n * p) ** 2 / (n * p * (1.0 - p)) for n, k in rows)
+    return max(1.0, chi2 / (len(rows) - 1))
+
+
+def clustered_lower(successes: int, n: int, deff: float) -> float:
+    """Wilson lower bound on the effective sample: n / deff trials."""
+    if deff <= 1.0:
+        return wilson_lower(successes, n)
+    return wilson_lower(successes / deff, n / deff)

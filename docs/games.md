@@ -1,10 +1,12 @@
 # Plugging a game in
 
-No profile in this repo is a studio export. Do not ban from a copied community table. The server that simulates the player already applied a speed cap and a recoil for the current stance, perks, and attachments. Send those numbers as `expected_max_ground_speed_mps` and `expected_min_recoil_pitch_deg`. The curves in `profiles/` are the fallback for when a sample has no expected value, and they are how you unit-test the idea.
+> **Not affiliated.** fpsdet is not affiliated with, endorsed by, or sponsored by Battlestate Games (Escape from Tarkov), Activision (Call of Duty), Electronic Arts or DICE (Battlefield), or the developers of WARDOGS. Those names are trademarks of their owners. They are used here only to describe which fields a server for that kind of game could emit. Only those studios could integrate fpsdet into their games. Nothing on this page comes from them. Where it describes how a game works, it is an assumption from public play and public guides, not knowledge of their servers.
+
+No profile in this repo is a studio export. Do not ban from a copied community table. A server that simulates the player has already applied a speed cap and a recoil for the current stance, perks, and attachments. Send those numbers as `expected_max_ground_speed_mps` and `expected_min_recoil_pitch_deg`. The curves in `profiles/` are the fallback for when a sample has no expected value, and they are how you unit-test the idea.
 
 Set `"aim_group": "weapon_id"` when guns inside one class are not the same fight. A bolt gun and a semi-auto sniper should not share an accuracy ceiling.
 
-## Fields every one of these games can fill
+## Fields a server for these games could fill
 
 | Field | Why it exists |
 | --- | --- |
@@ -27,41 +29,41 @@ Extra numbers are a row in `extra_metrics` plus the field on the event. ADS time
 
 ## WARDOGS
 
-Weight is a real rule in WARDOGS. Public gear guides in September 2026 describe five equipment classes and about these move penalties: lightest 0–10 kg with no penalty, light 10–17 kg about −5%, medium 17–27 kg about −13%, heavy 27–40 kg and super-heavy about −20%. Armor dominates the total: community tables put body armor around 3 kg at level 1 and 18 kg at level 4. Those penalties are in [profiles/wardogs.json](../profiles/wardogs.json). Absolute meters per second are not, on purpose. The guides do not publish a server sprint speed, and a wrong constant would flag legal players.
+Public gear guides from September 2026 describe weight as a movement rule in WARDOGS. They list five equipment classes with about these move penalties: lightest 0–10 kg with no penalty, light 10–17 kg about −5%, medium 17–27 kg about −13%, heavy 27–40 kg and super-heavy about −20%. Community tables put body armor around 3 kg at level 1 and 18 kg at level 4, so armor dominates the total. Those penalties are in [profiles/wardogs.json](../profiles/wardogs.json). Absolute meters per second are not, on purpose. The guides do not publish a server sprint speed, and a wrong constant would flag legal players.
 
-The adrenaline pen reduces equipment weight class. If you score against the raw kit weight, a legal pen looks like a speedhack. Send `expected_max_ground_speed_mps` after the pen, the stance, and the class math. That one field covers the pen without a special case.
+The same guides describe an adrenaline pen that lowers the equipment weight class. If the server works that way and you score against the raw kit weight, a legal pen looks like a speedhack. Send `expected_max_ground_speed_mps` after the pen, the stance, and the class math. That one field covers the pen without a special case.
 
-Also tag parachute, explosion, ragdoll, vehicle, and ladder. A player blown across the ground is `explosion` or `knockback` for the whole throw, not one sample. The two-frame glitch filter is the backstop for a tag you missed. It is not a substitute for the tag.
+Tag anything the game has that moves a body: parachute, explosion, ragdoll, vehicle, ladder. A player blown across the ground is `explosion` or `knockback` for the whole throw, not one sample. The two-frame glitch filter is the backstop for a tag you missed. It is not a substitute for the tag.
 
-`aim_group` is `weapon_id`. Attachments change recoil, so either send the expected recoil floor from the server's item assembly or add a `recoil_floors` row per build you care about. Builds you have not measured stay untrained.
+`profiles/wardogs.json` sets `aim_group` to `weapon_id`. If attachments change recoil, either send the expected recoil floor from the server's item assembly or add a `recoil_floors` row per build you care about. Builds you have not measured stay untrained.
 
-The synthetic demo's `weight-cheat` player is the shape you described: about 10 kg of kit, sprinting at the cap of the lightest class, on the ground, cause `none`, for a full run of samples. `blasted` is the same speed with the cause set, and it stays clean. `adrenaline` is the pen case: the curve would flag the weight, the server expected-cap does not.
+The synthetic demo's `weight-cheat` player is this case: about 10 kg of kit, sprinting at the cap of the lightest class, on the ground, cause `none`, for a full run of samples. `blasted` is the same speed with the cause set, and it stays clean. `adrenaline` is the pen case: the curve would flag the weight, the server expected-cap does not.
 
 ## Escape from Tarkov
 
-The same shape as WARDOGS, with a harsher version of the same facts. Weight and inertia change acceleration and top speed. Weapon, attachment, ammo, and ergonomics change recoil and ADS. Armor and a backpack change weight. Send the server's post-effect speed cap and the server's recoil floor for the assembled gun. A profile of guessed ergo numbers will false-flag.
+From public play, Tarkov has the same shape as WARDOGS, only harsher. Weight and inertia appear to change acceleration and top speed. The weapon, attachments, ammo, and ergonomics appear to change recoil and ADS. Armor and a backpack add weight. A server that applies those effects should send its post-effect speed cap and its recoil floor for the assembled gun. A profile of guessed ergo numbers will false-flag.
 
 Innocent causes that matter: grenade and ragdoll, stimulus or pain effects if they launch the body, and any admin or disconnect correction. `through_geometry` is only as good as the server trace.
 
-Much of the felt recoil in Tarkov is presented on the client. Score the view delta the server replicated during the spray, compared with the kick the server thinks that build produces. A client-only camera shake is not evidence, because a cheat will not play it.
+If part of the felt recoil is presented only on the client, such as a camera shake, score the view delta the server replicated during the spray, compared with the kick the server thinks that build produces. A client-only camera shake is not evidence, because a cheat will not play it.
 
 ## Call of Duty
 
-Gunsmith means the build key is the weapon plus the attachment list, not the weapon class. Recoil floors differ by barrel, muzzle, underbarrel, and optic. Send the expected floor from the server's gunsmith result.
+If the build is the weapon plus an attachment list (Gunsmith), the build key is that list, not the weapon class. If recoil differs by barrel, muzzle, underbarrel, and optic, send the expected floor the server computed for that build.
 
-Movement caps change by stance. Tac-sprint, slide, dive, swim, and perk or specialist speed are legal when `expected_max_ground_speed_mps` is the cap of the stance they are in. A profile that only knows walk speed will call tac-sprint a cheat. Score ground sprints with `on_ground`. Leave slide-cancel quirks to the server cap rather than a hand-written exception.
+If movement caps change by stance, tac-sprint, slide, dive, swim, and perk or specialist speed stay legal when `expected_max_ground_speed_mps` is the cap of the stance they are in. A profile that only knows walk speed will call tac-sprint a cheat. Score ground sprints with `on_ground`. Leave slide-cancel quirks to the server cap rather than a hand-written exception.
 
-Warzone and Ground War add vehicles, redeploys, and explosions. Those are innocence causes. Killstreaks and scorestreaks that move the player or fire for them should be their own `weapon_id` or an `ability` cause, so a VTOL does not enter an infantry accuracy cohort.
+Modes with vehicles, redeploys, and explosions (Warzone, Ground War) need those tagged as innocence causes. Killstreaks and scorestreaks that move the player or fire for them should be their own `weapon_id` or an `ability` cause, so a VTOL does not enter an infantry accuracy cohort.
 
-Rank band is the matchmaking bracket of that playlist. A profile that mixes casual and ranked CDL rules into one ceiling will flag one of them.
+Use the matchmaking bracket of that playlist as the rank band. If ranked and casual play use different rules, keep them in separate ceilings. A profile that mixes them into one ceiling will flag one of them.
 
 ## Battlefield
 
-Vehicles are the dominant false positive. A player inside a vehicle, on a wing, under a parachute, or being flung by destruction is not an infantry sprint. Tag `vehicle`, `parachute`, `explosion`, or `knockback` for the whole interval, including the exit if the exit launches them.
+Vehicles are likely the biggest source of false positives. A player inside a vehicle, on a wing, under a parachute, or being flung by destruction is not an infantry sprint. Tag `vehicle`, `parachute`, `explosion`, or `knockback` for the whole interval, including the exit if the exit launches them.
 
-Infantry recoil is per weapon and per attachment, same as gunsmith. Gadgets (grapple, wingsuit, launchers, traversal) are `ability` or `launch`. Do not put vehicle-seat accuracy into the infantry rifle cohort: send a distinct `weapon_class` for vehicle weapons so the human ceiling is other vehicle gunners.
+If infantry recoil is per weapon and per attachment, key it by build, as for Gunsmith above. Tag traversal gadgets (a grapple, a wingsuit, a launcher) as `ability` or `launch`. Do not put vehicle-seat accuracy into the infantry rifle cohort: send a distinct `weapon_class` for vehicle weapons so the human ceiling is other vehicle gunners.
 
-Conquest-scale maps make a single distance baseline meaningless. `map_id` is on the event for your own splits. The reference cohort keys distance by weapon and rank, not by map. When one weapon is used on a 100 m infantry map and a 400 m vehicle map, split `weapon_class` or the distance flag will lie.
+On very large maps, a single distance baseline means little. `map_id` is on the event for your own splits. The reference cohort keys distance by weapon and rank, not by map. When one weapon is used on a 100 m infantry map and a 400 m vehicle map, split `weapon_class` or the distance flag will lie.
 
 ## What "training" means here
 

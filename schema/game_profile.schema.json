@@ -15,6 +15,7 @@
     "unknowable_jitter_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
     "vendor_min_r": { "type": "number", "minimum": -1, "maximum": 1 },
     "vendor_min_shots": { "type": "integer", "minimum": 1 },
+    "vendor_min_points": { "type": "integer", "minimum": 3 },
     "voice_min_ms": { "type": "integer", "minimum": 1 },
     "inherit_min_events": { "type": "integer", "minimum": 1 },
     "aim_group": { "enum": ["weapon_class", "weapon_id"] },
@@ -24,6 +25,19 @@
     "recoil_floor_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
     "recoil_min_spray_index": { "type": "integer", "minimum": 0 },
     "recoil_min_run": { "type": "integer", "minimum": 1 },
+    "recoil_pattern": { "enum": ["learnable", "random"] },
+    "mirror_min_shots": { "type": "integer", "minimum": 3 },
+    "mirror_max_r": { "type": "number", "minimum": -1, "maximum": 1 },
+    "mirror_lag_shots": { "type": "integer", "minimum": 0 },
+    "mirror_lag_gap": { "type": "number", "minimum": 0 },
+    "metronome_min_gaps": { "type": "integer", "minimum": 2 },
+    "metronome_max_std_ms": { "type": "number", "minimum": 0 },
+    "tick_ms": { "type": ["integer", "null"], "minimum": 1 },
+    "hidden_track_min_ms": { "type": "number", "minimum": 0 },
+    "hidden_track_min_samples": { "type": "integer", "minimum": 1 },
+    "hidden_grace_ms": { "type": "number", "minimum": 0 },
+    "poison_jump": { "type": "number", "minimum": 0 },
+    "innocent_causes": { "type": "array", "items": { "type": "string" } },
     "reference_lightest_speed_mps": { "type": ["number", "null"], "minimum": 0 },
     "weight_classes": {
       "type": "array",
@@ -47,7 +61,8 @@
           "interval_slack_ms": { "type": "integer" },
           "min_intervals": { "type": "integer" },
           "min_violations": { "type": "integer" },
-          "min_violation_rate": { "type": "number" }
+          "min_violation_rate": { "type": "number" },
+          "server_paced": { "type": "boolean" }
         }
       }
     },

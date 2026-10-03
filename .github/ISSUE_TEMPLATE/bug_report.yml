@@ -1,0 +1,60 @@
+name: Bug report
+description: A command crashed, printed something wrong, or wrote a broken file.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For honest play that got flagged, use the **False positive** form instead.
+
+        Report these privately, not here: a way to get a cheat past a check, a way to make an innocent player get flagged on purpose, HTML or script that runs in a case page or the desk, or player ids leaking to the AI endpoint. See the [security policy](https://github.com/Nimdy/detect-FPS-hackers/security/policy).
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran.
+      render: shell
+      placeholder: PYTHONPATH=src python3 -m fpsdet score events.ndjson --profile profiles/example-loadout.json
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Paste the output or the traceback.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: input
+    attributes:
+      label: Smallest input that shows it (optional)
+      description: A few event lines, a profile, or a reports file. Replace any id that could point to a real person.
+      render: json
+
+  - type: input
+    id: version
+    attributes:
+      label: fpsdet version or commit
+      placeholder: 0.2.0, or a commit hash
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version and OS
+      placeholder: Python 3.12.3 on Ubuntu 24.04
+    validations:
+      required: true

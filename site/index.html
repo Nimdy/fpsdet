@@ -45,10 +45,12 @@
     <div class="rounded-xl border border-line panel p-5">
       <p class="m-0 text-sm text-muted">From the repo, Python 3.11 or newer. No packages to install.</p>
       <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>PYTHONPATH=src python3 -m fpsdet demo</code></pre>
-      <p class="m-0 mt-4 text-sm text-muted">The terminal prints one line per player. The first pair is the whole pitch. The last line says the planted cases matched.</p>
-      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-clean bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>weight-cheat    review
+      <p class="m-0 mt-4 text-sm text-muted">The terminal prints one line per player: reviews first, then watches, then clean. Look for these two rows. They are the whole pitch: the same 7.1 m/s sprint on 10 kg of kit, and only the second one was tagged by the server as a blast. The last line says the planted cases matched.</p>
+      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-clean bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>…
+weight-cheat    review
+…
 blasted         clean
-
+…
 Planted cases matched profiles/example-loadout.json.</code></pre>
     </div>
     <div class="rounded-xl border border-line panel p-5">
@@ -236,11 +238,11 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
       </article>
       <article class="rounded-xl border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">The clock.</h3>
-        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The camera is allowed to kick. The case is the player command matching the kick the server just applied, backwards, on that same tick. Pull the same kick one shot later and it stays clean. This catches a same-tick no-recoil script. A script that waits one shot and adds a little noise stays quiet. Your server has to log both numbers, <code class="font-mono text-[0.92em]">applied_recoil_pitch_deg</code> and <code class="font-mono text-[0.92em]">compensation_pitch_deg</code>. If you do not have them, this check does nothing.</p>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The camera is allowed to kick. The case is the player command matching the kick the server just applied, backwards, on that same tick. Pull the same kick one shot later and it stays clean. In a game with a fixed spray pattern, a player who memorised it pulls on time too, so the pattern is removed first and only the part of the kick that changes between sprays is tested. This catches a same-tick no-recoil script. A script that waits one shot and adds a little noise stays quiet. Your server has to log both numbers, <code class="font-mono text-[0.92em]">applied_recoil_pitch_deg</code> and <code class="font-mono text-[0.92em]">compensation_pitch_deg</code>. If you do not have them, this check does nothing.</p>
       </article>
       <article class="rounded-xl border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">A fact this client was not sent.</h3>
-        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Sustained aim on an enemy the server had not made visible, or on a replay of someone else’s real movement, turned onto another heading, where this client has no sight and no audio. There is no invisible flag. The official client drops that body before draw because it is occluded. A snapshot parser that keeps every player still sees a person running. Sustained aim on it is a review. A four-shot clip of it stays clean.</p>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Sustained aim on an enemy this client could neither see nor hear (footsteps count as heard, and so does a body that broke line of sight a moment ago), or on a replay of someone else’s real movement, turned onto another heading, where this client has no sight and no audio. There is no invisible flag. The official client drops that body before draw because it is occluded. A snapshot parser that keeps every player still sees a person running. Sustained aim on it is a review. A four-shot clip of it stays clean.</p>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">That third check can catch a cheat that aims at bodies in the server snapshot. It cannot catch a DMA read of the frame the game actually drew, or a capture card looking at pixels. Those never receive a body the official client did not draw. If the visibility query is wrong, the case is manufactured. Fix the query before you trust the case.</p>
       </article>
       <article class="rounded-xl border border-line panel p-5">

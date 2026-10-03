@@ -1,0 +1,16 @@
+name: License or other question
+description: Ask about the license, a commercial license, or anything the docs do not answer.
+title: "[question] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        fpsdet is under the [PolyForm Small Business License 1.0.0](https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md). Companies above its size limits need a commercial license from ZeroBandwidth. Ask here. Do not post anything confidential: if a question needs private details, say so and the maintainer will follow up.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+    validations:
+      required: true
