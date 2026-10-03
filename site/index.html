@@ -13,20 +13,22 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="fpsdet.css">
 </head>
-<body class="m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
-<a class="sr-only bg-watch px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
-<header class="border-b border-line">
-  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-baseline gap-x-6 gap-y-3 px-10 py-5 max-md:px-4">
-    <a class="font-serif text-[1.7rem] leading-none tracking-tight text-ink no-underline" href="index.html">fpsdet</a>
-    <nav class="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-[0.95rem]" aria-label="Site">
-      <a class="border-b border-watch text-ink no-underline" href="index.html" aria-current="page">What this is</a>
-      <a class="text-muted no-underline hover:text-ink" href="scoring.html">Scoring</a>
-      <a class="text-muted no-underline hover:text-ink" href="wire.html">Wire a game</a>
-      <a class="text-muted no-underline hover:text-ink" href="games.html">Games</a>
-      <a class="text-muted no-underline hover:text-ink" href="source.html">Source</a>
-      <a class="text-muted no-underline hover:text-ink" href="../demo/board.html">Desk</a>
+<body class="relative m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<div class="zb-backdrop" aria-hidden="true"></div>
+<a class="sr-only rounded-md bg-signal px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
+<header class="relative z-50 border-b border-line bg-bg/80 backdrop-blur-xl md:sticky md:top-0">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-center gap-x-5 gap-y-2 px-10 py-3 max-md:px-4">
+    <a class="zb-logo flex items-center gap-2.5 font-mono text-[1.05rem] font-semibold tracking-tight text-white no-underline" href="index.html"><span class="pulse-dot" aria-hidden="true"></span><span>fps<span class="text-signal">det</span></span></a>
+    <a class="font-mono text-[11px] text-muted no-underline hover:text-ink" href="https://zerobandwidth.com">by Zero<span class="text-signal">Bandwidth</span></a>
+    <nav class="flex flex-wrap items-center gap-x-0.5 gap-y-1 text-[0.9rem]" aria-label="Site">
+      <a class="nav-link" href="index.html" aria-current="page"><span>01</span>What this is</a>
+      <a class="nav-link" href="scoring.html"><span>02</span>Scoring</a>
+      <a class="nav-link" href="wire.html"><span>03</span>Wire a game</a>
+      <a class="nav-link" href="games.html"><span>04</span>Games</a>
+      <a class="nav-link" href="source.html"><span>05</span>Source</a>
+      <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
     </nav>
-    <p class="m-0 ml-auto font-mono text-[0.78rem] text-watch max-md:ml-0 max-md:basis-full">Automated action: none</p>
+    <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
 </header>
 
@@ -34,37 +36,37 @@
 <section class="mx-auto w-full max-w-[1800px] px-10 pb-2 pt-12 max-md:px-4 max-md:pt-8">
   <div class="grid grid-cols-12 items-end gap-x-12 gap-y-8 max-xl:grid-cols-1">
     <div class="col-span-7 max-xl:col-span-1">
-      <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">What we are building</p>
-      <h1 class="m-0 mt-4 font-serif text-[4.6rem] font-normal leading-[0.92] tracking-tight text-balance max-md:text-[2.55rem]">Run the test before you wire a game.</h1>
+      <p class="prompt m-0"><span class="text-signal-soft">zb@zerobandwidth</span><span class="text-faint">:</span><span class="text-prototype">~/fpsdet</span><span class="text-faint">$</span> <span class="text-ink">What we are building</span><span class="caret" aria-hidden="true"></span></p>
+      <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">Run the test before you <span class="text-gradient-brand">wire a game.</span></h1>
     </div>
     <p class="col-span-5 m-0 text-lg max-xl:col-span-1"><strong class="font-medium">You are looking at an answer key, and the program that grades it.</strong> Thirty-two fake players. A known decision on each one. fpsdet reads JSON a dedicated server already can write, and it writes a case a person opens. It does not install on a player’s PC. It does not ban. This does not end cheating.</p>
   </div>
   <div class="mt-10 grid grid-cols-2 gap-4 max-md:grid-cols-1">
-    <div class="border border-line bg-panel p-5">
+    <div class="rounded-xl border border-line panel p-5">
       <p class="m-0 text-sm text-muted">From the repo, Python 3.11 or newer. No packages to install.</p>
-      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap border-l-[3px] border-watch bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>PYTHONPATH=src python3 -m fpsdet demo</code></pre>
+      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>PYTHONPATH=src python3 -m fpsdet demo</code></pre>
       <p class="m-0 mt-4 text-sm text-muted">The terminal prints one line per player. The first pair is the whole pitch. The last line says the planted cases matched.</p>
-      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap border-l-[3px] border-clean bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>weight-cheat    review
+      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-clean bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>weight-cheat    review
 blasted         clean
 
 Planted cases matched profiles/example-loadout.json.</code></pre>
     </div>
-    <div class="border border-line bg-panel p-5">
+    <div class="rounded-xl border border-line panel p-5">
       <p class="m-0 text-sm text-muted">A second command shows the tool refusing to guess. <code class="font-mono text-[0.92em]">examples/shot.jsonl</code> is one legal shot, one legal step, and one step at 18 m/s tagged as an explosion.</p>
-      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap border-l-[3px] border-watch bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>PYTHONPATH=src python3 -m fpsdet score examples/shot.jsonl --profile profiles/example-loadout.json</code></pre>
-      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap border-l-[3px] border-info bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>p-1044    insufficient_data</code></pre>
+      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>PYTHONPATH=src python3 -m fpsdet score examples/shot.jsonl --profile profiles/example-loadout.json</code></pre>
+      <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-info bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>p-1044    insufficient_data</code></pre>
       <p class="m-0 mt-4 text-sm text-muted">The reason says the explosion sample was excluded. One fast sample is not a case. A case needs a sustained run. That refusal is what you want on a short log.</p>
     </div>
   </div>
 </section>
 
 <section class="mx-auto w-full max-w-[1800px] px-10 pb-6 pt-16 max-md:px-4 max-md:pt-12" aria-labelledby="left-pc">
-  <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">Why the server</p>
-  <h2 id="left-pc" class="m-0 mt-4 font-serif text-[2.6rem] font-normal leading-none tracking-tight text-balance max-md:text-4xl">The cheat left the PC. Its commands did not.</h2>
+  <p class="zb-kicker">Why the server</p>
+  <h2 id="left-pc" class="m-0 mt-4 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white text-balance max-md:text-[1.6rem]">The cheat left the PC. Its commands did not.</h2>
   <p class="m-0 mt-4 max-w-3xl">A kernel driver watches processes on the player’s PC. A DMA card, a second PC, or a capture card runs the cheat where that driver never runs. Every move and every shot still has to be accepted by the dedicated server. fpsdet reads what the server accepted, beside what the server already knew.</p>
   <figure class="m-0 mt-8">
     <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] max-lg:grid-cols-1">
-      <div class="flex flex-col border border-line border-t-[3px] border-t-review bg-panel p-5">
+      <div class="rounded-xl flex flex-col border border-line border-t-[3px] border-t-review panel p-5">
         <p class="m-0 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-review" aria-hidden="true"></span>Off the PC</p>
         <h3 class="m-0 mt-3 text-lg font-medium">Where the cheat runs now</h3>
         <ul class="m-0 mt-3 list-none space-y-1.5 p-0 text-sm text-muted">
@@ -78,7 +80,7 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
         <svg class="h-5 w-12 text-muted max-lg:w-8 max-lg:rotate-90" viewBox="0 0 48 20" fill="none" aria-hidden="true"><path d="M2 10h40m-7-7 7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="font-mono text-[11px] leading-tight text-muted">mouse input</span>
       </div>
-      <div class="flex flex-col border border-line border-t-[3px] border-t-muted bg-panel p-5">
+      <div class="rounded-xl flex flex-col border border-line border-t-[3px] border-t-muted panel p-5">
         <p class="m-0 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-muted" aria-hidden="true"></span>The player’s PC</p>
         <h3 class="m-0 mt-3 text-lg font-medium">Where kernel anti-cheat looks</h3>
         <ul class="m-0 mt-3 list-none space-y-1.5 p-0 text-sm text-muted">
@@ -91,8 +93,8 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
         <svg class="h-5 w-12 text-muted max-lg:w-8 max-lg:rotate-90" viewBox="0 0 48 20" fill="none" aria-hidden="true"><path d="M2 10h40m-7-7 7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="font-mono text-[11px] leading-tight text-muted">every command</span>
       </div>
-      <div class="flex flex-col border border-line border-t-[3px] border-t-watch bg-panel p-5">
-        <p class="m-0 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-watch" aria-hidden="true"></span>Dedicated server</p>
+      <div class="rounded-xl flex flex-col border border-line border-t-[3px] border-t-signal panel p-5">
+        <p class="m-0 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-signal" aria-hidden="true"></span>Dedicated server</p>
         <h3 class="m-0 mt-3 text-lg font-medium">Where fpsdet reads</h3>
         <ul class="m-0 mt-3 list-none space-y-1.5 p-0 text-sm text-muted">
           <li>Accepted every move and every shot</li>
@@ -108,64 +110,64 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
 </section>
 
 <section id="twins" class="mx-auto w-full max-w-[1800px] px-10 py-12 max-md:px-4" aria-labelledby="twins-title">
-  <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">The planted pairs</p>
-  <h2 id="twins-title" class="m-0 mt-4 font-serif text-[2.6rem] font-normal leading-none tracking-tight text-balance max-md:text-4xl">Same numbers. Opposite answers.</h2>
+  <p class="zb-kicker">The planted pairs</p>
+  <h2 id="twins-title" class="m-0 mt-4 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white text-balance max-md:text-[1.6rem]">Same numbers. Opposite answers.</h2>
   <p class="m-0 mt-4 max-w-3xl">Most of the desk is pairs. One player is cheating. The other has the same speed, the same hits, or the same quiet aim, and is not. A detector that cannot tell them apart bans the wrong one. The middle of each row is what they share. The ends are the one fact that differs. Each end opens that case on the desk.</p>
   <div class="mt-8 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] border-b border-line pb-2 font-mono text-xs uppercase tracking-[0.12em] text-muted max-md:hidden" aria-hidden="true">
     <span>Opens a case</span><span class="text-center">What they share</span><span class="text-right">Stays clean</span>
   </div>
   <ol class="m-0 list-none p-0 max-md:mt-6 max-md:space-y-3">
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-review bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-weight-cheat"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · weight-cheat</span><span class="mt-1 block text-[15px]">Cause none.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-review panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-weight-cheat"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · weight-cheat</span><span class="mt-1 block text-[15px]">Cause none.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>10 kg kit · 7.1 m/s · 30 samples</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-blasted"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · blasted</span><span class="mt-1 block text-[15px]">Cause explosion.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-blasted"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · blasted</span><span class="mt-1 block text-[15px]">Cause explosion.</span></a>
     </li>
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-review bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-no-recoil"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · no-recoil</span><span class="mt-1 block text-[15px]">Stock AK. 0.05° against a 1.6° floor.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-review panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-no-recoil"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · no-recoil</span><span class="mt-1 block text-[15px]">Stock AK. 0.05° against a 1.6° floor.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>Less kick than a stock AK</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-modded-recoil"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · modded-recoil</span><span class="mt-1 block text-[15px]">Compensator and grip. Floor 0.7°, kick 0.8°.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-modded-recoil"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · modded-recoil</span><span class="mt-1 block text-[15px]">Compensator and grip. Floor 0.7°, kick 0.8°.</span></a>
     </li>
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-review bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-mirror-script"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · mirror-script</span><span class="mt-1 block text-[15px]">Pulls on the same tick. r −1.00.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-review panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-mirror-script"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · mirror-script</span><span class="mt-1 block text-[15px]">Pulls on the same tick. r −1.00.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>Same kicks · same pull-down</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-late-compensate"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · late-compensate</span><span class="mt-1 block text-[15px]">Pulls one shot late. Same-tick r near zero.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-late-compensate"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · late-compensate</span><span class="mt-1 block text-[15px]">Pulls one shot late. Same-tick r near zero.</span></a>
     </li>
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-review bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-wall-eye"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · wall-eye</span><span class="mt-1 block text-[15px]">1600 ms on a mover the server hid.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-review panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-wall-eye"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · wall-eye</span><span class="mt-1 block text-[15px]">1600 ms on a mover the server hid.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>Fast onto the enemy</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-angle-holder"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · angle-holder</span><span class="mt-1 block text-[15px]">Held the corner. 0 ms hidden.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-angle-holder"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · angle-holder</span><span class="mt-1 block text-[15px]">Held the corner. 0 ms hidden.</span></a>
     </li>
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-review bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-rage"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · rage</span><span class="mt-1 block text-[15px]">Queued average. Accuracy bound 89%, best elite measured 37%.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-review panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-rage"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · rage</span><span class="mt-1 block text-[15px]">Queued average. Accuracy bound 89%, best elite measured 37%.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>They hit a lot</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-elite-human"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · elite-human</span><span class="mt-1 block text-[15px]">Elite band, on the elite median.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-elite-human"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · elite-human</span><span class="mt-1 block text-[15px]">Elite band, on the elite median.</span></a>
     </li>
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-review bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-quiet-radar"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · quiet-radar</span><span class="mt-1 block text-[15px]">Only while nothing was knowable.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-review panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-quiet-radar"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · quiet-radar</span><span class="mt-1 block text-[15px]">Only while nothing was knowable.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>Aim noise drops to 0.08°</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-listened"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · listened</span><span class="mt-1 block text-[15px]">While the server says they could hear it.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-listened"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · listened</span><span class="mt-1 block text-[15px]">While the server says they could hear it.</span></a>
     </li>
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-watch bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-radar-friend"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-watch" aria-hidden="true"></span>watch · radar-friend</span><span class="mt-1 block text-[15px]">Swings 40 ms later. A voice needs 350.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-watch panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-radar-friend"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-watch" aria-hidden="true"></span>watch · radar-friend</span><span class="mt-1 block text-[15px]">Swings 40 ms later. A voice needs 350.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>Teammate of wall-eye · same hidden enemy</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-callout-friend"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · callout-friend</span><span class="mt-1 block text-[15px]">800 ms or more later. A callout.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-callout-friend"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · callout-friend</span><span class="mt-1 block text-[15px]">800 ms or more later. A callout.</span></a>
     </li>
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-review bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-replay-lock"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · replay-lock</span><span class="mt-1 block text-[15px]">1600 ms on a private replay.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-review panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-replay-lock"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · replay-lock</span><span class="mt-1 block text-[15px]">1600 ms on a private replay.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>Ordinary speed, recoil, and aim</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-real-fight"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · real-fight</span><span class="mt-1 block text-[15px]">Clips that path for 160 ms in a spray.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-real-fight"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · real-fight</span><span class="mt-1 block text-[15px]">Clips that path for 160 ms in a spray.</span></a>
     </li>
     <li class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] items-center border-b border-line py-3 max-md:grid-cols-1 max-md:gap-2 max-md:border max-md:p-3">
-      <a class="block border border-line border-l-[3px] border-l-review bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16]" href="../demo/board.html#card-wire-lock"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · wire-lock</span><span class="mt-1 block text-[15px]">0.18° off the snapshot, 2.40° off the picture.</span></a>
+      <a class="rounded-md block border border-line border-l-[3px] border-l-review panel px-4 py-3 text-ink no-underline hover:bg-panel-hover" href="../demo/board.html#card-wire-lock"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted"><span class="h-2 w-2 shrink-0 bg-review" aria-hidden="true"></span>review · wire-lock</span><span class="mt-1 block text-[15px]">0.18° off the snapshot, 2.40° off the picture.</span></a>
       <p class="relative m-0 flex items-center justify-center px-2 text-center text-sm"><span class="absolute inset-x-0 top-1/2 h-px bg-line max-md:hidden" aria-hidden="true"></span><span class="relative bg-bg px-3"><span class="text-muted md:hidden">Both: </span>Same enemy · same hits</span></p>
-      <a class="block border border-line border-r-[3px] border-r-clean bg-panel px-4 py-3 text-ink no-underline hover:bg-[#1b1d16] md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-picture-track"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · picture-track</span><span class="mt-1 block text-[15px]">0.18° off the picture, where a person aims.</span></a>
+      <a class="rounded-md block border border-line border-r-[3px] border-r-clean panel px-4 py-3 text-ink no-underline hover:bg-panel-hover md:text-right max-md:border-r max-md:border-r-line max-md:border-l-[3px] max-md:border-l-clean" href="../demo/board.html#card-picture-track"><span class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted md:justify-end"><span class="h-2 w-2 shrink-0 bg-clean" aria-hidden="true"></span>clean · picture-track</span><span class="mt-1 block text-[15px]">0.18° off the picture, where a person aims.</span></a>
     </li>
   </ol>
 </section>
 
 <section id="answer-key" class="mx-auto w-full max-w-[1800px] px-10 py-12 max-md:px-4" aria-labelledby="key-title">
-  <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">The answer key</p>
-  <h2 id="key-title" class="m-0 mt-4 font-serif text-[2.6rem] font-normal leading-none tracking-tight text-balance max-md:text-4xl">Thirty-two players. Every answer is known.</h2>
+  <p class="zb-kicker">The answer key</p>
+  <h2 id="key-title" class="m-0 mt-4 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white text-balance max-md:text-[1.6rem]">Thirty-two players. Every answer is known.</h2>
   <p class="m-0 mt-4 max-w-4xl">Then open <a class="text-ink underline decoration-line underline-offset-4" href="../demo/board.html">demo/board.html</a>. That page is the same result, with the charts. The header reads 11 to open, 4 to watch, 16 clean, 1 held. Tape 01 is a 10 kg kit holding 7.1 m/s, cap 5.6, beside the same sprint tagged as a blast. The blast is clean. If those two decisions move, the scorer changed. This file is the spec. Later, <code class="font-mono text-[0.92em]">wire-lock</code> is a review and <code class="font-mono text-[0.92em]">picture-track</code> is clean. Same enemy. Same hits.</p>
   <figure class="m-0 mt-8">
     <div class="flex h-3 w-full gap-[2px]" role="img" aria-label="Thirty-two planted players: 11 review, 4 watch, 16 clean, 1 held.">
@@ -177,47 +179,47 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
     <div class="mt-6 grid grid-cols-[9rem_minmax(0,1fr)] gap-x-6 gap-y-5 max-md:grid-cols-1 max-md:gap-y-2" data-answer-key>
       <p class="m-0 flex items-baseline gap-2 max-md:mt-3"><span class="text-[2rem] leading-none">11</span><span class="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-review" aria-hidden="true"></span>review</span></p>
       <ul class="m-0 flex list-none flex-wrap gap-2 p-0" data-decision="review">
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-weight-cheat" title="10 kg on the ground, running at the 3 kg cap"><span class="h-2 w-2 bg-review" aria-hidden="true"></span>weight-cheat</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-no-recoil" title="Stock rifle. The kick never arrives."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>no-recoil</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-mirror-script" title="The camera still kicks. The command is that kick, backwards, same tick."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>mirror-script</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-fire-rate" title="Every gap is under the rifle's own cycle"><span class="h-2 w-2 bg-review" aria-hidden="true"></span>fire-rate</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-metronome" title="Legal fire rate. No variation."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>metronome</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-wall-eye" title="The aim was on a player the server still had hidden."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>wall-eye</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-rage" title="Queued average. Past every elite in the baseline."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>rage</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-quiet-radar" title="The aim gets quiet only while this client could not have known."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>quiet-radar</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-clone-source" title="Already a mirror review. The leftover is the product."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>clone-source</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-replay-lock" title="Ordinary fight. The crosshair is on a body this client was not sent."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>replay-lock</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-wire-lock" title="Same hits. The crosshair is on the snapshot, not the picture."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>wire-lock</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-weight-cheat" title="10 kg on the ground, running at the 3 kg cap"><span class="h-2 w-2 bg-review" aria-hidden="true"></span>weight-cheat</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-no-recoil" title="Stock rifle. The kick never arrives."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>no-recoil</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-mirror-script" title="The camera still kicks. The command is that kick, backwards, same tick."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>mirror-script</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-fire-rate" title="Every gap is under the rifle's own cycle"><span class="h-2 w-2 bg-review" aria-hidden="true"></span>fire-rate</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-metronome" title="Legal fire rate. No variation."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>metronome</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-wall-eye" title="The aim was on a player the server still had hidden."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>wall-eye</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-rage" title="Queued average. Past every elite in the baseline."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>rage</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-quiet-radar" title="The aim gets quiet only while this client could not have known."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>quiet-radar</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-clone-source" title="Already a mirror review. The leftover is the product."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>clone-source</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-replay-lock" title="Ordinary fight. The crosshair is on a body this client was not sent."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>replay-lock</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-wire-lock" title="Same hits. The crosshair is on the snapshot, not the picture."><span class="h-2 w-2 bg-review" aria-hidden="true"></span>wire-lock</a></li>
       </ul>
       <p class="m-0 flex items-baseline gap-2 max-md:mt-3"><span class="text-[2rem] leading-none">4</span><span class="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-watch" aria-hidden="true"></span>watch</span></p>
       <ul class="m-0 flex list-none flex-wrap gap-2 p-0" data-decision="watch">
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-rank-outlier" title="Better than their rank. Inside the best humans."><span class="h-2 w-2 bg-watch" aria-hidden="true"></span>rank-outlier</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-account-changed" title="This account stopped shooting like itself"><span class="h-2 w-2 bg-watch" aria-hidden="true"></span>account-changed</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-clone-buyer" title="Not a mirror. Same leftover as someone who is."><span class="h-2 w-2 bg-watch" aria-hidden="true"></span>clone-buyer</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-radar-friend" title="Eight swings, 40 ms after a teammate who could see through the wall."><span class="h-2 w-2 bg-watch" aria-hidden="true"></span>radar-friend</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-rank-outlier" title="Better than their rank. Inside the best humans."><span class="h-2 w-2 bg-watch" aria-hidden="true"></span>rank-outlier</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-account-changed" title="This account stopped shooting like itself"><span class="h-2 w-2 bg-watch" aria-hidden="true"></span>account-changed</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-clone-buyer" title="Not a mirror. Same leftover as someone who is."><span class="h-2 w-2 bg-watch" aria-hidden="true"></span>clone-buyer</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-radar-friend" title="Eight swings, 40 ms after a teammate who could see through the wall."><span class="h-2 w-2 bg-watch" aria-hidden="true"></span>radar-friend</a></li>
       </ul>
       <p class="m-0 flex items-baseline gap-2 max-md:mt-3"><span class="text-[2rem] leading-none">16</span><span class="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-clean" aria-hidden="true"></span>clean</span></p>
       <ul class="m-0 flex list-none flex-wrap gap-2 p-0" data-decision="clean">
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-blasted" title="Same 7.1 m/s. The server called it an explosion."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>blasted</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-glitch" title="Two frames at 15 m/s, then a normal sprint"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>glitch</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-adrenaline" title="The weight table says illegal. The server cap says legal."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>adrenaline</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-legal-heavy" title="18 kg, 5.0 m/s, under a 5.4 cap"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>legal-heavy</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-modded-recoil" title="Same gun, compensator and grip, 0.8° of kick"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>modded-recoil</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-new-gun" title="0.02° of kick, and it is still not a case"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>new-gun</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-late-compensate" title="The command follows the previous kick."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>late-compensate</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-angle-holder" title="Fast onto the angle. Zero time on a hidden mover."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>angle-holder</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-elite-human" title="The best band, shooting like the best band"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>elite-human</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-weak-human" title="Worse than average. That is not suspicious."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>weak-human</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-reported-streamer" title="25 reports. Ordinary aim."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>reported-streamer</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-listened" title="Quiet, because the server says they could hear it."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>listened</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-steady-hands" title="Smooth while looking. Smooth while unknowing. No drop."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>steady-hands</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-callout-friend" title="Same enemy. Late enough that somebody could have said it."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>callout-friend</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-real-fight" title="They fought the body the server let them see."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>real-fight</a></li>
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-picture-track" title="Same enemy. Same hits. The crosshair is on the picture."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>picture-track</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-blasted" title="Same 7.1 m/s. The server called it an explosion."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>blasted</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-glitch" title="Two frames at 15 m/s, then a normal sprint"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>glitch</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-adrenaline" title="The weight table says illegal. The server cap says legal."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>adrenaline</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-legal-heavy" title="18 kg, 5.0 m/s, under a 5.4 cap"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>legal-heavy</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-modded-recoil" title="Same gun, compensator and grip, 0.8° of kick"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>modded-recoil</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-new-gun" title="0.02° of kick, and it is still not a case"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>new-gun</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-late-compensate" title="The command follows the previous kick."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>late-compensate</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-angle-holder" title="Fast onto the angle. Zero time on a hidden mover."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>angle-holder</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-elite-human" title="The best band, shooting like the best band"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>elite-human</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-weak-human" title="Worse than average. That is not suspicious."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>weak-human</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-reported-streamer" title="25 reports. Ordinary aim."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>reported-streamer</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-listened" title="Quiet, because the server says they could hear it."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>listened</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-steady-hands" title="Smooth while looking. Smooth while unknowing. No drop."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>steady-hands</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-callout-friend" title="Same enemy. Late enough that somebody could have said it."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>callout-friend</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-real-fight" title="They fought the body the server let them see."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>real-fight</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-picture-track" title="Same enemy. Same hits. The crosshair is on the picture."><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>picture-track</a></li>
       </ul>
       <p class="m-0 flex items-baseline gap-2 max-md:mt-3"><span class="text-[2rem] leading-none">1</span><span class="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-info" aria-hidden="true"></span>held</span></p>
       <ul class="m-0 flex list-none flex-wrap gap-2 p-0" data-decision="insufficient_data">
-        <li><a class="inline-flex items-center gap-2 border border-line bg-panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-small-sample" title="10 for 10, and the desk refuses it"><span class="h-2 w-2 bg-info" aria-hidden="true"></span>small-sample</a></li>
+        <li><a class="rounded-md inline-flex items-center gap-2 border border-line panel px-2.5 py-1.5 font-mono text-[12.5px] text-ink no-underline hover:border-muted" href="../demo/board.html#card-small-sample" title="10 for 10, and the desk refuses it"><span class="h-2 w-2 bg-info" aria-hidden="true"></span>small-sample</a></li>
       </ul>
     </div>
     <figcaption class="m-0 mt-6 max-w-3xl text-sm text-muted">Half the key is clean on purpose: a blast, a glitch, a legal mod, a callout, a streamer with 25 reports. Each square opens that player on the desk. A test locks these groups to the scorer, so this picture cannot drift from the code.</figcaption>
@@ -225,23 +227,23 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
 </section>
 
   <section class="mx-auto w-full max-w-[1800px] px-10 py-12 max-md:px-4">
-    <h2 class="m-0 font-serif text-[2.6rem] font-normal leading-none tracking-tight max-md:text-4xl">What will fire</h2>
+    <h2 class="m-0 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white max-md:text-[1.6rem]">What will fire</h2>
     <p class="m-0 mt-4 max-w-3xl">Four checks. The first two are ordinary, and they work. The third catches a body the official client never drew. The fourth is two positions of a player they can see. None of them ban anyone. Each one is drawn on <a class="text-ink underline decoration-line underline-offset-4" href="scoring.html#drawn">Scoring</a>.</p>
     <div class="mt-8 grid grid-cols-2 gap-4 max-md:grid-cols-1">
-      <article class="border border-line bg-panel p-5">
+      <article class="rounded-xl border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">Gear the server already applied.</h3>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">A 10 kg kit sprinting at 7.1 m/s when that server’s cap for the kit is 5.6. The same speed, tagged as a blast, is not a case. Fire rate uses the gun’s own cycle. Recoil uses the floor for that build. This is not a new idea. It catches blatant speed, a macro under the legal gap, and a stock gun with no kick. A cheat that stays inside the cap, and jitters its timing by a few milliseconds, walks through it.</p>
       </article>
-      <article class="border border-line bg-panel p-5">
+      <article class="rounded-xl border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">The clock.</h3>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The camera is allowed to kick. The case is the player command matching the kick the server just applied, backwards, on that same tick. Pull the same kick one shot later and it stays clean. This catches a same-tick no-recoil script. A script that waits one shot and adds a little noise stays quiet. Your server has to log both numbers, <code class="font-mono text-[0.92em]">applied_recoil_pitch_deg</code> and <code class="font-mono text-[0.92em]">compensation_pitch_deg</code>. If you do not have them, this check does nothing.</p>
       </article>
-      <article class="border border-line bg-panel p-5">
+      <article class="rounded-xl border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">A fact this client was not sent.</h3>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Sustained aim on an enemy the server had not made visible, or on a replay of someone else’s real movement, turned onto another heading, where this client has no sight and no audio. There is no invisible flag. The official client drops that body before draw because it is occluded. A snapshot parser that keeps every player still sees a person running. Sustained aim on it is a review. A four-shot clip of it stays clean.</p>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">That third check can catch a cheat that aims at bodies in the server snapshot. It cannot catch a DMA read of the frame the game actually drew, or a capture card looking at pixels. Those never receive a body the official client did not draw. If the visibility query is wrong, the case is manufactured. Fix the query before you trust the case.</p>
       </article>
-      <article class="border border-line bg-panel p-5">
+      <article class="rounded-xl border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">The picture is late.</h3>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Every moving player has two positions. The wire is the snapshot the server just sent. The picture is where the official client draws them, the wire position from one interpolation delay ago. A person aims at the picture. A packet aimbot aims at the wire, often the tick the snapshot arrives. The case is not “too accurate.” Both crosshairs can hit. The case is the error to the wire staying smaller than the error to the picture, across enough shots, before that delay has elapsed. Standing still makes the two positions match, and nothing fires. One shot does not fire. On the desk, <code class="font-mono text-[0.92em]">wire-lock</code> is the review and <code class="font-mono text-[0.92em]">picture-track</code> is clean.</p>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">That check still misses a capture card looking at the pixels that were drawn, a cheat that reimplements the official interpolator and waits out the delay, and a server that compares against the wrong timeline. A wrong timeline frames a legal player. A listen server can forge the fields. If you cannot measure the two errors and the delay, omit them. The check does nothing.</p>
@@ -250,57 +252,57 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
   </section>
 
   <section class="mx-auto w-full max-w-[1800px] px-10 py-12 max-md:px-4" aria-labelledby="flow-title">
-    <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">How it runs</p>
-    <h2 id="flow-title" class="m-0 mt-4 font-serif text-[2.6rem] font-normal leading-none tracking-tight text-balance max-md:text-4xl">One line in. A case out. A person decides.</h2>
+    <p class="zb-kicker">How it runs</p>
+    <h2 id="flow-title" class="m-0 mt-4 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white text-balance max-md:text-[1.6rem]">One line in. A case out. A person decides.</h2>
     <ol class="m-0 mt-8 grid list-none grid-cols-6 gap-y-6 p-0 max-xl:grid-cols-3 max-md:grid-cols-1">
       <li class="pr-4">
-        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-watch font-mono text-xs text-ink">1</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
+        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal font-mono text-xs text-ink shadow-[0_0_14px_-4px_var(--color-signal)]">1</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
         <h3 class="m-0 mt-4 text-base font-medium">The server writes a line</h3>
         <p class="m-0 mt-2 font-mono text-[12px] text-muted">{"speed_mps": 7.1, …}</p>
         <p class="m-0 mt-2 text-sm text-muted">Per shot and per movement sample, from the server’s own accept path.</p>
       </li>
       <li class="pr-4">
-        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-watch font-mono text-xs text-ink">2</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
+        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal font-mono text-xs text-ink shadow-[0_0_14px_-4px_var(--color-signal)]">2</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
         <h3 class="m-0 mt-4 text-base font-medium">The lake keeps it</h3>
         <p class="m-0 mt-2 font-mono text-[12px] text-muted">game=…/dt=…/events.ndjson</p>
         <p class="m-0 mt-2 text-sm text-muted">Append-only files you own. A folder for a solo dev, an object store for a studio.</p>
       </li>
       <li class="pr-4">
-        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-watch font-mono text-xs text-ink">3</span><span class="ml-3 h-px flex-1 bg-line max-xl:hidden"></span></div>
+        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal font-mono text-xs text-ink shadow-[0_0_14px_-4px_var(--color-signal)]">3</span><span class="ml-3 h-px flex-1 bg-line max-xl:hidden"></span></div>
         <h3 class="m-0 mt-4 text-base font-medium">Humans set the bar</h3>
         <p class="m-0 mt-2 font-mono text-[12px] text-muted">rank × weapon × build</p>
         <p class="m-0 mt-2 text-sm text-muted">Once you have players. Until then, the gear rules run alone.</p>
       </li>
       <li class="pr-4">
-        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-watch font-mono text-xs text-ink">4</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
+        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal font-mono text-xs text-ink shadow-[0_0_14px_-4px_var(--color-signal)]">4</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
         <h3 class="m-0 mt-4 text-base font-medium">The scorer counts</h3>
         <p class="m-0 mt-2 font-mono text-[12px] text-muted">gear · clock · knowledge · picture · humans</p>
         <p class="m-0 mt-2 text-sm text-muted">A count, not a model call. Reports move the queue, never the score.</p>
       </li>
       <li class="pr-4">
-        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-watch font-mono text-xs text-ink">5</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
+        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal font-mono text-xs text-ink shadow-[0_0_14px_-4px_var(--color-signal)]">5</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
         <h3 class="m-0 mt-4 text-base font-medium">A case is written</h3>
         <p class="m-0 mt-2 font-mono text-[12px] text-muted">case.json · case.html · seal</p>
         <p class="m-0 mt-2 text-sm text-muted">Review, watch, clean, or held, with the reasons and the numbers behind them.</p>
       </li>
-      <li class="border-l-[3px] border-watch pl-4">
-        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-watch font-mono text-xs text-bg">6</span></div>
+      <li class="border-l-[3px] border-signal pl-4">
+        <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-signal font-mono text-xs text-bg">6</span></div>
         <h3 class="m-0 mt-4 text-base font-medium">A person decides</h3>
         <p class="m-0 mt-2 font-mono text-[12px] text-muted">automated_action: none</p>
         <p class="m-0 mt-2 text-sm text-muted">Wire your ban button to your review tool, after a person looks. Never to the word review.</p>
       </li>
     </ol>
     <div class="mt-8 grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
-      <p class="m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Reports</span>Jump the scan queue, clean numbers included. They never add to the score.</p>
-      <p class="m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">AI brief, optional</span>Any OpenAI-compatible endpoint writes a paragraph on a case. It cannot change the decision.</p>
-      <p class="m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">features.csv</span>Train your own model on reviewer labels. Keep the gear rules beside it.</p>
-      <p class="m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Dashboards</span>Grafana, Elastic, or Splunk read the case JSON. They are viewers, not the detector.</p>
+      <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Reports</span>Jump the scan queue, clean numbers included. They never add to the score.</p>
+      <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">AI brief, optional</span>Any OpenAI-compatible endpoint writes a paragraph on a case. It cannot change the decision.</p>
+      <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">features.csv</span>Train your own model on reviewer labels. Keep the gear rules beside it.</p>
+      <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Dashboards</span>Grafana, Elastic, or Splunk read the case JSON. They are viewers, not the detector.</p>
     </div>
   </section>
 
   <section class="mx-auto grid w-full max-w-[1800px] grid-cols-2 gap-10 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
     <div>
-      <h2 class="m-0 font-serif text-[2.6rem] font-normal leading-none tracking-tight max-md:text-4xl">What you set up on the server</h2>
+      <h2 class="m-0 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white max-md:text-[1.6rem]">What you set up on the server</h2>
       <p class="m-0 mt-4">Nothing on the player’s machine. When the dedicated server accepts a shot or a movement sample, append one JSON object. Start with the fields you already compute to move the body.</p>
       <ul class="m-0 mt-4 list-disc space-y-2 pl-5">
         <li><code class="font-mono text-[0.92em]">loadout_weight_kg</code>, <code class="font-mono text-[0.92em]">speed_mps</code>, <code class="font-mono text-[0.92em]">on_ground</code></li>
@@ -311,7 +313,7 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
       <p class="m-0 mt-4">Add the clock only when you can send the applied kick and the view command. Add the hidden-aim and replay checks only when line-of-sight and audio for that connection are queries you already trust. Add the wire-and-picture check only when the server can measure angular error to the snapshot it just sent, angular error to the position the official client is drawing, and the interpolation delay. Omit any of the three and that shot does not count. Which field turns on which check is drawn on <a class="text-ink underline decoration-line underline-offset-4" href="wire.html">Wire a game</a>, with the JSON, Unity, Unreal, and Godot shapes. Tarkov, Call of Duty, Battlefield, and WARDOGS are the same fields, on <a class="text-ink underline decoration-line underline-offset-4" href="games.html">Games</a>. The bars are on <a class="text-ink underline decoration-line underline-offset-4" href="scoring.html">Scoring</a>.</p>
     </div>
     <div>
-      <h2 class="m-0 font-serif text-[2.6rem] font-normal leading-none tracking-tight max-md:text-4xl">What you have to lose</h2>
+      <h2 class="m-0 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white max-md:text-[1.6rem]">What you have to lose</h2>
       <p class="m-0 mt-4">An afternoon, and a log line. Cheaters are in every shooter tonight, with a kernel driver and without one. Running the planted test takes nobody off a server.</p>
       <p class="m-0 mt-4">ZeroBandwidth wrote this. No studio is running it. There is no deployment to trust. Reproduce the two decisions above, then try to break them.</p>
       <ul class="m-0 mt-4 list-disc space-y-2 pl-5">
@@ -324,11 +326,11 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
   </section>
 
   <section id="build" class="mx-auto w-full max-w-[1800px] px-10 py-12 max-md:px-4" aria-labelledby="build-title">
-    <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">The baseline, not the ceiling</p>
-    <h2 id="build-title" class="m-0 mt-4 font-serif text-[2.6rem] font-normal leading-none tracking-tight text-balance max-md:text-4xl">Build on it. Make it yours.</h2>
+    <p class="zb-kicker">The baseline, not the ceiling</p>
+    <h2 id="build-title" class="m-0 mt-4 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white text-balance max-md:text-[1.6rem]">Build on it. Make it yours.</h2>
     <p class="m-0 mt-4 max-w-3xl">The contract is one JSON line in and one case out. Everything around that is a slot. Add your game, your numbers, your checks, your model, your desk. The planted answers keep you honest while you do it: plant a cheater and the innocent twin first, then write the rule that separates them.</p>
     <div class="relative mt-8">
-      <svg class="pointer-events-none absolute inset-0 h-full w-full text-line max-lg:hidden" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <svg class="pointer-events-none absolute inset-0 h-full w-full text-line-bright max-lg:hidden" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <g stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke">
           <line x1="50" y1="50" x2="16.7" y2="16.7" vector-effect="non-scaling-stroke"/><line x1="50" y1="50" x2="50" y2="16.7" vector-effect="non-scaling-stroke"/><line x1="50" y1="50" x2="83.3" y2="16.7" vector-effect="non-scaling-stroke"/>
           <line x1="50" y1="50" x2="16.7" y2="50" vector-effect="non-scaling-stroke"/><line x1="50" y1="50" x2="83.3" y2="50" vector-effect="non-scaling-stroke"/>
@@ -336,43 +338,44 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
         </g>
       </svg>
       <div class="relative grid grid-cols-3 gap-8 max-lg:grid-cols-2 max-lg:gap-4 max-md:grid-cols-1">
-        <article class="border border-line bg-panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your game</p><p class="m-0 mt-2 font-mono text-sm text-ink">profiles/*.json</p><p class="m-0 mt-2 text-sm text-muted">Weight classes, caps, recoil floors, innocence causes. WARDOGS and a synthetic loadout ship as examples.</p></article>
-        <article class="border border-line bg-panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your engine</p><p class="m-0 mt-2 font-mono text-sm text-ink">Unity · Unreal · Godot</p><p class="m-0 mt-2 text-sm text-muted">Emit from the server’s accept path. The shapes are on <a class="text-ink underline decoration-line underline-offset-4" href="wire.html">Wire a game</a>.</p></article>
-        <article class="border border-line bg-panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your numbers</p><p class="m-0 mt-2 font-mono text-sm text-ink">extra_metrics</p><p class="m-0 mt-2 text-sm text-muted">ADS time, sway, stamina, time-to-kill. Declare the row, send the field. No code change.</p></article>
-        <article class="border border-line bg-panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your storage</p><p class="m-0 mt-2 font-mono text-sm text-ink">NDJSON → DuckDB · ClickHouse</p><p class="m-0 mt-2 text-sm text-muted">Start with a folder. Grow into an object store. The scorer does not care how the line arrived.</p></article>
-        <article class="border border-watch bg-plot p-6 max-lg:col-span-2 max-lg:row-start-1 max-md:col-span-1">
-          <p class="m-0 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-watch" aria-hidden="true"></span>The core</p>
-          <p class="m-0 mt-3 font-serif text-[1.9rem] leading-[1.05] tracking-tight">One line in. A case out.</p>
+        <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your game</p><p class="m-0 mt-2 font-mono text-sm text-ink">profiles/*.json</p><p class="m-0 mt-2 text-sm text-muted">Weight classes, caps, recoil floors, innocence causes. WARDOGS and a synthetic loadout ship as examples.</p></article>
+        <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your engine</p><p class="m-0 mt-2 font-mono text-sm text-ink">Unity · Unreal · Godot</p><p class="m-0 mt-2 text-sm text-muted">Emit from the server’s accept path. The shapes are on <a class="text-ink underline decoration-line underline-offset-4" href="wire.html">Wire a game</a>.</p></article>
+        <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your numbers</p><p class="m-0 mt-2 font-mono text-sm text-ink">extra_metrics</p><p class="m-0 mt-2 text-sm text-muted">ADS time, sway, stamina, time-to-kill. Declare the row, send the field. No code change.</p></article>
+        <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your storage</p><p class="m-0 mt-2 font-mono text-sm text-ink">NDJSON → DuckDB · ClickHouse</p><p class="m-0 mt-2 text-sm text-muted">Start with a folder. Grow into an object store. The scorer does not care how the line arrived.</p></article>
+        <article class="corner-frame rounded-xl border border-signal/50 bg-plot p-6 shadow-[0_0_0_1px_rgb(56_200_255/0.15),0_0_40px_-8px_rgb(56_200_255/0.45),0_0_56px_-12px_rgb(168_85_247/0.35)] max-lg:col-span-2 max-lg:row-start-1 max-md:col-span-1">
+          <p class="m-0 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-signal" aria-hidden="true"></span>The core</p>
+          <p class="m-0 mt-3 font-mono text-[1.45rem] font-bold leading-[1.15] tracking-tight text-white">One line in. A case out.</p>
           <p class="m-0 mt-3 text-sm text-muted">Gear rules, the clock, the knowledge checks, the picture, human ceilings. Zero runtime dependencies. Thirty-two planted answers and the tests lock it.</p>
         </article>
-        <article class="border border-line bg-panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your checks</p><p class="m-0 mt-2 font-mono text-sm text-ink">src/fpsdet/signals.py</p><p class="m-0 mt-2 text-sm text-muted">Plant the cheater and the twin. Write the failing test. Then the rule.</p></article>
-        <article class="border border-line bg-panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your model</p><p class="m-0 mt-2 font-mono text-sm text-ink">features.csv</p><p class="m-0 mt-2 text-sm text-muted">Gradient boosting or whatever your team trains, once reviewers have labeled cases. Labels first.</p></article>
-        <article class="border border-line bg-panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your AI</p><p class="m-0 mt-2 font-mono text-sm text-ink">any OpenAI-compatible endpoint</p><p class="m-0 mt-2 text-sm text-muted">Local or hosted. It writes the brief on the queue. It cannot change the decision.</p></article>
-        <article class="border border-line bg-panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your desk</p><p class="m-0 mt-2 font-mono text-sm text-ink">case.json · case.html</p><p class="m-0 mt-2 text-sm text-muted">Open it in a browser, or index it where you already look: Grafana, Elastic, Splunk.</p></article>
+        <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your checks</p><p class="m-0 mt-2 font-mono text-sm text-ink">src/fpsdet/signals.py</p><p class="m-0 mt-2 text-sm text-muted">Plant the cheater and the twin. Write the failing test. Then the rule.</p></article>
+        <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your model</p><p class="m-0 mt-2 font-mono text-sm text-ink">features.csv</p><p class="m-0 mt-2 text-sm text-muted">Gradient boosting or whatever your team trains, once reviewers have labeled cases. Labels first.</p></article>
+        <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your AI</p><p class="m-0 mt-2 font-mono text-sm text-ink">any OpenAI-compatible endpoint</p><p class="m-0 mt-2 text-sm text-muted">Local or hosted. It writes the brief on the queue. It cannot change the decision.</p></article>
+        <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your desk</p><p class="m-0 mt-2 font-mono text-sm text-ink">case.json · case.html</p><p class="m-0 mt-2 text-sm text-muted">Open it in a browser, or index it where you already look: Grafana, Elastic, Splunk.</p></article>
       </div>
     </div>
-    <div class="mt-8 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 border border-line border-l-[3px] border-l-watch bg-panel p-5 max-md:grid-cols-1">
+    <div class="rounded-xl mt-8 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 border border-line border-l-[3px] border-l-watch panel p-5 max-md:grid-cols-1">
       <p class="m-0 text-sm text-muted"><strong class="font-medium text-ink">Free to build on for small studios.</strong> fpsdet is under the <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">PolyForm Small Business License 1.0.0</a>. If your company has fewer than 100 people and less than US$1M revenue last year, you can use it, change it, and ship it in your game. Larger studios and publishers need a commercial license from ZeroBandwidth.</p>
-      <a class="inline-block border border-watch px-4 py-2 text-sm text-ink no-underline hover:bg-watch hover:text-bg" href="https://github.com/Nimdy/detect-FPS-hackers/issues">Ask about a license</a>
+      <a class="btn-signal" href="https://github.com/Nimdy/detect-FPS-hackers/issues">Ask about a license</a>
     </div>
   </section>
 
   <section id="still" class="mx-auto w-full max-w-[1800px] px-10 py-12 max-md:px-4">
-    <h2 class="m-0 font-serif text-[2.6rem] font-normal leading-none tracking-tight max-md:text-4xl">What still gets through</h2>
+    <h2 class="m-0 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white max-md:text-[1.6rem]">What still gets through</h2>
     <div class="mt-8 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">An aim that never sits on a hidden mover, never sits on the replay, aims at the picture rather than the wire, and does not get quieter when that mover exists.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">Aim that stays on the picture the official client draws, including a cheat that waits out the interpolation delay. Standing still, where the snapshot and the picture are the same place.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">A DMA read of the frame the game actually drew, and a capture card looking at pixels.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">A server that scores aim against a position that client was not shown. That manufactures the case.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">A humanizer with its own noise, when that noise also matches human lag and human variance. A callout slow enough to have been a voice. A speed pulse inside the glitch filter. A kick that barely changes from shot to shot. Stamps that all land on one tick. A gun the server itself fired.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">A listen server, or a game that lets the client decide the hit, can forge every field. The contract is a dedicated server. A bad visibility query manufactures the case. Fix the query.</p>
-      <p class="col-span-3 m-0 border border-line p-5 text-sm leading-relaxed text-ink max-xl:col-span-2 max-md:col-span-1">A person still opens the file. This does not end cheating.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">An aim that never sits on a hidden mover, never sits on the replay, aims at the picture rather than the wire, and does not get quieter when that mover exists.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">Aim that stays on the picture the official client draws, including a cheat that waits out the interpolation delay. Standing still, where the snapshot and the picture are the same place.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A DMA read of the frame the game actually drew, and a capture card looking at pixels.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A server that scores aim against a position that client was not shown. That manufactures the case.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A humanizer with its own noise, when that noise also matches human lag and human variance. A callout slow enough to have been a voice. A speed pulse inside the glitch filter. A kick that barely changes from shot to shot. Stamps that all land on one tick. A gun the server itself fired.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A listen server, or a game that lets the client decide the hit, can forge every field. The contract is a dedicated server. A bad visibility query manufactures the case. Fix the query.</p>
+      <p class="rounded-xl col-span-3 m-0 border border-line p-5 text-sm leading-relaxed text-ink max-xl:col-span-2 max-md:col-span-1">A person still opens the file. This does not end cheating.</p>
     </div>
   </section>
 </main>
 
-<footer class="border-t border-line">
+<footer class="relative border-t border-line bg-bg/60">
   <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-end justify-between gap-6 px-10 py-8 max-md:px-4">
+    <p class="m-0 basis-full font-mono text-sm"><a class="text-white no-underline" href="https://zerobandwidth.com">Zero<span class="text-signal">Bandwidth</span></a> <span class="text-muted">· the original signal · a ZeroBandwidth system</span></p>
     <p class="m-0 max-w-3xl text-sm text-muted">ZeroBandwidth. The planted desk is generated from the same code as the score. The picture is not the score. The score reads the server’s numbers. A person still reviews. This does not end cheating.</p>
     <p class="m-0 flex flex-wrap gap-x-5 gap-y-2 text-sm">
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>

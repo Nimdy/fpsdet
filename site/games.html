@@ -8,34 +8,36 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="fpsdet.css">
 </head>
-<body class="m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
-<a class="sr-only bg-watch px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
-<header class="border-b border-line">
-  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-baseline gap-x-6 gap-y-3 px-10 py-5 max-md:px-4">
-    <a class="font-serif text-[1.7rem] leading-none tracking-tight text-ink no-underline" href="index.html">fpsdet</a>
-    <nav class="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-[0.95rem]" aria-label="Site">
-      <a class="text-muted no-underline hover:text-ink" href="index.html">What this is</a>
-      <a class="text-muted no-underline hover:text-ink" href="scoring.html">Scoring</a>
-      <a class="text-muted no-underline hover:text-ink" href="wire.html">Wire a game</a>
-      <a class="border-b border-watch text-ink no-underline" href="games.html" aria-current="page">Games</a>
-      <a class="text-muted no-underline hover:text-ink" href="source.html">Source</a>
-      <a class="text-muted no-underline hover:text-ink" href="../demo/board.html">Desk</a>
+<body class="relative m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<div class="zb-backdrop" aria-hidden="true"></div>
+<a class="sr-only rounded-md bg-signal px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
+<header class="relative z-50 border-b border-line bg-bg/80 backdrop-blur-xl md:sticky md:top-0">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-center gap-x-5 gap-y-2 px-10 py-3 max-md:px-4">
+    <a class="zb-logo flex items-center gap-2.5 font-mono text-[1.05rem] font-semibold tracking-tight text-white no-underline" href="index.html"><span class="pulse-dot" aria-hidden="true"></span><span>fps<span class="text-signal">det</span></span></a>
+    <a class="font-mono text-[11px] text-muted no-underline hover:text-ink" href="https://zerobandwidth.com">by Zero<span class="text-signal">Bandwidth</span></a>
+    <nav class="flex flex-wrap items-center gap-x-0.5 gap-y-1 text-[0.9rem]" aria-label="Site">
+      <a class="nav-link" href="index.html"><span>01</span>What this is</a>
+      <a class="nav-link" href="scoring.html"><span>02</span>Scoring</a>
+      <a class="nav-link" href="wire.html"><span>03</span>Wire a game</a>
+      <a class="nav-link" href="games.html" aria-current="page"><span>04</span>Games</a>
+      <a class="nav-link" href="source.html"><span>05</span>Source</a>
+      <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
     </nav>
-    <p class="m-0 ml-auto font-mono text-[0.78rem] text-watch max-md:ml-0 max-md:basis-full">Automated action: none</p>
+    <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
 </header>
 
 <main id="main">
 <section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
   <div class="col-span-6 max-lg:col-span-1">
-    <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">Games</p>
-    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight text-balance max-md:text-[2.55rem]">Plug in the game you already simulate.</h1>
+    <p class="prompt m-0"><span class="text-signal-soft">zb@zerobandwidth</span><span class="text-faint">:</span><span class="text-prototype">~/fpsdet</span><span class="text-faint">$</span> <span class="text-ink">Games</span><span class="caret" aria-hidden="true"></span></p>
+    <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">Plug in the game you <span class="text-gradient-brand">already simulate.</span></h1>
   </div>
   <p class="col-span-6 m-0 text-lg max-lg:col-span-1">No profile in this repo is a studio export. Do not ban from a copied community table. The server that simulates the player already applied a speed cap and a recoil for the current stance, perks, and attachments. Send those numbers. The curves in <code class="font-mono text-[0.92em]">profiles/</code> are the fallback when a sample has no expected value, and they are how the idea is unit-tested. This does not end cheating.</p>
 </section>
 
 <div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
-  <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Fields these games can fill</h2>
+  <h2 class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Fields these games can fill</h2>
   <div class="mt-6 overflow-x-auto">
     <table class="w-full border-collapse text-left">
       <thead>
@@ -63,30 +65,30 @@
   <p class="m-0 mt-4 text-sm text-muted">Extra numbers are a row in <code class="font-mono text-[0.92em]">extra_metrics</code> plus the field on the event. ADS time, stamina, sway, ergonomics, and time-to-kill fit that slot. The line itself is on <a class="text-ink underline decoration-line underline-offset-4" href="wire.html">Wire a game</a>.</p>
 
   <div class="mt-12 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
-    <article class="border border-line bg-panel p-6">
-      <h2 class="m-0 font-serif text-[2.2rem] font-normal leading-none tracking-tight">WARDOGS</h2>
+    <article class="rounded-xl border border-line panel p-6">
+      <h2 class="m-0 font-mono text-[1.6rem] font-semibold leading-[1.12] tracking-tight text-white">WARDOGS</h2>
       <p class="m-0 mt-4 text-sm leading-relaxed text-muted">Weight is a real rule. Public gear guides describe five equipment classes and about these move penalties: lightest 0–10 kg with no penalty, light 10–17 kg about −5%, medium 17–27 kg about −13%, heavy 27–40 kg and super-heavy about −20%. Those penalties are in <code class="font-mono text-[0.92em]">profiles/wardogs.json</code>. Absolute meters per second are not. A wrong constant would flag legal players. The server's <code class="font-mono text-[0.92em]">expected_max_ground_speed_mps</code> is the number that scores.</p>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The adrenaline pen reduces equipment weight class. If you score against the raw kit weight, a legal pen looks like a speedhack. Send the cap after the pen, the stance, and the class math.</p>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Tag parachute, explosion, ragdoll, vehicle, and ladder for the whole throw, not one sample. On the planted desk, <code class="font-mono text-[0.92em]">weight-cheat</code> is about 10 kg of kit sprinting at 7.1 m/s, on the ground, cause <code class="font-mono text-[0.92em]">none</code>. <code class="font-mono text-[0.92em]">blasted</code> is the same speed with the cause set, and it stays clean. <code class="font-mono text-[0.92em]">adrenaline</code> is the pen: the curve would flag the weight, and the server cap does not.</p>
     </article>
-    <article class="border border-line bg-panel p-6">
-      <h2 class="m-0 font-serif text-[2.2rem] font-normal leading-none tracking-tight">Escape from Tarkov</h2>
+    <article class="rounded-xl border border-line panel p-6">
+      <h2 class="m-0 font-mono text-[1.6rem] font-semibold leading-[1.12] tracking-tight text-white">Escape from Tarkov</h2>
       <p class="m-0 mt-4 text-sm leading-relaxed text-muted">The same shape, harsher. Weight and inertia change acceleration and top speed. The weapon, the attachments, the ammo, and ergonomics change recoil and ADS. Send the server's post-effect speed cap and the server's recoil floor for the assembled gun. A profile of guessed ergo numbers will false-flag.</p>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Grenades, ragdolls, stimulus or pain effects that launch the body, and admin or disconnect corrections are innocence causes. Much of the felt recoil is presented on the client. Score the view delta the server replicated during the spray. A client-only camera shake is not evidence, because a cheat will not play it.</p>
     </article>
-    <article class="border border-line bg-panel p-6">
-      <h2 class="m-0 font-serif text-[2.2rem] font-normal leading-none tracking-tight">Call of Duty</h2>
+    <article class="rounded-xl border border-line panel p-6">
+      <h2 class="m-0 font-mono text-[1.6rem] font-semibold leading-[1.12] tracking-tight text-white">Call of Duty</h2>
       <p class="m-0 mt-4 text-sm leading-relaxed text-muted">Gunsmith means the build key is the weapon plus the attachment list, not the weapon class. Recoil floors differ by barrel, muzzle, underbarrel, and optic. Send the floor from the server's gunsmith result.</p>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Tac-sprint, slide, dive, swim, and perk or specialist speed are legal when <code class="font-mono text-[0.92em]">expected_max_ground_speed_mps</code> is the cap of the stance they are in. A profile that only knows walk speed will call tac-sprint a cheat. Vehicles, redeploys, and explosions are innocence causes. A killstreak that moves the player or fires for them should be its own <code class="font-mono text-[0.92em]">weapon_id</code> or an <code class="font-mono text-[0.92em]">ability</code> cause, so a VTOL does not enter an infantry accuracy cohort. Rank band is the matchmaking bracket of that playlist.</p>
     </article>
-    <article class="border border-line bg-panel p-6">
-      <h2 class="m-0 font-serif text-[2.2rem] font-normal leading-none tracking-tight">Battlefield</h2>
+    <article class="rounded-xl border border-line panel p-6">
+      <h2 class="m-0 font-mono text-[1.6rem] font-semibold leading-[1.12] tracking-tight text-white">Battlefield</h2>
       <p class="m-0 mt-4 text-sm leading-relaxed text-muted">Vehicles are the dominant false positive. A player inside a vehicle, on a wing, under a parachute, or flung by destruction is not an infantry sprint. Tag <code class="font-mono text-[0.92em]">vehicle</code>, <code class="font-mono text-[0.92em]">parachute</code>, <code class="font-mono text-[0.92em]">explosion</code>, or <code class="font-mono text-[0.92em]">knockback</code> for the whole interval, including the exit if the exit launches them.</p>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Do not put vehicle-seat accuracy into the infantry rifle cohort. Send a distinct <code class="font-mono text-[0.92em]">weapon_class</code> for vehicle weapons so the human ceiling is other vehicle gunners. Gadgets are <code class="font-mono text-[0.92em]">ability</code> or <code class="font-mono text-[0.92em]">launch</code>. Conquest-scale maps make one distance baseline meaningless. <code class="font-mono text-[0.92em]">map_id</code> is on the event for your own splits. The reference cohort keys distance by weapon and rank.</p>
     </article>
   </div>
 
-  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">What training means</h2>
+  <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">What training means</h2>
   <div class="mt-6 grid grid-cols-2 gap-8 max-lg:grid-cols-1">
     <p class="m-0">Training is the cohort file <code class="font-mono text-[0.92em]">fpsdet baseline</code> writes. It is the distribution of humans on each band, weapon, and build, from the lake you dumped. A new gun, a new mod combination, or a new weight class with no curve stays untrained until <code class="font-mono text-[0.92em]">min_cohort_players</code> humans have enough samples. Flagging a build you have never measured is how legal players get removed.</p>
     <p class="m-0">The optional brief does not do this training. It explains a case after the numbers exist. A sustained break of the server's own speed cap does not need a model. The bars are on <a class="text-ink underline decoration-line underline-offset-4" href="scoring.html">Scoring</a>. The files are on <a class="text-ink underline decoration-line underline-offset-4" href="source.html">Source</a>.</p>
@@ -94,8 +96,9 @@
 </div>
 </main>
 
-<footer class="border-t border-line">
+<footer class="relative border-t border-line bg-bg/60">
   <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-end justify-between gap-6 px-10 py-8 max-md:px-4">
+    <p class="m-0 basis-full font-mono text-sm"><a class="text-white no-underline" href="https://zerobandwidth.com">Zero<span class="text-signal">Bandwidth</span></a> <span class="text-muted">· the original signal · a ZeroBandwidth system</span></p>
     <p class="m-0 text-sm text-muted">A person still reviews. This does not end cheating.</p>
     <p class="m-0 flex flex-wrap gap-x-5 gap-y-2 text-sm">
       <a class="text-ink no-underline hover:underline" href="index.html">What this is</a>

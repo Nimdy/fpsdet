@@ -8,34 +8,36 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="fpsdet.css">
 </head>
-<body class="m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
-<a class="sr-only bg-watch px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
-<header class="border-b border-line">
-  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-baseline gap-x-6 gap-y-3 px-10 py-5 max-md:px-4">
-    <a class="font-serif text-[1.7rem] leading-none tracking-tight text-ink no-underline" href="index.html">fpsdet</a>
-    <nav class="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-[0.95rem]" aria-label="Site">
-      <a class="text-muted no-underline hover:text-ink" href="index.html">What this is</a>
-      <a class="border-b border-watch text-ink no-underline" href="scoring.html" aria-current="page">Scoring</a>
-      <a class="text-muted no-underline hover:text-ink" href="wire.html">Wire a game</a>
-      <a class="text-muted no-underline hover:text-ink" href="games.html">Games</a>
-      <a class="text-muted no-underline hover:text-ink" href="source.html">Source</a>
-      <a class="text-muted no-underline hover:text-ink" href="../demo/board.html">Desk</a>
+<body class="relative m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<div class="zb-backdrop" aria-hidden="true"></div>
+<a class="sr-only rounded-md bg-signal px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
+<header class="relative z-50 border-b border-line bg-bg/80 backdrop-blur-xl md:sticky md:top-0">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-center gap-x-5 gap-y-2 px-10 py-3 max-md:px-4">
+    <a class="zb-logo flex items-center gap-2.5 font-mono text-[1.05rem] font-semibold tracking-tight text-white no-underline" href="index.html"><span class="pulse-dot" aria-hidden="true"></span><span>fps<span class="text-signal">det</span></span></a>
+    <a class="font-mono text-[11px] text-muted no-underline hover:text-ink" href="https://zerobandwidth.com">by Zero<span class="text-signal">Bandwidth</span></a>
+    <nav class="flex flex-wrap items-center gap-x-0.5 gap-y-1 text-[0.9rem]" aria-label="Site">
+      <a class="nav-link" href="index.html"><span>01</span>What this is</a>
+      <a class="nav-link" href="scoring.html" aria-current="page"><span>02</span>Scoring</a>
+      <a class="nav-link" href="wire.html"><span>03</span>Wire a game</a>
+      <a class="nav-link" href="games.html"><span>04</span>Games</a>
+      <a class="nav-link" href="source.html"><span>05</span>Source</a>
+      <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
     </nav>
-    <p class="m-0 ml-auto font-mono text-[0.78rem] text-watch max-md:ml-0 max-md:basis-full">Automated action: none</p>
+    <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
 </header>
 
 <main id="main">
 <section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
   <div class="col-span-5 max-lg:col-span-1">
-    <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">Scoring</p>
-    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight text-balance max-md:text-[2.55rem]">How a line becomes a case.</h1>
+    <p class="prompt m-0"><span class="text-signal-soft">zb@zerobandwidth</span><span class="text-faint">:</span><span class="text-prototype">~/fpsdet</span><span class="text-faint">$</span> <span class="text-ink">Scoring</span><span class="caret" aria-hidden="true"></span></p>
+    <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">How a line becomes <span class="text-gradient-brand">a case.</span></h1>
   </div>
   <p class="col-span-7 m-0 max-w-3xl text-lg max-lg:col-span-1">Four outcomes: <strong class="font-medium">review</strong>, <strong class="font-medium">watch</strong>, <strong class="font-medium">clean</strong>, or <strong class="font-medium">held</strong> (<code class="font-mono text-[0.92em]">insufficient_data</code>). <code class="font-mono text-[0.92em]">automated_action</code> is always <code class="font-mono text-[0.92em]">none</code>. <code class="font-mono text-[0.92em]">recommended_action</code> is <code class="font-mono text-[0.92em]">human_review</code>, <code class="font-mono text-[0.92em]">monitor</code>, or <code class="font-mono text-[0.92em]">none</code>. A person still decides. This does not end cheating.</p>
 </section>
 
 <div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
-  <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">The decision</h2>
+  <h2 class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">The decision</h2>
   <p class="m-0 mt-4 max-w-3xl">Gear rules can open a review on their own. Combat rates need a thick cohort of humans first. A thin cohort does not flag. The build is reported as untrained.</p>
   <div class="mt-6 overflow-x-auto">
     <table class="w-full border-collapse text-left">
@@ -58,10 +60,10 @@
   <p class="m-0 mt-4 max-w-5xl text-sm text-muted">A sustained gear break is speed, fire interval, blatant or learned recoil, a same-tick recoil mirror, a metronome on a legal cycle, sustained tracking of a hidden mover, sustained aim on a private replay, aim that matches the wire snapshot ahead of the picture, or aim noise that drops only while the server says this client could not have known.</p>
 
   <section id="drawn" class="mt-16" aria-labelledby="drawn-title">
-    <h2 id="drawn-title" class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">The four checks, drawn</h2>
+    <h2 id="drawn-title" class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">The four checks, drawn</h2>
     <p class="m-0 mt-4 max-w-3xl">Each picture is a planted pair from the desk. One opens a case. The other shares the headline number and stays clean. The exact bars are in the cards under it.</p>
     <div class="mt-8 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
-      <figure id="speed-drawn" class="m-0 flex flex-col border border-line bg-panel p-5">
+      <figure id="speed-drawn" class="rounded-xl m-0 flex flex-col border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">1 · Sustained, not a spike.</h3>
         <p class="m-0 mt-1 text-sm text-muted">Each square is one server movement sample on a 10 kg kit. The cap is 5.6 m/s.</p>
         <div class="mt-5 space-y-3">
@@ -85,7 +87,7 @@
         <p class="m-0 mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted"><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-review" aria-hidden="true"></span>over the cap, cause none</span><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-clean" aria-hidden="true"></span>inside the cap</span><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-info" aria-hidden="true"></span>excluded: the server named a cause</span></p>
         <figcaption class="m-0 mt-auto pt-4 text-sm">Same speed, three answers. A run, not a frame. A cause the server already knew is not a case.</figcaption>
       </figure>
-      <figure id="clock-drawn" class="m-0 flex flex-col border border-line bg-panel p-5">
+      <figure id="clock-drawn" class="rounded-xl m-0 flex flex-col border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">2 · Same tick, or one shot late.</h3>
         <p class="m-0 mt-1 text-sm text-muted">Each column is one shot. Up is the kick the server applied. Down is the player’s pull.</p>
         <div class="mt-5">
@@ -109,7 +111,7 @@
         <p class="m-0 mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted"><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-watch" aria-hidden="true"></span>kick the server applied</span><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-review" aria-hidden="true"></span>player command</span></p>
         <figcaption class="m-0 mt-auto pt-4 text-sm">A script reads the kick and cancels it on that tick. A person sees the kick, then pulls. The pull lands one shot late.</figcaption>
       </figure>
-      <figure id="hidden-drawn" class="m-0 flex flex-col border border-line bg-panel p-5">
+      <figure id="hidden-drawn" class="rounded-xl m-0 flex flex-col border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">3 · A body this client was not sent.</h3>
         <p class="m-0 mt-1 text-sm text-muted">Top-down. The white dot is this player. The dashed path is an enemy the server has not made visible.</p>
         <div class="mt-5 grid grid-cols-2 gap-4">
@@ -140,7 +142,7 @@
         </div>
         <figcaption class="m-0 mt-auto pt-4 text-sm">Pre-aiming a corner is skill. Tracking a body through the wall needs a fact the official client never drew. The score reads <code class="font-mono text-[0.92em]">hidden_track_ms</code>, not this map.</figcaption>
       </figure>
-      <figure id="picture-drawn" class="m-0 flex flex-col border border-line bg-panel p-5">
+      <figure id="picture-drawn" class="rounded-xl m-0 flex flex-col border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">4 · The picture is late.</h3>
         <p class="m-0 mt-1 text-sm text-muted">One enemy running right. The server already sent where they are. The client still draws where they were.</p>
         <svg class="mt-5 block h-auto w-full max-w-[460px] font-mono" viewBox="56 14 380 180" role="img" aria-label="The wire position is one interpolation delay ahead of the picture position. A person aims at the picture. A packet aimbot aims at the wire.">
@@ -171,69 +173,69 @@
   </section>
 
 
-  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Gear, from the first match</h2>
+  <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Gear, from the first match</h2>
   <div class="mt-6 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
-    <article class="border border-line bg-panel p-5">
+    <article class="rounded-xl border border-line panel p-5">
       <h3 class="m-0 text-base font-medium">Speed.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Only samples on the ground with <code class="font-mono text-[0.92em]">displacement_cause</code> of <code class="font-mono text-[0.92em]">none</code> are scored. The cap is <code class="font-mono text-[0.92em]">expected_max_ground_speed_mps</code> on that sample, else the weight curve in the profile. Over cap means faster than the cap times 1.08. The finding needs a run of at least 25 of those samples, with gaps no larger than 400 ms. A blast, a vehicle, a parachute, an ability, an unknown cause, a cause the profile has not listed, and any airborne sample are excluded. A shorter run is written down as a possible glitch. It does not open a case. The planted desk shows a 10 kg kit at 7.1 m/s, cap 5.6, beside the same sprint tagged as a blast.</p>
     </article>
-    <article class="border border-line bg-panel p-5">
+    <article class="rounded-xl border border-line panel p-5">
       <h3 class="m-0 text-base font-medium">Fire interval.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Gaps under that weapon's own minimum, past one tick of slack, and enough of them. This runs even when the aim sample is still too small to score. Stamps that all land on the server tick, and a gun the server itself fired, stay quiet.</p>
     </article>
-    <article class="border border-line bg-panel p-5">
+    <article class="rounded-xl border border-line panel p-5">
       <h3 class="m-0 text-base font-medium">Recoil.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Counted once the spray index is at least 3, and the cause is not an innocence tag. The floor is <code class="font-mono text-[0.92em]">expected_min_recoil_pitch_deg</code> on the shot, else the profile row for that build. A run of 10 shots under a quarter of the floor is a review. A compensated gun has a lower floor, so the same pitch can be legal. No floor and no thick cohort: untrained, not flagged. The steadiest legal player on a build is not a review.</p>
     </article>
-    <article class="border border-line bg-panel p-5">
+    <article class="rounded-xl border border-line panel p-5">
       <h3 class="m-0 text-base font-medium">Same-tick mirror.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The camera can still kick. Send the kick the server applied and the signed player command on that same tick. Review when at least 16 shots correlate at −0.90 or below, and that correlation is at least 0.25 more negative than the same series shifted one shot later. A person pulls on a later shot. A kick that barely changes from shot to shot cannot separate the two.</p>
     </article>
-    <article class="border border-line bg-panel p-5 max-lg:col-span-1">
+    <article class="rounded-xl border border-line panel p-5 max-lg:col-span-1">
       <h3 class="m-0 text-base font-medium">Metronome.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Fire interval catches gaps under the legal line. A macro that fires on the legal line, with no motor noise, does not. Review at 40 or more gaps, a mean on the legal side of the line, and a standard deviation of 1.0 ms or under.</p>
     </article>
   </div>
 
-  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">A fact this client was not given</h2>
+  <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">A fact this client was not given</h2>
   <div class="mt-6 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
-    <article class="border border-line p-5">
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Hidden tracking.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">hidden_track_ms</code> is time, on that shot, that the aim stayed on an enemy the server had not made visible. Omit it, or send 0, and nothing happens. Review when at least 8 shots are above 0 and the sum is at least 1200 ms. One long sample is not enough. A visibility query that marks a visible enemy as hidden manufactures the case. That is an emitter bug.</p>
     </article>
-    <article class="border border-line p-5">
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Private replay.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">private_track_ms</code> uses the same bar. The body is someone else's real movement, on another heading, where this client's sight and audio queries both fail. There is no invisible flag. A short crossing stays clean. A body this client could see, labeled private, manufactures the case. The desk draws that route. The score reads only <code class="font-mono text-[0.92em]">private_track_ms</code>.</p>
     </article>
-    <article class="border border-line p-5">
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">The picture is late.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">wire_error_deg</code> is the error to the snapshot the server just sent. <code class="font-mono text-[0.92em]">picture_error_deg</code> is the error to the position the official client draws, one <code class="font-mono text-[0.92em]">interp_delay_ms</code> earlier. Omit any of the three and that shot does not count. A shot counts as wire-led when the delay has started, the picture is at least 0.20° farther than the wire, and the wire error is at most 0.35 of the picture error. That gap is a separation floor, not an accuracy ceiling. The same bar applies: 8 wire-led shots and 1200 ms of summed delay. Standing still does nothing. One shot does nothing. The same hits on the picture stay clean. A server that scores the wrong timeline manufactures the case. There is no new profile knob. This runs even when the aim sample is still too small to score.</p>
     </article>
-    <article class="border border-line p-5">
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Unknowable smoothness.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">information_state</code> is <code class="font-mono text-[0.92em]">visible</code>, <code class="font-mono text-[0.92em]">audio</code>, or <code class="font-mono text-[0.92em]">unknowable</code>. Audio is knowable. Review when both sides have at least 12 samples, the knowable median is at least 0.05°, and the unknowable median is at or under 0.35 of that. A player who is smooth the whole time stays clean. A wrong <code class="font-mono text-[0.92em]">unknowable</code> label manufactures the case.</p>
     </article>
   </div>
 
-  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">After the decision</h2>
+  <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">After the decision</h2>
   <div class="mt-6 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
-    <article class="border border-line p-5">
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">The same leftover.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Subtract the server kick and the previous kick. What remains is compared across accounts, at least 32 shots, correlation at or above 0.85. A match is a watch, not a review. If one account is already a review, the other moves up the scan. If neither is a review, both are watches.</p>
     </article>
-    <article class="border border-line p-5">
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">A teammate, before a voice.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Only after someone in the party is already a review for a hidden mover. Four or more swings on that same still-hidden enemy, under 350 ms, are a watch. A lag long enough to have been a voice stays clean.</p>
     </article>
-    <article class="border border-line p-5">
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Reports.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">They change queue order. They do not change the decision, and they are not in the seal. A brigade can make you look today. It cannot convict anyone.</p>
     </article>
-    <article class="border border-line p-5">
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">The seal.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">SHA-256 of the player, the game, the decision, and the reasons. Edit a reason and the hash changes. It identifies the packet a reviewer saw. It is not a ban.</p>
     </article>
-    <article class="border border-line p-5 max-xl:col-span-2 max-md:col-span-1">
+    <article class="rounded-xl border border-line p-5 max-xl:col-span-2 max-md:col-span-1">
       <h3 class="m-0 text-base font-medium">Human ceilings.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">One number per player, leave-one-out, in that rank and on that weapon. The cohort is thick at 30 players after the subject is removed. The bound is a one-sided 95% Wilson lower bound. Past the best measured human is review-grade. Past the rank only is a watch. A hot ten-shot game has a wide bound and does not clear a maximum.</p>
     </article>
@@ -242,8 +244,9 @@
 </div>
 </main>
 
-<footer class="border-t border-line">
+<footer class="relative border-t border-line bg-bg/60">
   <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-end justify-between gap-6 px-10 py-8 max-md:px-4">
+    <p class="m-0 basis-full font-mono text-sm"><a class="text-white no-underline" href="https://zerobandwidth.com">Zero<span class="text-signal">Bandwidth</span></a> <span class="text-muted">· the original signal · a ZeroBandwidth system</span></p>
     <p class="m-0 text-sm text-muted">A person still reviews. This does not end cheating.</p>
     <p class="m-0 flex flex-wrap gap-x-5 gap-y-2 text-sm">
       <a class="text-ink no-underline hover:underline" href="index.html">What this is</a>

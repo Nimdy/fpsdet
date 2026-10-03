@@ -686,22 +686,29 @@ _SHELL = r"""<!DOCTYPE html>
 <link rel="stylesheet" href="../site/fpsdet.css">
 <style>
 :root {
-  --bg: #0e0f0c;
-  --panel: #161814;
-  --plot: #10110e;
-  --line: #2a2c24;
-  --ink: #f3efe6;
-  --muted: #a39c8e;
-  --review: #e15a3a;
-  --watch: #e0b15c;
-  --clean: #9bb58f;
-  --held: #8d887c;
-  --excluded: #7ea0c4;
-  --cap: #e0b15c;
-  --light: #d5dece;
+  --bg: #040718;
+  --panel: #0a102c;
+  --panel-hover: #0e1538;
+  --elevated: #070b24;
+  --plot: #070b24;
+  --line: #171e42;
+  --line-bright: #242e5e;
+  --ink: #e6ebf9;
+  --muted: #8a93b8;
+  --signal: #38c8ff;
+  --violet: #a855f7;
+  --review: #ff5470;
+  --watch: #d8b26c;
+  --clean: #2dd4bf;
+  --held: #7c8cff;
+  --excluded: #7c8cff;
+  --cap: #d8b26c;
+  --light: #c9d2f0;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--ink); }
+html { background: var(--bg); }
+html, body { margin: 0; color: var(--ink); }
+body { position: relative; background: transparent; }
 body {
   font: 16px/1.45 var(--sans, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif);
   min-height: 100vh;
@@ -716,35 +723,42 @@ body {
   border-bottom: 1px solid var(--line);
   font-size: 0.92rem;
 }
+.mast { align-items: center; }
 .mast .mark {
-  font-family: var(--serif, Georgia, "Liberation Serif", serif);
-  font-size: 1.55rem;
-  line-height: 1;
-  letter-spacing: -0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   text-decoration: none;
-  color: var(--ink);
-  margin-right: 0.35rem;
+  color: #fff;
+  text-shadow: -0.6px 0 rgb(255 84 112 / 0.5), 0.6px 0 rgb(56 200 255 / 0.5);
 }
-.mast a { color: var(--muted); text-decoration: none; }
-.mast a:hover { color: var(--ink); }
-.mast a[aria-current="page"] { color: var(--ink); box-shadow: inset 0 -1px 0 var(--cap); }
+.mast .sig { color: var(--signal); }
+.mast .by { margin-right: 0.6rem; font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace); font-size: 11px; color: var(--muted); text-decoration: none; }
+.mast a { text-decoration: none; }
 header {
-  padding: 1rem 1.4rem 0.85rem;
+  padding: 0.8rem 1.4rem 0.85rem;
   border-bottom: 1px solid var(--line);
 }
 .topline { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; align-items: baseline; }
-.brand { margin: 0; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; }
+.brand { margin: 0; color: rgb(56 200 255 / 0.8); font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace); letter-spacing: 0.22em; text-transform: uppercase; font-size: 0.6875rem; }
 .counts { margin: 0; color: var(--muted); font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace); font-size: 0.82rem; }
 .counts b { color: var(--ink); font-weight: 500; }
-.rule { margin: 0 0 0 auto; color: var(--cap); font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace); font-size: 0.82rem; }
+.rule { margin: 0 0 0 auto; }
 h1 {
-  margin: 0.55rem 0 0;
-  font-family: var(--serif, Georgia, "Liberation Serif", serif);
+  margin: 0.7rem 0 0.2rem;
+  font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace);
   font-size: clamp(2rem, 3.4vw, 3.1rem);
-  line-height: 0.98;
-  font-weight: 400;
-  letter-spacing: -0.03em;
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: #fff;
   max-width: 16ch;
+  text-shadow: -0.035em 0 rgb(255 84 112 / 0.6), 0.035em 0 rgb(56 200 255 / 0.6);
+  animation: ca-glitch 7s steps(1, end) infinite;
 }
 .face {
   display: grid;
@@ -770,9 +784,9 @@ h1 {
   color: inherit;
 }
 .tour a.step:hover { color: var(--ink); }
-.tour a.step:focus-visible { outline: 2px solid var(--cap); outline-offset: -2px; }
+.tour a.step:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
 .tour a.step b { font-weight: 560; }
-.tour .more { color: var(--watch); }
+.tour .more { color: var(--signal); }
 #still { scroll-margin-top: 0.8rem; }
 button.chip {
   /* A button centers its content. A column keeps every chip's label on one line. */
@@ -780,18 +794,21 @@ button.chip {
   flex-direction: column;
   justify-content: flex-start;
   text-align: left;
-  background: var(--panel);
+  background: linear-gradient(180deg, var(--panel), var(--elevated));
   color: inherit;
   border: 1px solid var(--line);
   border-top: 3px solid var(--review);
+  border-radius: 0.75rem;
   padding: 0.55rem 0.7rem 0.65rem;
+  box-shadow: -1px 0 0 rgb(255 84 112 / 0.22), 1px 0 0 rgb(56 200 255 / 0.22);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
   cursor: pointer;
   font: inherit;
   min-width: 0;
   overflow-wrap: break-word;
 }
-button.chip:hover { background: #1b1d16; }
-button.chip:focus-visible { outline: 2px solid var(--cap); outline-offset: -2px; }
+button.chip:hover { background: var(--panel-hover); border-color: rgb(56 200 255 / 0.4); border-top-color: var(--review); box-shadow: -2px 0 0 rgb(255 84 112 / 0.45), 2px 0 0 rgb(56 200 255 / 0.45), 0 0 32px -8px rgb(56 200 255 / 0.45); }
+button.chip:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
 button.chip .kicker { margin: 0; }
 button.chip strong {
   display: block;
@@ -838,9 +855,9 @@ button.item {
 }
 button.item strong { display: block; font-weight: 560; font-size: 0.92rem; }
 button.item span { color: var(--muted); font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace); font-size: 0.72rem; }
-button.item:hover { background: #1b1d16; }
-button.item:focus-visible { outline: 2px solid var(--cap); outline-offset: -2px; }
-button.item[aria-current="true"] { background: #22241c; border-left-color: var(--cap); }
+button.item:hover { background: #0e1538; }
+button.item:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
+button.item[aria-current="true"] { background: var(--panel-hover); border-left-color: var(--signal); }
 .tag.review { color: var(--review); }
 .tag.watch { color: var(--watch); }
 .tag.clean { color: var(--clean); }
@@ -850,7 +867,7 @@ main { padding: 1.15rem 1.35rem 3.5rem; min-width: 0; }
 .kicker { margin: 0; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .tape h2 {
   margin: 0.2rem 0 0.35rem;
-  font-family: var(--serif, Georgia, "Liberation Serif", serif);
+  font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace);
   font-size: clamp(1.6rem, 2.4vw, 2.15rem);
   line-height: 1.05;
   font-weight: 400;
@@ -863,9 +880,11 @@ main { padding: 1.15rem 1.35rem 3.5rem; min-width: 0; }
 .grid.n2 { grid-template-columns: 1fr 1fr; }
 .grid.n3 { grid-template-columns: 1fr 1fr 1fr; }
 .card {
-  background: var(--panel);
+  background: linear-gradient(180deg, var(--panel), var(--elevated));
   border: 1px solid var(--line);
   border-top: 3px solid var(--held);
+  border-radius: 0.75rem;
+  overflow: hidden;
   min-width: 0;
   scroll-margin-top: 0.8rem;
 }
@@ -875,14 +894,18 @@ main { padding: 1.15rem 1.35rem 3.5rem; min-width: 0; }
 .card.insufficient_data { border-top-color: var(--held); }
 .head { display: flex; justify-content: space-between; gap: 0.8rem; align-items: flex-start; padding: 0.75rem 0.85rem 0.55rem; }
 .who { margin: 0; color: var(--muted); font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace); font-size: 0.75rem; }
-.card h3 { margin: 0.15rem 0 0; font-family: var(--serif, Georgia, "Liberation Serif", serif); font-size: 1.35rem; line-height: 1.15; font-weight: 400; letter-spacing: -0.02em; }
+.card h3 { margin: 0.2rem 0 0; font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace); font-size: 1.05rem; line-height: 1.3; font-weight: 600; letter-spacing: -0.01em; color: #fff; }
 .stamp {
   flex: none;
   font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
-  padding: 0.22rem 0.4rem;
+  padding: 0.22rem 0.5rem;
   border: 1px solid currentColor;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  box-shadow: 0 0 18px -6px currentColor;
+  text-shadow: -0.6px 0 rgb(255 84 112 / 0.55), 0.6px 0 rgb(56 200 255 / 0.55);
 }
 .stamp.review { color: var(--review); }
 .stamp.watch { color: var(--watch); }
@@ -890,6 +913,8 @@ main { padding: 1.15rem 1.35rem 3.5rem; min-width: 0; }
 .stamp.insufficient_data { color: var(--held); }
 .chart { background: var(--plot); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.35rem 0.35rem 0; }
 svg { width: 100%; height: auto; display: block; }
+#stage svg { filter: drop-shadow(-0.7px 0 rgb(255 84 112 / 0.5)) drop-shadow(0.7px 0 rgb(56 200 255 / 0.5)); }
+@media (prefers-contrast: more), (forced-colors: active) { #stage svg, h1 { filter: none; text-shadow: none; animation: none; } }
 /* Charts are drawn 720 wide. --chart-scale undoes the shrink on a narrow card. */
 #stage svg text { font-size: calc(11.5px * var(--chart-scale, 1)); }
 .plot { position: relative; }
@@ -956,20 +981,22 @@ svg { width: 100%; height: auto; display: block; }
 </style>
 </head>
 <body>
+<div class="zb-backdrop" aria-hidden="true"></div>
 <header>
   <nav class="mast" aria-label="Site">
-    <a class="mark" href="../site/index.html">fpsdet</a>
-    <a href="../site/index.html">What this is</a>
-    <a href="../site/scoring.html">Scoring</a>
-    <a href="../site/wire.html">Wire a game</a>
-    <a href="../site/games.html">Games</a>
-    <a href="../site/source.html">Source</a>
-    <a href="#tape-speed" aria-current="page">Desk</a>
+    <a class="mark" href="../site/index.html"><span class="pulse-dot" aria-hidden="true"></span><span>fps<span class="sig">det</span></span></a>
+    <a class="by" href="https://zerobandwidth.com">by Zero<span class="sig">Bandwidth</span></a>
+    <a class="nav-link" href="../site/index.html"><span>01</span>What this is</a>
+    <a class="nav-link" href="../site/scoring.html"><span>02</span>Scoring</a>
+    <a class="nav-link" href="../site/wire.html"><span>03</span>Wire a game</a>
+    <a class="nav-link" href="../site/games.html"><span>04</span>Games</a>
+    <a class="nav-link" href="../site/source.html"><span>05</span>Source</a>
+    <a class="nav-link" href="#tape-speed" aria-current="page"><span>06</span>Desk</a>
   </nav>
   <div class="topline">
     <p class="brand">fpsdet review desk · <span id="game"></span></p>
     <p class="counts" id="counts"></p>
-    <p class="rule">Automated action: none</p>
+    <p class="rule status-pill"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
   <h1>The answer key.</h1>
   <p class="section-lede">Thirty-two planted players. Expect 11 review, 4 watch, 16 clean, 1 held. The first tape is 10 kg on the ground, running like 3 kg, beside the same sprint tagged as a blast. The blast stays clean. Nothing on this page bans.</p>
@@ -1152,7 +1179,7 @@ function svgEl(name, attrs, text) {
 function chartFrame(h, label) {
   const svg = svgEl("svg", {viewBox: `0 0 720 ${h}`, role: "img"});
   svg.append(svgEl("title", {}, label));
-  svg.append(svgEl("rect", {x: 0, y: 0, width: 720, height: h, fill: "#10110e"}));
+  svg.append(svgEl("rect", {x: 0, y: 0, width: 720, height: h, fill: "none"}));
   return svg;
 }
 // A sentence does not fit a 720-wide frame on a phone. It goes under the plot,
@@ -1173,13 +1200,13 @@ function guideLines(player) {
   const used = player.speed.find(row => row.cap != null);
   const usedCap = used ? used.cap : null;
   const lines = [];
-  if (usedCap != null) lines.push({v: usedCap, color: "#e0b15c", dash: "", label: "cap " + usedCap.toFixed(1)});
+  if (usedCap != null) lines.push({v: usedCap, color: "#d8b26c", dash: "", label: "cap " + usedCap.toFixed(1)});
   if (data.loaded_cap != null && usedCap != null && Math.abs(data.loaded_cap - usedCap) > 0.05) {
-    lines.push({v: data.loaded_cap, color: "#9b9486", dash: "5 4", label: "10 kg " + data.loaded_cap.toFixed(1)});
+    lines.push({v: data.loaded_cap, color: "#8a93b8", dash: "5 4", label: "10 kg " + data.loaded_cap.toFixed(1)});
   }
   const nearLight = data.light_cap != null && player.speed.some(row => row.speed > data.light_cap * 0.9);
   if (nearLight && usedCap != null && Math.abs(data.light_cap - usedCap) > 0.05) {
-    lines.push({v: data.light_cap, color: "#d5dece", dash: "2 3", label: "3 kg " + data.light_cap.toFixed(1)});
+    lines.push({v: data.light_cap, color: "#c9d2f0", dash: "2 3", label: "3 kg " + data.light_cap.toFixed(1)});
   }
   return lines;
 }
@@ -1201,8 +1228,8 @@ function speedChart(player, sharedMax) {
   const y = v => padT + innerH * (1 - v / maxY);
   const step = maxY > 12 ? 5 : 2;
   for (let tick = 0; tick <= maxY; tick += step) {
-    svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(tick), y2: y(tick), stroke: "#2a2c24", "stroke-width": 1}));
-    monoText(svg, padL - 6, y(tick) + 4, String(tick), "#8d887c", "end");
+    svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(tick), y2: y(tick), stroke: "#242e5e", "stroke-width": 1}));
+    monoText(svg, padL - 6, y(tick) + 4, String(tick), "#8a93b8", "end");
   }
   const guides = guideLines(player).sort((a, b) => b.v - a.v);
   let lastLabel = -999;
@@ -1216,10 +1243,10 @@ function speedChart(player, sharedMax) {
     monoText(svg, 700, labelY, guide.label, guide.color, "end");
   });
   rows.forEach((row, i) => {
-    const color = row.cause !== "none" ? "#7ea0c4" : (row.over ? "#e15a3a" : "#9bb58f");
+    const color = row.cause !== "none" ? "#7c8cff" : (row.over ? "#ff5470" : "#2dd4bf");
     if (i) {
       const prev = rows[i - 1];
-      const prevColor = prev.cause !== "none" ? "#7ea0c4" : (prev.over ? "#e15a3a" : "#9bb58f");
+      const prevColor = prev.cause !== "none" ? "#7c8cff" : (prev.over ? "#ff5470" : "#2dd4bf");
       svg.append(svgEl("line", {
         x1: x(i - 1), y1: y(prev.speed), x2: x(i), y2: y(row.speed),
         stroke: prevColor, "stroke-width": 1.6
@@ -1246,16 +1273,16 @@ function recoilChart(player) {
   const x = i => padL + innerW * i / Math.max(1, rows.length - 1);
   const y = v => padT + innerH * (1 - Math.max(0, v) / maxY);
   if (floorV == null) {
-    monoText(svg, padL, 18, "no floor on file for this build", "#a39c8e");
+    monoText(svg, padL, 18, "no floor on file for this build", "#8a93b8");
   } else {
     const blatant = floorV * 0.25;
-    svg.append(svgEl("rect", {x: padL, y: y(blatant), width: innerW, height: Math.max(0, y(0) - y(blatant)), fill: "#e15a3a", opacity: 0.14}));
-    svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(floorV), y2: y(floorV), stroke: "#e0b15c", "stroke-dasharray": "5 4"}));
-    monoText(svg, 700, y(floorV) - 6, "floor " + floorV.toFixed(1) + "°", "#e0b15c", "end");
+    svg.append(svgEl("rect", {x: padL, y: y(blatant), width: innerW, height: Math.max(0, y(0) - y(blatant)), fill: "#ff5470", opacity: 0.14}));
+    svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(floorV), y2: y(floorV), stroke: "#d8b26c", "stroke-dasharray": "5 4"}));
+    monoText(svg, 700, y(floorV) - 6, "floor " + floorV.toFixed(1) + "°", "#d8b26c", "end");
   }
   let d = "";
   rows.forEach((row, i) => { d += (i ? "L" : "M") + x(i).toFixed(1) + " " + y(row.pitch).toFixed(1) + " "; });
-  svg.append(svgEl("path", {d, fill: "none", stroke: "#f3efe6", "stroke-width": 1.7}));
+  svg.append(svgEl("path", {d, fill: "none", stroke: "#e6ebf9", "stroke-width": 1.7}));
   axisNote(svg, "spray index, from the first shot");
   return svg;
 }
@@ -1280,14 +1307,14 @@ function gapChart(player) {
       y: top,
       width: Math.max(1, barW - 1.2),
       height: Math.max(0, y(0) - top),
-      fill: gap < line ? "#e15a3a" : "#9bb58f"
+      fill: gap < line ? "#ff5470" : "#2dd4bf"
     }));
   });
   // The legal line goes over the bars, or a legal cycle hides it.
-  svg.append(svgEl("line", {x1: padL, x2: 708, y1: y(line), y2: y(line), stroke: "#e0b15c", "stroke-width": 2}));
+  svg.append(svgEl("line", {x1: padL, x2: 708, y1: y(line), y2: y(line), stroke: "#d8b26c", "stroke-width": 2}));
   const labelY = y(line) - 6;
-  svg.append(svgEl("rect", {x: 552, y: labelY - 19, width: 154, height: 25, fill: "#10110e", opacity: 0.85}));
-  monoText(svg, 700, labelY, line + " ms legal", "#e0b15c", "end");
+  svg.append(svgEl("rect", {x: 552, y: labelY - 19, width: 154, height: 25, fill: "#070b24", opacity: 0.85}));
+  monoText(svg, 700, labelY, line + " ms legal", "#d8b26c", "end");
   axisNote(svg, "milliseconds between server-accepted shots");
   return svg;
 }
@@ -1311,9 +1338,9 @@ function wireChart(player) {
   const innerH = h - padT - padB;
   const x = i => padL + innerW * i / Math.max(1, rows.length - 1);
   const y = v => padT + innerH * (1 - v / maxY);
-  svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(0), y2: y(0), stroke: "#2a2c24"}));
-  poly(svg, rows, x, y, "wire", "#e15a3a");
-  poly(svg, rows, x, y, "picture", "#7ea0c4");
+  svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(0), y2: y(0), stroke: "#242e5e"}));
+  poly(svg, rows, x, y, "wire", "#ff5470");
+  poly(svg, rows, x, y, "picture", "#7c8cff");
   axisNote(svg, "degrees off the snapshot, and off the picture the client draws");
   return svg;
 }
@@ -1334,11 +1361,11 @@ function mirrorChart(player) {
   const innerH = h - padT - padB;
   const x = i => padL + innerW * i / Math.max(1, rows.length - 1);
   const y = v => padT + innerH * (1 - (v + maxAbs) / (2 * maxAbs));
-  svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(0), y2: y(0), stroke: "#2a2c24", "stroke-width": 1}));
-  monoText(svg, padL - 6, y(0) + 4, "0", "#8d887c", "end");
-  poly(svg, rows, x, y, "applied", "#e0b15c");
-  poly(svg, rows, x, y, "command", "#e15a3a");
-  poly(svg, rows, x, y, "net", "#f3efe6");
+  svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(0), y2: y(0), stroke: "#242e5e", "stroke-width": 1}));
+  monoText(svg, padL - 6, y(0) + 4, "0", "#8a93b8", "end");
+  poly(svg, rows, x, y, "applied", "#d8b26c");
+  poly(svg, rows, x, y, "command", "#ff5470");
+  poly(svg, rows, x, y, "net", "#e6ebf9");
   axisNote(svg, "degrees, shot by shot. Zero is no pitch.");
   return svg;
 }
@@ -1362,7 +1389,7 @@ function msBars(samples, label, empty, axis, hot) {
       y: top,
       width: Math.max(1, barW - 1.2),
       height: Math.max(0, y(0) - top),
-      fill: ms > 0 ? hot : "#2a2c24"
+      fill: ms > 0 ? hot : "#242e5e"
     }));
   });
   axisNote(svg, axis);
@@ -1374,7 +1401,7 @@ function hiddenChart(player) {
     player.id + " time on a hidden mover",
     "No time on an enemy the server still had hidden.",
     "milliseconds the aim cone held a hidden mover",
-    "#e15a3a"
+    "#ff5470"
   );
 }
 function mapPath(svg, points, X, Y, color, width) {
@@ -1423,23 +1450,23 @@ function privateChart(player) {
   const Y = y => oy + (maxY - y) * scale;
   svg.append(svgEl("rect", {
     x: X(wall.x), y: Y(wall.y + wall.h), width: wall.w * scale, height: wall.h * scale,
-    fill: "#e0b15c", opacity: 0.1, stroke: "#e0b15c", "stroke-dasharray": "4 3", "stroke-width": 1
+    fill: "#d8b26c", opacity: 0.1, stroke: "#d8b26c", "stroke-dasharray": "4 3", "stroke-width": 1
   }));
-  mapPath(svg, scene.source, X, Y, "#8a8478", 1.6);
-  mapPath(svg, scene.enemy, X, Y, "#7ea0c4", 1.8);
-  mapPath(svg, scene.replay, X, Y, "#e0b15c", 2.4);
+  mapPath(svg, scene.source, X, Y, "#6d77a3", 1.6);
+  mapPath(svg, scene.enemy, X, Y, "#7c8cff", 1.8);
+  mapPath(svg, scene.replay, X, Y, "#d8b26c", 2.4);
   const hotPts = [];
   const coldPts = [];
   aims.forEach((point, i) => (samples[i] > 0 ? hotPts : coldPts).push(point));
-  mapPath(svg, coldPts, X, Y, "#9bb58f", 2.2);
-  mapPath(svg, hotPts, X, Y, "#e15a3a", 3.2);
+  mapPath(svg, coldPts, X, Y, "#2dd4bf", 2.2);
+  mapPath(svg, hotPts, X, Y, "#ff5470", 3.2);
   aims.forEach((point, i) => {
     const hot = samples[i] > 0;
     svg.append(svgEl("circle", {
       cx: X(point[0]).toFixed(1),
       cy: Y(point[1]).toFixed(1),
       r: hot ? 3.2 : 2.2,
-      fill: hot ? "#e15a3a" : "#9bb58f"
+      fill: hot ? "#ff5470" : "#2dd4bf"
     }));
   });
   const placed = [];
@@ -1455,10 +1482,10 @@ function privateChart(player) {
   };
   const sourceMid = scene.source[Math.floor(scene.source.length / 2)];
   const enemyMid = scene.enemy[Math.floor(scene.enemy.length / 2)];
-  label(X(sourceMid[0]), Y(sourceMid[1]) + 20, "live route", "#c4beb2", "middle");
-  label(X(enemyMid[0]), Y(enemyMid[1]) + 22, "seen enemy", "#7ea0c4", "middle");
-  label(X(wall.x + wall.w / 2), Y(wall.y + wall.h) - 34, "replay " + Math.round(scene.heading_deg) + "°", "#e0b15c", "middle");
-  label(X(wall.x + wall.w / 2), Y(wall.y + wall.h) - 8, "no sight, no audio", "#e0b15c", "middle");
+  label(X(sourceMid[0]), Y(sourceMid[1]) + 20, "live route", "#a9b2d6", "middle");
+  label(X(enemyMid[0]), Y(enemyMid[1]) + 22, "seen enemy", "#7c8cff", "middle");
+  label(X(wall.x + wall.w / 2), Y(wall.y + wall.h) - 34, "replay " + Math.round(scene.heading_deg) + "°", "#d8b26c", "middle");
+  label(X(wall.x + wall.w / 2), Y(wall.y + wall.h) - 8, "no sight, no audio", "#d8b26c", "middle");
   axisNote(svg, "generated from the plant. the score reads milliseconds, not this map.");
   return svg;
 }
@@ -1475,7 +1502,7 @@ function jitterChart(player) {
   const innerH = h - padT - padB;
   const y = v => padT + innerH * (1 - v / maxY);
   const barW = innerW / rows.length;
-  const color = state => state === "unknowable" ? "#e15a3a" : (state === "audio" ? "#7ea0c4" : "#9bb58f");
+  const color = state => state === "unknowable" ? "#ff5470" : (state === "audio" ? "#7c8cff" : "#2dd4bf");
   rows.forEach((row, i) => {
     const top = y(row.jitter);
     svg.append(svgEl("rect", {
@@ -1516,12 +1543,12 @@ function residualChart(player) {
   const plot = h - padT - padB;
   const x = v => padL + inner * (v + maxAbs) / (2 * maxAbs);
   const y = v => padT + plot * (1 - (v + maxAbs) / (2 * maxAbs));
-  svg.append(svgEl("line", {x1: x(-maxAbs), y1: y(-maxAbs), x2: x(maxAbs), y2: y(maxAbs), stroke: "#2a2c24", "stroke-width": 1.4}));
+  svg.append(svgEl("line", {x1: x(-maxAbs), y1: y(-maxAbs), x2: x(maxAbs), y2: y(maxAbs), stroke: "#242e5e", "stroke-width": 1.4}));
   for (let i = 0; i < n; i++) {
-    svg.append(svgEl("circle", {cx: x(xs[i]), cy: y(ys[i]), r: 2.4, fill: "#e0b15c"}));
+    svg.append(svgEl("circle", {cx: x(xs[i]), cy: y(ys[i]), r: 2.4, fill: "#d8b26c"}));
   }
   axisNote(svg, "this leftover, scaled  →");
-  monoText(svg, 704, 16, (player.vendor_twin || "twin") + " ↑", "#8d887c", "end");
+  monoText(svg, 704, 16, (player.vendor_twin || "twin") + " ↑", "#8a93b8", "end");
   return svg;
 }
 function lagChart(player) {
@@ -1537,8 +1564,8 @@ function lagChart(player) {
   const innerW = 720 - padL - padR;
   const innerH = h - padT - padB;
   const y = v => padT + innerH * (1 - v / maxY);
-  svg.append(svgEl("line", {x1: padL, x2: 708, y1: y(voice), y2: y(voice), stroke: "#e0b15c", "stroke-width": 1.5}));
-  monoText(svg, 700, y(voice) - 6, voice + " ms voice", "#e0b15c", "end");
+  svg.append(svgEl("line", {x1: padL, x2: 708, y1: y(voice), y2: y(voice), stroke: "#d8b26c", "stroke-width": 1.5}));
+  monoText(svg, 700, y(voice) - 6, voice + " ms voice", "#d8b26c", "end");
   const barW = innerW / lags.length;
   lags.forEach((lag, i) => {
     const top = y(lag);
@@ -1547,7 +1574,7 @@ function lagChart(player) {
       y: top,
       width: Math.max(1, barW - 1.2),
       height: Math.max(0, y(0) - top),
-      fill: lag < voice ? "#e15a3a" : "#9bb58f"
+      fill: lag < voice ? "#ff5470" : "#2dd4bf"
     }));
   });
   axisNote(svg, "milliseconds after the teammate's hidden track");
@@ -1555,13 +1582,13 @@ function lagChart(player) {
 }
 function track(svg, y0, bound, human, rank, maxX) {
   const x = v => 168 + 520 * (v / maxX);
-  svg.append(svgEl("line", {x1: 168, x2: 688, y1: y0, y2: y0, stroke: "#2a2c24", "stroke-width": 8, "stroke-linecap": "round"}));
-  let playerColor = "#9bb58f";
-  if (human != null && bound > human) playerColor = "#e15a3a";
-  else if (rank != null && bound > rank) playerColor = "#f3efe6";
+  svg.append(svgEl("line", {x1: 168, x2: 688, y1: y0, y2: y0, stroke: "#242e5e", "stroke-width": 8, "stroke-linecap": "round"}));
+  let playerColor = "#2dd4bf";
+  if (human != null && bound > human) playerColor = "#ff5470";
+  else if (rank != null && bound > rank) playerColor = "#e6ebf9";
   const marks = [];
-  if (rank != null) marks.push({v: rank, color: "#a39c8e", where: "high"});
-  if (human != null) marks.push({v: human, color: "#e0b15c", where: "high"});
+  if (rank != null) marks.push({v: rank, color: "#8a93b8", where: "high"});
+  if (human != null) marks.push({v: human, color: "#d8b26c", where: "high"});
   marks.push({v: bound, color: playerColor, where: "low"});
   marks.forEach(mark => {
     const px = x(mark.v);
@@ -1572,7 +1599,7 @@ function track(svg, y0, bound, human, rank, maxX) {
     let lx = x(mark.v);
     const ly = mark.where === "high" ? y0 - 22 : y0 + 32;
     const crowded = used.some(prev => prev.where === mark.where && Math.abs(prev.lx - lx) < 46);
-    if (crowded && mark.color === "#a39c8e") return;
+    if (crowded && mark.color === "#8a93b8") return;
     if (crowded) lx += 28;
     used.push({lx, ly, where: mark.where});
     monoText(svg, lx, ly, Math.round(mark.v * 100) + "%", mark.color, "middle");
@@ -1595,10 +1622,10 @@ function aimChart(player) {
     maxX = Math.max(maxX, aim.headshot_bound, aim.elite_headshot_max, aim.headshot_rank_p95 || 0);
   }
   maxX *= 1.08;
-  monoText(svg, 28, 36, "Accuracy", "#a39c8e");
+  monoText(svg, 28, 36, "Accuracy", "#8a93b8");
   track(svg, 86, bound, human, rank, maxX);
   if (aim.headshot_bound != null && aim.elite_headshot_max != null) {
-    monoText(svg, 28, 156, "Headshots", "#a39c8e");
+    monoText(svg, 28, 156, "Headshots", "#8a93b8");
     track(svg, 200, aim.headshot_bound, aim.elite_headshot_max, aim.headshot_rank_p95, maxX);
   }
   return svg;
@@ -1700,52 +1727,52 @@ function legendFor(player) {
     row.append(span);
   };
   if (player.chart === "speed") {
-    item("#e15a3a", "over the cap, cause none");
-    item("#9bb58f", "inside the cap");
-    item("#7ea0c4", "excluded, blast or other cause");
-    item("#e0b15c", "cap the server enforced");
-    item("#d5dece", "3 kg cap, when the sprint is up there");
+    item("#ff5470", "over the cap, cause none");
+    item("#2dd4bf", "inside the cap");
+    item("#7c8cff", "excluded, blast or other cause");
+    item("#d8b26c", "cap the server enforced");
+    item("#c9d2f0", "3 kg cap, when the sprint is up there");
   } else if (player.chart === "recoil") {
-    item("#f3efe6", "measured kick");
-    item("#e0b15c", "floor for this build");
-    item("#e15a3a", "under a quarter of that floor");
+    item("#e6ebf9", "measured kick");
+    item("#d8b26c", "floor for this build");
+    item("#ff5470", "under a quarter of that floor");
   } else if (player.chart === "gaps") {
-    item("#e15a3a", "faster than the weapon");
-    item("#9bb58f", "legal gap");
-    item("#e0b15c", "cycle minus one tick");
+    item("#ff5470", "faster than the weapon");
+    item("#2dd4bf", "legal gap");
+    item("#d8b26c", "cycle minus one tick");
   } else if (player.chart === "mirror") {
-    item("#e0b15c", "kick the server applied");
-    item("#e15a3a", "player command");
-    item("#f3efe6", "camera, kick plus command");
+    item("#d8b26c", "kick the server applied");
+    item("#ff5470", "player command");
+    item("#e6ebf9", "camera, kick plus command");
   } else if (player.chart === "hidden") {
-    item("#e15a3a", "time on an enemy still hidden");
+    item("#ff5470", "time on an enemy still hidden");
   } else if (player.chart === "private") {
     const heading = data.replay ? Math.round(data.replay.heading_deg) : "";
-    item("#e0b15c", "replay, turned " + heading + "°");
-    item("#8a8478", "the live route it was copied from");
-    item("#7ea0c4", "the enemy this client could see");
-    item("#e15a3a", "this crosshair, on the replay");
-    item("#9bb58f", "this crosshair, on that enemy");
+    item("#d8b26c", "replay, turned " + heading + "°");
+    item("#6d77a3", "the live route it was copied from");
+    item("#7c8cff", "the enemy this client could see");
+    item("#ff5470", "this crosshair, on the replay");
+    item("#2dd4bf", "this crosshair, on that enemy");
   } else if (player.chart === "wire") {
-    item("#e15a3a", "error to the snapshot");
-    item("#7ea0c4", "error to the picture");
+    item("#ff5470", "error to the snapshot");
+    item("#7c8cff", "error to the picture");
   } else if (player.chart === "jitter") {
-    item("#9bb58f", "visible, the client could know");
-    item("#7ea0c4", "audio, the client could know");
-    item("#e15a3a", "unknowable, no sight and no audio");
+    item("#2dd4bf", "visible, the client could know");
+    item("#7c8cff", "audio, the client could know");
+    item("#ff5470", "unknowable, no sight and no audio");
   } else if (player.chart === "residual") {
-    item("#e0b15c", "this leftover against the other customer");
-    item("#2a2c24", "a match sits on the diagonal");
+    item("#d8b26c", "this leftover against the other customer");
+    item("#242e5e", "a match sits on the diagonal");
   } else if (player.chart === "lags") {
-    item("#e15a3a", "faster than a voice");
-    item("#9bb58f", "late enough to have been told");
-    item("#e0b15c", "350 ms, a voice");
+    item("#ff5470", "faster than a voice");
+    item("#2dd4bf", "late enough to have been told");
+    item("#d8b26c", "350 ms, a voice");
   } else if (player.aim.accuracy_bound != null) {
-    item("#a39c8e", "this rank's p95");
-    item("#e0b15c", "best measured elite");
-    item("#e15a3a", "this player, past that elite");
-    item("#f3efe6", "this player, above this rank only");
-    item("#9bb58f", "this player, inside the humans");
+    item("#8a93b8", "this rank's p95");
+    item("#d8b26c", "best measured elite");
+    item("#ff5470", "this player, past that elite");
+    item("#e6ebf9", "this player, above this rank only");
+    item("#2dd4bf", "this player, inside the humans");
   }
   return row;
 }

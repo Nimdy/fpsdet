@@ -729,10 +729,14 @@ class DemoTest(unittest.TestCase):
                 for name in ("scoring.html", "wire.html", "games.html", "source.html")
             }
             css = (dest / "fpsdet.css").read_text(encoding="utf-8")
-            self.assertIn("Instrument Serif", css)
+            self.assertIn("Geist Mono", css)
             self.assertIn(".grid", css)
             self.assertNotIn("<script", css)
-            self.assertTrue((dest / "fonts" / "instrument-serif-400.woff2").is_file())
+            # The channel split is switched off for anyone who asked the OS for more contrast.
+            self.assertIn("prefers-contrast", css)
+            self.assertTrue((dest / "fonts" / "geist-variable.woff2").is_file())
+            self.assertTrue((dest / "fonts" / "geist-mono-variable.woff2").is_file())
+            self.assertTrue((dest / "fonts" / "OFL-geist.txt").is_file())
         self.assertIn('href="board.html"', index)
         self.assertNotIn("../demo/board.html", index)
         self.assertIn("What we are building", index)

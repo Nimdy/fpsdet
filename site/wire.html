@@ -8,115 +8,117 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="fpsdet.css">
 </head>
-<body class="m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
-<a class="sr-only bg-watch px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
-<header class="border-b border-line">
-  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-baseline gap-x-6 gap-y-3 px-10 py-5 max-md:px-4">
-    <a class="font-serif text-[1.7rem] leading-none tracking-tight text-ink no-underline" href="index.html">fpsdet</a>
-    <nav class="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-[0.95rem]" aria-label="Site">
-      <a class="text-muted no-underline hover:text-ink" href="index.html">What this is</a>
-      <a class="text-muted no-underline hover:text-ink" href="scoring.html">Scoring</a>
-      <a class="border-b border-watch text-ink no-underline" href="wire.html" aria-current="page">Wire a game</a>
-      <a class="text-muted no-underline hover:text-ink" href="games.html">Games</a>
-      <a class="text-muted no-underline hover:text-ink" href="source.html">Source</a>
-      <a class="text-muted no-underline hover:text-ink" href="../demo/board.html">Desk</a>
+<body class="relative m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<div class="zb-backdrop" aria-hidden="true"></div>
+<a class="sr-only rounded-md bg-signal px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
+<header class="relative z-50 border-b border-line bg-bg/80 backdrop-blur-xl md:sticky md:top-0">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-center gap-x-5 gap-y-2 px-10 py-3 max-md:px-4">
+    <a class="zb-logo flex items-center gap-2.5 font-mono text-[1.05rem] font-semibold tracking-tight text-white no-underline" href="index.html"><span class="pulse-dot" aria-hidden="true"></span><span>fps<span class="text-signal">det</span></span></a>
+    <a class="font-mono text-[11px] text-muted no-underline hover:text-ink" href="https://zerobandwidth.com">by Zero<span class="text-signal">Bandwidth</span></a>
+    <nav class="flex flex-wrap items-center gap-x-0.5 gap-y-1 text-[0.9rem]" aria-label="Site">
+      <a class="nav-link" href="index.html"><span>01</span>What this is</a>
+      <a class="nav-link" href="scoring.html"><span>02</span>Scoring</a>
+      <a class="nav-link" href="wire.html" aria-current="page"><span>03</span>Wire a game</a>
+      <a class="nav-link" href="games.html"><span>04</span>Games</a>
+      <a class="nav-link" href="source.html"><span>05</span>Source</a>
+      <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
     </nav>
-    <p class="m-0 ml-auto font-mono text-[0.78rem] text-watch max-md:ml-0 max-md:basis-full">Automated action: none</p>
+    <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
 </header>
 
 <main id="main">
 <section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
   <div class="col-span-6 max-lg:col-span-1">
-    <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">Wire a game</p>
-    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight text-balance max-md:text-[2.55rem]">The server writes one line.</h1>
+    <p class="prompt m-0"><span class="text-signal-soft">zb@zerobandwidth</span><span class="text-faint">:</span><span class="text-prototype">~/fpsdet</span><span class="text-faint">$</span> <span class="text-ink">Wire a game</span><span class="caret" aria-hidden="true"></span></p>
+    <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">The server writes <span class="text-gradient-brand">one line.</span></h1>
   </div>
   <p class="col-span-6 m-0 text-lg max-lg:col-span-1">Emit from the dedicated server, at the moment it accepts the shot or the movement sample, using the server's hit and the server's clock. One JSON object per line. Do not have the client POST its own stats. This does not end cheating.</p>
 </section>
 
 <div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
   <section id="ladder" class="mb-16" aria-labelledby="ladder-title">
-    <h2 id="ladder-title" class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight text-balance">What you send decides what can fire</h2>
+    <h2 id="ladder-title" class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white text-balance">What you send decides what can fire</h2>
     <p class="m-0 mt-4 max-w-3xl">Start with the fields you already compute. Each rung adds checks and changes nothing under it. Leave a field out and its check stays quiet. It never guesses. Rung 2 adds no new case at all. It is there so a stim or a legal mod never becomes one.</p>
     <ol class="m-0 mt-8 grid list-none grid-cols-6 gap-3 p-0 max-2xl:grid-cols-3 max-md:grid-cols-1">
-      <li class="flex flex-col border border-line bg-panel">
-        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 17%"></span></div>
+      <li class="rounded-md flex flex-col border border-line panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-signal bg-linear-to-t from-violet/15 to-signal/30 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 17%"></span></div>
         <div class="flex flex-1 flex-col p-4">
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 1</p>
           <h3 class="m-0 mt-1 text-base font-medium">Day one</h3>
           <p class="m-0 mt-1 text-sm text-muted">The fields that already move the body.</p>
           <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">weapon_id</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">t_ms</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">speed_mps</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">on_ground</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">loadout_weight_kg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">displacement_cause</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">recoil_pitch_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">spray_index</li></ul>
           <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
-          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Speed over the cap</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Fire rate under the cycle</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>A metronome on a legal cycle</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>No kick under the floor</span></li></ul>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Speed over the cap</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Fire rate under the cycle</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>A metronome on a legal cycle</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>No kick under the floor</span></li></ul>
         </div>
       </li>
-      <li class="flex flex-col border border-line bg-panel">
-        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 33%"></span></div>
+      <li class="rounded-md flex flex-col border border-line panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-signal bg-linear-to-t from-violet/15 to-signal/30 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 33%"></span></div>
         <div class="flex flex-1 flex-col p-4">
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 2</p>
           <h3 class="m-0 mt-1 text-base font-medium">+ the server’s own caps</h3>
           <p class="m-0 mt-1 text-sm text-muted">Send the number the server used, not a table.</p>
           <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">expected_max_ground_speed_mps</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">expected_min_recoil_pitch_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">mod_set</li></ul>
           <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
-          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Stims, perks, slides, and legal mods stay clean</span></li></ul>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Stims, perks, slides, and legal mods stay clean</span></li></ul>
         </div>
       </li>
-      <li class="flex flex-col border border-line bg-panel">
-        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 50%"></span></div>
+      <li class="rounded-md flex flex-col border border-line panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-signal bg-linear-to-t from-violet/15 to-signal/30 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 50%"></span></div>
         <div class="flex flex-1 flex-col p-4">
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 3</p>
           <h3 class="m-0 mt-1 text-base font-medium">+ the kick and the pull</h3>
           <p class="m-0 mt-1 text-sm text-muted">Both numbers, on the same tick.</p>
           <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">applied_recoil_pitch_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">compensation_pitch_deg</li></ul>
           <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
-          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Same-tick mirror</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>The same leftover on two accounts</span></li></ul>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Same-tick mirror</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>The same leftover on two accounts</span></li></ul>
         </div>
       </li>
-      <li class="flex flex-col border border-line bg-panel">
-        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 67%"></span></div>
+      <li class="rounded-md flex flex-col border border-line panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-signal bg-linear-to-t from-violet/15 to-signal/30 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 67%"></span></div>
         <div class="flex flex-1 flex-col p-4">
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 4</p>
           <h3 class="m-0 mt-1 text-base font-medium">+ what this client could know</h3>
           <p class="m-0 mt-1 text-sm text-muted">Queries the server already runs.</p>
           <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">information_state</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">hidden_track_ms</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">private_track_ms</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">enemy_id</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">party_id</li></ul>
           <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
-          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Tracking a hidden mover</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Quiet only while unknowable</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Aim on a private replay</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>A teammate before a voice</span></li></ul>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Tracking a hidden mover</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Quiet only while unknowable</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Aim on a private replay</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>A teammate before a voice</span></li></ul>
         </div>
       </li>
-      <li class="flex flex-col border border-line bg-panel">
-        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 83%"></span></div>
+      <li class="rounded-md flex flex-col border border-line panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-signal bg-linear-to-t from-violet/15 to-signal/30 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 83%"></span></div>
         <div class="flex flex-1 flex-col p-4">
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 5</p>
           <h3 class="m-0 mt-1 text-base font-medium">+ the two positions</h3>
           <p class="m-0 mt-1 text-sm text-muted">Error to the snapshot, error to the picture, and the delay.</p>
           <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">wire_error_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">picture_error_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">interp_delay_ms</li></ul>
           <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
-          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>The picture is late</span></li></ul>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>The picture is late</span></li></ul>
         </div>
       </li>
-      <li class="flex flex-col border border-line bg-panel">
-        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 100%"></span></div>
+      <li class="rounded-md flex flex-col border border-line panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-signal bg-linear-to-t from-violet/15 to-signal/30 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 100%"></span></div>
         <div class="flex flex-1 flex-col p-4">
           <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 6</p>
           <h3 class="m-0 mt-1 text-base font-medium">+ enough humans</h3>
           <p class="m-0 mt-1 text-sm text-muted">A thick cohort per rank and weapon, and your own numbers.</p>
           <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">hit</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">hitbox</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">distance_m</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">extra_metrics</li></ul>
           <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
-          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Past the best measured human</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Past the rank, inside the humans</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>An account that changed</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Your number. No code change.</span></li></ul>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Past the best measured human</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Past the rank, inside the humans</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>An account that changed</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true"></span><span>Your number. No code change.</span></li></ul>
         </div>
       </li>
     </ol>
   </section>
 
-  <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Required on every line</h2>
+  <h2 class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Required on every line</h2>
   <div class="mt-4 grid grid-cols-2 gap-8 max-lg:grid-cols-1">
     <p class="m-0"><code class="font-mono text-[0.92em]">game_id</code>, <code class="font-mono text-[0.92em]">match_id</code>, <code class="font-mono text-[0.92em]">player_id</code>, <code class="font-mono text-[0.92em]">t_ms</code>, and a rank (<code class="font-mono text-[0.92em]">skill_band</code>, or <code class="font-mono text-[0.92em]">skill_prior</code>). <code class="font-mono text-[0.92em]">event_type</code> defaults to <code class="font-mono text-[0.92em]">shot</code>. <code class="font-mono text-[0.92em]">player_id</code> should be a stable pseudonym. Keep the map from pseudonym to account on your side.</p>
     <p class="m-0">Send the cap and the recoil floor the server already used. Omit a field you cannot measure. A guessed number false-flags. A missing number is skipped.</p>
   </div>
 
-  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Shot</h2>
+  <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Shot</h2>
   <div class="mt-6 grid grid-cols-2 items-start gap-8 max-xl:grid-cols-1">
-    <pre class="m-0 overflow-x-auto border-l-[3px] border-watch bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>{
+    <pre class="m-0 overflow-x-auto rounded-r-lg border-l-[3px] border-signal bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>{
   "game_id": "your-game",
   "match_id": "m-1001",
   "player_id": "stable-pseudonym",
@@ -150,18 +152,18 @@
   "displacement_cause": "none"
 }</code></pre>
     <div class="grid gap-4">
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">applied_recoil_pitch_deg</code> is the kick the server applied. <code class="font-mono text-[0.92em]">compensation_pitch_deg</code> is the signed view command on that same tick. Negative is a pull-down. Omit either one and the mirror check does nothing.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">information_state</code> is <code class="font-mono text-[0.92em]">visible</code>, <code class="font-mono text-[0.92em]">audio</code>, or <code class="font-mono text-[0.92em]">unknowable</code>. Unknowable means this client's own line-of-sight and audio queries both failed. Audio is knowable: footsteps and a legal callout have to be labeled, or a quiet aim on a heard target becomes a radar case. Labeling a visible enemy as unknowable manufactures the case.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">hidden_track_ms</code> is time on a mover the server had not made visible. <code class="font-mono text-[0.92em]">private_track_ms</code> is time on a replay of someone else's movement, placed where this client could not see or hear it. Omit either field, or send 0, when you do not have that query. A bad query manufactures the case. How those bars fire is on <a class="text-ink underline decoration-line underline-offset-4" href="scoring.html">Scoring</a>.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">wire_error_deg</code> is the angular error to the snapshot the server just sent. <code class="font-mono text-[0.92em]">picture_error_deg</code> is the angular error to the position the official client is drawing. <code class="font-mono text-[0.92em]">interp_delay_ms</code> is that delay. The sample above is closer to the picture than to the wire, which is what a person does. Omit any of the three when you cannot measure it. <code class="font-mono text-[0.92em]">view_delta_deg</code> is not this pair. A comparison against the wrong timeline manufactures the case.</p>
-      <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">through_geometry</code> is the server trace, not the client's claim. <code class="font-mono text-[0.92em]">hitbox</code> is <code class="font-mono text-[0.92em]">head</code>, <code class="font-mono text-[0.92em]">upper_torso</code>, <code class="font-mono text-[0.92em]">lower_torso</code>, <code class="font-mono text-[0.92em]">limbs</code>, or omitted on a miss.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">applied_recoil_pitch_deg</code> is the kick the server applied. <code class="font-mono text-[0.92em]">compensation_pitch_deg</code> is the signed view command on that same tick. Negative is a pull-down. Omit either one and the mirror check does nothing.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">information_state</code> is <code class="font-mono text-[0.92em]">visible</code>, <code class="font-mono text-[0.92em]">audio</code>, or <code class="font-mono text-[0.92em]">unknowable</code>. Unknowable means this client's own line-of-sight and audio queries both failed. Audio is knowable: footsteps and a legal callout have to be labeled, or a quiet aim on a heard target becomes a radar case. Labeling a visible enemy as unknowable manufactures the case.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">hidden_track_ms</code> is time on a mover the server had not made visible. <code class="font-mono text-[0.92em]">private_track_ms</code> is time on a replay of someone else's movement, placed where this client could not see or hear it. Omit either field, or send 0, when you do not have that query. A bad query manufactures the case. How those bars fire is on <a class="text-ink underline decoration-line underline-offset-4" href="scoring.html">Scoring</a>.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">wire_error_deg</code> is the angular error to the snapshot the server just sent. <code class="font-mono text-[0.92em]">picture_error_deg</code> is the angular error to the position the official client is drawing. <code class="font-mono text-[0.92em]">interp_delay_ms</code> is that delay. The sample above is closer to the picture than to the wire, which is what a person does. Omit any of the three when you cannot measure it. <code class="font-mono text-[0.92em]">view_delta_deg</code> is not this pair. A comparison against the wrong timeline manufactures the case.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">through_geometry</code> is the server trace, not the client's claim. <code class="font-mono text-[0.92em]">hitbox</code> is <code class="font-mono text-[0.92em]">head</code>, <code class="font-mono text-[0.92em]">upper_torso</code>, <code class="font-mono text-[0.92em]">lower_torso</code>, <code class="font-mono text-[0.92em]">limbs</code>, or omitted on a miss.</p>
     </div>
   </div>
 
-  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Movement</h2>
+  <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Movement</h2>
   <p class="m-0 mt-4 max-w-3xl">Send movement on a fixed cadence. Ten hertz is enough. A speedhack between shots is invisible if you only sample on the trigger.</p>
   <div class="mt-6 grid grid-cols-2 items-start gap-8 max-xl:grid-cols-1">
-    <pre class="m-0 overflow-x-auto border-l-[3px] border-watch bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>{
+    <pre class="m-0 overflow-x-auto rounded-r-lg border-l-[3px] border-signal bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>{
   "game_id": "your-game",
   "match_id": "m-1001",
   "player_id": "stable-pseudonym",
@@ -174,33 +176,33 @@
   "on_ground": true,
   "displacement_cause": "none"
 }</code></pre>
-    <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">When a grenade, a vehicle, a parachute, a ladder, a zipline, an ability, or an admin teleport moves the body, set <code class="font-mono text-[0.92em]">displacement_cause</code> for every sample in that window. If you do not know, send <code class="font-mono text-[0.92em]">unknown</code>. Unknown is dropped. A long untagged throw can look like a speedhack, and the case will say the server did not mark a cause. Only <code class="font-mono text-[0.92em]">none</code> on the ground is scored.</p>
+    <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">When a grenade, a vehicle, a parachute, a ladder, a zipline, an ability, or an admin teleport moves the body, set <code class="font-mono text-[0.92em]">displacement_cause</code> for every sample in that window. If you do not know, send <code class="font-mono text-[0.92em]">unknown</code>. Unknown is dropped. A long untagged throw can look like a speedhack, and the case will say the server did not mark a cause. Only <code class="font-mono text-[0.92em]">none</code> on the ground is scored.</p>
   </div>
 
-  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Where the script runs</h2>
+  <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Where the script runs</h2>
   <div class="mt-6 grid grid-cols-3 gap-4 max-lg:grid-cols-1">
-    <article class="border border-line bg-panel p-5">
+    <article class="rounded-xl border border-line panel p-5">
       <h3 class="m-0 text-base font-medium">Unity.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">A dedicated-server script, not a client MonoBehaviour. <code class="font-mono text-[0.92em]">examples/unity/BaselineEmitter.cs</code> writes a line. Ship the lines to your collector.</p>
     </article>
-    <article class="border border-line bg-panel p-5">
+    <article class="rounded-xl border border-line panel p-5">
       <h3 class="m-0 text-base font-medium">Unreal.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">From the server GameMode, after the server confirms the hit, post lag-compensation rewind, and only when <code class="font-mono text-[0.92em]">HasAuthority()</code> is true.</p>
     </article>
-    <article class="border border-line bg-panel p-5">
+    <article class="rounded-xl border border-line panel p-5">
       <h3 class="m-0 text-base font-medium">Godot.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The dedicated-server peer only. <code class="font-mono text-[0.92em]">JSON.stringify</code> one object. <code class="font-mono text-[0.92em]">on_ground</code> is the server body's floor state. <code class="font-mono text-[0.92em]">expected_max_ground_speed_mps</code> is the cap that server already applied.</p>
     </article>
   </div>
   <p class="m-0 mt-4">Per-title fields, including what not to copy out of a community table, are on <a class="text-ink underline decoration-line underline-offset-4" href="games.html">Games</a>.</p>
 
-  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">The collector</h2>
+  <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">The collector</h2>
   <div class="mt-6 grid grid-cols-2 items-start gap-8 max-xl:grid-cols-1">
     <div>
       <p class="m-0">Appending lines to a file is enough for a solo dev. <code class="font-mono text-[0.92em]">fpsdet ingest</code> partitions them into <code class="font-mono text-[0.92em]">lake/game=&lt;id&gt;/dt=&lt;YYYY-MM-DD&gt;/events.ndjson</code>. A studio can point the same stream at a bus it already runs. The scorer does not care how the line arrived.</p>
       <p class="m-0 mt-4">Call <code class="font-mono text-[0.92em]">run_score</code> in-process if you would rather not shell out. Pass a cohort built from an earlier window. The lake, the queue, and the optional brief are on <a class="text-ink underline decoration-line underline-offset-4" href="source.html">Source</a>.</p>
     </div>
-    <pre class="m-0 overflow-x-auto border-l-[3px] border-watch bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>from fpsdet.parse import load_profile, parse_event
+    <pre class="m-0 overflow-x-auto rounded-r-lg border-l-[3px] border-signal bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>from fpsdet.parse import load_profile, parse_event
 from fpsdet.pipeline import run_score
 
 profile = load_profile("profiles/example-loadout.json")
@@ -210,8 +212,9 @@ cases = run_score(events, profile, cohort, history, reports)</code></pre>
 </div>
 </main>
 
-<footer class="border-t border-line">
+<footer class="relative border-t border-line bg-bg/60">
   <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-end justify-between gap-6 px-10 py-8 max-md:px-4">
+    <p class="m-0 basis-full font-mono text-sm"><a class="text-white no-underline" href="https://zerobandwidth.com">Zero<span class="text-signal">Bandwidth</span></a> <span class="text-muted">· the original signal · a ZeroBandwidth system</span></p>
     <p class="m-0 text-sm text-muted">A person still reviews. This does not end cheating.</p>
     <p class="m-0 flex flex-wrap gap-x-5 gap-y-2 text-sm">
       <a class="text-ink no-underline hover:underline" href="index.html">What this is</a>
