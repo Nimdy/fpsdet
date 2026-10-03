@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="fpsdet.css">
 </head>
 <body class="m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<a class="sr-only bg-watch px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
 <header class="border-b border-line">
   <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-baseline gap-x-6 gap-y-3 px-10 py-5 max-md:px-4">
     <a class="font-serif text-[1.7rem] leading-none tracking-tight text-ink no-underline" href="index.html">fpsdet</a>
@@ -24,15 +25,89 @@
   </div>
 </header>
 
+<main id="main">
 <section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
   <div class="col-span-6 max-lg:col-span-1">
     <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">Wire a game</p>
-    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight max-md:text-[2.55rem]">The server writes one line.</h1>
+    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight text-balance max-md:text-[2.55rem]">The server writes one line.</h1>
   </div>
   <p class="col-span-6 m-0 text-lg max-lg:col-span-1">Emit from the dedicated server, at the moment it accepts the shot or the movement sample, using the server's hit and the server's clock. One JSON object per line. Do not have the client POST its own stats. This does not end cheating.</p>
 </section>
 
-<main class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
+<div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
+  <section id="ladder" class="mb-16" aria-labelledby="ladder-title">
+    <h2 id="ladder-title" class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight text-balance">What you send decides what can fire</h2>
+    <p class="m-0 mt-4 max-w-3xl">Start with the fields you already compute. Each rung adds checks and changes nothing under it. Leave a field out and its check stays quiet. It never guesses. Rung 2 adds no new case at all. It is there so a stim or a legal mod never becomes one.</p>
+    <ol class="m-0 mt-8 grid list-none grid-cols-6 gap-3 p-0 max-2xl:grid-cols-3 max-md:grid-cols-1">
+      <li class="flex flex-col border border-line bg-panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 17%"></span></div>
+        <div class="flex flex-1 flex-col p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 1</p>
+          <h3 class="m-0 mt-1 text-base font-medium">Day one</h3>
+          <p class="m-0 mt-1 text-sm text-muted">The fields that already move the body.</p>
+          <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">weapon_id</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">t_ms</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">speed_mps</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">on_ground</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">loadout_weight_kg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">displacement_cause</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">recoil_pitch_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">spray_index</li></ul>
+          <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Speed over the cap</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Fire rate under the cycle</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>A metronome on a legal cycle</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>No kick under the floor</span></li></ul>
+        </div>
+      </li>
+      <li class="flex flex-col border border-line bg-panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 33%"></span></div>
+        <div class="flex flex-1 flex-col p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 2</p>
+          <h3 class="m-0 mt-1 text-base font-medium">+ the server’s own caps</h3>
+          <p class="m-0 mt-1 text-sm text-muted">Send the number the server used, not a table.</p>
+          <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">expected_max_ground_speed_mps</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">expected_min_recoil_pitch_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">mod_set</li></ul>
+          <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Stims, perks, slides, and legal mods stay clean</span></li></ul>
+        </div>
+      </li>
+      <li class="flex flex-col border border-line bg-panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 50%"></span></div>
+        <div class="flex flex-1 flex-col p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 3</p>
+          <h3 class="m-0 mt-1 text-base font-medium">+ the kick and the pull</h3>
+          <p class="m-0 mt-1 text-sm text-muted">Both numbers, on the same tick.</p>
+          <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">applied_recoil_pitch_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">compensation_pitch_deg</li></ul>
+          <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Same-tick mirror</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>The same leftover on two accounts</span></li></ul>
+        </div>
+      </li>
+      <li class="flex flex-col border border-line bg-panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 67%"></span></div>
+        <div class="flex flex-1 flex-col p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 4</p>
+          <h3 class="m-0 mt-1 text-base font-medium">+ what this client could know</h3>
+          <p class="m-0 mt-1 text-sm text-muted">Queries the server already runs.</p>
+          <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">information_state</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">hidden_track_ms</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">private_track_ms</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">enemy_id</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">party_id</li></ul>
+          <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Tracking a hidden mover</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Quiet only while unknowable</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Aim on a private replay</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>A teammate before a voice</span></li></ul>
+        </div>
+      </li>
+      <li class="flex flex-col border border-line bg-panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 83%"></span></div>
+        <div class="flex flex-1 flex-col p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 5</p>
+          <h3 class="m-0 mt-1 text-base font-medium">+ the two positions</h3>
+          <p class="m-0 mt-1 text-sm text-muted">Error to the snapshot, error to the picture, and the delay.</p>
+          <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">wire_error_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">picture_error_deg</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">interp_delay_ms</li></ul>
+          <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>The picture is late</span></li></ul>
+        </div>
+      </li>
+      <li class="flex flex-col border border-line bg-panel">
+        <div class="flex h-24 items-end px-4 pt-4 max-md:h-auto max-md:pb-0" aria-hidden="true"><span class="block h-(--lvl) w-full border-t-2 border-watch bg-watch/25 max-md:h-2 max-md:w-(--lvl)" style="--lvl: 100%"></span></div>
+        <div class="flex flex-1 flex-col p-4">
+          <p class="m-0 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Rung 6</p>
+          <h3 class="m-0 mt-1 text-base font-medium">+ enough humans</h3>
+          <p class="m-0 mt-1 text-sm text-muted">A thick cohort per rank and weapon, and your own numbers.</p>
+          <ul class="m-0 mt-3 flex list-none flex-wrap gap-1.5 p-0" aria-label="Fields"><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">hit</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">hitbox</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">distance_m</li><li class="border border-line bg-plot px-1.5 py-0.5 font-mono text-[11.5px] text-muted">extra_metrics</li></ul>
+          <p class="m-0 mt-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">Turns on</p>
+          <ul class="m-0 mt-1.5 list-none space-y-1 p-0 text-sm"><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Past the best measured human</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Past the rank, inside the humans</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>An account that changed</span></li><li class="flex gap-2"><span class="mt-[0.55em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span>Your number. No code change.</span></li></ul>
+        </div>
+      </li>
+    </ol>
+  </section>
+
   <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Required on every line</h2>
   <div class="mt-4 grid grid-cols-2 gap-8 max-lg:grid-cols-1">
     <p class="m-0"><code class="font-mono text-[0.92em]">game_id</code>, <code class="font-mono text-[0.92em]">match_id</code>, <code class="font-mono text-[0.92em]">player_id</code>, <code class="font-mono text-[0.92em]">t_ms</code>, and a rank (<code class="font-mono text-[0.92em]">skill_band</code>, or <code class="font-mono text-[0.92em]">skill_prior</code>). <code class="font-mono text-[0.92em]">event_type</code> defaults to <code class="font-mono text-[0.92em]">shot</code>. <code class="font-mono text-[0.92em]">player_id</code> should be a stable pseudonym. Keep the map from pseudonym to account on your side.</p>
@@ -132,6 +207,7 @@ profile = load_profile("profiles/example-loadout.json")
 events = [parse_event(obj) for obj in batch]
 cases = run_score(events, profile, cohort, history, reports)</code></pre>
   </div>
+</div>
 </main>
 
 <footer class="border-t border-line">
@@ -143,6 +219,7 @@ cases = run_score(events, profile, cohort, history, reports)</code></pre>
       <a class="text-ink no-underline hover:underline" href="games.html">Games</a>
       <a class="text-ink no-underline hover:underline" href="source.html">Source</a>
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
     </p>
   </div>
 </footer>

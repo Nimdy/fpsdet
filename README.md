@@ -186,6 +186,14 @@ examples/          one shot, one movement sample, a Unity emitter
 cases/             gitignored output
 ```
 
+## Build on it
+
+This is the baseline, not the ceiling. One JSON line goes in and a case comes out. Everything around that is a slot: a profile for your game, an `extra_metrics` row for your number, a check in `signals.py`, a model trained on `features.csv`, an AI endpoint for the brief, the desk you already run. Plant a cheater and the innocent twin first. Then write the rule that separates them.
+
+## License
+
+[PolyForm Small Business 1.0.0](LICENSE.md). If your company has fewer than 100 people and less than US$1M revenue last year (2019 dollars, adjusted for inflation), you can use it, change it, and ship it in your game. Past that, you need a commercial license from ZeroBandwidth. [Open an issue](https://github.com/Nimdy/detect-FPS-hackers/issues) to ask. The fonts in `site/fonts/` are under the SIL Open Font License, which sits beside them.
+
 ## Before other people send patches
 
-There is no license yet. Add one before you take contributions. Patches that describe how to build a cheat, or that weaken the innocence rules so a blast becomes a ban, are off the point of this repo. Patches that add a game's server-side fields, a profile, or a failing test for a false positive are the point.
+There is no contributor agreement yet. Add one before you take contributions, so a patch can ship under the commercial license too. Patches that describe how to build a cheat, or that weaken the innocence rules so a blast becomes a ban, are off the point of this repo. Patches that add a game's server-side fields, a profile, or a failing test for a false positive are the point.

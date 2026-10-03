@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="fpsdet.css">
 </head>
 <body class="m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<a class="sr-only bg-watch px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
 <header class="border-b border-line">
   <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-baseline gap-x-6 gap-y-3 px-10 py-5 max-md:px-4">
     <a class="font-serif text-[1.7rem] leading-none tracking-tight text-ink no-underline" href="index.html">fpsdet</a>
@@ -24,15 +25,16 @@
   </div>
 </header>
 
+<main id="main">
 <section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
   <div class="col-span-6 max-lg:col-span-1">
     <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">Games</p>
-    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight max-md:text-[2.55rem]">Plug in the game you already simulate.</h1>
+    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight text-balance max-md:text-[2.55rem]">Plug in the game you already simulate.</h1>
   </div>
   <p class="col-span-6 m-0 text-lg max-lg:col-span-1">No profile in this repo is a studio export. Do not ban from a copied community table. The server that simulates the player already applied a speed cap and a recoil for the current stance, perks, and attachments. Send those numbers. The curves in <code class="font-mono text-[0.92em]">profiles/</code> are the fallback when a sample has no expected value, and they are how the idea is unit-tested. This does not end cheating.</p>
 </section>
 
-<main class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
+<div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
   <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Fields these games can fill</h2>
   <div class="mt-6 overflow-x-auto">
     <table class="w-full border-collapse text-left">
@@ -89,6 +91,7 @@
     <p class="m-0">Training is the cohort file <code class="font-mono text-[0.92em]">fpsdet baseline</code> writes. It is the distribution of humans on each band, weapon, and build, from the lake you dumped. A new gun, a new mod combination, or a new weight class with no curve stays untrained until <code class="font-mono text-[0.92em]">min_cohort_players</code> humans have enough samples. Flagging a build you have never measured is how legal players get removed.</p>
     <p class="m-0">The optional brief does not do this training. It explains a case after the numbers exist. A sustained break of the server's own speed cap does not need a model. The bars are on <a class="text-ink underline decoration-line underline-offset-4" href="scoring.html">Scoring</a>. The files are on <a class="text-ink underline decoration-line underline-offset-4" href="source.html">Source</a>.</p>
   </div>
+</div>
 </main>
 
 <footer class="border-t border-line">
@@ -100,6 +103,7 @@
       <a class="text-ink no-underline hover:underline" href="wire.html">Wire a game</a>
       <a class="text-ink no-underline hover:underline" href="source.html">Source</a>
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
     </p>
   </div>
 </footer>

@@ -775,7 +775,10 @@ h1 {
 .tour .more { color: var(--watch); }
 #still { scroll-margin-top: 0.8rem; }
 button.chip {
-  display: block;
+  /* A button centers its content. A column keeps every chip's label on one line. */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   text-align: left;
   background: var(--panel);
   color: inherit;
@@ -887,6 +890,21 @@ main { padding: 1.15rem 1.35rem 3.5rem; min-width: 0; }
 .stamp.insufficient_data { color: var(--held); }
 .chart { background: var(--plot); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 0.35rem 0.35rem 0; }
 svg { width: 100%; height: auto; display: block; }
+/* Charts are drawn 720 wide. --chart-scale undoes the shrink on a narrow card. */
+#stage svg text { font-size: calc(11.5px * var(--chart-scale, 1)); }
+.plot { position: relative; }
+.plot-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0 1.2rem;
+  color: var(--ink);
+  font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 0.8rem;
+}
+.axis-note { margin: 0.35rem 0.45rem 0; color: var(--muted); font-family: var(--mono, ui-monospace, Menlo, Consolas, monospace); font-size: 0.72rem; }
 .legend { display: flex; flex-wrap: wrap; gap: 0.7rem 0.9rem; color: var(--muted); font-size: 0.75rem; padding: 0.35rem 0.45rem 0.5rem; }
 .swatch { display: inline-block; width: 0.65rem; height: 0.65rem; margin-right: 0.28rem; vertical-align: -1px; }
 .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; padding: 0.7rem 0.85rem 0.2rem; }
@@ -1102,7 +1120,19 @@ const TAPES = [
 
 const byId = Object.fromEntries(data.players.map(player => [player.id, player]));
 const tapeIds = TAPES.map(tape => tape.id);
-let tapeIndex = 0;
+
+// The tape at the top of the screen, read from the scroll position so a mouse
+// or a sidebar click never leaves j and k behind. -1 is above the first tape.
+function tapeHere() {
+  let here = -1;
+  tapeIds.forEach((id, index) => {
+    const node = document.getElementById(id);
+    if (!node) return;
+    const margin = parseFloat(getComputedStyle(node).scrollMarginTop) || 0;
+    if (node.getBoundingClientRect().top - margin <= 8) here = index;
+  });
+  return here;
+}
 
 function el(tag, attrs, text) {
   const node = document.createElement(tag);
@@ -1124,6 +1154,14 @@ function chartFrame(h, label) {
   svg.append(svgEl("title", {}, label));
   svg.append(svgEl("rect", {x: 0, y: 0, width: 720, height: h, fill: "#10110e"}));
   return svg;
+}
+// A sentence does not fit a 720-wide frame on a phone. It goes under the plot,
+// or over an empty one, as HTML that wraps. The SVG keeps the short labels.
+function axisNote(svg, text) {
+  svg.dataset.note = text;
+}
+function emptyNote(svg, text) {
+  svg.dataset.empty = text;
 }
 function monoText(svg, x, y, text, fill, anchor) {
   svg.append(svgEl("text", {
@@ -1150,7 +1188,7 @@ function speedChart(player, sharedMax) {
   const h = 300, padL = 46, padR = 16, padT = 18, padB = 28;
   const svg = chartFrame(h, player.id + " ground speed");
   if (!rows.length) {
-    monoText(svg, 48, 150, "No movement samples on this player.", "#a39c8e");
+    emptyNote(svg, "No movement samples on this player.");
     return svg;
   }
   const speeds = rows.map(row => row.speed);
@@ -1164,7 +1202,7 @@ function speedChart(player, sharedMax) {
   const step = maxY > 12 ? 5 : 2;
   for (let tick = 0; tick <= maxY; tick += step) {
     svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(tick), y2: y(tick), stroke: "#2a2c24", "stroke-width": 1}));
-    monoText(svg, padL - 6, y(tick) + 4, String(tick), "#6f6a60", "end");
+    monoText(svg, padL - 6, y(tick) + 4, String(tick), "#8d887c", "end");
   }
   const guides = guideLines(player).sort((a, b) => b.v - a.v);
   let lastLabel = -999;
@@ -1189,7 +1227,7 @@ function speedChart(player, sharedMax) {
     }
     svg.append(svgEl("circle", {cx: x(i), cy: y(row.speed), r: row.over || row.cause !== "none" ? 3.6 : 2.8, fill: color}));
   });
-  monoText(svg, padL, h - 8, "each mark is one server sample", "#6f6a60");
+  axisNote(svg, "each mark is one server sample");
   return svg;
 }
 function recoilChart(player) {
@@ -1197,7 +1235,7 @@ function recoilChart(player) {
   const h = 280, padL = 44, padR = 16, padT = 22, padB = 28;
   const svg = chartFrame(h, player.id + " recoil");
   if (!rows.length) {
-    monoText(svg, 48, 140, "No recoil samples on this player.", "#a39c8e");
+    emptyNote(svg, "No recoil samples on this player.");
     return svg;
   }
   const floor = rows.find(row => row.floor != null);
@@ -1218,7 +1256,7 @@ function recoilChart(player) {
   let d = "";
   rows.forEach((row, i) => { d += (i ? "L" : "M") + x(i).toFixed(1) + " " + y(row.pitch).toFixed(1) + " "; });
   svg.append(svgEl("path", {d, fill: "none", stroke: "#f3efe6", "stroke-width": 1.7}));
-  monoText(svg, padL, h - 8, "spray index, from the first shot", "#6f6a60");
+  axisNote(svg, "spray index, from the first shot");
   return svg;
 }
 function gapChart(player) {
@@ -1226,7 +1264,7 @@ function gapChart(player) {
   const h = 200, padL = 44, padR = 12, padT = 18, padB = 26;
   const svg = chartFrame(h, player.id + " shot gaps");
   if (!gaps.length) {
-    monoText(svg, 48, 100, "No shot gaps on this player.", "#a39c8e");
+    emptyNote(svg, "No shot gaps on this player.");
     return svg;
   }
   const line = player.gap_line || data.gap_line || 75;
@@ -1234,8 +1272,6 @@ function gapChart(player) {
   const innerW = 720 - padL - padR;
   const innerH = h - padT - padB;
   const y = v => padT + innerH * (1 - v / maxY);
-  svg.append(svgEl("line", {x1: padL, x2: 708, y1: y(line), y2: y(line), stroke: "#e0b15c", "stroke-width": 1.5}));
-  monoText(svg, 700, y(line) - 6, line + " ms legal", "#e0b15c", "end");
   const barW = innerW / gaps.length;
   gaps.forEach((gap, i) => {
     const top = y(gap);
@@ -1247,7 +1283,12 @@ function gapChart(player) {
       fill: gap < line ? "#e15a3a" : "#9bb58f"
     }));
   });
-  monoText(svg, padL, h - 8, "milliseconds between server-accepted shots", "#6f6a60");
+  // The legal line goes over the bars, or a legal cycle hides it.
+  svg.append(svgEl("line", {x1: padL, x2: 708, y1: y(line), y2: y(line), stroke: "#e0b15c", "stroke-width": 2}));
+  const labelY = y(line) - 6;
+  svg.append(svgEl("rect", {x: 552, y: labelY - 19, width: 154, height: 25, fill: "#10110e", opacity: 0.85}));
+  monoText(svg, 700, labelY, line + " ms legal", "#e0b15c", "end");
+  axisNote(svg, "milliseconds between server-accepted shots");
   return svg;
 }
 function poly(svg, rows, x, y, key, color) {
@@ -1260,7 +1301,7 @@ function wireChart(player) {
   const h = 240, padL = 44, padR = 16, padT = 22, padB = 28;
   const svg = chartFrame(h, player.id + " error to the wire and to the picture");
   if (!rows.length) {
-    monoText(svg, 48, 120, "No wire and picture errors on these shots.", "#a39c8e");
+    emptyNote(svg, "No wire and picture errors on these shots.");
     return svg;
   }
   let maxY = 0.4;
@@ -1273,7 +1314,7 @@ function wireChart(player) {
   svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(0), y2: y(0), stroke: "#2a2c24"}));
   poly(svg, rows, x, y, "wire", "#e15a3a");
   poly(svg, rows, x, y, "picture", "#7ea0c4");
-  monoText(svg, padL, h - 8, "degrees off the snapshot, and off the picture the client draws", "#6f6a60");
+  axisNote(svg, "degrees off the snapshot, and off the picture the client draws");
   return svg;
 }
 function mirrorChart(player) {
@@ -1281,7 +1322,7 @@ function mirrorChart(player) {
   const h = 280, padL = 44, padR = 16, padT = 22, padB = 28;
   const svg = chartFrame(h, player.id + " command against server kick");
   if (!rows.length) {
-    monoText(svg, 48, 140, "No server kick and player command on these shots.", "#a39c8e");
+    emptyNote(svg, "No server kick and player command on these shots.");
     return svg;
   }
   let maxAbs = 2.2;
@@ -1294,11 +1335,11 @@ function mirrorChart(player) {
   const x = i => padL + innerW * i / Math.max(1, rows.length - 1);
   const y = v => padT + innerH * (1 - (v + maxAbs) / (2 * maxAbs));
   svg.append(svgEl("line", {x1: padL, x2: 704, y1: y(0), y2: y(0), stroke: "#2a2c24", "stroke-width": 1}));
-  monoText(svg, padL - 6, y(0) + 4, "0", "#6f6a60", "end");
+  monoText(svg, padL - 6, y(0) + 4, "0", "#8d887c", "end");
   poly(svg, rows, x, y, "applied", "#e0b15c");
   poly(svg, rows, x, y, "command", "#e15a3a");
   poly(svg, rows, x, y, "net", "#f3efe6");
-  monoText(svg, padL, h - 8, "degrees, shot by shot. Zero is no pitch.", "#6f6a60");
+  axisNote(svg, "degrees, shot by shot. Zero is no pitch.");
   return svg;
 }
 function msBars(samples, label, empty, axis, hot) {
@@ -1306,7 +1347,7 @@ function msBars(samples, label, empty, axis, hot) {
   const svg = chartFrame(h, label);
   const total = samples.reduce((sum, ms) => sum + ms, 0);
   if (!samples.length || total <= 0) {
-    monoText(svg, 48, 100, empty, "#a39c8e");
+    emptyNote(svg, empty);
     return svg;
   }
   const maxY = Math.max(...samples) * 1.25;
@@ -1324,7 +1365,7 @@ function msBars(samples, label, empty, axis, hot) {
       fill: ms > 0 ? hot : "#2a2c24"
     }));
   });
-  monoText(svg, padL, h - 8, axis, "#6f6a60");
+  axisNote(svg, axis);
   return svg;
 }
 function hiddenChart(player) {
@@ -1351,7 +1392,7 @@ function privateChart(player) {
   const h = 390;
   const svg = chartFrame(h, player.id + " private replay, generated from the plant");
   if (!scene || !scene.source || !scene.source.length) {
-    monoText(svg, 48, 180, "No generated route on this desk.", "#a39c8e");
+    emptyNote(svg, "No generated route on this desk.");
     return svg;
   }
   const aims = (scene.aims && scene.aims[player.id]) || [];
@@ -1403,10 +1444,11 @@ function privateChart(player) {
   });
   const placed = [];
   const label = (x, y, text, fill, anchor) => {
-    let px = Math.max(14, Math.min(700, x));
-    let py = Math.max(16, Math.min(h - 32, y));
+    const half = anchor === "middle" ? text.length * 6.5 : 0;
+    let px = Math.max(14 + half, Math.min(700 - half, x));
+    let py = Math.max(20, Math.min(h - 32, y));
     placed.forEach(prev => {
-      if (Math.abs(prev.y - py) < 15 && Math.abs(prev.x - px) < 150) py = Math.min(h - 32, prev.y + 16);
+      if (Math.abs(prev.y - py) < 24 && Math.abs(prev.x - px) < 220) py = Math.min(h - 32, prev.y + 26);
     });
     placed.push({x: px, y: py});
     monoText(svg, px, py, text, fill, anchor);
@@ -1415,9 +1457,9 @@ function privateChart(player) {
   const enemyMid = scene.enemy[Math.floor(scene.enemy.length / 2)];
   label(X(sourceMid[0]), Y(sourceMid[1]) + 20, "live route", "#c4beb2", "middle");
   label(X(enemyMid[0]), Y(enemyMid[1]) + 22, "seen enemy", "#7ea0c4", "middle");
-  label(X(wall.x + wall.w / 2), Y(wall.y + wall.h) - 24, "replay " + Math.round(scene.heading_deg) + "°", "#e0b15c", "middle");
+  label(X(wall.x + wall.w / 2), Y(wall.y + wall.h) - 34, "replay " + Math.round(scene.heading_deg) + "°", "#e0b15c", "middle");
   label(X(wall.x + wall.w / 2), Y(wall.y + wall.h) - 8, "no sight, no audio", "#e0b15c", "middle");
-  monoText(svg, 16, h - 8, "generated from the plant. the score reads milliseconds, not this map.", "#6f6a60");
+  axisNote(svg, "generated from the plant. the score reads milliseconds, not this map.");
   return svg;
 }
 function jitterChart(player) {
@@ -1425,7 +1467,7 @@ function jitterChart(player) {
   const h = 200, padL = 44, padR = 12, padT = 18, padB = 26;
   const svg = chartFrame(h, player.id + " aim noise by what the client could know");
   if (!rows.length) {
-    monoText(svg, 48, 100, "No aim noise labeled with what this client could know.", "#a39c8e");
+    emptyNote(svg, "No aim noise labeled with what this client could know.");
     return svg;
   }
   const maxY = Math.max(0.2, ...rows.map(row => row.jitter)) * 1.25;
@@ -1444,7 +1486,7 @@ function jitterChart(player) {
       fill: color(row.state)
     }));
   });
-  monoText(svg, padL, h - 8, "degrees of aim noise, in server order", "#6f6a60");
+  axisNote(svg, "degrees of aim noise, in server order");
   return svg;
 }
 function centered(values) {
@@ -1462,7 +1504,7 @@ function residualChart(player) {
   const h = 280, padL = 48, padR = 16, padT = 18, padB = 28;
   const svg = chartFrame(h, player.id + " leftover against the other customer");
   if (n < 3) {
-    monoText(svg, 48, 140, "No leftover series long enough to compare.", "#a39c8e");
+    emptyNote(svg, "No leftover series long enough to compare.");
     return svg;
   }
   const xs = centered(mine.slice(0, n));
@@ -1478,8 +1520,8 @@ function residualChart(player) {
   for (let i = 0; i < n; i++) {
     svg.append(svgEl("circle", {cx: x(xs[i]), cy: y(ys[i]), r: 2.4, fill: "#e0b15c"}));
   }
-  monoText(svg, padL, h - 8, "this leftover, scaled  →", "#6f6a60");
-  monoText(svg, 704, 16, (player.vendor_twin || "twin") + " ↑", "#6f6a60", "end");
+  axisNote(svg, "this leftover, scaled  →");
+  monoText(svg, 704, 16, (player.vendor_twin || "twin") + " ↑", "#8d887c", "end");
   return svg;
 }
 function lagChart(player) {
@@ -1488,7 +1530,7 @@ function lagChart(player) {
   const svg = chartFrame(h, player.id + " lag behind the teammate who already knew");
   const voice = data.voice_ms || 350;
   if (!lags.length) {
-    monoText(svg, 48, 100, "No swing on an enemy a teammate was tracking while hidden.", "#a39c8e");
+    emptyNote(svg, "No swing on an enemy a teammate was tracking while hidden.");
     return svg;
   }
   const maxY = Math.max(voice, ...lags) * 1.18;
@@ -1508,7 +1550,7 @@ function lagChart(player) {
       fill: lag < voice ? "#e15a3a" : "#9bb58f"
     }));
   });
-  monoText(svg, padL, h - 8, "milliseconds after the teammate's hidden track", "#6f6a60");
+  axisNote(svg, "milliseconds after the teammate's hidden track");
   return svg;
 }
 function track(svg, y0, bound, human, rank, maxX) {
@@ -1544,18 +1586,7 @@ function aimChart(player) {
   const human = aim.elite_accuracy_max;
   if (bound == null || human == null) {
     const why = (player.observations && player.observations[0]) || aim.skipped || "Not enough shots, or no cohort for this weapon yet.";
-    const words = why.split(" ");
-    let line = "";
-    let y = 96;
-    words.forEach(word => {
-      const next = line ? line + " " + word : word;
-      if (next.length > 58) {
-        monoText(svg, 36, y, line, "#f3efe6");
-        line = word;
-        y += 22;
-      } else line = next;
-    });
-    if (line) monoText(svg, 36, y, line, "#f3efe6");
+    emptyNote(svg, why);
     return svg;
   }
   const rank = aim.rank_p95;
@@ -1740,7 +1771,11 @@ function cardFor(player, sharedMax) {
     : player.chart === "residual" ? residualChart(player)
     : player.chart === "lags" ? lagChart(player)
     : aimChart(player);
-  box.append(drawer);
+  const plot = el("div", {class: "plot"});
+  plot.append(drawer);
+  if (drawer.dataset.empty) plot.append(el("p", {class: "plot-empty"}, drawer.dataset.empty));
+  box.append(plot);
+  if (drawer.dataset.note) box.append(el("p", {class: "axis-note"}, drawer.dataset.note));
   box.append(legendFor(player));
   card.append(box);
   card.append(factsFor(player));
@@ -1770,8 +1805,6 @@ function paintFace() {
     button.append(el("strong", null, chip.title));
     button.append(el("span", null, chip.detail));
     button.addEventListener("click", () => {
-      const index = tapeIds.indexOf(chip.tape);
-      if (index >= 0) tapeIndex = index;
       const node = document.getElementById(chip.tape);
       if (node) node.scrollIntoView({block: "start"});
     });
@@ -1815,18 +1848,31 @@ function paint() {
   stage.append(el("p", {class: "limits"}, limits));
   stage.append(el("p", {class: "limits", id: "still"}, "What still gets through. Aim that gets quiet only while the server says this client could not have known is a review. Aim that stays on a private replay is a review, even when the public charts are ordinary. A short crossing of that path stays clean. Aim that matches the wire snapshot, ahead of the picture the client draws, is a review. The same hits on that picture stay clean. Standing still is not a signal. A leftover that matches another customer is a watch, and it moves them up the scan. A teammate who swings faster than a voice is a watch. A wallhack that never aims at a hidden mover, never stays on the replay, aims at the picture rather than the wire, and does not get quieter when a mover exists stays clean. An assist that matches human lag, human noise, and a noise sequence of its own stays clean. A DMA read of the frame the game actually drew, a capture card looking at pixels, and a cheat that reimplements the official interpolator and waits out the delay, never have to lock the snapshot. A server that scores the wrong timeline frames a legal player. A listen server can forge every field. This does not end cheating. The seal is the hash of the decision and the reasons. A person still reviews."));
 }
+// j and k only. The arrow keys keep scrolling the page.
 document.addEventListener("keydown", event => {
-  if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "j" && event.key !== "k") return;
+  if (event.key !== "j" && event.key !== "k") return;
   if (event.metaKey || event.ctrlKey || event.altKey) return;
   const tag = event.target && event.target.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA") return;
   event.preventDefault();
-  if (event.key === "ArrowDown" || event.key === "j") tapeIndex = Math.min(tapeIds.length - 1, tapeIndex + 1);
-  if (event.key === "ArrowUp" || event.key === "k") tapeIndex = Math.max(0, tapeIndex - 1);
-  const node = document.getElementById(tapeIds[tapeIndex]);
+  const here = tapeHere();
+  const next = event.key === "j" ? Math.min(tapeIds.length - 1, here + 1) : Math.max(0, here - 1);
+  const node = document.getElementById(tapeIds[next]);
   if (node) node.scrollIntoView({block: "start"});
 });
 paint();
+function fitChartText() {
+  stage.querySelectorAll("svg").forEach(svg => {
+    const width = svg.getBoundingClientRect().width;
+    if (width) svg.style.setProperty("--chart-scale", Math.min(1.8, 720 / width).toFixed(3));
+  });
+}
+fitChartText();
+let fitting = 0;
+window.addEventListener("resize", () => {
+  cancelAnimationFrame(fitting);
+  fitting = requestAnimationFrame(fitChartText);
+});
 </script>
 </body>
 </html>

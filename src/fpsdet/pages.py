@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SITE = ROOT / "site"
 PAGE = SITE / "index.html"
 HTML = ("index.html", "scoring.html", "wire.html", "games.html", "source.html")
-LOCAL_DESK = 'href="../demo/board.html"'
+# A prefix, so a deep link such as board.html#card-wire-lock is rewritten too.
+LOCAL_DESK = 'href="../demo/board.html'
 LOCAL_SITE = 'href="../site/'
 
 
@@ -29,7 +30,7 @@ def write_pages(demo: Demo, dest: str | Path | None = None) -> Path:
         if LOCAL_DESK not in text:
             raise ValueError(f"{name} does not link demo/board.html")
         # Published files sit side by side. The repo copies sit in site/ and demo/.
-        (target / name).write_text(text.replace(LOCAL_DESK, 'href="board.html"'), encoding="utf-8")
+        (target / name).write_text(text.replace(LOCAL_DESK, 'href="board.html'), encoding="utf-8")
     css = SITE / "fpsdet.css"
     if not css.is_file():
         raise FileNotFoundError(css)

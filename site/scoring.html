@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="fpsdet.css">
 </head>
 <body class="m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<a class="sr-only bg-watch px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
 <header class="border-b border-line">
   <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-baseline gap-x-6 gap-y-3 px-10 py-5 max-md:px-4">
     <a class="font-serif text-[1.7rem] leading-none tracking-tight text-ink no-underline" href="index.html">fpsdet</a>
@@ -24,15 +25,16 @@
   </div>
 </header>
 
+<main id="main">
 <section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
   <div class="col-span-5 max-lg:col-span-1">
     <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">Scoring</p>
-    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight max-md:text-[2.55rem]">How a line becomes a case.</h1>
+    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight text-balance max-md:text-[2.55rem]">How a line becomes a case.</h1>
   </div>
   <p class="col-span-7 m-0 max-w-3xl text-lg max-lg:col-span-1">Four outcomes: <strong class="font-medium">review</strong>, <strong class="font-medium">watch</strong>, <strong class="font-medium">clean</strong>, or <strong class="font-medium">held</strong> (<code class="font-mono text-[0.92em]">insufficient_data</code>). <code class="font-mono text-[0.92em]">automated_action</code> is always <code class="font-mono text-[0.92em]">none</code>. <code class="font-mono text-[0.92em]">recommended_action</code> is <code class="font-mono text-[0.92em]">human_review</code>, <code class="font-mono text-[0.92em]">monitor</code>, or <code class="font-mono text-[0.92em]">none</code>. A person still decides. This does not end cheating.</p>
 </section>
 
-<main class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
+<div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
   <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">The decision</h2>
   <p class="m-0 mt-4 max-w-3xl">Gear rules can open a review on their own. Combat rates need a thick cohort of humans first. A thin cohort does not flag. The build is reported as untrained.</p>
   <div class="mt-6 overflow-x-auto">
@@ -54,6 +56,120 @@
     </table>
   </div>
   <p class="m-0 mt-4 max-w-5xl text-sm text-muted">A sustained gear break is speed, fire interval, blatant or learned recoil, a same-tick recoil mirror, a metronome on a legal cycle, sustained tracking of a hidden mover, sustained aim on a private replay, aim that matches the wire snapshot ahead of the picture, or aim noise that drops only while the server says this client could not have known.</p>
+
+  <section id="drawn" class="mt-16" aria-labelledby="drawn-title">
+    <h2 id="drawn-title" class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">The four checks, drawn</h2>
+    <p class="m-0 mt-4 max-w-3xl">Each picture is a planted pair from the desk. One opens a case. The other shares the headline number and stays clean. The exact bars are in the cards under it.</p>
+    <div class="mt-8 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
+      <figure id="speed-drawn" class="m-0 flex flex-col border border-line bg-panel p-5">
+        <h3 class="m-0 text-base font-medium">1 · Sustained, not a spike.</h3>
+        <p class="m-0 mt-1 text-sm text-muted">Each square is one server movement sample on a 10 kg kit. The cap is 5.6 m/s.</p>
+        <div class="mt-5 space-y-3">
+        <div aria-hidden="true">
+          <p class="m-0 font-mono text-[11px] text-muted">the bar · 25 samples in a row</p>
+          <div class="mt-1 grid grid-cols-[repeat(32,minmax(0,1fr))]"><span class="col-span-25 h-2 border-x border-t border-muted"></span></div>
+        </div>
+        <div>
+          <p class="m-0 flex flex-wrap items-center justify-between gap-x-3 font-mono text-[12px] text-muted"><span><span class="text-ink">weight-cheat</span> · 7.1 m/s · cause none</span><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-review" aria-hidden="true"></span>review</span></p>
+          <div class="mt-1.5 grid grid-cols-[repeat(32,minmax(0,1fr))] gap-[2px]" role="img" aria-label="weight-cheat: 30 samples in a row over the cap"><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span></div>
+        </div>
+        <div>
+          <p class="m-0 flex flex-wrap items-center justify-between gap-x-3 font-mono text-[12px] text-muted"><span><span class="text-ink">glitch</span> · 15 m/s twice, then 5.0</span><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>clean</span></p>
+          <div class="mt-1.5 grid grid-cols-[repeat(32,minmax(0,1fr))] gap-[2px]" role="img" aria-label="glitch: 2 samples over the cap, then 30 inside it"><span class="h-5 bg-review"></span><span class="h-5 bg-review"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span><span class="h-5 bg-clean"></span></div>
+        </div>
+        <div>
+          <p class="m-0 flex flex-wrap items-center justify-between gap-x-3 font-mono text-[12px] text-muted"><span><span class="text-ink">blasted</span> · 7.1 m/s · cause explosion</span><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>clean</span></p>
+          <div class="mt-1.5 grid grid-cols-[repeat(32,minmax(0,1fr))] gap-[2px]" role="img" aria-label="blasted: 30 samples excluded because the server tagged an explosion"><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span><span class="h-5 bg-info"></span></div>
+        </div>
+        </div>
+        <p class="m-0 mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted"><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-review" aria-hidden="true"></span>over the cap, cause none</span><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-clean" aria-hidden="true"></span>inside the cap</span><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-info" aria-hidden="true"></span>excluded: the server named a cause</span></p>
+        <figcaption class="m-0 mt-auto pt-4 text-sm">Same speed, three answers. A run, not a frame. A cause the server already knew is not a case.</figcaption>
+      </figure>
+      <figure id="clock-drawn" class="m-0 flex flex-col border border-line bg-panel p-5">
+        <h3 class="m-0 text-base font-medium">2 · Same tick, or one shot late.</h3>
+        <p class="m-0 mt-1 text-sm text-muted">Each column is one shot. Up is the kick the server applied. Down is the player’s pull.</p>
+        <div class="mt-5">
+          <p class="m-0 flex flex-wrap items-center justify-between gap-x-3 font-mono text-[12px] text-muted"><span><span class="text-ink">mirror-script</span> · same tick · r −1.00</span><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-review" aria-hidden="true"></span>review</span></p>
+          <svg class="mt-1.5 block h-auto w-full max-w-[560px]" viewBox="0 0 460 96" role="img" aria-label="mirror-script: each pull matches the kick on the same shot">
+            <line x1="0" y1="48" x2="460" y2="48" class="stroke-line" stroke-width="1"/>
+            <path class="fill-watch" d="M15.0 46V18.0Q15.0 16.0 17.0 16.0H29.0Q31.0 16.0 31.0 18.0V46Z M61.0 46V12.0Q61.0 10.0 63.0 10.0H75.0Q77.0 10.0 77.0 12.0V46Z M107.0 46V22.0Q107.0 20.0 109.0 20.0H121.0Q123.0 20.0 123.0 22.0V46Z M153.0 46V8.0Q153.0 6.0 155.0 6.0H167.0Q169.0 6.0 169.0 8.0V46Z M199.0 46V15.0Q199.0 13.0 201.0 13.0H213.0Q215.0 13.0 215.0 15.0V46Z M245.0 46V20.0Q245.0 18.0 247.0 18.0H259.0Q261.0 18.0 261.0 20.0V46Z M291.0 46V10.0Q291.0 8.0 293.0 8.0H305.0Q307.0 8.0 307.0 10.0V46Z M337.0 46V17.0Q337.0 15.0 339.0 15.0H351.0Q353.0 15.0 353.0 17.0V46Z M383.0 46V13.0Q383.0 11.0 385.0 11.0H397.0Q399.0 11.0 399.0 13.0V46Z M429.0 46V19.0Q429.0 17.0 431.0 17.0H443.0Q445.0 17.0 445.0 19.0V46Z"/>
+            <path class="fill-review" d="M15.0 50V78.0Q15.0 80.0 17.0 80.0H29.0Q31.0 80.0 31.0 78.0V50Z M61.0 50V84.0Q61.0 86.0 63.0 86.0H75.0Q77.0 86.0 77.0 84.0V50Z M107.0 50V74.0Q107.0 76.0 109.0 76.0H121.0Q123.0 76.0 123.0 74.0V50Z M153.0 50V88.0Q153.0 90.0 155.0 90.0H167.0Q169.0 90.0 169.0 88.0V50Z M199.0 50V81.0Q199.0 83.0 201.0 83.0H213.0Q215.0 83.0 215.0 81.0V50Z M245.0 50V76.0Q245.0 78.0 247.0 78.0H259.0Q261.0 78.0 261.0 76.0V50Z M291.0 50V86.0Q291.0 88.0 293.0 88.0H305.0Q307.0 88.0 307.0 86.0V50Z M337.0 50V79.0Q337.0 81.0 339.0 81.0H351.0Q353.0 81.0 353.0 79.0V50Z M383.0 50V83.0Q383.0 85.0 385.0 85.0H397.0Q399.0 85.0 399.0 83.0V50Z M429.0 50V77.0Q429.0 79.0 431.0 79.0H443.0Q445.0 79.0 445.0 77.0V50Z"/>
+          </svg>
+        </div>
+        <div class="mt-4">
+          <p class="m-0 flex flex-wrap items-center justify-between gap-x-3 font-mono text-[12px] text-muted"><span><span class="text-ink">late-compensate</span> · each pull answers the shot before · same-tick r near zero</span><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>clean</span></p>
+          <svg class="mt-1.5 block h-auto w-full max-w-[560px]" viewBox="0 0 460 96" role="img" aria-label="late-compensate: each pull answers the previous shot's kick">
+            <line x1="0" y1="48" x2="460" y2="48" class="stroke-line" stroke-width="1"/>
+            <path class="fill-watch" d="M15.0 46V18.0Q15.0 16.0 17.0 16.0H29.0Q31.0 16.0 31.0 18.0V46Z M61.0 46V12.0Q61.0 10.0 63.0 10.0H75.0Q77.0 10.0 77.0 12.0V46Z M107.0 46V22.0Q107.0 20.0 109.0 20.0H121.0Q123.0 20.0 123.0 22.0V46Z M153.0 46V8.0Q153.0 6.0 155.0 6.0H167.0Q169.0 6.0 169.0 8.0V46Z M199.0 46V15.0Q199.0 13.0 201.0 13.0H213.0Q215.0 13.0 215.0 15.0V46Z M245.0 46V20.0Q245.0 18.0 247.0 18.0H259.0Q261.0 18.0 261.0 20.0V46Z M291.0 46V10.0Q291.0 8.0 293.0 8.0H305.0Q307.0 8.0 307.0 10.0V46Z M337.0 46V17.0Q337.0 15.0 339.0 15.0H351.0Q353.0 15.0 353.0 17.0V46Z M383.0 46V13.0Q383.0 11.0 385.0 11.0H397.0Q399.0 11.0 399.0 13.0V46Z M429.0 46V19.0Q429.0 17.0 431.0 17.0H443.0Q445.0 17.0 445.0 19.0V46Z"/>
+            <path class="fill-review" d="M61.0 50V66.0Q61.0 68.0 63.0 68.0H75.0Q77.0 68.0 77.0 66.0V50Z M107.0 50V67.0Q107.0 69.0 109.0 69.0H121.0Q123.0 69.0 123.0 67.0V50Z M153.0 50V63.0Q153.0 65.0 155.0 65.0H167.0Q169.0 65.0 169.0 63.0V50Z M199.0 50V68.0Q199.0 70.0 201.0 70.0H213.0Q215.0 70.0 215.0 68.0V50Z M245.0 50V66.0Q245.0 68.0 247.0 68.0H259.0Q261.0 68.0 261.0 66.0V50Z M291.0 50V65.0Q291.0 67.0 293.0 67.0H305.0Q307.0 67.0 307.0 65.0V50Z M337.0 50V68.0Q337.0 70.0 339.0 70.0H351.0Q353.0 70.0 353.0 68.0V50Z M383.0 50V66.0Q383.0 68.0 385.0 68.0H397.0Q399.0 68.0 399.0 66.0V50Z M429.0 50V67.0Q429.0 69.0 431.0 69.0H443.0Q445.0 69.0 445.0 67.0V50Z"/>
+            <path d="M169 40 C 186 30, 198 46, 201 62" fill="none" class="stroke-ink" stroke-width="1.2"/>
+            <path d="M197 57 l4 6 3-7" fill="none" class="stroke-ink" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <p class="m-0 mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted"><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-watch" aria-hidden="true"></span>kick the server applied</span><span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 bg-review" aria-hidden="true"></span>player command</span></p>
+        <figcaption class="m-0 mt-auto pt-4 text-sm">A script reads the kick and cancels it on that tick. A person sees the kick, then pulls. The pull lands one shot late.</figcaption>
+      </figure>
+      <figure id="hidden-drawn" class="m-0 flex flex-col border border-line bg-panel p-5">
+        <h3 class="m-0 text-base font-medium">3 · A body this client was not sent.</h3>
+        <p class="m-0 mt-1 text-sm text-muted">Top-down. The white dot is this player. The dashed path is an enemy the server has not made visible.</p>
+        <div class="mt-5 grid grid-cols-2 gap-4">
+          <div>
+            <p class="m-0 flex flex-wrap items-center justify-between gap-x-2 font-mono text-[12px] text-muted"><span class="text-ink">wall-eye</span><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-review" aria-hidden="true"></span>review</span></p>
+            <svg class="mt-2 block h-auto w-full" viewBox="0 0 220 160" role="img" aria-label="wall-eye: the crosshair follows an enemy behind the wall">
+            <rect x="98" y="14" width="12" height="132" class="fill-muted" opacity="0.4"/>
+            <path d="M150 25 C 178 45, 160 70, 172 92 S 192 128, 168 146" fill="none" class="stroke-muted" stroke-width="1.5" stroke-dasharray="3 4"/>
+            <circle cx="168" cy="146" r="6" fill="none" class="stroke-muted" stroke-width="1.5"/>
+            <circle cx="30" cy="80" r="7" class="fill-ink"/>
+            <line x1="30" y1="80" x2="151" y2="27" class="stroke-review" stroke-width="1" opacity="0.35"/><line x1="30" y1="80" x2="166" y2="70" class="stroke-review" stroke-width="1" opacity="0.35"/><line x1="30" y1="80" x2="184" y2="120" class="stroke-review" stroke-width="1" opacity="0.35"/>
+            <circle cx="151" cy="27" r="4" class="fill-review stroke-panel" stroke-width="2"/><circle cx="163" cy="38" r="4" class="fill-review stroke-panel" stroke-width="2"/><circle cx="169" cy="53" r="4" class="fill-review stroke-panel" stroke-width="2"/><circle cx="166" cy="70" r="4" class="fill-review stroke-panel" stroke-width="2"/><circle cx="170" cy="88" r="4" class="fill-review stroke-panel" stroke-width="2"/><circle cx="177" cy="104" r="4" class="fill-review stroke-panel" stroke-width="2"/><circle cx="184" cy="120" r="4" class="fill-review stroke-panel" stroke-width="2"/><circle cx="176" cy="136" r="4" class="fill-review stroke-panel" stroke-width="2"/>
+          </svg>
+            <p class="m-0 mt-1 text-[13px] text-muted">The aim follows the hidden mover. 1600 ms across 20 shots.</p>
+          </div>
+          <div>
+            <p class="m-0 flex flex-wrap items-center justify-between gap-x-2 font-mono text-[12px] text-muted"><span class="text-ink">angle-holder</span><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span>clean</span></p>
+            <svg class="mt-2 block h-auto w-full" viewBox="0 0 220 160" role="img" aria-label="angle-holder: the crosshair waits on the corner of the wall">
+            <rect x="98" y="14" width="12" height="132" class="fill-muted" opacity="0.4"/>
+            <path d="M150 25 C 178 45, 160 70, 172 92 S 192 128, 168 146" fill="none" class="stroke-muted" stroke-width="1.5" stroke-dasharray="3 4"/>
+            <circle cx="168" cy="146" r="6" fill="none" class="stroke-muted" stroke-width="1.5"/>
+            <circle cx="30" cy="80" r="7" class="fill-ink"/>
+            <line x1="30" y1="80" x2="118" y2="13" class="stroke-clean" stroke-width="1" opacity="0.5"/>
+            <circle cx="117" cy="11" r="4" class="fill-clean stroke-panel" stroke-width="2"/><circle cx="120" cy="14" r="4" class="fill-clean stroke-panel" stroke-width="2"/><circle cx="116" cy="16" r="4" class="fill-clean stroke-panel" stroke-width="2"/><circle cx="121" cy="10" r="4" class="fill-clean stroke-panel" stroke-width="2"/><circle cx="118" cy="13" r="4" class="fill-clean stroke-panel" stroke-width="2"/>
+          </svg>
+            <p class="m-0 mt-1 text-[13px] text-muted">The aim waits on the corner. 0 ms on a hidden mover.</p>
+          </div>
+        </div>
+        <figcaption class="m-0 mt-auto pt-4 text-sm">Pre-aiming a corner is skill. Tracking a body through the wall needs a fact the official client never drew. The score reads <code class="font-mono text-[0.92em]">hidden_track_ms</code>, not this map.</figcaption>
+      </figure>
+      <figure id="picture-drawn" class="m-0 flex flex-col border border-line bg-panel p-5">
+        <h3 class="m-0 text-base font-medium">4 · The picture is late.</h3>
+        <p class="m-0 mt-1 text-sm text-muted">One enemy running right. The server already sent where they are. The client still draws where they were.</p>
+        <svg class="mt-5 block h-auto w-full max-w-[460px] font-mono" viewBox="56 14 380 180" role="img" aria-label="The wire position is one interpolation delay ahead of the picture position. A person aims at the picture. A packet aimbot aims at the wire.">
+          <line x1="30" y1="128" x2="420" y2="128" class="stroke-line" stroke-width="1"/>
+          <path d="M412 122 l10 6 -10 6" fill="none" class="stroke-muted" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="140" cy="78" r="9" class="fill-info"/>
+          <rect x="131" y="90" width="18" height="38" rx="4" class="fill-info"/>
+          <circle cx="330" cy="78" r="9" fill="none" class="stroke-review" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <rect x="321" y="90" width="18" height="38" rx="4" fill="none" class="stroke-review" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <g class="stroke-ink" stroke-width="1.5" fill="none">
+            <circle cx="140" cy="100" r="15"/><path d="M140 80v8M140 112v8M120 100h8M152 100h8"/>
+            <circle cx="330" cy="100" r="15"/><path d="M330 80v8M330 112v8M310 100h8M342 100h8"/>
+          </g>
+          <text x="140" y="34" text-anchor="middle" class="fill-ink" font-size="16">picture</text>
+          <text x="140" y="52" text-anchor="middle" class="fill-muted" font-size="13">a person aims here</text>
+          <text x="330" y="34" text-anchor="middle" class="fill-ink" font-size="16">wire</text>
+          <text x="330" y="52" text-anchor="middle" class="fill-muted" font-size="13">an aimbot aims here</text>
+          <path d="M140 148v8h190v-8" fill="none" class="stroke-muted" stroke-width="1.2"/>
+          <text x="235" y="180" text-anchor="middle" class="fill-muted" font-size="13">one interpolation delay, 100 ms</text>
+        </svg>
+        <div class="mt-3 grid grid-cols-2 gap-4 font-mono text-[12px] text-muted max-sm:grid-cols-1 max-sm:gap-2">
+          <p class="m-0"><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-review" aria-hidden="true"></span><span class="text-ink">wire-lock</span> · review</span>0.18° off the wire, 2.40° off the picture, 48 shots</p>
+          <p class="m-0"><span class="flex items-center gap-1.5"><span class="h-2 w-2 bg-clean" aria-hidden="true"></span><span class="text-ink">picture-track</span> · clean</span>0.18° off the picture. Same enemy, same hits</p>
+        </div>
+        <figcaption class="m-0 mt-auto pt-4 text-sm">Both crosshairs hit. The case is which position the aim explains, before the delay could have caught up. Standing still puts both in one place, and nothing fires.</figcaption>
+      </figure>
+    </div>
+  </section>
+
 
   <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Gear, from the first match</h2>
   <div class="mt-6 grid grid-cols-2 gap-4 max-lg:grid-cols-1">
@@ -123,6 +239,7 @@
     </article>
   </div>
   <p class="m-0 mt-6">The precise bars, every default, are <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/scoring.md">docs/scoring.md</a> in the repository. The planted answers are on <a class="text-ink underline decoration-line underline-offset-4" href="../demo/board.html">the desk</a>.</p>
+</div>
 </main>
 
 <footer class="border-t border-line">
@@ -134,6 +251,7 @@
       <a class="text-ink no-underline hover:underline" href="games.html">Games</a>
       <a class="text-ink no-underline hover:underline" href="source.html">Source</a>
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
     </p>
   </div>
 </footer>

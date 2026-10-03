@@ -3,6 +3,7 @@ name = "fpsdet"
 version = "0.2.0"
 description = "Server-side human-play and gear-rule baselines for FPS anti-cheat"
 readme = "README.md"
+license = { text = "PolyForm-Small-Business-1.0.0" }
 requires-python = ">=3.11"
 authors = [{ name = "ZeroBandwidth" }]
 dependencies = []

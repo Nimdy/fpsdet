@@ -701,6 +701,20 @@ class DemoTest(unittest.TestCase):
         self.assertIn("The picture is late", html)
         self.assertIn('href="#tape-wire"', html)
 
+    def test_public_answer_key_matches_the_planted_decisions(self):
+        import re
+
+        demo = build_demo()
+        index = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
+        drawn = {}
+        for decision, body in re.findall(r'data-decision="([a-z_]+)">(.*?)</ul>', index, re.S):
+            for player in re.findall(r'#card-([a-z0-9-]+)"', body):
+                drawn[player] = decision
+        self.assertEqual(drawn, {case.player_id: case.decision for case in demo.cases})
+        # Every planted pair on the page opens a player the desk actually has.
+        for player in re.findall(r'board\.html#card-([a-z0-9-]+)"', index):
+            self.assertIn(player, drawn)
+
     def test_public_page_keeps_the_argument_honest(self):
         from fpsdet.pages import write_pages
 
