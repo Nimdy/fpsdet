@@ -9,6 +9,9 @@
 
 It is for indie and small studios, community server operators, and anyone who wants to check how a server can see a cheat that left the PC.
 
+## View the Demo
+https://nimdy.github.io/detect-FPS-hackers/
+
 ## Try it in two minutes
 
 ```bash
