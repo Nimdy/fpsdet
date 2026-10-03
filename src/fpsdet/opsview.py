@@ -113,7 +113,8 @@ OPS_CSS = r"""
 #ops .more-rows { margin-top: 0.6rem; background: transparent; color: var(--signal); border: 1px solid var(--line-bright); border-radius: 6px; padding: 0.3rem 0.7rem; font: inherit; font-size: 0.82rem; cursor: pointer; }
 @media (max-width: 760px) { #ops .hide-sm { display: none; } }
 
-#ops .drawer { position: sticky; top: 64px; max-height: calc(100vh - 80px); overflow: auto; }
+#ops .drawer { position: sticky; top: calc(var(--ops-filter-h, 60px) + 12px); align-self: start; z-index: 1; max-height: calc(100vh - var(--ops-filter-h, 60px) - 24px); overflow: auto; }
+@media (max-width: 1100px) { #ops .drawer { position: static; max-height: none; } }
 #ops .drawer h3 { margin: 0.2rem 0 0; font: 600 1.25rem/1.2 var(--mono, ui-monospace, monospace); color: #fff; word-break: break-all; }
 #ops .drawer h4 { margin: 1rem 0 0.35rem; font: 500 11px/1.4 var(--mono, ui-monospace, monospace); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 #ops .drawer ul.findings { margin: 0; padding: 0 0 0 1rem; font-size: 0.86rem; line-height: 1.45; }
@@ -172,8 +173,13 @@ OPS_HTML = r"""
   </div>
   <div class="ops-grid">
     <article class="ops-card span-12" id="card-truth" hidden></article>
+  </div>
+  <!-- Its own grid: the sticky case panel stops where the queue ends. -->
+  <div class="ops-grid ops-queue-row">
     <article class="ops-card span-8" id="card-queue"></article>
     <aside class="ops-card span-4 drawer" id="ops-drawer" aria-live="polite"></aside>
+  </div>
+  <div class="ops-grid">
     <div class="section-title"><h2>Server health</h2><p>The whole server for the week. Not affected by the filters above.</p></div>
     <article class="ops-card span-7" id="card-coverage"></article>
     <article class="ops-card span-5" id="card-cohort"></article>
@@ -822,6 +828,8 @@ function cohort() {
 // ---- render ----------------------------------------------------------------
 function render() {
   const list = filtered();
+  // The filter row is sticky and can wrap; the case panel sits just under it.
+  root.style.setProperty("--ops-filter-h", document.getElementById("ops-filters").offsetHeight + "px");
   document.getElementById("ops-showing").textContent = `Showing ${nf.format(list.length)} of ${nf.format(rows.length)} players`;
   kpis(list);
   nightly(list);
