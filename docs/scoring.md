@@ -4,6 +4,17 @@ The reference implementation is `src/fpsdet/`. A port in C#, C++, or Go is compa
 
 `automated_action` is always `none`. `recommended_action` is `human_review`, `monitor`, or `none`.
 
+`checks` lists the ids of what fired, so a dashboard can group cases without reading sentences. The ids are:
+
+| Family | Ids |
+| --- | --- |
+| Gear rules | `speed`, `fire_rate`, `metronome`, `recoil_floor`, `recoil_learned`, `mirror` |
+| Human baseline | `accuracy`, `headshot_rate`, `median_distance`, `geometry_rate`, `extra`, `account_jump`, `rank_tail` (the watch-grade tail), `supporting` |
+| Information | `hidden`, `quiet_aim`, `private_replay`, `wire` |
+| Batch | `leftover`, `voice` |
+
+The labels and families are `fpsdet.models.CHECKS`.
+
 ## Cohort
 
 A cohort is one number per player, not one number per shot. The keys are rank band, weapon key, and metric.
@@ -31,16 +42,18 @@ The bound is the one-sided 95% Wilson lower bound, z = 1.6448536269514722.
 Shots are not independent. A player who has one hot match moves every shot in it together. When a player has at least 5 matches on that weapon, the per-match rates give a design effect: the Pearson dispersion `sum((k - n·p)^2 / (n·p·(1-p))) / (matches - 1)`, floored at 1. The Wilson bound is taken on `hits / deff` successes out of `shots / deff` trials. One hot match widens the bound; ten steady matches leave it alone. With fewer than 5 matches the plain bound is used. A design effect of 1.5 or more is written on the case.
 
 - Past the rank: lower bound > the rank band's p95.
-- Past the best measured human: lower bound > the ceiling band's maximum.
+- Past the best measured human: lower bound > the highest value among all thick bands. For accuracy that is almost always the top band. For numbers that rank does not order, such as distance, it is whichever band holds the most extreme human.
 
 Past the best human is the review-grade flag. Past the rank only is a watch-grade flag. A hot 10-shot game has a wide bound and does not clear a maximum.
 
 ## Continuous numbers
 
-Distance and declared `extra_metrics` use the player's median.
+Distance and declared `extra_metrics` use the player's median, tested on a one-sided 95% distribution-free bound from order statistics: the value `floor((n - 1.645·√n) / 2)` places below the middle (or above it, for the low direction). A night of 30 shots gets a wide bound. A week of 300 gets a tight one.
 
-- High direction, past the rank: median > own p95. Past humans: median > the ceiling band's maximum.
-- Low direction, past the rank: median < own p05. Past humans: median < the ceiling band's minimum.
+- High direction, past the rank: lower bound > own p95. Past humans: lower bound > the highest value among all thick bands.
+- Low direction, past the rank: upper bound < own p05. Past humans: upper bound < the lowest value among all thick bands.
+
+Recoil medians use the upper bound in the same way, because low recoil is the finding.
 
 Past humans means past every human measured, the same bar the rates use. The top band's p95 is crossed by one player in twenty on every metric, and the best players are good at all of them at once. An `extra_metrics` row has one distribution (its `group_by`), so its tail is p95/p05 and past humans is its maximum/minimum.
 
@@ -81,11 +94,11 @@ Blatant: a run of at least `recoil_min_run` shots (default 10) whose pitch is un
 
 No floor and no thick cohort: untrained, not flagged.
 
-No floor, thick cohort, and the player's median pitch is under the lowest measured human and under `recoil_floor_fraction` of that cohort's median: learned floor break, review. Sitting in the low tail (under p05) without clearing that gap is only a watch-grade flag. The steadiest legal player on a build is not a review.
+No floor, thick cohort, and the upper bound of the player's median pitch is under the lowest measured human and under `recoil_floor_fraction` of that cohort's median: learned floor break, review. Sitting in the low tail (under p05) without clearing that gap is only a watch-grade flag. The steadiest legal player on a build is not a review.
 
 ## Fire interval
 
-Per match, per weapon id (or weapon class when the id is absent). Gaps under `min_shot_interval_ms - interval_slack_ms` are violations. The finding fires when there are at least `min_intervals` gaps, at least `min_violations` violations, and the violation rate is at least `min_violation_rate`. This is checked even when the aim sample is still too small to score.
+Per match, per weapon id (or weapon class when the id is absent). Gaps under `min_shot_interval_ms - interval_slack_ms` are violations. A match counts when at least `min_violation_rate` of its gaps are violations. The finding fires when the matches that count hold at least `min_intervals` gaps and `min_violations` violations between them. One jittery timestamp in an honest match does not make the match count. A macro switched on in the middle of a week is not diluted by the honest matches before it. This is checked even when the aim sample is still too small to score.
 
 Set the interval to the minimum legal gap between accepted shots. For a burst weapon that is the intra-burst gap, or leave the rule off for that weapon. Slack covers one tick of timestamp jitter. Timestamps are server time.
 
@@ -107,7 +120,7 @@ When the sprays are too few, or `spray_index` is missing, the profile decides. `
 
 ## Metronome
 
-Fire interval catches gaps under the legal line. A macro that fires on the legal line, with no motor noise, does not. Review when there are at least `metronome_min_gaps` (default 40), the mean gap is at or above the legal line, and the sample standard deviation is at or under `metronome_max_std_ms` (default 1.0 ms).
+Fire interval catches gaps under the legal line. A macro that fires on the legal line, with no motor noise, does not. Only the cadence counts: gaps no longer than 2.5 times `min_shot_interval_ms`. Longer gaps are pauses between bursts. They vary the way a person's do, and they would hide a perfect cadence. Each match is judged on its own. A match counts when it has at least 5 cadence gaps, their mean is at or above the legal line, and their sample standard deviation is at or under `metronome_max_std_ms` (default 1.0 ms). Review when the matches that count hold at least `metronome_min_gaps` (default 40) cadence gaps between them.
 
 If the mean is under the legal line, this rule returns nothing and the fire-interval rule owns the case. `WeaponRule.server_paced` true opts that weapon out: the server fired it. If `tick_ms` is set on the profile and every gap equals that tick, the stamps are quantized and the rule stays quiet.
 
@@ -145,11 +158,15 @@ Review when both sides have at least `unknowable_min_samples` (default 12), the 
 
 ## Shared leftover
 
-After the case decisions exist, each player's command is fit to `1 + applied kick + previous kick`. What remains is the leftover. A player needs at least `vendor_min_shots` (default 32) leftover samples on a build.
+After the case decisions exist, each player's command is fit to `1 + applied kick + previous kick`. With `spray_index`, the previous kick is the previous shot of the same spray, and 0 on a spray's first shot. A person reacts to the kick they just felt, not to the end of a spray seconds ago; lagging across that gap leaves the same spike at every spray's first shot, for every player. What remains is the leftover. A player needs at least `vendor_min_shots` (default 32) leftover samples on a weapon.
 
-Only accounts on the same build key are compared; a leftover belongs to a gun. With `spray_index`, each account's leftover is averaged per spray index, and two accounts are compared on the spray indices both have, when there are at least `vendor_min_points` (default 24). That lines up a humanizer table whatever the spray lengths or where the logs start. Without `spray_index`, leftovers are compared on their overlapping prefix of at least `vendor_min_shots`, which only lines up a replay that started on the same shot. When a build has at least `min_cohort_players` accounts, the mean leftover at each index is removed first, so a habit every human on that gun shares is not a match. Pearson correlation at or above `vendor_min_r` (default 0.85) is a match. Twenty-four points at 0.85 is about six standard deviations for unrelated noise.
+Accounts are compared per weapon key. A humanizer table belongs to the tool, so the same table on a stock and a modded rifle still lines up. With `spray_index`, each account's signature is its mean leftover at each spray index reached by at least 3 sprays, divided by that mean's standard error. Each point then carries equal weight, and a late index reached by two sprays cannot decide the correlation alone. Two accounts are compared on the spray indices both have, when there are at least `vendor_min_points` (default 12).
 
-Every pair inside a build is compared. That is fine for a community server and slow for a studio's whole population. Run it per build, per region, or only against accounts that are already a review.
+Without `spray_index`, or with too few qualifying indices (one long spray, say), leftovers are compared on their overlapping prefix of at least `vendor_min_shots`. That only lines up a replay that started on the same shot. When a weapon has at least `min_cohort_players` accounts, the mean signature is removed first, so a habit every human on that gun shares is not a match.
+
+A match needs Pearson r at or above `vendor_min_r` (default 0.85) and a Fisher z, `atanh(r)·√(n−3)`, of at least `vendor_min_z` (default 5). Every pair on a weapon is a test, so the bar has to hold across thousands of them. At 12 points that takes r ≈ 0.93. From about 24 points on, the r floor of 0.85 is the stricter bar. In the synthetic week, 400 honest players produce no matches.
+
+Every pair inside a weapon is compared. That is fine for a community server and slow for a studio's whole population. Run it per region, or only against accounts that are already a review.
 
 A match does not make a review. If either account is already a review, the other becomes a watch and moves up the non-reported scan (`queue_rank` 2). The confirmed account gets an observation only, so its seal stays. If neither is a review, both become watches and the reason says nobody in the pair is a review yet. A flat leftover, a series shorter than the minimum, and independent noise do not match. Comparing the raw command to the raw kick correlates two humans through the kick itself, so that comparison is not used.
 

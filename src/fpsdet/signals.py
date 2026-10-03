@@ -120,25 +120,55 @@ def mirror_check(recoil: RecoilSummary, profile: GameProfile) -> tuple[str | Non
     )
 
 
+# A gap longer than this many cycles is a pause between bursts, not the firing cadence.
+CADENCE_CYCLES = 2.5
+# A match needs this many cadence gaps before its spread means anything.
+METRONOME_MATCH_GAPS = 5
+
+
+def match_gaps(weapon: WeaponSummary) -> list[list[int]]:
+    """Fire gaps one match at a time. A summary built by hand has one pooled list."""
+    if weapon.fire_matches:
+        return list(weapon.fire_matches.values())
+    return [weapon.fire_gaps] if weapon.fire_gaps else []
+
+
 def metronome_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
-    """Legal gaps with no variation. The server-paced weapons opt out."""
+    """Legal gaps with no variation. The server-paced weapons opt out.
+
+    Only the cadence counts: gaps inside a burst. A macro fires a burst, pauses
+    while the player repositions, and fires another; the pauses vary like a
+    person's do, and they would hide a perfect cadence if they were measured.
+    Each match is judged alone, so a macro switched on halfway through the week
+    is not averaged away by the honest matches before it.
+    """
     rule = profile.weapon_rule(weapon.weapon_class, weapon.weapon_key)
     if rule is None or rule.min_shot_interval_ms is None or rule.server_paced:
         return None
-    gaps = weapon.fire_gaps
-    if len(gaps) < profile.metronome_min_gaps:
-        return None
     legal = rule.min_shot_interval_ms - rule.interval_slack_ms
-    mean = sum(gaps) / len(gaps)
-    if mean < legal:
+    steady: list[int] = []
+    spreads: list[float] = []
+    matches = 0
+    for gaps in match_gaps(weapon):
+        cadence = [gap for gap in gaps if gap <= CADENCE_CYCLES * rule.min_shot_interval_ms]
+        if len(cadence) < METRONOME_MATCH_GAPS:
+            continue
+        if sum(cadence) / len(cadence) < legal:
+            continue
+        if profile.tick_ms and all(gap == profile.tick_ms for gap in cadence):
+            continue
+        spread = sample_std([float(gap) for gap in cadence])
+        if spread > profile.metronome_max_std_ms:
+            continue
+        steady.extend(cadence)
+        spreads.append(spread)
+        matches += 1
+    if len(steady) < profile.metronome_min_gaps:
         return None
-    if profile.tick_ms and all(gap == profile.tick_ms for gap in gaps):
-        return None
-    spread = sample_std([float(gap) for gap in gaps])
-    if spread > profile.metronome_max_std_ms:
-        return None
+    mean = sum(steady) / len(steady)
+    where = f" in {matches} matches" if matches > 1 else ""
     return (
-        f"{weapon.weapon_key} fire interval std {spread:.2f} ms across {len(gaps)} legal gaps "
+        f"{weapon.weapon_key} fire interval std {max(spreads):.2f} ms across {len(steady)} legal gaps{where} "
         f"(mean {mean:.0f} ms)"
     )
 
@@ -261,15 +291,28 @@ def smoothness_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     )
 
 
-def command_residual(applied: list[float], command: list[float]) -> list[float] | None:
-    """What is left of the player command after the server kick and its lag are removed."""
+def command_residual(
+    applied: list[float], command: list[float], spray: list[int | None] | None = None
+) -> list[float] | None:
+    """What is left of the player command after the server kick and its lag are removed.
+
+    With spray indices, the lagged kick is the previous shot of the same spray,
+    and nothing at the first shot. A person reacts to the kick they just felt,
+    not to the last shot of a spray that ended seconds ago. Lagging across the
+    gap would leave the same spike at every spray's first shot, for every
+    player, and unrelated accounts would correlate on it.
+    """
     count = min(len(applied), len(command))
     if count < 8:
         return None
+    in_spray = spray is not None and _by_spray(spray, count) is not None
     rows: list[tuple[float, float, float]] = []
     values: list[float] = []
     for index in range(1, count):
-        rows.append((1.0, applied[index], applied[index - 1]))
+        lagged = applied[index - 1]
+        if in_spray and spray[index] != spray[index - 1] + 1:  # type: ignore[index, operator]
+            lagged = 0.0
+        rows.append((1.0, applied[index], lagged))
         values.append(command[index])
     coeff = _solve3(rows, values)
     if coeff is None:
@@ -284,25 +327,41 @@ def command_residual(applied: list[float], command: list[float]) -> list[float] 
     return residual
 
 
-def leftover_signature(recoil: RecoilSummary) -> tuple[dict[tuple[str, int], float], int] | None:
+def leftover_signature(
+    recoil: RecoilSummary, min_points: int = 12
+) -> tuple[dict[tuple[str, int], float], int] | None:
     """The leftover, keyed so two accounts line up shot for shot.
 
     With spray_index, each point is the average leftover at that spray index,
     so a humanizer table lines up across accounts whatever their spray lengths
-    or where their logs start. Without it, points are keyed by position in the
-    log, which only lines up a replay that starts at the same shot.
+    or where their logs start. Each average is divided by its standard error, so
+    every point has the same weight: a late spray index reached by two sprays is
+    noisy, and unscaled it would decide the correlation by itself. Indices
+    reached by fewer than PATTERN_MIN_SPRAYS sprays are left out. Without
+    spray_index, or with fewer than ``min_points`` indices that qualify (one long
+    spray, say), points are keyed by position in the log, which only lines up a
+    replay that starts at the same shot.
     Returns (points, leftover samples).
     """
-    residual = command_residual(recoil.applied, recoil.compensation)
+    residual = command_residual(recoil.applied, recoil.compensation, recoil.spray)
     if residual is None:
         return None
     count = min(len(recoil.applied), len(recoil.compensation))
+    by_position = {("position", index): value for index, value in enumerate(residual, start=1)}
     if _by_spray(recoil.spray, count) is None:
-        return {("position", index): value for index, value in enumerate(residual, start=1)}, len(residual)
+        return by_position, len(residual)
     sums: dict[int, list[float]] = defaultdict(list)
     for position, value in enumerate(residual, start=1):
         sums[recoil.spray[position]].append(value)  # type: ignore[index]
-    return {("spray", index): sum(rows) / len(rows) for index, rows in sums.items()}, len(residual)
+    spread = sample_std(residual)
+    points = {
+        ("spray", index): (sum(rows) / len(rows)) * math.sqrt(len(rows)) / spread
+        for index, rows in sums.items()
+        if len(rows) >= PATTERN_MIN_SPRAYS
+    }
+    if len(points) < min_points:
+        return by_position, len(residual)
+    return points, len(residual)
 
 
 def _solve3(

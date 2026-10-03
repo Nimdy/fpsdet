@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+from collections import Counter
 import math
 import random
 import tempfile
@@ -29,6 +30,8 @@ from fpsdet.models import (
 )
 from fpsdet.casefile import safe_name
 from fpsdet.cli import main as cli_main
+from fpsdet.ops import merge_payloads, merge_queue, week_payload
+from fpsdet.week import WIRE_SHIPS, build_week
 from fpsdet.parse import ParseError, load_events, load_profile, parse_event, profile_from_dict
 from fpsdet.persist import case_to_dict, write_json
 from fpsdet.pipeline import run_score
@@ -47,7 +50,7 @@ from fpsdet.signals import (
     smoothness_break,
     wire_break,
 )
-from fpsdet.statsutil import clustered_lower, design_effect, percentile, wilson_lower
+from fpsdet.statsutil import clustered_lower, design_effect, median_bound, percentile, wilson_lower
 from fpsdet.summarize import summarize
 from fpsdet.board import render_board
 from fpsdet.synthetic import PROFILE_PATH, ROOT, build_demo
@@ -1484,7 +1487,7 @@ class VendorAlignmentTest(unittest.TestCase):
         rng = random.Random(5)
         table = [rng.uniform(-0.4, 0.4) for _ in range(30)]
 
-        def customer(seed: int, lengths: list[int], build: str = "ak|") -> RecoilSummary:
+        def customer(seed: int, lengths: list[int], build: str = "ak|", weapon: str = "rifle") -> RecoilSummary:
             local = random.Random(seed)
             applied, command, spray = [], [], []
             for length in lengths:
@@ -1493,7 +1496,7 @@ class VendorAlignmentTest(unittest.TestCase):
                     applied.append(kick)
                     command.append(-kick + table[k] + local.gauss(0, 0.02))
                     spray.append(k)
-            return RecoilSummary(build, "rifle", "average", applied=applied, compensation=command, spray=spray)
+            return RecoilSummary(build, weapon, "average", applied=applied, compensation=command, spray=spray)
 
         def honest(seed: int, lengths: list[int]) -> RecoilSummary:
             local = random.Random(seed)
@@ -1514,17 +1517,20 @@ class VendorAlignmentTest(unittest.TestCase):
         # Different spray lengths and a different first spray: the log positions never line up.
         first = customer(1, [30, 30, 30, 30])
         second = customer(2, [12, 30, 25, 30, 28])
-        other_gun = customer(3, [30, 30, 30], build="m4|")
+        # The same tool on a modded rifle still lines up. A different weapon is never compared.
+        modded = customer(5, [30, 30, 30], build="ak|compensator")
+        other_gun = customer(3, [30, 30, 30], build="vector|", weapon="smg")
         stranger = honest(4, [30, 26, 30, 30])
-        cases = {pid: _bare_case(pid, "clean") for pid in ("first", "second", "other-gun", "stranger")}
+        cases = {pid: _bare_case(pid, "clean") for pid in ("first", "second", "modded", "other-gun", "stranger")}
         annotate_vendors(
             list(cases.values()),
-            [record("first", first), record("second", second),
+            [record("first", first), record("second", second), record("modded", modded),
              record("other-gun", other_gun), record("stranger", stranger)],
             profile,
         )
-        self.assertEqual(cases["first"].vendor_twin, "second")
+        self.assertIn(cases["first"].vendor_twin, ("second", "modded"))
         self.assertEqual(cases["second"].decision, "watch")
+        self.assertEqual(cases["modded"].decision, "watch")
         self.assertEqual(cases["other-gun"].decision, "clean")
         self.assertEqual(cases["stranger"].decision, "clean")
 
@@ -1590,6 +1596,176 @@ class PlumbingTest(unittest.TestCase):
             self.assertTrue(any(player.startswith("pop-elite") for player in players))
             moved = [event for event in events if event.player_id == "blasted" and event.event_type == "movement"]
             self.assertTrue(moved and all(event.displacement_cause == "explosion" for event in moved))
+
+
+class PopulationTest(unittest.TestCase):
+    """The synthetic week: four hundred players, seventeen planted cheats, scored nightly and weekly.
+
+    A rule that is fine on one planted player and noisy on a population shows up here.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.week = build_week()
+        cls.queue = merge_queue(cls.week.cases, cls.week.nightly)
+        cls.payload = week_payload(cls.week)
+
+    def _decisions(self, label: str) -> list[str]:
+        return [self.queue[pid].decision for pid, truth in self.week.truth.items() if truth == label]
+
+    def test_no_honest_player_reaches_review(self):
+        framed = [pid for pid, truth in self.week.truth.items() if truth == "honest" and self.queue[pid].decision == "review"]
+        self.assertEqual(framed, [])
+
+    def test_honest_watch_rate_is_small(self):
+        honest = self._decisions("honest")
+        self.assertLessEqual(honest.count("watch"), len(honest) * 0.02)
+
+    def test_blatant_cheats_reach_review(self):
+        for label in ("speed", "rage", "no-recoil", "mirror", "fire-rate", "metronome", "wallhack", "quiet-radar", "wire", "esp"):
+            self.assertEqual(set(self._decisions(label)), {"review"}, label)
+
+    def test_teammate_on_a_wallhacker_call_is_a_watch(self):
+        friend = next(pid for pid, truth in self.week.truth.items() if truth == "radar-friend")
+        self.assertEqual(self.queue[friend].decision, "watch")
+        self.assertIn("voice", self.queue[friend].checks)
+
+    def test_payload_reports_what_the_server_sent(self):
+        self.assertTrue(self.payload["synthetic"])
+        self.assertEqual(len(self.payload["rows"]), self.payload["totals"]["players"])
+        wire = next(row for row in self.payload["coverage"] if row["field"] == "wire_error_deg")
+        self.assertEqual(wire["daily"][:WIRE_SHIPS], [0.0] * WIRE_SHIPS)
+        self.assertTrue(all(share > 0.99 for share in wire["daily"][WIRE_SHIPS:]))
+        counts = Counter(row["decision"] for row in self.payload["rows"])
+        self.assertEqual(counts, Counter(case.decision for case in self.queue.values()))
+        self.assertTrue(all(len(row["nights"]) == len(self.week.days) for row in self.payload["rows"]))
+
+
+class OpsTest(unittest.TestCase):
+    def _row(self, pid: str, decision: str) -> dict:
+        return {"id": pid, "decision": decision, "reports": 0, "checks": [], "why": "", "nights": [], "first": None, "metrics": []}
+
+    def _payload(self, rows: list[dict]) -> dict:
+        return {"rows": rows, "totals": {"events": 10, "shots": 8, "movement": 2, "matches": 1, "players": len(rows)}}
+
+    def test_a_nightly_review_stays_open(self):
+        first = self._payload([self._row("a", "review"), self._row("b", "watch")])
+        second = self._payload([self._row("a", "clean"), self._row("b", "clean"), self._row("c", "watch")])
+        merged = merge_payloads([first, second], ["2026-09-26", "2026-09-27"])
+        rows = {row["id"]: row for row in merged["rows"]}
+        self.assertEqual(rows["a"]["decision"], "review")
+        self.assertEqual(rows["a"]["nights"], ["R", "C"])
+        self.assertEqual(rows["a"]["first"], 0)
+        # A watch is a monitor flag. The latest run decides it.
+        self.assertEqual(rows["b"]["decision"], "clean")
+        self.assertEqual(rows["c"]["nights"], ["", "W"])
+        self.assertEqual(merged["days"][0]["label"], "Sat 26")
+
+    def test_score_writes_a_dashboard_and_dashboard_merges_runs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            nights = [Path(tmp) / "2026-10-01", Path(tmp) / "2026-10-02"]
+            with contextlib.redirect_stdout(io.StringIO()):
+                for night in nights:
+                    self.assertEqual(cli_main(["score", str(ROOT / "examples" / "shot.jsonl"), "--profile", str(PROFILE_PATH), "--out", str(night)]), 0)
+                self.assertEqual(cli_main(["dashboard", *map(str, nights), "--out", str(Path(tmp) / "week.html")]), 0)
+            self.assertTrue((nights[0] / "dashboard.html").is_file())
+            html = (Path(tmp) / "week.html").read_text(encoding="utf-8")
+            marker = '<script id="ops-payload" type="application/json">'
+            start = html.index(marker) + len(marker)
+            payload = json.loads(html[start:html.index("</script>", start)])
+            self.assertEqual([day["label"] for day in payload["days"]], ["Thu 01", "Fri 02"])
+            self.assertEqual(payload["rows"][0]["id"], "p-1044")
+            self.assertEqual(len(payload["rows"][0]["nights"]), 2)
+            with self.assertRaises(SystemExit):
+                cli_main(["dashboard", str(Path(tmp) / "missing")])
+
+    def test_board_opens_on_operations_and_keeps_the_answer_key(self):
+        html = render_board(build_demo())
+        self.assertIn('role="tablist"', html)
+        self.assertLess(html.index('id="ops"'), html.index('id="key"'))
+        self.assertIn("The answer key.", html)
+        marker = '<script id="ops-payload" type="application/json">'
+        start = html.index(marker) + len(marker)
+        payload = json.loads(html[start:html.index("</script>", start)])
+        self.assertTrue(payload["synthetic"])
+        self.assertEqual(payload["tape_base"], "")
+        self.assertEqual(payload["tapes"]["mirror"], "tape-mirror")
+
+
+class CadenceTest(unittest.TestCase):
+    def setUp(self):
+        self.profile = GameProfile(game_id="t", weapons={"rifle": WeaponRule(min_shot_interval_ms=90, interval_slack_ms=15)})
+
+    def _weapon(self, matches: dict[str, list[int]]) -> WeaponSummary:
+        gaps = [gap for rows in matches.values() for gap in rows]
+        return WeaponSummary("rifle", "rifle", "average", fire_gaps=gaps, fire_matches=matches)
+
+    def test_a_macro_switched_on_midweek_is_judged_on_its_own_matches(self):
+        honest = {f"h{i}": [100 + (k * 17) % 60 for k in range(20)] for i in range(4)}
+        macro = {"m1": [140] * 9 + [4200] + [140] * 12, "m2": [140] * 14 + [2500] + [140] * 8}
+        weapon = self._weapon({**honest, **macro})
+        pooled = WeaponSummary("rifle", "rifle", "average", fire_gaps=weapon.fire_gaps)
+        self.assertIsNone(metronome_break(pooled, self.profile))
+        found = metronome_break(weapon, self.profile)
+        self.assertIn("std 0.00", found)
+        self.assertIn("in 2 matches", found)
+        self.assertIsNone(metronome_break(self._weapon(honest), self.profile))
+
+    def test_fire_rate_is_judged_per_match(self):
+        honest = {f"h{i}": [110 + k % 40 for k in range(30)] for i in range(3)}
+        rapid = {"r1": [50] * 25}
+        record = PlayerRecord("p", "t", "average", weapons=[self._weapon({**honest, **rapid})])
+        case = assess_player(record, CohortTable(), self.profile)
+        self.assertEqual(case.decision, "review")
+        self.assertIn("fire_rate", case.checks)
+        # One jittery honest gap per match is not a habit.
+        jitter = {f"j{i}": [110] * 28 + [60] for i in range(8)}
+        clean = assess_player(PlayerRecord("q", "t", "average", weapons=[self._weapon(jitter)]), CohortTable(), self.profile)
+        self.assertNotIn("fire_rate", clean.checks)
+
+
+class BoundTest(unittest.TestCase):
+    def test_a_short_sample_gets_a_wide_median_bound(self):
+        short = [30.0, 31.0, 29.0, 35.0, 28.0, 33.0, 30.5, 34.0, 32.0]
+        self.assertLess(median_bound(short, upper=False), 29.5)
+        long = [30.0 + (i % 7) * 0.5 for i in range(400)]
+        self.assertGreaterEqual(median_bound(long, upper=False), 31.0)
+        self.assertGreaterEqual(median_bound(short, upper=True), 33.0)
+
+    def test_past_every_human_means_every_band(self):
+        profile = GameProfile(game_id="t", min_shots=40, min_cohort_players=30)
+        table = CohortTable()
+        for index in range(40):
+            table.add("developing", "rifle", "median_distance", f"d{index}", 30.0 + index * 0.25)
+            table.add("elite", "rifle", "median_distance", f"e{index}", 25.0 + index * 0.15)
+        # 35 m is past the farthest elite (30.9) and inside the farthest developing player (39.75).
+        record = PlayerRecord("long", "t", "elite", weapons=[_rifle("long", "elite", 80, 20, 5, 35.0)])
+        view = next(row for row in assess_player(record, table, profile).metrics if row.name == "median_distance")
+        self.assertFalse(view.beyond_human)
+        self.assertEqual(view.ceiling_band, "developing")
+
+
+class HonestLeftoverTest(unittest.TestCase):
+    def test_honest_players_with_ordinary_sprays_do_not_match_each_other(self):
+        profile = GameProfile(game_id="t")
+        records, cases = [], []
+        for index in range(60):
+            rng = random.Random(index)
+            gain = rng.uniform(0.3, 0.6)
+            applied, command, spray = [], [], []
+            for _ in range(rng.randint(25, 45)):
+                before = 0.0
+                for k in range(rng.randint(1, 14)):
+                    kick = rng.uniform(0.8, 2.4)
+                    applied.append(kick)
+                    command.append(-gain * before + rng.gauss(0, 0.08))
+                    spray.append(k)
+                    before = kick
+            pid = f"h{index}"
+            records.append(PlayerRecord(pid, "t", "average", recoils=[RecoilSummary("ak|", "rifle", "average", applied=applied, compensation=command, spray=spray)]))
+            cases.append(_bare_case(pid, "clean"))
+        annotate_vendors(cases, records, profile)
+        self.assertEqual([case.player_id for case in cases if case.decision != "clean"], [])
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from pathlib import Path
 
 from .models import GameProfile, curve_speed
+from .ops import week_payload
+from .opsview import OPS_CSS, OPS_HTML, OPS_JS, payload_json
 from .signals import WIRE_ERROR_RATIO, WIRE_MIN_GAP_DEG, command_residual, pearson
 from .statsutil import median
 from .synthetic import Demo, replay_scene
+from .week import build_week
 
 # Tour order. The queue is a story, not an alphabetical dump.
 TOUR = [
@@ -664,9 +668,22 @@ def board_payload(demo: Demo) -> dict:
     }
 
 
-def render_board(demo: Demo) -> str:
+@lru_cache(maxsize=2)
+def _week_ops(seed: int) -> str:
+    """The synthetic week through the operations view. Built once per process: it scores eight batches."""
+    payload = week_payload(build_week(seed))
+    payload["tape_base"] = ""  # the tapes are on this page
+    return payload_json(payload)
+
+
+def render_board(demo: Demo, week_seed: int = 7) -> str:
     payload = json.dumps(board_payload(demo), separators=(",", ":")).replace("<", "\\u003c")
-    return _SHELL.replace("/*__DATA__*/", payload)
+    shell = (
+        _SHELL.replace("/*__OPS_CSS__*/", OPS_CSS)
+        .replace("<!--__OPS_HTML__-->", OPS_HTML)
+        .replace("/*__OPS_JS__*/", OPS_JS)
+    )
+    return shell.replace("/*__OPS__*/", _week_ops(week_seed)).replace("/*__DATA__*/", payload)
 
 
 def write_board(demo: Demo, path: str | Path | None = None) -> Path:
@@ -681,7 +698,7 @@ _SHELL = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>10 kg, running like 3 kg — fpsdet</title>
+<title>Review desk — fpsdet</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="../site/fpsdet.css">
 <style>
@@ -978,11 +995,24 @@ svg { width: 100%; height: auto; display: block; }
   .facts { grid-template-columns: 1fr 1fr 1fr; }
   .tape, .card { scroll-margin-top: 5.6rem; }
 }
+.deskbar { padding: 0.8rem 1.4rem 0; }
+.deskbar .mast { margin: 0; padding: 0 0 0.7rem; border-bottom: 0; }
+.tabs { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.25rem; }
+.tabs a[role=tab] { padding: 0.55rem 1rem 0.6rem; border: 1px solid transparent; border-bottom: 0; border-radius: 8px 8px 0 0; color: var(--muted); text-decoration: none; font-size: 0.92rem; }
+.tabs a[role=tab] span { margin-right: 0.45rem; font-family: var(--mono, ui-monospace, monospace); font-size: 11px; color: var(--signal); }
+.tabs a[role=tab]:hover { color: var(--ink); }
+.tabs a[role=tab][aria-selected=true] { color: #fff; background: var(--panel); border-color: var(--line); box-shadow: inset 0 2px 0 var(--signal); }
+.tabs a[role=tab]:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
+.tabs .status-pill { margin: 0 0 0.45rem auto; }
+#key[hidden] { display: none; }
+/* The scanlines are the site's look. Over a chart they stripe the data, so the operations view drops them. */
+body.view-ops::after { content: none; }
+/*__OPS_CSS__*/
 </style>
 </head>
 <body>
 <div class="zb-backdrop" aria-hidden="true"></div>
-<header>
+<header class="deskbar">
   <nav class="mast" aria-label="Site">
     <a class="mark" href="../site/index.html"><span class="pulse-dot" aria-hidden="true"></span><span>fps<span class="sig">det</span></span></a>
     <a class="by" href="https://zerobandwidth.com">by Zero<span class="sig">Bandwidth</span></a>
@@ -991,12 +1021,20 @@ svg { width: 100%; height: auto; display: block; }
     <a class="nav-link" href="../site/wire.html"><span>03</span>Wire a game</a>
     <a class="nav-link" href="../site/games.html"><span>04</span>Games</a>
     <a class="nav-link" href="../site/source.html"><span>05</span>Source</a>
-    <a class="nav-link" href="#tape-speed" aria-current="page"><span>06</span>Desk</a>
+    <a class="nav-link" href="#ops" aria-current="page"><span>06</span>Desk</a>
   </nav>
+  <div class="tabs" role="tablist" aria-label="Desk views">
+    <a role="tab" id="tab-ops" href="#ops" aria-controls="ops" aria-selected="true"><span>A</span>Operations · a synthetic week</a>
+    <a role="tab" id="tab-key" href="#key" aria-controls="key" aria-selected="false"><span>B</span>Answer key · 32 planted players</a>
+    <p class="status-pill"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
+  </div>
+</header>
+<!--__OPS_HTML__-->
+<div id="key" role="tabpanel" aria-labelledby="tab-key" hidden>
+<header>
   <div class="topline">
     <p class="brand">fpsdet review desk · <span id="game"></span></p>
     <p class="counts" id="counts"></p>
-    <p class="rule status-pill"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
   <h1>The answer key.</h1>
   <p class="section-lede">Thirty-two planted players. Expect 11 review, 4 watch, 16 clean, 1 held. The first tape is 10 kg on the ground, running like 3 kg, beside the same sprint tagged as a blast. The blast stays clean. Nothing on this page bans.</p>
@@ -1019,7 +1057,10 @@ svg { width: 100%; height: auto; display: block; }
   <nav id="queue" aria-label="Planted players"></nav>
   <main id="stage"></main>
 </div>
-<noscript><p class="noscript">This desk draws the tapes with JavaScript. The terminal printed the same thirty-two decisions.</p></noscript>
+</div>
+<noscript><p class="noscript">This desk draws the queue and the tapes with JavaScript. The terminal printed the same thirty-two decisions.</p></noscript>
+<script id="ops-payload" type="application/json">/*__OPS__*/</script>
+<script>/*__OPS_JS__*/</script>
 <script id="payload" type="application/json">/*__DATA__*/</script>
 <script>
 const data = JSON.parse(document.getElementById("payload").textContent);
@@ -1878,6 +1919,7 @@ function paint() {
 // j and k only. The arrow keys keep scrolling the page.
 document.addEventListener("keydown", event => {
   if (event.key !== "j" && event.key !== "k") return;
+  if (document.getElementById("key").hidden) return;
   if (event.metaKey || event.ctrlKey || event.altKey) return;
   const tag = event.target && event.target.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA") return;
@@ -1900,6 +1942,40 @@ window.addEventListener("resize", () => {
   cancelAnimationFrame(fitting);
   fitting = requestAnimationFrame(fitChartText);
 });
+
+// Two views on one page. A link into the answer key (#tape-…, #card-…, #still, #key)
+// opens it; anything else opens the operations view.
+function viewFor(hash) {
+  return /^#(tape-|card-|still|key$)/.test(hash) ? "key" : "ops";
+}
+function showView(view) {
+  const key = document.getElementById("key");
+  const ops = document.getElementById("ops");
+  key.hidden = view !== "key";
+  ops.hidden = view !== "ops";
+  document.getElementById("tab-key").setAttribute("aria-selected", String(view === "key"));
+  document.getElementById("tab-ops").setAttribute("aria-selected", String(view === "ops"));
+  document.body.classList.toggle("view-ops", view === "ops");
+  if (view === "key") fitChartText();
+  else if (window.fpsdetOpsRender) window.fpsdetOpsRender();
+}
+function route() {
+  const hash = location.hash;
+  const view = viewFor(hash);
+  showView(view);
+  if (view === "key" && hash.length > 1 && hash !== "#key") {
+    // After the tab is visible and laid out, or the browser lands above the card.
+    requestAnimationFrame(() => {
+      const node = document.getElementById(hash.slice(1));
+      if (node) node.scrollIntoView({block: "start"});
+    });
+  } else if (hash === "#key" || hash === "#ops") {
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }
+}
+window.addEventListener("hashchange", route);
+route();
+window.addEventListener("load", () => { if (viewFor(location.hash) === "key") route(); });
 </script>
 </body>
 </html>

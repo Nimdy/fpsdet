@@ -96,6 +96,7 @@ def case_to_dict(case: Case) -> dict:
             "beyond_band": row.beyond_band,
             "beyond_human": row.beyond_human,
             "skipped": row.skipped,
+            "key": row.key,
         }
 
     speed = None
@@ -137,6 +138,7 @@ def case_to_dict(case: Case) -> dict:
         "vendor_twin": case.vendor_twin,
         "vendor_r": case.vendor_r,
         "inherit_lags_ms": case.inherit_lags_ms,
+        "checks": case.checks,
     }
 
 

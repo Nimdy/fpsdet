@@ -35,6 +35,25 @@ class CohortTable:
     def dist(self, band: str, key: str, metric: str, exclude: str | None) -> Dist | None:
         return make_dist(self.series(band, key, metric, exclude))
 
+    def extreme(
+        self, key: str, metric: str, exclude: str | None, min_players: int, *, high: bool
+    ) -> tuple[str, float] | None:
+        """The most extreme human measured in any thick band, and that band.
+
+        Rank does not order every number. Long engagements are a habit of
+        some players in every band, so "past every measured human" looks at all
+        of them, not only the top band.
+        """
+        best: tuple[str, float] | None = None
+        for band in (*BANDS, "unrated"):
+            values = self.series(band, key, metric, exclude)
+            if len(values) < min_players:
+                continue
+            value = max(values) if high else min(values)
+            if best is None or (value > best[1] if high else value < best[1]):
+                best = (band, value)
+        return best
+
     def ceiling_band(
         self, key: str, metric: str, exclude: str | None, min_players: int
     ) -> str | None:

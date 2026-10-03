@@ -66,6 +66,24 @@ def wilson_upper(successes: float, n: float) -> float:
     return wilson_bound(successes, n, upper=True)
 
 
+def median_bound(values: list[float], *, upper: bool) -> float:
+    """One-sided 95% distribution-free bound on a median, from order statistics.
+
+    The median's rank is uncertain by about z * sqrt(n) / 2 places. Taking the
+    value that many places below (or above) the middle gives a bound that is
+    wide for a short sample and tight for a long one, the way the Wilson bound
+    is for a rate. A night of 30 shots cannot put a median past a line that a
+    week of 300 would not.
+    """
+    if not values:
+        raise ValueError("median_bound of empty")
+    ys = sorted(values)
+    n = len(ys)
+    rank = math.floor((n - Z95 * math.sqrt(n)) / 2)
+    rank = min(max(rank, 1), n)
+    return ys[n - rank] if upper else ys[rank - 1]
+
+
 # Fewer matches than this and the between-match spread is not measurable.
 DESIGN_MIN_GROUPS = 5
 

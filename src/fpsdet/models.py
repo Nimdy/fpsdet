@@ -117,7 +117,8 @@ class GameProfile:
     unknowable_jitter_ratio: float = 0.35
     vendor_min_r: float = 0.85
     vendor_min_shots: int = 32
-    vendor_min_points: int = 24
+    vendor_min_points: int = 12
+    vendor_min_z: float = 5.0
     voice_min_ms: int = 350
     inherit_min_events: int = 4
     reference_lightest_speed_mps: float | None = None
@@ -174,7 +175,7 @@ def weight_class_name(profile: GameProfile, kg: float | None) -> str:
     return chosen.name or f"le-{chosen.max_kg:g}kg"
 
 
-@dataclass
+@dataclass(slots=True)
 class Event:
     game_id: str
     match_id: str
@@ -234,6 +235,8 @@ class WeaponSummary:
     fire_intervals: int = 0
     fire_violations: int = 0
     fire_gaps: list[int] = field(default_factory=list)
+    # The same gaps, one list per match and gun. A cheat switched on mid-week is judged on its own matches.
+    fire_matches: dict[str, list[int]] = field(default_factory=dict)
     hidden_track_ms: list[float] = field(default_factory=list)
     private_track_ms: list[float] = field(default_factory=list)
     wire_error_deg: list[float] = field(default_factory=list)
@@ -326,6 +329,7 @@ class MetricView:
     beyond_band: bool = False
     beyond_human: bool = False
     skipped: str | None = None
+    key: str = ""  # the weapon key or extra group the number belongs to
 
 
 @dataclass
@@ -351,11 +355,38 @@ class Case:
     vendor_twin: str = ""
     vendor_r: float | None = None
     inherit_lags_ms: list[int] = field(default_factory=list)
+    # Machine-readable ids of what fired, from CHECKS. Dashboards group on these, not on reason text.
+    checks: list[str] = field(default_factory=list)
     limits: str = (
         "This case is evidence for a person. It is not a ban. "
         "A sustained gear-rule break or a result past the best measured humans "
         "is the finding. One wild frame is not."
     )
+
+
+# id -> (family, label). A case lists the ids that fired in ``Case.checks``.
+CHECKS: dict[str, tuple[str, str]] = {
+    "speed": ("gear", "Speed over the gear cap"),
+    "fire_rate": ("gear", "Faster than the gun cycles"),
+    "metronome": ("gear", "Legal cycle, no human variation"),
+    "recoil_floor": ("gear", "Recoil under the build floor"),
+    "recoil_learned": ("gear", "Recoil under every human on the build"),
+    "mirror": ("gear", "Command mirrors the kick, same tick"),
+    "accuracy": ("baseline", "Accuracy past every human"),
+    "headshot_rate": ("baseline", "Headshots past every human"),
+    "median_distance": ("baseline", "Distance past every human"),
+    "geometry_rate": ("baseline", "Through geometry past every human"),
+    "extra": ("baseline", "Declared metric past every human"),
+    "account_jump": ("baseline", "Account stopped looking like itself"),
+    "rank_tail": ("baseline", "Above this rank, inside humans"),
+    "supporting": ("baseline", "Supporting tell (snaps, timing)"),
+    "hidden": ("information", "Aim on a hidden mover"),
+    "quiet_aim": ("information", "Quiet only while unknowable"),
+    "private_replay": ("information", "Aim on a private replay"),
+    "wire": ("information", "Aim on the wire, not the picture"),
+    "leftover": ("batch", "Shared humanizer leftover"),
+    "voice": ("batch", "Teammate faster than a voice"),
+}
 
 
 ACTIONS = {

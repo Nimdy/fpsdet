@@ -29,6 +29,8 @@ from .pipeline import run_score
 from .priority import review_order, scan_order
 from .summarize import summarize
 from .board import write_board
+from .ops import merge_payloads, ops_payload, read_ops, write_ops
+from .opsview import render_dashboard
 from .pages import write_pages
 from .signals import poison_alarms
 from .synthetic import build_demo, demo_rows
@@ -42,7 +44,7 @@ def _print_cases(cases) -> None:
         print(f"{case.player_id:<22} {case.decision:<18} {case.reports:7d}  {why[:88]}")
 
 
-def _write_outputs(cases, out: str, *, ai: bool) -> None:
+def _write_outputs(cases, out: str, *, ai: bool, ops: dict | None = None) -> None:
     folder = Path(out)
     folder.mkdir(parents=True, exist_ok=True)
     if ai:
@@ -54,6 +56,9 @@ def _write_outputs(cases, out: str, *, ai: bool) -> None:
     write_json(folder / "scan-index.json", {"order": "reports_first", "cases": scan})
     write_json(folder / "review-index.json", {"order": "evidence_first", "cases": review})
     _write_features(cases, folder / "features.csv")
+    if ops is not None:
+        write_ops(folder / "ops.json", ops)
+        (folder / "dashboard.html").write_text(render_dashboard(ops), encoding="utf-8")
 
 
 def _attach_ai(cases) -> None:
@@ -218,13 +223,30 @@ def cmd_score(args: argparse.Namespace) -> int:
     cases = run_score(events, profile, cohort, history, reports)
     _print_cases(cases)
     if args.out:
-        _write_outputs(cases, args.out, ai=args.ai)
-        print(f"Wrote {len(cases)} cases to {args.out}")
+        table = cohort if cohort is not None else build_cohorts(summarize(events, profile), profile)
+        ops = ops_payload(profile=profile, cases=cases, events=events, cohort=table)
+        _write_outputs(cases, args.out, ai=args.ai, ops=ops)
+        print(f"Wrote {len(cases)} cases to {args.out}, with ops.json and dashboard.html")
     elif args.ai:
         _attach_ai(cases)
         for case in review_order(cases):
             if case.ai_brief:
                 print(f"\n{case.player_id}: {case.ai_brief}")
+    return 0
+
+
+def cmd_dashboard(args: argparse.Namespace) -> int:
+    folders = [Path(folder) for folder in args.folders]
+    try:
+        payloads = [read_ops(folder) for folder in folders]
+    except FileNotFoundError as error:
+        raise SystemExit(str(error))
+    payload = payloads[0] if len(payloads) == 1 else merge_payloads(payloads, [folder.name for folder in folders])
+    target = Path(args.out)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(render_dashboard(payload), encoding="utf-8")
+    nights = f" across {len(folders)} runs" if len(folders) > 1 else ""
+    print(f"Wrote {target}: {len(payload['rows'])} players{nights}. Open it in a browser; it needs no network.")
     return 0
 
 
@@ -273,6 +295,14 @@ def build_parser() -> argparse.ArgumentParser:
     score.add_argument("--out")
     score.add_argument("--ai", action="store_true", help="Attach a brief from any OpenAI-compatible endpoint")
     score.set_defaults(func=cmd_score)
+
+    dashboard = sub.add_parser(
+        "dashboard",
+        help="Render the operations view from score --out folders. Several folders, oldest first, become one week",
+    )
+    dashboard.add_argument("folders", nargs="+", help="Folders written by fpsdet score --out")
+    dashboard.add_argument("--out", default="dashboard.html", help="HTML file to write")
+    dashboard.set_defaults(func=cmd_dashboard)
 
     ingest = sub.add_parser("ingest", help="Append NDJSON into the lake")
     ingest.add_argument("events")

@@ -225,10 +225,12 @@ def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> l
             if rule is None or rule.min_shot_interval_ms is None:
                 continue
             floor = rule.min_shot_interval_ms - rule.interval_slack_ms
+            in_match = summary.fire_matches.setdefault(f"{grouped[0].match_id}|{grouped[0].weapon_id or grouped[0].weapon_class}", [])
             for prev, nxt in zip(grouped, grouped[1:]):
                 gap = nxt.t_ms - prev.t_ms
                 summary.fire_intervals += 1
                 summary.fire_gaps.append(gap)
+                in_match.append(gap)
                 if gap < floor:
                     summary.fire_violations += 1
         summaries.append(summary)

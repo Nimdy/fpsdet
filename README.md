@@ -17,7 +17,17 @@ PYTHONPATH=src python3 -m fpsdet demo
 
 That scores 32 planted players with a known answer each. Eleven are cheats that should be reviewed, four should be watched, sixteen are honest players (most of them look suspicious at first glance), and one has too little data. The last line is `Planted cases matched profiles/example-loadout.json.` If a decision moves, the scorer changed.
 
-Then open `demo/board.html` in a browser, the review desk. It works offline. Its header reads 11 to open, 4 to watch, 16 clean, 1 held. Press j and k to move between the worked examples ("tapes"). Tape 01 is a 10 kg kit sprinting at 7.1 m/s beside the same sprint tagged as an explosion: the first is a review, the second is clean.
+Then open `demo/board.html` in a browser, the review desk. It works offline and has two tabs:
+
+- **Operations** is what a week looks like to the people who run the queue. It covers 400 synthetic players and 17 planted cheats, scored every night against last week's frozen baseline:
+  - the open reviews, and the queue night by night
+  - which checks fired, and where players sit against the best humans
+  - whether reports track the evidence
+  - a sortable queue with a case drawer
+  - which fields the server is actually sending
+
+  An answer check shows that every blatant cheat reached review and no honest player did. The two closet aimbots tuned under the ceiling, and one shared-humanizer buyer, got through. All of it is invented, and the page says so.
+- **Answer key** is the 32 planted players, one worked example ("tape") per check. Its header reads 11 to open, 4 to watch, 16 clean, 1 held. Press j and k to move between tapes. Tape 01 is a 10 kg kit sprinting at 7.1 m/s beside the same sprint tagged as an explosion: the first is a review, the second is clean.
 
 ## Run the whole pipeline on a sample week
 
@@ -40,7 +50,13 @@ PYTHONPATH=src python3 -m fpsdet score --lake ./lake \
 3. `baseline` learns what humans on each rank and weapon look like.
 4. `score` writes the cases.
 
-`cases/` gets one JSON file and one offline HTML page per player. It also gets `scan-index.json` (reported players first), `review-index.json` (strongest evidence first) and `features.csv`.
+`cases/` gets one JSON file and one offline HTML page per player. It also gets:
+- `scan-index.json` (reported players first)
+- `review-index.json` (strongest evidence first)
+- `features.csv`
+- `ops.json` and `dashboard.html`, the operations view of this batch
+
+Score each night into its own folder and `fpsdet dashboard cases/2026-09-26 cases/2026-09-27 ... --out week.html` merges them into one week. A review opened on any night stays open. To build the same panels in Grafana, Kibana or Splunk instead, [dashboards/README.md](dashboards/README.md) maps each panel to the case-JSON fields that drive it.
 
 Next week, score the new events against this week's baseline and pass `--history baselines/week-players.json`. An account whose accuracy jumps well past its own history then becomes a watch. This sample has no earlier week, so `account-changed` stays clean here.
 
@@ -85,6 +101,8 @@ Most of this code exists so that an honest player is not flagged. Each rule belo
 - **A target who just ducked out of sight.** Within `hidden_grace_ms` (default 1 s) of last seeing or hearing them, it is not hidden tracking.
 - **The best player in the game.** A number counts as "past every human" only beyond the best human measured, not the top 5%. The same number on several guns counts once.
 - **One hot match.** Shots in one match are not independent. A rate that swings between matches gets a wider bound.
+- **A short night.** Medians (distance, recoil, declared metrics) are tested on a confidence bound, as rates are. Thirty shots cannot put a player past a line that three hundred would not.
+- **Many players, many pairs.** The shared-leftover check scales each spray position by its own noise and needs a Fisher z of 5. Four hundred honest players produce no matches.
 - **New guns and thin data.** A weapon or build with fewer than 30 measured humans is listed as untrained, and its human-baseline numbers are not flagged.
 
 ## What still gets through
@@ -157,7 +175,7 @@ The model receives the aggregated case only. Every player id in it, including ot
 
 The lake is append-only NDJSON, partitioned `game=<id>/dt=<day>/events.ndjson`. A solo developer can stop there. A studio can land the same lines in object storage and aggregate with DuckDB or ClickHouse. Elasticsearch and Splunk are fine viewers for the case JSON. They are not the detector; see [dashboards/README.md](dashboards/README.md).
 
-Every pair of accounts on a build is compared for shared leftovers. That is fine for a community server and slow for a large population; [docs/scoring.md](docs/scoring.md) says how to split it.
+Every pair of accounts on a weapon is compared for shared leftovers. That is fine for a community server and slow for a large population; [docs/scoring.md](docs/scoring.md) says how to split it.
 
 ## Glossary
 
@@ -201,7 +219,7 @@ examples/          a shot and movement file, report counts, a Unity emitter
 docs/              the docs listed above
 site/              the public pages
 demo/board.html    the review desk, regenerated by `fpsdet demo`
-dashboards/        notes on Elasticsearch and Splunk as viewers
+dashboards/        the built-in dashboard, and the case-JSON fields for your own tools
 ```
 
 ## Contributing and security

@@ -22,6 +22,8 @@ That is a smurf or a good player, not a review.
 
 from __future__ import annotations
 
+import math
+
 from .baseline import CohortTable, Dist, cohort_is_thick, sample_std
 from .models import (
     ACTIONS,
@@ -36,6 +38,7 @@ from .signals import (
     evidence_seal,
     hidden_break,
     leftover_signature,
+    match_gaps,
     metronome_break,
     mirror_check,
     private_break,
@@ -43,7 +46,7 @@ from .signals import (
     smoothness_break,
     wire_break,
 )
-from .statsutil import clustered_lower, design_effect, median, percentile, wilson_upper
+from .statsutil import clustered_lower, design_effect, median, median_bound, percentile, wilson_upper
 
 # A rate that moves this much more between matches than chance is worth a line on the case.
 NOTE_DESIGN_EFFECT = 1.5
@@ -126,13 +129,12 @@ def _rate_flags(
         return _view(name, point, None, own, ceiling_name, ceiling, beyond_band=False, beyond_human=False, skipped=why), False, False, False
     lower = clustered_lower(successes, total, deff)
     past_band = lower > own.p95  # type: ignore[union-attr]
-    past_human = lower > ceiling.maximum  # type: ignore[union-attr]
-    return (
-        _view(name, point, lower, own, ceiling_name, ceiling, beyond_band=past_band, beyond_human=past_human),
-        past_band,
-        past_human,
-        True,
-    )
+    top = cohorts.extreme(weapon.weapon_key, name, record.player_id, profile.min_cohort_players, high=True)
+    best_band, best = top if top is not None else (ceiling_name, ceiling.maximum)  # type: ignore[union-attr]
+    past_human = lower > best
+    view = _view(name, point, lower, own, best_band, ceiling, beyond_band=past_band, beyond_human=past_human)
+    view.ceiling_extreme = best
+    return view, past_band, past_human, True
 
 
 def _continuous_flags(
@@ -144,7 +146,9 @@ def _continuous_flags(
     profile: GameProfile,
     *,
     direction: str,
+    bound: float | None = None,
 ) -> tuple[MetricView, bool, bool, bool]:
+    """``bound`` is the conservative end of the player's number, when the number has one."""
     own = cohorts.dist(weapon.skill_band, weapon.weapon_key, name, record.player_id)
     ceiling_name = cohorts.ceiling_band(
         weapon.weapon_key, name, record.player_id, profile.min_cohort_players
@@ -160,16 +164,20 @@ def _continuous_flags(
     assert own is not None and ceiling is not None
     # Past the rank is the rank's tail. Past humans is past every human measured,
     # the same bar the rates use. The top band's p95 is crossed by one player in twenty.
+    top = cohorts.extreme(
+        weapon.weapon_key, name, record.player_id, profile.min_cohort_players, high=direction == "high"
+    )
+    tested = value if bound is None else bound
     if direction == "high":
-        past_band = value > own.p95
-        past_human = value > ceiling.maximum
-        extreme = ceiling.maximum
+        best_band, extreme = top if top is not None else (ceiling_name, ceiling.maximum)
+        past_band = tested > own.p95
+        past_human = tested > extreme
     else:
-        past_band = value < own.p05
-        past_human = value < ceiling.minimum
-        extreme = ceiling.minimum
+        best_band, extreme = top if top is not None else (ceiling_name, ceiling.minimum)
+        past_band = tested < own.p05
+        past_human = tested < extreme
     view = _view(
-        name, value, value, own, ceiling_name, ceiling, beyond_band=past_band, beyond_human=past_human
+        name, value, tested, own, best_band, ceiling, beyond_band=past_band, beyond_human=past_human
     )
     view.ceiling_extreme = extreme
     return view, past_band, past_human, True
@@ -201,19 +209,28 @@ def _identity(record: PlayerRecord, history: list[HistoryWindow], profile: GameP
 
 
 def _fire_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
+    """Gaps under the cycle, counted in the matches where they are the habit.
+
+    A match counts when at least ``min_violation_rate`` of its gaps broke the
+    cycle. One jittery timestamp in an honest match does not reach that, and
+    a macro switched on midweek is not diluted by the matches before it.
+    """
     rule = profile.weapon_rule(weapon.weapon_class, weapon.weapon_key)
-    if rule is None or rule.min_shot_interval_ms is None or weapon.fire_intervals <= 0:
+    if rule is None or rule.min_shot_interval_ms is None:
         return None
-    rate = weapon.fire_violations / weapon.fire_intervals
-    if (
-        weapon.fire_intervals >= rule.min_intervals
-        and weapon.fire_violations >= rule.min_violations
-        and rate >= rule.min_violation_rate
-    ):
+    floor = rule.min_shot_interval_ms - rule.interval_slack_ms
+    intervals = violations = matches = 0
+    for gaps in match_gaps(weapon):
+        bad = sum(1 for gap in gaps if gap < floor)
+        if gaps and bad / len(gaps) >= rule.min_violation_rate:
+            intervals += len(gaps)
+            violations += bad
+            matches += 1
+    if intervals >= rule.min_intervals and violations >= rule.min_violations:
+        where = f" in {matches} matches" if matches > 1 else ""
         return (
             f"{weapon.weapon_key} fired faster than its cycle "
-            f"({weapon.fire_violations}/{weapon.fire_intervals} gaps under "
-            f"{rule.min_shot_interval_ms - rule.interval_slack_ms} ms)"
+            f"({violations}/{intervals} gaps under {floor} ms{where})"
         )
     return None
 
@@ -231,6 +248,12 @@ def assess_player(
     metrics: list[MetricView] = []
     untrained: list[str] = []
     physics = False
+    checks: list[str] = []
+
+    def fired(check: str) -> None:
+        if check not in checks:
+            checks.append(check)
+
     human_families: set[str] = set()
     beyond_band = 0
     supporting_families: set[str] = set()
@@ -244,36 +267,44 @@ def assess_player(
     if record.speed.sustained:
         physics = True
         reasons.append(record.speed.detail or "sustained ground speed over the gear cap")
+        fired("speed")
     elif record.speed.spike_samples:
         observations.append(record.speed.detail)
     elif record.speed.detail:
         observations.append(record.speed.detail)
 
     for weapon in record.weapons:
+        first_metric = len(metrics)
         fire = _fire_break(weapon, profile)
         if fire:
             physics = True
             reasons.append(fire)
+            fired("fire_rate")
         steady = metronome_break(weapon, profile)
         if steady:
             physics = True
             reasons.append(steady)
+            fired("metronome")
         hidden = hidden_break(weapon, profile)
         if hidden:
             physics = True
             reasons.append(hidden)
+            fired("hidden")
         private = private_break(weapon, profile)
         if private:
             physics = True
             reasons.append(private)
+            fired("private_replay")
         wire = wire_break(weapon, profile)
         if wire:
             physics = True
             reasons.append(wire)
+            fired("wire")
         smooth = smoothness_break(weapon, profile)
         if smooth:
             physics = True
             reasons.append(smooth)
+            fired("quiet_aim")
         if weapon.shots < profile.min_shots:
             observations.append(
                 f"{weapon.weapon_key}: {weapon.shots} shots, need {profile.min_shots} before aim is scored"
@@ -299,8 +330,11 @@ def assess_player(
         metrics.append(acc_view)
         compared = compared or did
         beyond_band += int(band)
+        if band and not human:
+            fired("rank_tail")
         if human:
             human_families.add("accuracy")
+            fired("accuracy")
             reasons.append(
                 f"{weapon.weapon_key} accuracy lower bound {acc_view.bound:.0%} is past the best "
                 f"measured {acc_view.ceiling_band} human ({acc_view.ceiling_extreme:.0%})"
@@ -328,8 +362,11 @@ def assess_player(
             metrics.append(hs_view)
             compared = compared or did
             beyond_band += int(band)
+            if band and not human:
+                fired("rank_tail")
             if human:
                 human_families.add("headshot_rate")
+                fired("headshot_rate")
             if human:
                 reasons.append(
                     f"{weapon.weapon_key} headshot lower bound {hs_view.bound:.0%} is past the best "
@@ -348,14 +385,18 @@ def assess_player(
                 cohorts,
                 profile,
                 direction="high",
+                bound=median_bound(weapon.distances, upper=False),
             )
             metrics.append(dist_view)
             compared = compared or did
             beyond_band += int(band)
+            if band and not human:
+                fired("rank_tail")
             if human:
                 human_families.add("median_distance")
+                fired("median_distance")
                 reasons.append(
-                    f"{weapon.weapon_key} median engagement {dist_value:.0f} m is past the farthest measured "
+                    f"{weapon.weapon_key} median engagement {dist_value:.0f} m (lower bound {dist_view.bound:.0f} m) is past the farthest measured "
                     f"{dist_view.ceiling_band} human ({dist_view.ceiling_extreme:.0f} m)"
                 )
 
@@ -373,8 +414,11 @@ def assess_player(
             metrics.append(geo_view)
             compared = compared or did
             beyond_band += int(band)
+            if band and not human:
+                fired("rank_tail")
             if human:
                 human_families.add("geometry_rate")
+                fired("geometry_rate")
                 reasons.append(
                     f"{weapon.weapon_key} shots through geometry are past the best measured human rate"
                 )
@@ -387,6 +431,7 @@ def assess_player(
             metrics.append(view)
             if did and human:
                 supporting_families.add("view")
+                fired("supporting")
                 observations.append(f"{weapon.weapon_key} view snaps sit past every measured human")
 
         if len(weapon.acquire_ms) >= profile.min_shots:
@@ -401,15 +446,19 @@ def assess_player(
             metrics.extend([med_view, dev_view])
             if did1 and (human1 or human2):
                 supporting_families.add("acquire")
+                fired("supporting")
                 observations.append(
                     f"{weapon.weapon_key} target-acquire timing is tighter than the human low end"
                 )
+        for view in metrics[first_metric:]:
+            view.key = weapon.weapon_key
 
     for recoil in record.recoils:
         mirror, mirror_note = mirror_check(recoil, profile)
         if mirror:
             physics = True
             reasons.append(mirror)
+            fired("mirror")
         elif mirror_note:
             observations.append(mirror_note)
         if recoil.blatant:
@@ -419,10 +468,13 @@ def assess_player(
                 f"{recoil.build_key} recoil stayed under {profile.recoil_floor_fraction:.0%} of the "
                 f"build floor ({floor:.2f} deg) for {recoil.longest_low_run} shots"
             )
+            fired("recoil_floor")
             continue
         if len(recoil.pitches) < profile.recoil_min_run:
             continue
         player_med = median(recoil.pitches)
+        # Low recoil is the finding, so test the high end of the median.
+        pitch_high = median_bound(recoil.pitches, upper=True)
         if recoil.untrained:
             ceiling_name = cohorts.ceiling_band(
                 recoil.build_key, "recoil", record.player_id, profile.min_cohort_players
@@ -439,14 +491,16 @@ def assess_player(
                 )
                 continue
             learned_floor = ceiling.mid * profile.recoil_floor_fraction
-            if player_med < ceiling.minimum and ceiling.mid > 0 and player_med < learned_floor:
+            if pitch_high < ceiling.minimum and ceiling.mid > 0 and pitch_high < learned_floor:
                 physics = True
+                fired("recoil_learned")
                 reasons.append(
                     f"{recoil.build_key} recoil median {player_med:.2f} deg is far under every measured "
                     f"human on this build (lowest {ceiling.minimum:.2f}, median {ceiling.mid:.2f})"
                 )
-            elif player_med < ceiling.p05:
+            elif pitch_high < ceiling.p05:
                 beyond_band += 1
+                fired("rank_tail")
                 observations.append(
                     f"{recoil.build_key} recoil is in the low tail of humans who use this build"
                 )
@@ -454,8 +508,9 @@ def assess_player(
             continue
         # A designer floor exists and the spray was not blatant. Still learn the human tail.
         own = cohorts.dist(recoil.skill_band, recoil.build_key, "recoil", record.player_id)
-        if cohort_is_thick(own, profile) and own is not None and player_med < own.p05:
+        if cohort_is_thick(own, profile) and own is not None and pitch_high < own.p05:
             beyond_band += 1
+            fired("rank_tail")
             observations.append(f"{recoil.build_key} recoil is low for humans on this build, above the hard floor")
             compared = True
 
@@ -469,6 +524,7 @@ def assess_player(
             )
             continue
         player_med = median(extra.values)
+        extra_bound = median_bound(extra.values, upper=extra.direction == "low")
         dist = cohorts.dist(extra.group_key, extra.name, "extra", record.player_id)
         if not cohort_is_thick(dist, profile) or dist is None:
             untrained.append(f"{extra.name}:{extra.group_key}")
@@ -477,20 +533,20 @@ def assess_player(
         compared = True
         # The tail is one player in twenty. Past humans is past every one measured.
         if extra.direction == "high":
-            tail = player_med > dist.p95
-            past = player_med > dist.maximum
+            tail = extra_bound > dist.p95
+            past = extra_bound > dist.maximum
             extreme = dist.maximum
             line = f"{extra.name} median {player_med:.3g} is past every measured human (highest {extreme:.3g})"
         else:
-            tail = player_med < dist.p05
-            past = player_med < dist.minimum
+            tail = extra_bound < dist.p05
+            past = extra_bound < dist.minimum
             extreme = dist.minimum
             line = f"{extra.name} median {player_med:.3g} is under every measured human (lowest {extreme:.3g})"
         metrics.append(
             MetricView(
                 name=extra.name,
                 player_value=player_med,
-                bound=player_med,
+                bound=extra_bound,
                 own_p95=dist.p95,
                 own_max=dist.maximum,
                 ceiling_band=extra.group_key,
@@ -498,23 +554,28 @@ def assess_player(
                 ceiling_extreme=extreme,
                 beyond_band=tail,
                 beyond_human=past,
+                key=extra.group_key,
             )
         )
         if tail and not past and extra.kind == "primary":
             beyond_band += 1
+            fired("rank_tail")
             observations.append(f"{extra.name} median {player_med:.3g} is in the human tail, inside every measured human")
         if not past:
             continue
         if extra.kind == "primary":
             human_families.add(f"extra:{extra.name}")
+            fired("extra")
             reasons.append(line)
         else:
             supporting_families.add(f"extra:{extra.name}")
+            fired("supporting")
             observations.append(line)
 
     identity, identity_text = _identity(record, history, profile)
     if identity:
         reasons.append(identity_text)
+        fired("account_jump")
 
     decision = decide(
         physics=physics,
@@ -543,13 +604,16 @@ def assess_player(
         party_ids=sorted(record.party_ids),
         untrained=untrained,
         speed=record.speed,
+        checks=checks,
     )
     case.seal = evidence_seal(case)
     return case
 
 
-def _watch_for_batch(case: Case, reason: str, rank: int) -> None:
+def _watch_for_batch(case: Case, reason: str, rank: int, check: str) -> None:
     """A batch tell can move a clean player to watch. It does not make a review."""
+    if check not in case.checks:
+        case.checks.append(check)
     if case.decision == "review":
         case.observations.append(reason)
         return
@@ -586,31 +650,40 @@ def _signature_r(
     common = sorted(set(left) & set(right))
     if not common:
         return None
-    # Twenty-four spray indices at r 0.85 is about six sigma for unrelated noise.
     need = profile.vendor_min_shots if common[0][0] == "position" else profile.vendor_min_points
     if len(common) < need:
         return None
-    return pearson([left[key] for key in common], [right[key] for key in common])
+    correlation = pearson([left[key] for key in common], [right[key] for key in common])
+    if correlation is None or correlation < profile.vendor_min_r:
+        return None
+    # Every pair on a build is a test. A short signature needs a stronger r to clear the same
+    # bar: Fisher z = atanh(r) * sqrt(n - 3). Five is about one chance pair in three million.
+    fisher = math.atanh(min(correlation, 0.999999)) * math.sqrt(len(common) - 3)
+    return correlation if fisher >= profile.vendor_min_z else None
 
 
 def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: GameProfile) -> None:
     """Same leftover, after the kick is removed, across two customers.
 
-    A leftover belongs to a gun, so only accounts on the same build are
-    compared. Inside a build every pair is compared. When the build has a full
-    cohort, the leftover all of its players share is removed first.
+    Accounts are compared per weapon key. A humanizer table belongs to the
+    tool, so the same table on a stock and a modded rifle still lines up; the
+    leftover is already scaled per account. Inside a weapon every pair is
+    compared. When it has a full cohort, the leftover all of its players share
+    is removed first.
     """
     by_case = {case.player_id: case for case in cases}
     builds: dict[str, dict[str, dict[tuple[str, int], float]]] = {}
     for record in records:
+        longest: dict[str, int] = {}
         for recoil in record.recoils:
-            found = leftover_signature(recoil)
+            found = leftover_signature(recoil, profile.vendor_min_points)
             if found is None:
                 continue
             points, samples = found
-            if samples < profile.vendor_min_shots:
+            if samples < profile.vendor_min_shots or samples <= longest.get(recoil.weapon_key, 0):
                 continue
-            builds.setdefault(recoil.build_key, {})[record.player_id] = points
+            longest[recoil.weapon_key] = samples
+            builds.setdefault(recoil.weapon_key, {})[record.player_id] = points
     best: dict[tuple[str, str], float] = {}
     for players in builds.values():
         if len(players) >= profile.min_cohort_players:
@@ -632,6 +705,8 @@ def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: Ga
                 continue
             _remember_twin(case, other, correlation)
             if pair_confirmed and player_id in confirmed:
+                if "leftover" not in case.checks:
+                    case.checks.append("leftover")
                 case.observations.append(
                     f"leftover command matches {other} (r {correlation:.2f})"
                 )
@@ -646,7 +721,7 @@ def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: Ga
                     f"leftover command matches {other} (r {correlation:.2f}). "
                     "Nobody in the pair is a review yet"
                 )
-            _watch_for_batch(case, reason, 2)
+            _watch_for_batch(case, reason, 2, "leftover")
 
 
 def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile: GameProfile) -> None:
@@ -704,6 +779,7 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                         f"under the {profile.voice_min_ms} ms a voice needs"
                     ),
                     1,
+                    "voice",
                 )
 
 

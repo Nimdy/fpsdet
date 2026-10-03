@@ -1,6 +1,44 @@
 # Changelog
 
-## Unreleased
+## Unreleased: the operations view
+
+The review desk opens on an operations dashboard over a synthetic week, and studios get the same view from their own runs. Running the checks on a population of 400 players, instead of 32 planted ones, exposed several rules that were fine on one player and noisy on many. Those are fixed below. Every planted demo decision is unchanged.
+
+### Added
+
+- **Operations view.** `demo/board.html` now has two tabs:
+  - **Operations**: KPI tiles, the queue by night, what fired, the human-ceiling scatter, reports against decisions, an answer check, a sortable queue with a case drawer, field coverage per night, and baseline thickness. Every chart has a table twin.
+  - **Answer key**: the 32 planted tapes. Deep links such as `board.html#card-mirror-script` still open them.
+- **Synthetic week** (`fpsdet.week`): 400 players, 17 planted cheats with their own start days, parties, reports, a mid-week server build that ships the wire fields, and private replays on some matches. It is scored nightly and weekly against a frozen baseline from a clean prior week. It is deterministic.
+- **`fpsdet score --out`** writes `ops.json` and an offline `dashboard.html` next to the cases.
+- **`fpsdet dashboard <folders…> --out week.html`** renders one run, or merges several nightly runs into a week. A review opened on any night stays open; watches come from the latest run.
+- **`checks` on every case**: machine-readable ids of what fired, so dashboards group on ids instead of reason text. Metrics carry the weapon `key`.
+- **dashboards/README.md** maps each panel to the case-JSON fields that drive it, for Grafana, Kibana, Splunk or an in-house console.
+
+### Scoring: what the population showed
+
+- **Shared leftover.**
+  - The lag term crossed spray boundaries, which left the same spike on every spray's first shot for every player. In the synthetic week that matched 97 honest players with each other.
+  - The lag is now in-spray. Signature points need 3 sprays and are scaled by their standard error.
+  - A match needs Fisher z ≥ 5 (`vendor_min_z`) as well as r ≥ 0.85. `vendor_min_points` is now 12, since real sprays rarely reach 24 rounds.
+  - Accounts are compared per weapon, not per build.
+  - Result: 0 honest matches.
+- **Medians use a confidence bound.** Distance, recoil and declared-metric medians are tested on a distribution-free bound, as rates are. Nightly batches had put about half the honest players on watch at least once, from small-sample noise.
+- **"Past every human" means every band.** For numbers that rank does not order, such as distance, the top band's maximum was not the most extreme human. Ordinary players were "past every human" on engagement distance.
+- **Fire rate and metronome are judged per match.** A macro switched on mid-week, or one that fires in bursts with human-length pauses, used to be averaged away.
+
+The synthetic week, scored nightly and weekly against a frozen baseline:
+
+| Players | Outcome |
+| --- | --- |
+| Honest (383) | 0 in review, 1 on watch |
+| Blatant cheats (12) | All in review |
+| Teammate on a wallhacker's calls, boosted account | Watch |
+| Closet aimbots tuned under the elite ceiling, the humanizer buyer | One closet on watch; the other and the buyer clean |
+
+The buyer's leftover correlates at r 0.89 over 13 spray positions, under the z bar. Another week of data clears it.
+
+## Earlier in this release
 
 Fewer honest players flagged, plus fixes, onboarding and project files. Every planted demo decision is unchanged.
 
