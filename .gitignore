@@ -7,3 +7,4 @@ cases/
 lake/
 .pytest_cache/
 _site/
+node_modules/

@@ -8,78 +8,95 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="fpsdet.css">
 </head>
-<body>
-<header class="shell">
-  <nav class="mast" aria-label="Site">
-    <a class="mark" href="index.html">fpsdet</a>
-    <a href="index.html">What this is</a>
-    <a href="scoring.html">Scoring</a>
-    <a href="wire.html">Wire a game</a>
-    <a href="games.html">Games</a>
-    <a href="source.html" aria-current="page">Source</a>
-    <a href="../demo/board.html">Desk</a>
-    <p class="rule">Automated action: none</p>
-  </nav>
-  <p class="kicker">Source</p>
-  <h1>The reference is the Python in this repo.</h1>
-  <p class="lede"><strong>fpsdet 0.2.0.</strong> Python 3.11 or newer. No runtime dependencies. A solo dev and a studio run the same contract. A port in another language matches when it reproduces the planted demo and <code>tests/test_fpsdet.py</code>. This does not end cheating.</p>
+<body class="m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<header class="border-b border-line">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-baseline gap-x-6 gap-y-3 px-10 py-5 max-md:px-4">
+    <a class="font-serif text-[1.7rem] leading-none tracking-tight text-ink no-underline" href="index.html">fpsdet</a>
+    <nav class="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-[0.95rem]" aria-label="Site">
+      <a class="text-muted no-underline hover:text-ink" href="index.html">What this is</a>
+      <a class="text-muted no-underline hover:text-ink" href="scoring.html">Scoring</a>
+      <a class="text-muted no-underline hover:text-ink" href="wire.html">Wire a game</a>
+      <a class="text-muted no-underline hover:text-ink" href="games.html">Games</a>
+      <a class="border-b border-watch text-ink no-underline" href="source.html" aria-current="page">Source</a>
+      <a class="text-muted no-underline hover:text-ink" href="../demo/board.html">Desk</a>
+    </nav>
+    <p class="m-0 ml-auto font-mono text-[0.78rem] text-watch max-md:ml-0 max-md:basis-full">Automated action: none</p>
+  </div>
 </header>
-<main class="shell">
-  <h2>Run the planted matches</h2>
-  <pre><code>PYTHONPATH=src python3 -m fpsdet demo
+
+<section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
+  <div class="col-span-7 max-lg:col-span-1">
+    <p class="m-0 font-mono text-xs uppercase tracking-[0.14em] text-muted">Source</p>
+    <h1 class="m-0 mt-4 font-serif text-[4.2rem] font-normal leading-[0.92] tracking-tight max-md:text-[2.55rem]">The reference is the Python in this repo.</h1>
+  </div>
+  <p class="col-span-5 m-0 text-lg max-lg:col-span-1"><strong class="font-medium">fpsdet 0.2.0.</strong> Python 3.11 or newer. No runtime dependencies. A solo dev and a studio run the same contract. A port in another language matches when it reproduces the planted demo and <code class="font-mono text-[0.92em]">tests/test_fpsdet.py</code>. This does not end cheating.</p>
+</section>
+
+<main class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
+  <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Run the planted matches</h2>
+  <pre class="m-0 mt-6 overflow-x-auto border-l-[3px] border-watch bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>PYTHONPATH=src python3 -m fpsdet demo
 PYTHONPATH=src python3 -m unittest tests.test_fpsdet
 PYTHONPATH=src python3 -m fpsdet pages</code></pre>
-  <div class="measure">
-    <p><code>demo</code> writes <code>demo/board.html</code>. That page starts with a six-step walk-through, then the thirty-two planted players. The first tape is the 10 kg sprint beside the blast. <code>pages</code> writes a folder a static host can serve: these pages, and a fresh desk beside them. Nothing in that command publishes the repository.</p>
-    <p>The repository is <a href="https://github.com/Nimdy/detect-FPS-hackers">github.com/Nimdy/detect-FPS-hackers</a>. These HTML pages are the walk-through. The same contract, written for an implementer, is <code>docs/scoring.md</code>, <code>docs/integration.md</code>, <code>docs/games.md</code>, and <code>docs/operations.md</code>.</p>
+  <div class="mt-6 grid grid-cols-2 gap-8 max-lg:grid-cols-1">
+    <p class="m-0"><code class="font-mono text-[0.92em]">demo</code> writes <code class="font-mono text-[0.92em]">demo/board.html</code>. That page starts with a six-step walk-through, then the thirty-two planted players. The first tape is the 10 kg sprint beside the blast. <code class="font-mono text-[0.92em]">pages</code> writes a folder a static host can serve: these pages, and a fresh desk beside them. Nothing in that command publishes the repository.</p>
+    <p class="m-0">The repository is <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers">github.com/Nimdy/detect-FPS-hackers</a>. These HTML pages are the walk-through. The same contract, written for an implementer, is <code class="font-mono text-[0.92em]">docs/scoring.md</code>, <code class="font-mono text-[0.92em]">docs/integration.md</code>, <code class="font-mono text-[0.92em]">docs/games.md</code>, and <code class="font-mono text-[0.92em]">docs/operations.md</code>.</p>
   </div>
 
-  <h2>What is in the tree</h2>
-  <table>
-    <thead>
-      <tr><th>Path</th><th>What it is</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>src/fpsdet/</td><td>The reference scorer.</td></tr>
-      <tr><td>profiles/</td><td>Curves for the synthetic loadout, and WARDOGS weight classes with no absolute sprint speed.</td></tr>
-      <tr><td>tests/</td><td>The behavior lock, including the planted demo.</td></tr>
-      <tr><td>schema/</td><td>Event and profile shapes.</td></tr>
-      <tr><td>examples/</td><td>One shot, one movement sample, a Unity emitter.</td></tr>
-      <tr><td>site/</td><td>These pages.</td></tr>
-      <tr><td>demo/board.html</td><td>The generated desk. Regenerate it. Do not hand-edit it.</td></tr>
-      <tr><td>docs/</td><td>The bars, the wire-up, the games, the lake.</td></tr>
-    </tbody>
-  </table>
-
-  <h2>Where the bytes go</h2>
-  <div class="measure">
-    <p><code>fpsdet ingest</code> appends each line to <code>lake/game=&lt;id&gt;/dt=&lt;day&gt;/events.ndjson</code>. That tree is enough for a solo dev. A studio can put the same objects in the object store it already uses and aggregate with DuckDB or ClickHouse. The case a reviewer opens is small. The shots that built it do not belong in a search index as the system of record.</p>
-    <p>Reports are a queue, not a verdict. Scan reported players first, including the clean ones. A person reads review, then watch, then clean. Two batch tells, a shared leftover and a teammate who swings before a voice, are watches. They do not become reviews.</p>
+  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">What is in the tree</h2>
+  <div class="mt-6 overflow-x-auto">
+    <table class="w-full border-collapse text-left">
+      <thead>
+        <tr>
+          <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">Path</th>
+          <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">What it is</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">src/fpsdet/</td><td class="border-b border-line py-3 pr-6">The reference scorer.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">profiles/</td><td class="border-b border-line py-3 pr-6">Curves for the synthetic loadout, and WARDOGS weight classes with no absolute sprint speed.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">tests/</td><td class="border-b border-line py-3 pr-6">The behavior lock, including the planted demo.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">schema/</td><td class="border-b border-line py-3 pr-6">Event and profile shapes.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">examples/</td><td class="border-b border-line py-3 pr-6">One shot, one movement sample, a Unity emitter.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">site/</td><td class="border-b border-line py-3 pr-6">These pages.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">demo/board.html</td><td class="border-b border-line py-3 pr-6">The generated desk. Regenerate it. Do not hand-edit it.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">docs/</td><td class="border-b border-line py-3 pr-6">The bars, the wire-up, the games, the lake.</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <h2>A brief, if you want one</h2>
-  <div class="measure">
-    <p><code>--ai</code> calls one chat completion per case that is a review, a watch, or reported. The endpoint is any server that speaks the OpenAI chat-completions shape. Set <code>FPSDET_AI_BASE_URL</code>, <code>FPSDET_AI_MODEL</code>, and <code>FPSDET_AI_API_KEY</code> when the server checks one. Player, party, and match ids are stripped before the request. The model is told not to recommend a ban and not to invent numbers. If the endpoint is down, the decision already exists. The brief cannot change it.</p>
-    <p><code>features.csv</code> is for a later model trained on your reviewers' labels. Keep the gear rules beside it. A learned score that can talk a sustained over-cap sprint out of a case has learned the wrong objective.</p>
+  <div class="mt-12 grid grid-cols-2 gap-8 max-lg:grid-cols-1">
+    <div>
+      <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Where the bytes go</h2>
+      <p class="m-0 mt-4"><code class="font-mono text-[0.92em]">fpsdet ingest</code> appends each line to <code class="font-mono text-[0.92em]">lake/game=&lt;id&gt;/dt=&lt;day&gt;/events.ndjson</code>. That tree is enough for a solo dev. A studio can put the same objects in the object store it already uses and aggregate with DuckDB or ClickHouse. The case a reviewer opens is small. The shots that built it do not belong in a search index as the system of record.</p>
+      <p class="m-0 mt-4">Reports are a queue, not a verdict. Scan reported players first, including the clean ones. A person reads review, then watch, then clean. Two batch tells, a shared leftover and a teammate who swings before a voice, are watches. They do not become reviews.</p>
+    </div>
+    <div>
+      <h2 class="m-0 font-serif text-[2.4rem] font-normal leading-none tracking-tight">A brief, if you want one</h2>
+      <p class="m-0 mt-4"><code class="font-mono text-[0.92em]">--ai</code> calls one chat completion per case that is a review, a watch, or reported. The endpoint is any server that speaks the OpenAI chat-completions shape. Set <code class="font-mono text-[0.92em]">FPSDET_AI_BASE_URL</code>, <code class="font-mono text-[0.92em]">FPSDET_AI_MODEL</code>, and <code class="font-mono text-[0.92em]">FPSDET_AI_API_KEY</code> when the server checks one. Player, party, and match ids are stripped before the request. The model is told not to recommend a ban and not to invent numbers. If the endpoint is down, the decision already exists. The brief cannot change it.</p>
+      <p class="m-0 mt-4"><code class="font-mono text-[0.92em]">features.csv</code> is for a later model trained on your reviewers' labels. Keep the gear rules beside it. A learned score that can talk a sustained over-cap sprint out of a case has learned the wrong objective.</p>
+    </div>
   </div>
 
-  <h2>Before other people send patches</h2>
-  <div class="measure">
-    <p>There is no license yet. Add one before you take contributions. Patches that describe how to build a cheat, or that weaken the innocence rules so a blast becomes a ban, are off the point of this repo. Patches that add a game's server-side fields, a profile, or a failing test for a false positive are the point.</p>
-    <p>Store a pseudonym. Do not collect raw mouse input, kernel memory, or a hardware id here. Those are a different product. Wire a ban action to your own review tool after a person looks. Do not wire it to <code>decision == review</code>.</p>
-    <p><a href="index.html#still">What still gets through</a> is part of the contract. A DMA read of the drawn frame, a capture card, a cheat that waits out the interpolation delay, a wrong timeline, and a listen server are named there on purpose.</p>
+  <h2 class="m-0 mt-16 font-serif text-[2.4rem] font-normal leading-none tracking-tight">Before other people send patches</h2>
+  <div class="mt-6 grid grid-cols-3 gap-4 max-lg:grid-cols-1">
+    <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">There is no license yet. Add one before you take contributions. Patches that describe how to build a cheat, or that weaken the innocence rules so a blast becomes a ban, are off the point of this repo. Patches that add a game's server-side fields, a profile, or a failing test for a false positive are the point.</p>
+    <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted">Store a pseudonym. Do not collect raw mouse input, kernel memory, or a hardware id here. Those are a different product. Wire a ban action to your own review tool after a person looks. Do not wire it to <code class="font-mono text-[0.92em]">decision == review</code>.</p>
+    <p class="m-0 border border-line p-5 text-sm leading-relaxed text-muted"><a class="text-ink underline decoration-line underline-offset-4" href="index.html#still">What still gets through</a> is part of the contract. A DMA read of the drawn frame, a capture card, a cheat that waits out the interpolation delay, a wrong timeline, and a listen server are named there on purpose.</p>
   </div>
 </main>
-<footer class="shell">
-  <p>A person still reviews. This does not end cheating.</p>
-  <p class="links">
-    <a href="index.html">What this is</a>
-    <a href="scoring.html">Scoring</a>
-    <a href="wire.html">Wire a game</a>
-    <a href="games.html">Games</a>
-    <a href="../demo/board.html">Desk</a>
-    <a href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
-  </p>
+
+<footer class="border-t border-line">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-end justify-between gap-6 px-10 py-8 max-md:px-4">
+    <p class="m-0 text-sm text-muted">A person still reviews. This does not end cheating.</p>
+    <p class="m-0 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+      <a class="text-ink no-underline hover:underline" href="index.html">What this is</a>
+      <a class="text-ink no-underline hover:underline" href="scoring.html">Scoring</a>
+      <a class="text-ink no-underline hover:underline" href="wire.html">Wire a game</a>
+      <a class="text-ink no-underline hover:underline" href="games.html">Games</a>
+      <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
+    </p>
+  </div>
 </footer>
 </body>
 </html>

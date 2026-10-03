@@ -1,0 +1,67 @@
+/* Source for site/fpsdet.css. Rebuild with: npm run css
+   Type files live in fonts/. Instrument Serif, Instrument Sans, IBM Plex Mono.
+   Each SIL Open Font License is the OFL-*.txt beside those files.
+   Preflight is omitted so the review desk, which links this file for the fonts,
+   keeps its own element styles. */
+
+@font-face {
+  font-family: "Instrument Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/instrument-serif-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/instrument-sans-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/instrument-sans-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/ibm-plex-mono-400.woff2") format("woff2");
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* The review desk links this file for the faces and these three names. */
+:root {
+  --serif: "Instrument Serif", "Iowan Old Style", Palatino, Georgia, serif;
+  --sans: "Instrument Sans", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+/* A long command must scroll inside the card, not widen a 1920 or a 390 frame. */
+.grid > * { min-width: 0; }
+
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) source(none);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "./*.html";
+
+@theme {
+  --font-sans: "Instrument Sans", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-serif: "Instrument Serif", "Iowan Old Style", Palatino, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --color-bg: #0e0f0c;
+  --color-panel: #161814;
+  --color-plot: #10110e;
+  --color-line: #2a2c24;
+  --color-ink: #f3efe6;
+  --color-muted: #a39c8e;
+  --color-review: #e15a3a;
+  --color-watch: #e0b15c;
+  --color-clean: #9bb58f;
+  --color-info: #7ea0c4;
+}
