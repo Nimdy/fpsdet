@@ -1,0 +1,12 @@
+{
+  "game_id": "tf2",
+  "notes": "Team Fortress 2 competitive matches from logs.tf, converted by examples/tf2/tf2logs.py. Not affiliated with Valve, logs.tf or RGL. Aim is scored per weapon (scattergun, sniper rifle, shotgun and so on), because each weapon's hit rate is its own. Only aimed hitscan weapons are sent. Headshot rate is sent for sniper rifles and the Ambassador when the server recorded headshots. The logs carry per-match totals, not timing or movement, so there are no gear rules and every player is one unrated population.",
+  "min_shots": 40,
+  "min_hits_for_headshot": 25,
+  "min_cohort_players": 30,
+  "aim_group": "weapon_id",
+  "recoil_pattern": "learnable",
+  "weapons": {},
+  "recoil_floors": [],
+  "extra_metrics": []
+}

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Real TF2 matches** (`examples/tf2`): players RGL banned for cheating, each with up to 20 server-logged matches from logs.tf before the ban, scored beside the honest players from the same lobbies. Unlike the one-match CS2 data, this can show detection: at equal evidence fpsdet flagged 41% of the cheaters and 2.9% of never-banned players, and all three reviews were labelled cheaters. Public endpoints only, polite and cached, with keyed pseudonyms. Standard library only.
+
 ## 0.3.0 (2026-10-04): the operations view and real CS2 matches
 
 The review desk opens on an operations dashboard over a synthetic week, and studios get the same view from their own runs. Running the checks on a population of 400 players, instead of 32 planted ones, exposed several rules that were fine on one player and noisy on many. Those are fixed below. Every planted demo decision is unchanged. It also runs on real Counter-Strike 2 matches with hand-labelled cheaters (`examples/cs2`), shown in the desk beside the synthetic week.

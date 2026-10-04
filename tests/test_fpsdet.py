@@ -2053,5 +2053,80 @@ class Cs2ExampleTest(unittest.TestCase):
         self.assertAlmostEqual(moves[0].speed_mps, 5.08, places=2)
 
 
+class Tf2ExampleTest(unittest.TestCase):
+    """The logs.tf converter in examples/tf2. Standard library only, so it runs in CI."""
+
+    def setUp(self):
+        spec = importlib.util.spec_from_file_location("tf2logs", ROOT / "examples" / "tf2" / "tf2logs.py")
+        self.tf2 = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.tf2)
+
+    def test_ban_reasons_become_labels(self):
+        label = self.tf2.ban_label
+        self.assertEqual(label("Cheating - Multiple Offenses"), "cheater")
+        self.assertEqual(label("ETF2L Mirror Cheating Ban - First Offense"), "cheater")
+        self.assertEqual(label("Permanently banned due to a VAC ban."), "vac")
+        # Helping a cheater, or selling cheats, is not cheating in a match.
+        self.assertIsNone(label("Assisting Cheating - First Offense"))
+        self.assertIsNone(label("Distribution of Cheats"))
+        self.assertEqual(self.tf2.steam3("76561198890776257"), "[U:1:930510529]")
+
+    def test_a_match_becomes_one_event_per_aimed_shot(self):
+        log = {
+            "info": {"map": "cp_process_f12", "total_length": 1800, "hasHS_hit": True, "date": 1743465295},
+            "players": {
+                "[U:1:1]": {"headshots_hit": 12, "class_stats": [{"type": "sniper", "weapon": {
+                    "sniperrifle": {"shots": 50, "hits": 30}, "smg": {"shots": 20, "hits": 5}}}]},
+                "[U:1:2]": {"class_stats": [{"type": "soldier", "weapon": {
+                    "tf_projectile_rocket": {"shots": 300, "hits": 120}, "shotgun_soldier": {"shots": 10, "hits": 6}}}]},
+                "[U:1:3]": {"class_stats": [{"type": "scout", "weapon": {"scattergun": {"shots": 9, "hits": 9}}}]},
+            },
+        }
+        out = self.tf2.match_events(77, log, {"[U:1:1]": "sniper", "[U:1:2]": "soldier"})
+        events = {pid: [parse_event(e) for e in rows] for pid, rows in out.items()}
+        self.assertEqual(set(events), {"sniper", "soldier"})  # an unlisted player is left out
+        rifle = [e for e in events["sniper"] if e.weapon_id == "sniperrifle"]
+        self.assertEqual((len(rifle), sum(e.hit for e in rifle)), (50, 30))
+        self.assertEqual(Counter(e.hitbox for e in rifle if e.hit), Counter({"upper_torso": 18, "head": 12}))
+        smg = [e for e in events["sniper"] if e.weapon_id == "smg"]
+        self.assertTrue(all(e.hitbox is None for e in smg))
+        # Rockets hit by splash and are not aimed one shot at a time.
+        self.assertEqual({e.weapon_id for e in events["soldier"]}, {"shotgun_soldier"})
+        self.assertEqual({e.match_id for rows in events.values() for e in rows}, {"tf77"})
+
+    def test_convert_keeps_a_ban_honest_and_never_judges_a_player_against_themselves(self):
+        cheater, steady, rare = "76561197960265729", "76561197960265730", "76561197960265731"
+        def log(day: int, players: list[str]) -> dict:
+            return {"info": {"map": "cp_x", "total_length": 600, "date": day * 86400},
+                    "players": {self.tf2.steam3(sid): {"class_stats": [{"type": "scout", "weapon": {"scattergun": {"shots": 10, "hits": 5}}}]} for sid in players}}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "logs").mkdir()
+            # Day d is 1970-01-(d+1). The ban lands on day 11, so days 11 and 12 must not count.
+            (root / "bans.json").write_text(json.dumps({cheater: {"label": "cheater", "banned": "1970-01-12"}}), encoding="utf-8")
+            for day in range(1, 13):
+                players = [cheater, steady] + ([rare] if day == 1 else [])
+                (root / "logs" / f"{day}.json").write_text(json.dumps(log(day, players)), encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.tf2.main(["convert", tmp, "--min-matches", "8"])
+            labels = json.loads((root / "labels.json").read_text(encoding="utf-8"))
+            scored = [json.loads(line) for line in (root / "scored.ndjson").read_text(encoding="utf-8").splitlines()]
+            baseline = [json.loads(line) for line in (root / "baseline.ndjson").read_text(encoding="utf-8").splitlines()]
+            key = bytes.fromhex((root / "pseudonym.key").read_text(encoding="utf-8"))
+        cheater_id = self.tf2._pseudonym(key, self.tf2.steam3(cheater))
+        self.assertEqual(labels[cheater_id], "cheater")
+        self.assertEqual(len({e["match_id"] for e in scored if e["player_id"] == cheater_id}), 10)
+        # Seen once: too few matches to judge, and left out entirely.
+        everyone = {e["player_id"] for e in scored + baseline}
+        self.assertNotIn(self.tf2._pseudonym(key, self.tf2.steam3(rare)), everyone)
+        self.assertFalse({e["player_id"] for e in scored} & {e["player_id"] for e in baseline})
+        self.assertFalse(any(sid in json.dumps(scored + baseline) for sid in (cheater, steady, "[U:1:")))
+
+    def test_the_profile_loads(self):
+        profile = load_profile(ROOT / "examples" / "tf2" / "tf2.json")
+        self.assertEqual((profile.game_id, profile.aim_group), ("tf2", "weapon_id"))
+
+
 if __name__ == "__main__":
     unittest.main()
