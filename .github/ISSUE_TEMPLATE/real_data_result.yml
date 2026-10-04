@@ -1,0 +1,68 @@
+name: Result on real data
+description: You ran fpsdet on real play (the CS2 example, another public dataset, or your own server) and want to share what it decided.
+title: "[result] "
+labels: ["real-data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for running it. Results on real play, good or bad, are how the checks get better.
+
+        **Share counts and cases, never raw logs.** Replace every id that could point to a real person (player id, account name, party id, match id, IP) with a made-up one, such as `player-a` or `match-1`, and keep the replacements consistent.
+
+        If one honest player was flagged and you can show why the play was innocent, the [false positive form](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=false_positive.yml) is the faster route to a fix. If you found a way to get someone flagged on purpose, or a cheat past a check, report it privately: see the [security policy](https://github.com/Nimdy/detect-FPS-hackers/security/policy).
+
+  - type: dropdown
+    id: source
+    attributes:
+      label: Where the data came from
+      options:
+        - The CS2 example (examples/cs2, CS2CD)
+        - Another public dataset
+        - My own game server
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: run
+    attributes:
+      label: What you ran
+      description: The commands, the profile, and how much play went in (matches, players, days). For the CS2 example, say which matches you fetched.
+      placeholder: |
+        python examples/cs2/cs2cd.py fetch with_cheater_present --first 120 --count 100 --out ~/cs2cd
+        ...
+        300 matches, 2,900 players, one baseline from 150 clean matches
+    validations:
+      required: true
+
+  - type: textarea
+    id: decisions
+    attributes:
+      label: What fpsdet decided
+      description: Review, watch, clean and held counts. If you have labels (from a dataset or from your own reviewers), split the counts by label. `python examples/cs2/cs2cd.py report` prints this table for the CS2 example.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: What stood out
+      description: Anything that looked wrong, surprising, or useful. A baseline alarm, a check that never fired, a held player who should have been scored, a field your server cannot send.
+
+  - type: input
+    id: version
+    attributes:
+      label: fpsdet version or commit
+      placeholder: 0.2.0 or a commit hash
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before you submit
+      options:
+        - label: I replaced every player id, account name, party id, match id, and IP that could identify a real person.
+          required: true
+        - label: This contains no raw logs, no cheat code, and no steps for getting a cheat past a check.
+          required: true

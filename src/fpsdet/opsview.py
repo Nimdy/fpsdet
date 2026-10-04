@@ -8,6 +8,7 @@ server-health section.
 
 from __future__ import annotations
 
+import html
 import json
 
 # Decision colors are status colors: each one ships with a shape and a word, never alone.
@@ -204,13 +205,20 @@ const SEV = {review: 3, watch: 2, clean: 1, insufficient_data: 0};
 const BAND_ORDER = ["developing", "average", "advanced", "elite", "unrated"];
 const FAMILY = {gear: "Gear rules", baseline: "Human baseline", information: "Information", batch: "Across players"};
 const rows = OPS.rows;
+// Labels beside the decisions: planted by the synthetic week, or a real dataset's own. fpsdet never reads them.
+const LABELLED = OPS.truth_kind === "labelled";
+const HAS_TRUTH = !!OPS.synthetic || LABELLED;
+const isHonest = t => t === "honest" || (OPS.honest_labels || []).includes(t);
+const isCheat = t => !!t && !isHonest(t);
+const TRUTH_WORD = LABELLED ? "Labelled" : "Planted as";
+const TRUTH_VALUES = [...new Set(rows.map(r => r.truth).filter(Boolean))].sort((a, b) => isHonest(a) - isHonest(b) || a.localeCompare(b));
 // A case's checks, most decisive first: the gear and information findings, then batch, then the tails.
 const CHECK_ORDER = Object.keys(OPS.checks);
 const LAST = ["account_jump", "rank_tail", "supporting"];
 const rank = id => (LAST.includes(id) ? 100 + LAST.indexOf(id) : CHECK_ORDER.indexOf(id));
 rows.forEach(r => r.checks.sort((a, b) => rank(a) - rank(b)));
 const days = OPS.days || [];
-const state = {night: "", band: "", check: "", decision: "", reported: false, q: "", sort: "queue", dir: -1, limit: 25, selected: null};
+const state = {night: "", band: "", check: "", decision: "", truth: "", reported: false, q: "", sort: "queue", dir: -1, limit: 25, selected: null};
 const tables = {};
 const tip = document.getElementById("ops-tip");
 const nf = new Intl.NumberFormat("en-US");
@@ -312,6 +320,7 @@ function filtered() {
   return rows.filter(row => {
     if (state.band && row.band !== state.band) return false;
     if (state.check && !row.checks.includes(state.check)) return false;
+    if (state.truth && row.truth !== state.truth) return false;
     if (state.reported && !row.reports) return false;
     if (q && !row.id.toLowerCase().includes(q)) return false;
     if (night >= 0 && !["R", "W"].includes(row.nights[night])) return false;
@@ -339,9 +348,10 @@ function buildFilters() {
     select("decision", "Decision", [["", "All"], ["open", "Open (review + watch)"], ...ORDER.map(d => [d, DEC[d].label])]),
     select("band", "Rank", [["", "All"], ...bands.map(b => [b, b])]),
     select("check", "Check", [["", "Any"], ...groups]),
+    HAS_TRUTH ? select("truth", TRUTH_WORD, [["", "Any"], ...TRUTH_VALUES.map(t => [t, t])]) : null,
     el("label", null, el("input", {type: "checkbox", checked: state.reported || null, on: {change: e => { state.reported = e.target.checked; render(); }}}), "Reported only"),
     el("label", null, el("input", {type: "search", placeholder: "Player id", value: state.q, "aria-label": "Search player id", on: {input: e => { state.q = e.target.value; render(); }}})),
-    el("button", {type: "button", on: {click: () => { Object.assign(state, {night: "", band: "", check: "", decision: "", reported: false, q: "", limit: 25}); buildFilters(); render(); }}}, "Reset"),
+    el("button", {type: "button", on: {click: () => { Object.assign(state, {night: "", band: "", check: "", decision: "", truth: "", reported: false, q: "", limit: 25}); buildFilters(); render(); }}}, "Reset"),
     el("span", {class: "ops-showing", id: "ops-showing"})
   ].filter(Boolean));
 }
@@ -349,16 +359,19 @@ function buildFilters() {
 // ---- header --------------------------------------------------------------
 function header() {
   const first = days[0], last = days[days.length - 1];
-  document.getElementById("ops-kicker").textContent = ["Operations", OPS.game, OPS.synthetic ? "synthetic week" : "scored batch"].join(" · ");
+  document.getElementById("ops-kicker").textContent = ["Operations", OPS.game, OPS.synthetic ? "synthetic week" : LABELLED ? "real matches, labelled" : "scored batch"].join(" · ");
   document.getElementById("ops-title").textContent = first ? `Queue for ${first.label} – ${last.label}` : "This batch's queue";
   const t = OPS.totals;
   document.getElementById("ops-lede").textContent = OPS.synthetic
     ? `${nf.format(t.players)} players, ${nf.format(t.events)} server events across ${nf.format(t.matches)} matches, scored every night and once for the week against last week's frozen baseline. Some players were planted as cheats; the rest play honestly. Every number here is invented. The shape is what a real week looks like.`
+    : LABELLED
+    ? `${nf.format(t.players)} players in ${nf.format(t.matches)} real matches, ${nf.format(t.events)} server events, scored against a baseline built from other matches. ${OPS.truth_source || "The dataset"} says who cheated. fpsdet never saw those labels; they are here so you can check its decisions.`
     : `${nf.format(t.players)} players, ${nf.format(t.events)} server events. Read from the case files that fpsdet score wrote.`;
   const notes = document.getElementById("ops-notes");
   notes.replaceChildren();
   if (OPS.synthetic) notes.append(el("li", {class: "synthetic"}, "Synthetic data"));
   for (const text of Object.values(OPS.notes || {})) notes.append(el("li", null, text));
+  for (const link of OPS.links || []) notes.append(el("li", null, el("a", {href: link.href, style: "color:var(--signal)"}, link.text)));
   const status = (OPS.integrity || {}).status || "unchecked";
   notes.append(el("li", null, "Baseline integrity: ", el("b", null, status)));
   notes.append(el("li", null, "Automated action: ", el("b", null, "none")));
@@ -395,12 +408,12 @@ function kpis(list) {
   tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Watching"), el("p", {class: "value"}, nf.format(count("watch"))), el("p", {class: "sub"}, "Monitor. Not a case until a review fires.")));
   tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Clean"), el("p", {class: "value"}, nf.format(count("clean"))), el("p", {class: "sub"}, el("b", null, nf.format(count("insufficient_data"))), " held: too little play, or no baseline yet.")));
   tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Reported players"), el("p", {class: "value"}, nf.format(reported.length)), el("p", {class: "sub"}, el("b", null, `${reportedReview}`), ` of them in review (${reported.length ? Math.round(100 * reportedReview / reported.length) : 0}%). Reports set the order, never the decision.`)));
-  if (OPS.synthetic) {
-    const cheats = list.filter(r => r.truth && r.truth !== "honest");
+  if (HAS_TRUTH) {
+    const cheats = list.filter(r => isCheat(r.truth));
     const caught = cheats.filter(r => r.decision === "review").length;
-    const honest = list.filter(r => r.truth === "honest");
+    const honest = list.filter(r => isHonest(r.truth));
     const framed = honest.filter(r => r.decision === "review").length;
-    tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Answer check · synthetic only"), el("p", {class: "value"}, `${caught}/${cheats.length}`), el("p", {class: "sub"}, "planted cheats in review. ", el("b", null, String(framed)), ` of ${nf.format(honest.length)} honest players in review.`)));
+    tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, LABELLED ? "Answer check · dataset labels" : "Answer check · synthetic only"), el("p", {class: "value"}, `${caught}/${nf.format(cheats.length)}`), el("p", {class: "sub"}, LABELLED ? "labelled cheaters in review. " : "planted cheats in review. ", el("b", null, String(framed)), ` of ${nf.format(honest.length)} ${LABELLED ? "players labelled clean" : "honest players"} in review.`)));
   } else {
     tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Server events"), el("p", {class: "value"}, nf.format(OPS.totals.events)), el("p", {class: "sub"}, `${nf.format(OPS.totals.shots)} shots, ${nf.format(OPS.totals.movement)} movement samples.`)));
   }
@@ -623,10 +636,18 @@ function side(list) {
 }
 function truth(list) {
   const holder = document.getElementById("card-truth");
-  if (!OPS.synthetic) { holder.hidden = true; return; }
+  if (!HAS_TRUTH) { holder.hidden = true; return; }
   holder.hidden = false;
-  const card = cardHead(holder, "Answer check · synthetic only", "Who was planted as what, and where they ended up. In production nobody hands you this column. It is here to show what the checks catch, and what still gets through.", null);
-  const cheats = list.filter(r => r.truth && r.truth !== "honest").sort((a, b) => SEV[b.decision] - SEV[a.decision] || a.truth.localeCompare(b.truth));
+  const card = LABELLED
+    ? cardHead(holder, "Answer check · dataset labels", "The dataset's own labels beside fpsdet's decisions. fpsdet never saw them. In production nobody hands you this column. Pick a label in the filters to browse those players.", null)
+    : cardHead(holder, "Answer check · synthetic only", "Who was planted as what, and where they ended up. In production nobody hands you this column. It is here to show what the checks catch, and what still gets through.", null);
+  const cheats = list.filter(r => isCheat(r.truth)).sort((a, b) => SEV[b.decision] - SEV[a.decision] || a.truth.localeCompare(b.truth));
+  if (cheats.length > 48) {
+    // Too many to list one by one: players per label and decision.
+    const labels = TRUTH_VALUES.filter(t => list.some(r => r.truth === t));
+    card.append(dataTable(["Label", ...ORDER.map(d => DEC[d].label), "Players"], labels.map(t => { const of = list.filter(r => r.truth === t); return [t, ...ORDER.map(d => nf.format(of.filter(r => r.decision === d).length)), nf.format(of.length)]; })));
+    return;
+  }
   const grid = el("div", {style: "display:grid;grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr));gap:4px 18px"});
   for (const r of cheats) {
     const row = el("button", {type: "button", title: (OPS.truth_notes || {})[r.truth] || "", style: "all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;padding:3px 6px;border-radius:5px;cursor:pointer;font-size:0.8rem", on: {click: () => select(r.id, true)}});
@@ -634,9 +655,9 @@ function truth(list) {
     grid.append(row);
   }
   card.append(grid);
-  const honest = list.filter(r => r.truth === "honest");
+  const honest = list.filter(r => isHonest(r.truth));
   card.append(el("p", {class: "meta", style: "margin:0.6rem 0 0;font-size:0.8rem;color:var(--muted)"}, "Honest players: ", ...ORDER.map((d, i) => [el("b", {style: "color:" + (d === "review" ? "#fff" : "var(--ink)")}, nf.format(honest.filter(r => r.decision === d).length)), " " + DEC[d].label.toLowerCase() + (i < ORDER.length - 1 ? " · " : ".")])));
-  const missed = list.filter(r => r.truth && r.truth !== "honest" && r.decision !== "review");
+  const missed = list.filter(r => isCheat(r.truth) && r.decision !== "review");
   if (missed.length) card.append(el("p", {class: "caption"}, "Not in review: " + missed.map(r => `${r.truth} (${DEC[r.decision].label.toLowerCase()})`).join(", ") + ". Closet assists tuned under the ceiling, and leftover twins with too little data, are what still gets through."));
 }
 
@@ -659,7 +680,7 @@ function queue(list) {
     el("th", {class: "hide-sm"}, "Checks"),
     el("th", {class: "num"}, sortBtn("reports", "Reports")),
     days.length ? el("th", {class: "hide-sm"}, "Nights") : null,
-    OPS.synthetic ? el("th", {class: "hide-sm"}, "Planted as") : null);
+    HAS_TRUTH ? el("th", {class: "hide-sm"}, TRUTH_WORD) : null);
   const body = el("tbody");
   for (const r of sorted.slice(0, state.limit)) {
     const tr = el("tr", {class: "pick", tabindex: 0, "aria-selected": String(state.selected === r.id), on: {click: () => select(r.id), keydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(r.id); } }}});
@@ -672,7 +693,7 @@ function queue(list) {
       el("td", {class: "hide-sm", style: "white-space:nowrap"}, chips.length ? chips : el("span", {style: "color:var(--ops-axis)"}, "–")),
       el("td", {class: "num"}, r.reports ? String(r.reports) : "·"),
       days.length ? el("td", {class: "hide-sm"}, el("span", {class: "nights", "aria-label": r.nights.map((n, i) => days[i].label + " " + ({R: "review", W: "watch", C: "clean", H: "held"}[n] || "did not play")).join(", ")}, r.nights.map(n => el("i", {class: n || null})))) : null,
-      OPS.synthetic ? el("td", {class: "hide-sm mono", style: (r.truth === "honest" ? "color:var(--muted)" : "color:#e9c27a") + ";white-space:nowrap"}, r.truth) : null].filter(Boolean));
+      HAS_TRUTH ? el("td", {class: "hide-sm mono", style: (isHonest(r.truth) ? "color:var(--muted)" : "color:#e9c27a") + ";white-space:nowrap"}, r.truth || "–") : null].filter(Boolean));
     body.append(tr);
   }
   const table = el("table", null, el("thead", null, head), body);
@@ -715,7 +736,10 @@ function drawer(list) {
   box.append(el("p", {class: "ops-kicker"}, "Case"));
   box.append(el("h3", null, r.id));
   box.append(el("p", {class: "meta"}, pill(r.decision), " ", el("b", null, r.band), ` · ${r.reports || "no"} report${r.reports === 1 ? "" : "s"} · recommended: `, el("b", null, c.recommended_action || "none"), " · automated: ", el("b", null, "none")));
-  if (r.truth) box.append(el("p", {class: "truth"}, "Planted as ", el("b", null, r.truth), r.truth === "honest" ? " — plays honestly." : ` — ${(OPS.truth_notes || {})[r.truth] || ""}.`));
+  if (r.truth) {
+    const note = (OPS.truth_notes || {})[r.truth];
+    box.append(el("p", {class: "truth"}, TRUTH_WORD + " ", el("b", null, r.truth), note ? ` — ${note}.` : r.truth === "honest" ? " — plays honestly." : "."));
+  }
   if (days.length) {
     const strip = el("div", {style: "display:grid;grid-template-columns:repeat(" + days.length + ",1fr);gap:3px;margin-top:0.7rem"});
     r.nights.forEach((n, i) => strip.append(el("div", {style: "text-align:center;font-size:10px;color:var(--muted)"}, el("div", {class: "nights", style: "display:block"}, el("i", {class: n || null, style: "display:block;width:100%;height:12px"})), days[i].label)));
@@ -751,7 +775,7 @@ function drawer(list) {
   if (c.party_note) box.append(el("p", {class: "meta"}, c.party_note));
   if (c.seal) box.append(el("p", {class: "meta mono", style: "word-break:break-all"}, "seal " + c.seal.slice(0, 24) + "…"));
   if (r.case) {
-    const details = el("details", null, el("summary", null, "Case file (JSON), as fpsdet score writes it"));
+    const details = el("details", null, el("summary", null, c.limits ? "Case file (JSON), as fpsdet score writes it" : "Case file (JSON), shortened for this page"));
     details.append(el("pre", null, JSON.stringify(r.case, null, 2)));
     box.append(details);
   }
@@ -868,6 +892,8 @@ html, body { margin: 0; background: var(--bg); color: var(--ink); }
 body { font: 15px/1.45 var(--sans); }
 .ops-top { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1.4rem; border-bottom: 1px solid var(--line); font: 600 1rem var(--mono); color: #fff; }
 .ops-top span { color: var(--signal); }
+.ops-top .ops-home { font: 500 0.85rem var(--sans); color: var(--signal); text-decoration: none; }
+.ops-top .ops-home:hover { text-decoration: underline; }
 .ops-top small { margin-left: auto; font: 500 11px var(--mono); color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
 """
 
@@ -877,16 +903,27 @@ def payload_json(payload: dict) -> str:
     return json.dumps(payload, separators=(",", ":")).replace("<", "\\u003c")
 
 
-def render_dashboard(payload: dict, tape_base: str | None = "https://nimdy.github.io/detect-FPS-hackers/board.html") -> str:
-    """One offline page: the operations view over ``payload`` and nothing else."""
+def render_dashboard(
+    payload: dict,
+    tape_base: str | None = "https://nimdy.github.io/detect-FPS-hackers/board.html",
+    *,
+    home: str | None = None,
+    title: str | None = None,
+) -> str:
+    """One offline page: the operations view over ``payload`` and nothing else.
+
+    ``home`` adds a link back to the review desk. ``title`` replaces the page title.
+    """
     data = dict(payload)
     data["tape_base"] = tape_base
+    back = f'<a class="ops-home" href="{html.escape(home)}">← Review desk</a>' if home else ""
+    name = html.escape(title or f"fpsdet operations · {payload.get('game', '')}")
     return (
         "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
         "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-        f"<title>fpsdet operations · {payload.get('game', '')}</title>\n"
+        f"<title>{name}</title>\n"
         "<style>" + _TOKENS + OPS_CSS + "</style>\n</head>\n<body>\n"
-        "<header class=\"ops-top\">fps<span>det</span> operations<small>automated action: none</small></header>\n"
+        f"<header class=\"ops-top\">fps<span>det</span> operations{back}<small>automated action: none</small></header>\n"
         + OPS_HTML
         + "\n<script id=\"ops-payload\" type=\"application/json\">"
         + payload_json(data)

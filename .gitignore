@@ -8,3 +8,5 @@ lake/
 .pytest_cache/
 _site/
 node_modules/
+# Written by fpsdet demo from examples/cs2/desk.json
+demo/cs2.html

@@ -106,18 +106,23 @@ def _metric_rows(case: Case) -> list[dict]:
     return rows
 
 
-_WATCH_HINTS = ("above this rank", "human tail", "low for humans", "low tail", "need ", "waiting for a baseline", "no curve")
+# Lines that explain a watch: a tail inside the best humans, or two supporting tells.
+_WATCH_HINTS = ("above this rank", "human tail", "low for humans", "low tail", "past every measured human", "tighter than the human")
+# Lines that explain a hold. "shots, need" and not "need": a glitch note says "(need 25)" too.
+_HELD_HINTS = ("shots, need ", "waiting for a baseline", "no curve")
 
 
 def _why(case: Case) -> str:
-    """The one line a reviewer reads first. A clean case has none."""
+    """The one line a reviewer reads first: the line behind this decision. A clean case has none."""
     if case.reasons:
         return case.reasons[0]
     if case.decision == "clean":
         return ""
-    for line in case.observations:
-        if any(hint in line for hint in _WATCH_HINTS):
-            return line
+    first = _WATCH_HINTS if case.decision == "watch" else _HELD_HINTS
+    for hints in (first, _WATCH_HINTS + _HELD_HINTS):
+        for line in case.observations:
+            if any(hint in line for hint in hints):
+                return line
     return case.observations[0] if case.observations else ""
 
 

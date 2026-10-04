@@ -8,10 +8,10 @@ from pathlib import Path
 
 from .models import GameProfile, curve_speed
 from .ops import week_payload
-from .opsview import OPS_CSS, OPS_HTML, OPS_JS, payload_json
+from .opsview import OPS_CSS, OPS_HTML, OPS_JS, payload_json, render_dashboard
 from .signals import WIRE_ERROR_RATIO, WIRE_MIN_GAP_DEG, command_residual, pearson
 from .statsutil import median
-from .synthetic import Demo, replay_scene
+from .synthetic import ROOT, Demo, replay_scene
 from .week import build_week
 
 # Tour order. The queue is a story, not an alphabetical dump.
@@ -676,20 +676,42 @@ def _week_ops(seed: int) -> str:
     return payload_json(payload)
 
 
+# The real-match example: the operations view over CS2CD matches, written beside the desk.
+# examples/cs2/cs2cd.py desk builds it from a scored run. An installed package has no copy.
+CS2_PAYLOAD = ROOT / "examples" / "cs2" / "desk.json"
+CS2_PAGE = "cs2.html"
+_CS2_TAB = '<a class="tab-link" href="cs2.html"><span>C</span>Real CS2 matches</a>'
+
+
 def render_board(demo: Demo, week_seed: int = 7) -> str:
     payload = json.dumps(board_payload(demo), separators=(",", ":")).replace("<", "\\u003c")
     shell = (
         _SHELL.replace("/*__OPS_CSS__*/", OPS_CSS)
         .replace("<!--__OPS_HTML__-->", OPS_HTML)
         .replace("/*__OPS_JS__*/", OPS_JS)
+        .replace("<!--__CS2_TAB__-->", _CS2_TAB if CS2_PAYLOAD.is_file() else "")
     )
     return shell.replace("/*__OPS__*/", _week_ops(week_seed)).replace("/*__DATA__*/", payload)
+
+
+def write_cs2_page(folder: str | Path) -> Path | None:
+    """The CS2 example beside the desk, linked back to it. None when the example data is absent."""
+    if not CS2_PAYLOAD.is_file():
+        return None
+    payload = json.loads(CS2_PAYLOAD.read_text(encoding="utf-8"))
+    target = Path(folder) / CS2_PAGE
+    target.write_text(
+        render_dashboard(payload, tape_base="board.html", home="board.html", title="Real CS2 matches · fpsdet"),
+        encoding="utf-8",
+    )
+    return target
 
 
 def write_board(demo: Demo, path: str | Path | None = None) -> Path:
     target = Path(path) if path else Path.cwd() / "demo" / "board.html"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(render_board(demo), encoding="utf-8")
+    write_cs2_page(target.parent)
     return target
 
 
@@ -1004,6 +1026,11 @@ svg { width: 100%; height: auto; display: block; }
 .tabs a[role=tab][aria-selected=true] { color: #fff; background: var(--panel); border-color: var(--line); box-shadow: inset 0 2px 0 var(--signal); }
 .tabs a[role=tab]:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
 .tabs .status-pill { margin: 0 0 0.45rem auto; }
+.tabs a.tab-link { padding: 0.55rem 1rem 0.6rem; color: var(--muted); text-decoration: none; font-size: 0.92rem; }
+.tabs a.tab-link span { margin-right: 0.45rem; font-family: var(--mono, ui-monospace, monospace); font-size: 11px; color: var(--signal); }
+.tabs a.tab-link::after { content: " ↗"; color: var(--signal); }
+.tabs a.tab-link:hover { color: var(--ink); }
+.tabs a.tab-link:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
 #key[hidden] { display: none; }
 /* The scanlines are the site's look. Over a chart they stripe the data, so the operations view drops them. */
 body.view-ops::after { content: none; }
@@ -1026,6 +1053,7 @@ body.view-ops::after { content: none; }
   <div class="tabs" role="tablist" aria-label="Desk views">
     <a role="tab" id="tab-ops" href="#ops" aria-controls="ops" aria-selected="true"><span>A</span>Operations · a synthetic week</a>
     <a role="tab" id="tab-key" href="#key" aria-controls="key" aria-selected="false"><span>B</span>Answer key · 32 planted players</a>
+    <!--__CS2_TAB__-->
     <p class="status-pill"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
 </header>

@@ -32,7 +32,7 @@ from fpsdet.models import (
 )
 from fpsdet.casefile import safe_name
 from fpsdet.cli import main as cli_main
-from fpsdet.ops import _scatter_point, merge_payloads, merge_queue, week_payload
+from fpsdet.ops import _scatter_point, _why, merge_payloads, merge_queue, week_payload
 from fpsdet.week import WIRE_SHIPS, build_week
 from fpsdet.parse import ParseError, load_events, load_profile, parse_event, profile_from_dict
 from fpsdet.persist import case_to_dict, write_json
@@ -1627,6 +1627,13 @@ class PopulationTest(unittest.TestCase):
         for label in ("speed", "rage", "no-recoil", "mirror", "fire-rate", "metronome", "wallhack", "quiet-radar", "wire", "esp"):
             self.assertEqual(set(self._decisions(label)), {"review"}, label)
 
+    def test_every_watch_says_why(self):
+        # The queue line is the reason for the watch, never a note about too few shots on another gun.
+        for row in self.payload["rows"]:
+            if row["decision"] == "watch":
+                self.assertTrue(row["why"], row["id"])
+                self.assertNotIn("shots, need", row["why"], row["id"])
+
     def test_teammate_on_a_wallhacker_call_is_a_watch(self):
         friend = next(pid for pid, truth in self.week.truth.items() if truth == "radar-friend")
         self.assertEqual(self.queue[friend].decision, "watch")
@@ -1693,6 +1700,36 @@ class OpsTest(unittest.TestCase):
         self.assertEqual(_scatter_point(case, "rifle"), {"acc": 0.22, "hs": 0.27})
         # The smg has no headshot rate yet. It does not borrow the rifle's.
         self.assertIsNone(_scatter_point(case, "smg"))
+
+    def test_the_queue_line_is_the_one_behind_the_decision(self):
+        glitch = "4 over-cap ground samples, longest run 1 (need 25). Treated as a glitch or a blast the server did not tag, not as a cheat."
+        tail = "pistol accuracy is above this rank's range and inside the best humans measured"
+        short = "sniper: 4 shots, need 40 before aim is scored"
+        case = Case("p", "t", "watch", "monitor", "none", "average", 0, observations=[glitch, tail, short])
+        self.assertEqual(_why(case), tail)
+        case.decision = "insufficient_data"
+        self.assertEqual(_why(case), short)
+
+    def test_the_desk_links_the_real_cs2_matches(self):
+        from fpsdet.pages import write_pages
+
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = write_pages(build_demo(), tmp)
+            board = (dest / "board.html").read_text(encoding="utf-8")
+            page = (dest / "cs2.html").read_text(encoding="utf-8")
+        self.assertIn('href="cs2.html"', board)
+        self.assertIn('<a class="ops-home" href="board.html">', page)
+        self.assertIn("<title>Real CS2 matches · fpsdet</title>", page)
+        marker = '<script id="ops-payload" type="application/json">'
+        start = page.index(marker) + len(marker)
+        payload = json.loads(page[start:page.index("</script>", start)])
+        # Real matches with the dataset's labels: never called synthetic, and the labels are not fpsdet's.
+        self.assertFalse(payload["synthetic"])
+        self.assertEqual(payload["truth_kind"], "labelled")
+        self.assertEqual(payload["tape_base"], "board.html")
+        self.assertEqual({row["truth"] for row in payload["rows"]}, {"cheater", *payload["honest_labels"]})
+        self.assertFalse([row["id"] for row in payload["rows"] if row["decision"] == "review" and row["truth"] != "cheater"])
+        self.assertTrue(any("result" in link["text"] for link in payload["links"]))
 
     def test_board_opens_on_operations_and_keeps_the_answer_key(self):
         html = render_board(build_demo())
@@ -1902,6 +1939,30 @@ class Cs2ExampleTest(unittest.TestCase):
         self.assertEqual([band(12, rank) for rank in (5, 9, 13, 18)], ["developing", "average", "advanced", "elite"])
         self.assertEqual([band(11, rating) for rating in (4000, 7000, 15000, 25000)], ["developing", "average", "advanced", "elite"])
         self.assertEqual([band(11, 0), band(None, 5), band(12, 0)], ["unrated"] * 3)
+
+    def test_the_desk_page_carries_labels_and_drops_what_it_does_not_show(self):
+        ops = {
+            "rows": [
+                {"id": "wc001-p1", "decision": "watch", "metrics": [{"name": "accuracy"}, {"name": "view_p95"}],
+                 "case": {"decision": "watch", "reasons": [], "observations": ["x"], "speed": {"samples": 9}, "limits": "..."}},
+                {"id": "nc150-p2", "decision": "clean", "metrics": []},
+            ],
+            "integrity": {"status": "ok", "alarms": [], "left_out": ["match a", "match b"]},
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "ops.json").write_text(json.dumps(ops), encoding="utf-8")
+            labels = Path(tmp) / "labels.json"
+            labels.write_text(json.dumps({"wc001-p1": "cheater", "nc150-p2": "clean, unreviewed match"}), encoding="utf-8")
+            out = Path(tmp) / "desk.json"
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.cs2.main(["desk", tmp, "--labels", str(labels), "--out", str(out)])
+            desk = json.loads(out.read_text(encoding="utf-8"))
+        first, second = desk["rows"]
+        self.assertEqual((first["truth"], second["truth"]), ("cheater", "clean, unreviewed match"))
+        self.assertEqual([m["name"] for m in first["metrics"]], ["accuracy"])
+        self.assertEqual(sorted(first["case"]), ["decision", "observations", "reasons"])
+        self.assertEqual((desk["truth_kind"], desk["synthetic"]), ("labelled", False))
+        self.assertIn("2 hack-vs-hack lobbies", desk["notes"]["baseline"])
 
     def test_the_profile_loads(self):
         profile = load_profile(ROOT / "examples" / "cs2" / "cs2.json")

@@ -376,6 +376,10 @@ def assess_player(
                     f"{weapon.weapon_key} headshot lower bound {hs_view.bound:.0%} is past the best "
                     f"measured {hs_view.ceiling_band} human ({hs_view.ceiling_extreme:.0%})"
                 )
+            elif band:
+                observations.append(
+                    f"{weapon.weapon_key} headshot rate is above this rank's range and inside the best humans measured"
+                )
             if hs_view.skipped:
                 observations.append(f"{weapon.weapon_key} headshots: {hs_view.skipped}")
 
@@ -403,6 +407,10 @@ def assess_player(
                     f"{weapon.weapon_key} median engagement {dist_value:.0f} m (lower bound {dist_view.bound:.0f} m) is past the farthest measured "
                     f"{dist_view.ceiling_band} human ({dist_view.ceiling_extreme:.0f} m)"
                 )
+            elif band:
+                observations.append(
+                    f"{weapon.weapon_key} median engagement distance is above this rank's range and inside the farthest humans measured"
+                )
 
         if weapon.geometry_known >= profile.min_shots:
             geo_view, band, human, did = _rate_flags(
@@ -425,6 +433,10 @@ def assess_player(
                 fired("geometry_rate")
                 reasons.append(
                     f"{weapon.weapon_key} shots through geometry are past the best measured human rate"
+                )
+            elif band:
+                observations.append(
+                    f"{weapon.weapon_key} shots through geometry are above this rank's range and inside the best humans measured"
                 )
 
         if len(weapon.view_deltas) >= profile.min_shots:

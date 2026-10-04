@@ -27,6 +27,17 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 REPO = "datasets/CS2CD/CS2CD.Counter-Strike_2_Cheat_Detection"
+PROJECT = "https://github.com/Nimdy/detect-FPS-hackers"
+SHARE = PROJECT + "/issues/new?template=real_data_result.yml"
+HONEST_LABELS = ("clean, reviewed match", "clean, unreviewed match")
+# What the desk's case drawer reads. The page leaves the rest out.
+DESK_CASE = ("decision", "recommended_action", "automated_action", "reasons", "observations", "checks", "party_note", "seal")
+DESK_METRICS = ("accuracy", "headshot_rate", "median_distance", "geometry_rate")
+LABEL_NOTES = {
+    "cheater": "banned by VAC and judged a cheater by the dataset's reviewers",
+    "clean, reviewed match": "in a match the dataset's reviewers checked by hand",
+    "clean, unreviewed match": "in a match nobody reviewed, so a few of these may be cheating",
+}
 SPLITS = ("no_cheater_present", "with_cheater_present")
 SHORT = {"no_cheater_present": "nc", "with_cheater_present": "wc"}
 
@@ -349,6 +360,44 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_desk(args: argparse.Namespace) -> int:
+    """The scored run as the review desk's CS2 page, with the dataset's labels beside each decision.
+
+    fpsdet never reads the labels. The page shows them so a visitor can check its decisions.
+    To keep the page light, each case keeps only what the drawer shows, and each row keeps
+    only the numbers the drawer charts. The full cases stay in the scored run's folder.
+    """
+    ops = json.loads((Path(args.cases) / "ops.json").read_text(encoding="utf-8"))
+    labels = json.loads(Path(args.labels).read_text(encoding="utf-8"))
+    for row in ops["rows"]:
+        row["truth"] = labels.get(row["id"], "unlabelled")
+        row["metrics"] = [m for m in row["metrics"] if m["name"] in DESK_METRICS]
+        if row.get("case"):
+            row["case"] = {key: row["case"][key] for key in DESK_CASE if key in row["case"]}
+    left_out = len((ops.get("integrity") or {}).get("left_out") or [])
+    ops.update(
+        {
+            "synthetic": False,
+            "truth_kind": "labelled",
+            "truth_source": "CS2CD, a public dataset with cheaters labelled by hand,",
+            "honest_labels": list(HONEST_LABELS),
+            "truth_notes": LABEL_NOTES,
+            "notes": {
+                "data": "Counter-Strike 2 matchmaking matches from CS2CD by Mille Mei Zhen Loo and Gert Lužkov, CC BY 4.0",
+                "baseline": f"Baseline from other \u201cno cheater\u201d matches; {left_out} hack-vs-hack lobbies screened out",
+                "names": "Player names are the dataset's own placeholders. Not affiliated with Valve",
+            },
+            "links": [
+                {"text": "How this was built, and the full results", "href": PROJECT + "/tree/main/examples/cs2"},
+                {"text": "Run it yourself and share what you find", "href": SHARE},
+            ],
+        }
+    )
+    Path(args.out).write_text(json.dumps(ops, separators=(",", ":")) + "\n", encoding="utf-8")
+    print(f"Wrote {args.out}: {len(ops['rows'])} players, {Path(args.out).stat().st_size // 1024} KB")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -378,6 +427,12 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("cases", help="Folder written by fpsdet score --out")
     report.add_argument("--labels", required=True)
     report.set_defaults(func=cmd_report)
+
+    desk = sub.add_parser("desk", help="Write the review desk's CS2 page data from a scored run and the labels")
+    desk.add_argument("cases", help="Folder written by fpsdet score --out")
+    desk.add_argument("--labels", required=True)
+    desk.add_argument("--out", default=str(Path(__file__).with_name("desk.json")))
+    desk.set_defaults(func=cmd_desk)
 
     args = parser.parse_args(argv)
     return args.func(args)

@@ -20,7 +20,7 @@ PYTHONPATH=src python3 -m fpsdet demo
 
 That scores 32 planted players with a known answer each. Eleven are cheats that should be reviewed, four should be watched, sixteen are honest players (most of them look suspicious at first glance), and one has too little data. The last line is `Planted cases matched profiles/example-loadout.json.` If a decision moves, the scorer changed.
 
-Then open `demo/board.html` in a browser, the review desk. It works offline and has two tabs:
+Then open `demo/board.html` in a browser, the review desk. It works offline and has two tabs, plus a link to the real CS2 matches (see below):
 
 - **Operations** is what a week looks like to the people who run the queue. It covers 400 synthetic players and 17 planted cheats, scored every night against last week's frozen baseline:
   - the open reviews, and the queue night by night
@@ -35,6 +35,10 @@ Then open `demo/board.html` in a browser, the review desk. It works offline and 
 ## Try it on real Counter-Strike 2 matches
 
 [examples/cs2](examples/cs2/README.md) converts CS2CD, a public CC BY 4.0 dataset of CS2 matchmaking matches with hand-labelled cheaters, into fpsdet events, then scores them against a baseline built from clean matches. The README there has the results, including what one match per player cannot show.
+
+The scored run is in the desk too: **C · Real CS2 matches** in the [review desk](https://nimdy.github.io/detect-FPS-hackers/board.html), or `demo/cs2.html` after `fpsdet demo`. Every player has fpsdet's decision, the reason, and the dataset's label beside it.
+
+Run it yourself, on more matches or on your own server's logs, and share what you find with the [result form](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml).
 
 ## Run the whole pipeline on a sample week
 

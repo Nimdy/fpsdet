@@ -2,7 +2,11 @@
 
 The planted demo and the synthetic week show what fpsdet does when the answer is known by construction. This folder runs it on real play instead: Counter-Strike 2 matchmaking matches from the public **CS2CD** dataset, where the cheaters were labelled by hand.
 
-Not affiliated with Valve or with the dataset's authors. Nothing from the dataset is committed here; the script downloads it when you run it.
+Not affiliated with Valve or with the dataset's authors. The script downloads the dataset when you run it; the only thing committed here is `desk.json`, the scored results the review desk shows.
+
+**See it:** open the [review desk](https://nimdy.github.io/detect-FPS-hackers/board.html) and pick **C · Real CS2 matches**, or run `fpsdet demo` and open `demo/cs2.html`. Every scored player is there with fpsdet's decision, the reason, and the dataset's label beside it.
+
+**Try it, and tell us what you find.** Run it on more matches, or on your own server's logs, and post the result with the [result form](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml). Results that look wrong are the most useful ones.
 
 ## The data
 
@@ -43,6 +47,10 @@ PYTHONPATH=src python -m fpsdet score scored.ndjson --profile examples/cs2/cs2.j
 # Compare the decisions with the labels. fpsdet never sees the labels.
 $PY labels ~/cs2cd --out labels.json
 $PY report cs2-cases/ --labels labels.json
+
+# Optional: rebuild the desk's CS2 page from your run, then regenerate the desk.
+$PY desk cs2-cases/ --labels labels.json
+PYTHONPATH=src python -m fpsdet demo
 ```
 
 `cs2-cases/dashboard.html` is the operations view of the scored matches.
