@@ -66,18 +66,31 @@ Not sent, because a demo cannot say it honestly: recoil kick and the player's co
 
 ## Results
 
-Run on 2026-10-04 with the commands above: 165 complete no-cheater matches (the first 180 by number, minus abandoned ones) and 108 complete with-cheater matches (the first 120).
+Run on 2026-10-04 with the commands above: 165 complete no-cheater matches (the first 180 by number, minus abandoned ones) and 108 complete with-cheater matches (the first 120). 1,529 players were scored.
 
-**fpsdet caught its own poisoned baseline.** `fpsdet baseline` sets every match beside the others in the window. Of the first 120 no-cheater matches, it flagged 20 where the whole lobby was far past the median match, for example:
+### What it did well
 
-```
-match nc104: the lobby hit 49% of 334 shots (lower bound 44%); the median match hits 19% and the line is 35%;
-70% of 162 traced shots went through geometry (lower bound 64%); the median match is 8% and the line is 29%
-```
+- **No honest player was framed.** Of 1,025 clean players, none went to review, and none of the 575 in hand-reviewed matches was even watched.
+- **It held instead of guessing.** A player with too few shots on a weapon was held for too little data, and a weapon with too few measured humans was left unscored, with the reason written on the case.
+- **It caught its own poisoned baseline.** `fpsdet baseline` sets every match beside the others in the window. Of the first 120 "no cheater" matches, it flagged 20 where the whole lobby was far past the median match, for example:
 
-These look like hack-vs-hack games where nobody had been banned yet, which is what "not reviewed" allows. Left in, they would make "past every measured human" mean "past a rage cheater". `--screen-matches` left them out, keeping 100 matches and 996 players. The lines come from the window itself, not from CS2: none of the 45 held-out no-cheater matches crosses them, and 47 of the 108 with-cheater matches would. In this run, leaving them out changed no decision, because the players in those lobbies fired too few shots to enter the baseline. With more play per account it would matter.
+  ```
+  match nc104: the lobby hit 49% of 334 shots (lower bound 44%); the median match hits 19% and the line is 35%;
+  70% of 162 traced shots went through geometry (lower bound 64%); the median match is 8% and the line is 29%
+  ```
 
-**What the labels look like in the data.** The cheaters are not subtle:
+  These look like hack-vs-hack games where nobody had been banned yet, which is what "not reviewed" allows. Left in, they would make "past every measured human" mean "past a rage cheater". `--screen-matches` left them out, keeping 100 matches and 996 players. The lines come from the window itself, not from CS2: none of the 45 held-out no-cheater matches crosses them, and 47 of the 108 with-cheater matches would.
+- **Speed stayed clean** across 3.85 million movement samples. The CS2 server enforces it, and fpsdet agreed.
+
+| | Review | Watch | Clean | Held for too little data |
+| --- | --- | --- | --- | --- |
+| Clean, reviewed matches (575) | 0 | 0 | 302 | 273 |
+| Clean, unreviewed matches (450) | 0 | 4 | 435 | 11 |
+| Labelled cheaters (504) | 0 | 14 | 92 | 398 |
+
+### What it could not do from one match
+
+**No labelled cheater reached review.** The cheaters are not subtle in the data:
 
 | | Labelled cheaters | Clean, reviewed matches | Clean, unreviewed matches |
 | --- | --- | --- | --- |
@@ -88,23 +101,18 @@ These look like hack-vs-hack games where nobody had been banned yet, which is wh
 | Median share of hits through walls (10+ hits) | 47% | 6% | 5% |
 | Players with over 40% of hits through walls | 222 | 1 | 0 |
 
-**What fpsdet decided,** scored against the screened baseline:
+They stayed out of review for reasons fpsdet states on every case:
 
-| | Review | Watch | Clean | Held for too little data |
-| --- | --- | --- | --- | --- |
-| Labelled cheaters (504) | 0 | 14 | 92 | 398 |
-| Clean, reviewed matches (575) | 0 | 0 | 302 | 273 |
-| Clean, unreviewed matches (450) | 0 | 4 | 435 | 11 |
-
-- **No honest player was put in review,** and none of the 575 hand-reviewed clean players was even watched.
-- **No cheater was put in review either.** Most were held: a cheater fires a median 38 shots in a match, fpsdet waits for 40 on one weapon class, and many rage cheaters use auto-snipers, where too few clean players fire 40 shots to make a baseline.
-- **Those it could score mostly sat inside the human range.** The clearest, `wc002-p2`, hit 92.5% of rifle shots (lower bound 83%, best human 45%) but only 19% of hits were headshots. One number past every human is a watch. A review needs two.
-- **Shots through walls never counted.** A demo only records penetration for hits, and the wall check waits for 40 shots with a known answer. Few cheaters land 40 hits in one match.
-- **Speed stayed clean** across 3.85 million movement samples. The server enforces it.
+- **Too few shots.** A cheater fires a median 38 shots in a match, and fpsdet waits for 40 on one weapon class before it scores aim. 398 of 504 were held.
+- **Thin sniper baseline.** Many rage cheaters use auto-snipers, and too few clean players fire 40 sniper shots in a match to make a baseline. Those numbers stay untrained.
+- **One number is a watch.** The clearest cheater, `wc002-p2`, hit 92.5% of rifle shots (lower bound 83%, best human 45%), but only 19% of hits were headshots. One number past every human is a watch. A review needs two.
+- **Shots through walls never counted.** A demo records penetration only for hits, and the wall check waits for 40 shots with a known answer. Few cheaters land 40 hits in one match.
 
 Halving the per-player minimums (20 shots, 12 hits for headshot rate) as an experiment moved 35 cheaters and 9 clean players to watch, and still put nobody in review. The limit is evidence per account, not the thresholds.
 
-**What this shows.** On real CS2 play, fpsdet did not frame anyone, and it said "not enough data" instead of guessing when one match was all it had. The labelled cheaters differ from clean players by a wide margin on exactly the numbers fpsdet scores. What one match per account cannot show is detection: fpsdet is built to judge an account over a week of play, and CS2CD cannot link a player across matches.
+### What this shows
+
+On real CS2 play, fpsdet framed no one, said "not enough data" when one match was all it had, and found the cheaters hiding in its own baseline. The labelled cheaters differ from clean players by a wide margin on exactly the numbers fpsdet scores. What one match per account cannot show is detection: fpsdet is built to judge an account over a week of play, and CS2CD cannot link a player across matches.
 
 ## Limits
 
