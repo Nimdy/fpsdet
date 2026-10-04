@@ -133,9 +133,12 @@ def _why(case: Case) -> str:
 
 
 def _scatter_key(cases: Iterable[Case], cohort: CohortTable | None) -> str:
-    """The weapon the human-ceiling scatter is drawn for: rifle when there is one, else the most scored."""
+    """The weapon the human-ceiling scatter is drawn for: rifle when there is one, else the one most players were measured on."""
     if cohort is not None:
-        keys = Counter(key for (_, key, metric) in cohort._values if metric == "accuracy")
+        keys = Counter()
+        for (_, key, metric), values in cohort._values.items():
+            if metric == "accuracy":
+                keys[key] += len(values)
     else:
         keys = Counter(metric.key for case in cases for metric in case.metrics if metric.name == "accuracy" and metric.key)
     if "rifle" in keys:

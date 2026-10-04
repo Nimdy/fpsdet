@@ -1749,6 +1749,25 @@ class OpsTest(unittest.TestCase):
         self.assertFalse([row["id"] for row in payload["rows"] if row["decision"] == "review" and row["truth"] != "cheater"])
         self.assertTrue(any("result" in link["text"] for link in payload["links"]))
 
+    def test_the_desk_links_the_real_tf2_matches(self):
+        import re
+        from fpsdet.pages import write_pages
+
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = write_pages(build_demo(), tmp)
+            board = (dest / "board.html").read_text(encoding="utf-8")
+            page = (dest / "tf2.html").read_text(encoding="utf-8")
+        self.assertIn('href="tf2.html"', board)
+        self.assertLess(board.index('href="cs2.html"'), board.index('href="tf2.html"'))
+        marker = '<script id="ops-payload" type="application/json">'
+        start = page.index(marker) + len(marker)
+        payload = json.loads(page[start:page.index("</script>", start)])
+        self.assertEqual((payload["truth_kind"], payload["cheat_labels"], payload["honest_labels"]),
+                         ("labelled", ["banned for cheating"], ["never banned"]))
+        # Every review is a labelled cheater, and no raw SteamID reaches the page.
+        self.assertEqual({row["truth"] for row in payload["rows"] if row["decision"] == "review"}, {"banned for cheating"})
+        self.assertIsNone(re.search(r"7656\d{13}|\[U:1:\d+\]", page))
+
     def test_board_opens_on_operations_and_keeps_the_answer_key(self):
         html = render_board(build_demo())
         self.assertIn('role="tablist"', html)
@@ -2122,6 +2141,27 @@ class Tf2ExampleTest(unittest.TestCase):
         self.assertNotIn(self.tf2._pseudonym(key, self.tf2.steam3(rare)), everyone)
         self.assertFalse({e["player_id"] for e in scored} & {e["player_id"] for e in baseline})
         self.assertFalse(any(sid in json.dumps(scored + baseline) for sid in (cheater, steady, "[U:1:")))
+
+    def test_the_desk_page_names_the_labels_and_keeps_neither_kind_apart(self):
+        ops = {"rows": [
+            {"id": "tf-a", "decision": "review", "metrics": [{"name": "accuracy"}, {"name": "view_p95"}],
+             "case": {"decision": "review", "reasons": ["r"], "observations": [], "limits": "..."}},
+            {"id": "tf-b", "decision": "clean", "metrics": []},
+            {"id": "tf-c", "decision": "watch", "metrics": []},
+        ]}
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "ops.json").write_text(json.dumps(ops), encoding="utf-8")
+            labels = Path(tmp) / "labels.json"
+            labels.write_text(json.dumps({"tf-a": "cheater", "tf-b": "not banned", "tf-c": "other ban"}), encoding="utf-8")
+            out = Path(tmp) / "desk.json"
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.tf2.main(["desk", tmp, "--labels", str(labels), "--out", str(out)])
+            desk = json.loads(out.read_text(encoding="utf-8"))
+        self.assertEqual([row["truth"] for row in desk["rows"]], ["banned for cheating", "never banned", "banned for something else"])
+        # A ban for something else is neither a cheater nor a known-clean player in the answer check.
+        self.assertNotIn("banned for something else", desk["cheat_labels"] + desk["honest_labels"])
+        self.assertEqual([m["name"] for m in desk["rows"][0]["metrics"]], ["accuracy"])
+        self.assertNotIn("limits", desk["rows"][0]["case"])
 
     def test_the_profile_loads(self):
         profile = load_profile(ROOT / "examples" / "tf2" / "tf2.json")

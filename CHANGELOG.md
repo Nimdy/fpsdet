@@ -4,7 +4,7 @@
 
 ### Added
 
-- **Real TF2 matches** (`examples/tf2`): players RGL banned for cheating, each with up to 20 server-logged matches from logs.tf before the ban, scored beside the honest players from the same lobbies. Unlike the one-match CS2 data, this can show detection: at equal evidence fpsdet flagged 41% of the cheaters and 2.9% of never-banned players, and all three reviews were labelled cheaters. Public endpoints only, polite and cached, with keyed pseudonyms. Standard library only.
+- **Real TF2 matches** (`examples/tf2`): players RGL banned for cheating, each with up to 20 server-logged matches from logs.tf before the ban, scored beside the honest players from the same lobbies. Unlike the one-match CS2 data, this can show detection: at equal evidence fpsdet flagged 41% of the cheaters and 2.9% of never-banned players, and all three reviews were labelled cheaters. Public endpoints only, polite and cached, with keyed pseudonyms. Standard library only. The desk links it as **D · Real TF2 matches**; a dataset can now have labels that count as neither cheater nor clean, such as a ban for something else.
 
 ## 0.3.0 (2026-10-04): the operations view and real CS2 matches
 

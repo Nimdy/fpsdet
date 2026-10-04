@@ -7,6 +7,10 @@ The CS2 example could not show detection: CS2CD has one match per player, and fp
 
 Together they give players banned for cheating, each with dozens of server-logged matches before the ban, and the honest players they shared lobbies with.
 
+**See it:** open the [review desk](https://nimdy.github.io/detect-FPS-hackers/board.html) and pick **D · Real TF2 matches**, or run `fpsdet demo` and open `demo/tf2.html`. Every scored player is there with fpsdet's decision, the reason, and RGL's label beside it. Players are keyed pseudonyms.
+
+**Try it, and tell us what you find,** with the [result form](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml).
+
 Not affiliated with Valve, logs.tf or RGL. Neither site publishes terms for its data. logs.tf's robots.txt asks crawlers to stay off its API, so this script behaves like the community stats tools that use it: it asks for a bounded sample, one or two requests at a time with a pause after each, names this project in its User-Agent, and caches every response so nothing is fetched twice. Nothing downloaded is committed, and player ids are replaced by keyed pseudonyms whose key never leaves your machine, so published results name nobody. If you run logs.tf or RGL and want this changed, open an issue.
 
 ## Run it
@@ -23,6 +27,10 @@ python examples/tf2/tf2logs.py convert $DATA               # baseline.ndjson, sc
 PYTHONPATH=src python -m fpsdet baseline $DATA/baseline.ndjson --profile examples/tf2/tf2.json --screen-matches --out $DATA/cohort.json
 PYTHONPATH=src python -m fpsdet score $DATA/scored.ndjson --profile examples/tf2/tf2.json --cohort $DATA/cohort.json --out $DATA/cases
 python examples/tf2/tf2logs.py report $DATA/cases --labels $DATA/labels.json
+
+# Optional: rebuild the desk's TF2 page from your run, then regenerate the desk.
+python examples/tf2/tf2logs.py desk $DATA/cases --labels $DATA/labels.json
+PYTHONPATH=src python -m fpsdet demo
 ```
 
 ## Who is in it

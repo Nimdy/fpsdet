@@ -209,7 +209,8 @@ const rows = OPS.rows;
 const LABELLED = OPS.truth_kind === "labelled";
 const HAS_TRUTH = !!OPS.synthetic || LABELLED;
 const isHonest = t => t === "honest" || (OPS.honest_labels || []).includes(t);
-const isCheat = t => !!t && !isHonest(t);
+// A dataset may also have labels that are neither, such as a ban for something other than cheating.
+const isCheat = t => !!t && (OPS.cheat_labels ? OPS.cheat_labels.includes(t) : !isHonest(t));
 const TRUTH_WORD = LABELLED ? "Labelled" : "Planted as";
 const TRUTH_VALUES = [...new Set(rows.map(r => r.truth).filter(Boolean))].sort((a, b) => isHonest(a) - isHonest(b) || a.localeCompare(b));
 // A case's checks, most decisive first: the gear and information findings, then batch, then the tails.
@@ -365,7 +366,7 @@ function header() {
   document.getElementById("ops-lede").textContent = OPS.synthetic
     ? `${nf.format(t.players)} players, ${nf.format(t.events)} server events across ${nf.format(t.matches)} matches, scored every night and once for the week against last week's frozen baseline. Some players were planted as cheats; the rest play honestly. Every number here is invented. The shape is what a real week looks like.`
     : LABELLED
-    ? `${nf.format(t.players)} players in ${nf.format(t.matches)} real matches, ${nf.format(t.events)} server events, scored against a baseline built from other matches. ${OPS.truth_source || "The dataset"} says who cheated. fpsdet never saw those labels; they are here so you can check its decisions.`
+    ? `${nf.format(t.players)} players in ${nf.format(t.matches)} real matches, ${nf.format(t.events)} server events, scored against a baseline built from other players. ${OPS.truth_source || "The dataset"} says who cheated. fpsdet never saw those labels; they are here so you can check its decisions.`
     : `${nf.format(t.players)} players, ${nf.format(t.events)} server events. Read from the case files that fpsdet score wrote.`;
   const notes = document.getElementById("ops-notes");
   notes.replaceChildren();
@@ -693,7 +694,7 @@ function queue(list) {
       el("td", {class: "hide-sm", style: "white-space:nowrap"}, chips.length ? chips : el("span", {style: "color:var(--ops-axis)"}, "–")),
       el("td", {class: "num"}, r.reports ? String(r.reports) : "·"),
       days.length ? el("td", {class: "hide-sm"}, el("span", {class: "nights", "aria-label": r.nights.map((n, i) => days[i].label + " " + ({R: "review", W: "watch", C: "clean", H: "held"}[n] || "did not play")).join(", ")}, r.nights.map(n => el("i", {class: n || null})))) : null,
-      HAS_TRUTH ? el("td", {class: "hide-sm mono", style: (isHonest(r.truth) ? "color:var(--muted)" : "color:#e9c27a") + ";white-space:nowrap"}, r.truth || "–") : null].filter(Boolean));
+      HAS_TRUTH ? el("td", {class: "hide-sm mono", style: (isHonest(r.truth) ? "color:var(--muted)" : "color:#e9c27a") + (LABELLED ? ";min-width:9rem;white-space:normal" : ";white-space:nowrap")}, r.truth || "–") : null].filter(Boolean));
     body.append(tr);
   }
   const table = el("table", null, el("thead", null, head), body);

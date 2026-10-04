@@ -307,6 +307,57 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
+PROJECT = "https://github.com/Nimdy/detect-FPS-hackers"
+LABEL_NAMES = {
+    "cheater": "banned for cheating",
+    "not banned": "never banned",
+    "other ban": "banned for something else",
+    "vac": "VAC ban, mirrored by RGL",
+}
+LABEL_NOTES = {
+    "banned for cheating": "RGL banned this account for cheating; only matches before the ban are here",
+    "never banned": "RGL never banned this account; a few unlabelled cheaters may be among these",
+    "banned for something else": "RGL banned this account for something other than cheating, such as an alt account",
+    "VAC ban, mirrored by RGL": "Valve banned this account, possibly in another game, and RGL mirrored the ban",
+}
+# What the desk's case drawer reads. The page leaves the rest out.
+DESK_CASE = ("decision", "recommended_action", "automated_action", "reasons", "observations", "checks", "party_note", "seal")
+DESK_METRICS = ("accuracy", "headshot_rate")
+
+
+def cmd_desk(args: argparse.Namespace) -> int:
+    """The scored run as the review desk's TF2 page, with RGL's labels beside each decision."""
+    ops = json.loads((Path(args.cases) / "ops.json").read_text(encoding="utf-8"))
+    labels = json.loads(Path(args.labels).read_text(encoding="utf-8"))
+    for row in ops["rows"]:
+        row["truth"] = LABEL_NAMES.get(labels.get(row["id"], ""), "unlabelled")
+        row["metrics"] = [m for m in row["metrics"] if m["name"] in DESK_METRICS]
+        if row.get("case"):
+            row["case"] = {key: row["case"][key] for key in DESK_CASE if key in row["case"]}
+    ops.update(
+        {
+            "synthetic": False,
+            "truth_kind": "labelled",
+            "truth_source": "RGL's public ban list",
+            "honest_labels": ["never banned"],
+            "cheat_labels": ["banned for cheating"],
+            "truth_notes": LABEL_NOTES,
+            "notes": {
+                "data": "Team Fortress 2 league matches from logs.tf; labels from RGL's public bans",
+                "split": "Honest players split by a keyed pseudonym: half built the baseline, half are scored here",
+                "names": "Player names are keyed pseudonyms. Not affiliated with Valve, logs.tf or RGL",
+            },
+            "links": [
+                {"text": "How this was built, and the full results", "href": PROJECT + "/tree/main/examples/tf2"},
+                {"text": "Run it yourself and share what you find", "href": PROJECT + "/issues/new?template=real_data_result.yml"},
+            ],
+        }
+    )
+    Path(args.out).write_text(json.dumps(ops, separators=(",", ":")) + "\n", encoding="utf-8")
+    print(f"Wrote {args.out}: {len(ops['rows'])} players, {Path(args.out).stat().st_size // 1024} KB")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -329,6 +380,12 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("cases", help="Folder written by fpsdet score --out")
     report.add_argument("--labels", required=True)
     report.set_defaults(func=cmd_report)
+
+    desk = sub.add_parser("desk", help="Write the review desk's TF2 page data from a scored run and the labels")
+    desk.add_argument("cases", help="Folder written by fpsdet score --out")
+    desk.add_argument("--labels", required=True)
+    desk.add_argument("--out", default=str(Path(__file__).with_name("desk.json")))
+    desk.set_defaults(func=cmd_desk)
 
     args = parser.parse_args(argv)
     return args.func(args)

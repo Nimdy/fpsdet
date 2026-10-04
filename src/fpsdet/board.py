@@ -676,11 +676,13 @@ def _week_ops(seed: int) -> str:
     return payload_json(payload)
 
 
-# The real-match example: the operations view over CS2CD matches, written beside the desk.
-# examples/cs2/cs2cd.py desk builds it from a scored run. An installed package has no copy.
-CS2_PAYLOAD = ROOT / "examples" / "cs2" / "desk.json"
-CS2_PAGE = "cs2.html"
-_CS2_TAB = '<a class="tab-link" href="cs2.html"><span>C</span>Real CS2 matches</a>'
+# The real-match examples: the operations view over each scored run, written beside the desk.
+# Each example's script builds its desk.json from a scored run. An installed package has no copy.
+EXAMPLES = (
+    # (letter, payload, page, tab and page title)
+    ("C", ROOT / "examples" / "cs2" / "desk.json", "cs2.html", "Real CS2 matches"),
+    ("D", ROOT / "examples" / "tf2" / "desk.json", "tf2.html", "Real TF2 matches"),
+)
 
 
 def render_board(demo: Demo, week_seed: int = 7) -> str:
@@ -689,29 +691,40 @@ def render_board(demo: Demo, week_seed: int = 7) -> str:
         _SHELL.replace("/*__OPS_CSS__*/", OPS_CSS)
         .replace("<!--__OPS_HTML__-->", OPS_HTML)
         .replace("/*__OPS_JS__*/", OPS_JS)
-        .replace("<!--__CS2_TAB__-->", _CS2_TAB if CS2_PAYLOAD.is_file() else "")
+        .replace("<!--__CS2_TAB__-->", _example_tabs())
     )
     return shell.replace("/*__OPS__*/", _week_ops(week_seed)).replace("/*__DATA__*/", payload)
 
 
-def write_cs2_page(folder: str | Path) -> Path | None:
-    """The CS2 example beside the desk, linked back to it. None when the example data is absent."""
-    if not CS2_PAYLOAD.is_file():
-        return None
-    payload = json.loads(CS2_PAYLOAD.read_text(encoding="utf-8"))
-    target = Path(folder) / CS2_PAGE
-    target.write_text(
-        render_dashboard(payload, tape_base="board.html", home="board.html", title="Real CS2 matches · fpsdet"),
-        encoding="utf-8",
+def _example_tabs() -> str:
+    return "\n    ".join(
+        f'<a class="tab-link" href="{page}"><span>{letter}</span>{title}</a>'
+        for letter, payload, page, title in EXAMPLES
+        if payload.is_file()
     )
-    return target
+
+
+def write_example_pages(folder: str | Path) -> list[Path]:
+    """Each real-match example beside the desk, linked back to it. Examples without data are skipped."""
+    written = []
+    for _letter, payload_path, page, title in EXAMPLES:
+        if not payload_path.is_file():
+            continue
+        payload = json.loads(payload_path.read_text(encoding="utf-8"))
+        target = Path(folder) / page
+        target.write_text(
+            render_dashboard(payload, tape_base="board.html", home="board.html", title=f"{title} · fpsdet"),
+            encoding="utf-8",
+        )
+        written.append(target)
+    return written
 
 
 def write_board(demo: Demo, path: str | Path | None = None) -> Path:
     target = Path(path) if path else Path.cwd() / "demo" / "board.html"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(render_board(demo), encoding="utf-8")
-    write_cs2_page(target.parent)
+    write_example_pages(target.parent)
     return target
 
 

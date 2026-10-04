@@ -42,7 +42,7 @@ Run it yourself, on more matches or on your own server's logs, and share what yo
 
 ## Try it on real Team Fortress 2 matches
 
-[examples/tf2](examples/tf2/README.md) scores players banned for cheating by RGL, a competitive TF2 league, on their server-logged matches from logs.tf, beside the honest players from the same lobbies. With many matches per player, fpsdet flagged 41% of the cheaters against 2.9% of never-banned players at equal evidence, and every review it opened was a labelled cheater. Standard library only.
+[examples/tf2](examples/tf2/README.md) scores players banned for cheating by RGL, a competitive TF2 league, on their server-logged matches from logs.tf, beside the honest players from the same lobbies. With many matches per player, fpsdet flagged 41% of the cheaters against 2.9% of never-banned players at equal evidence, and every review it opened was a labelled cheater. Standard library only. The scored run is in the desk as **D · Real TF2 matches**.
 
 ## Run the whole pipeline on a sample week
 
