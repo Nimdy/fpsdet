@@ -178,7 +178,9 @@ A watch fires when at least `inherit_min_events` (default 4) of those lags are a
 
 ## Cohort poison
 
-`fpsdet baseline --previous <prior cohort json>` compares ceilings. For accuracy, headshot rate, and geometry rate, when both sides have at least `min_cohort_players` and the new maximum is at least `poison_jump` (default 0.08) above the old maximum, the cohort file is stamped `integrity.status = poison_risk` and each alarm is printed. Score reads that stamp, prints it, and does not change decisions. Freeze the last cohort you still trust. No `--previous` leaves the status `unchecked`.
+`fpsdet baseline` first sets every match in the window beside the others. Each match is one point: every shot fired in it, by everyone. The median match and a robust spread (1.4826 times the median absolute deviation) come from matches with at least 5 × `min_shots` shots. A match with at least `min_shots` shots is out of line when the Wilson lower bound of its hit rate, or of its rate of shots through geometry, is more than `match_outlier_sd` (default 5) spreads above the median. That is a lobby where cheaters played each other, the kind nobody reviews before a baseline is frozen. By default each one is an alarm, the cohort is stamped `poison_risk`, and the baseline keeps the match. `--screen-matches` leaves those matches out and lists them under `integrity.left_out`. With fewer than 10 matches big enough to set the line, the screen does not run. It finds whole lobbies, not one quiet cheater in an honest one.
+
+`fpsdet baseline --previous <prior cohort json>` also compares ceilings. For accuracy, headshot rate, and geometry rate, when both sides have at least `min_cohort_players` and the new maximum is at least `poison_jump` (default 0.08) above the old maximum, the cohort file is stamped `integrity.status = poison_risk` and each alarm is printed. Score reads that stamp, prints it, and does not change decisions. Freeze the last cohort you still trust. With no `--previous` and too few matches to screen, the status stays `unchecked`.
 
 ## Evidence seal
 

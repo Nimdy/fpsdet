@@ -54,7 +54,7 @@ PYTHONPATH=src python3 -m fpsdet score --lake ./lake \
 
 1. `sample` writes a synthetic population of 144 players plus the 32 planted ones, about 32,500 events.
 2. `ingest` files them into a lake.
-3. `baseline` learns what humans on each rank and weapon look like.
+3. `baseline` learns what humans on each rank and weapon look like. It prints one `POISON RISK` line, for match `raid-9`: a planted aimbot's lobby that hit 92% of its shots. On a real week, review that match, or rebuild with `--screen-matches` to leave it out.
 4. `score` writes the cases.
 
 `cases/` gets one JSON file and one offline HTML page per player. It also gets:
@@ -163,7 +163,7 @@ Rules of thumb:
 
 A human baseline needs `min_cohort_players` (default 30) players per rank and weapon, each with at least 40 shots on that weapon in the window. A community server with 40 regulars and no ranks trains in a week or two. Until then, aim numbers are not scored and only the gear rules and information checks run.
 
-Freeze the baseline on a window you trust. If a rank is already full of cheaters, the ceiling becomes the cheat. Pass the previous baseline with `--previous`, and a ceiling that jumps is stamped `poison_risk`. Add a number without code by declaring it under `extra_metrics` in the profile.
+Freeze the baseline on a window you trust. If a rank is already full of cheaters, the ceiling becomes the cheat. `baseline` sets each match beside the others in the window and flags a lobby far past the median match, the kind where cheaters played each other. `--screen-matches` leaves those out. Pass the previous baseline with `--previous`, and a ceiling that jumps is stamped `poison_risk` too. Add a number without code by declaring it under `extra_metrics` in the profile.
 
 ## AI briefs, if you want them
 

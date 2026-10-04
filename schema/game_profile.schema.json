@@ -38,6 +38,7 @@
     "hidden_track_min_samples": { "type": "integer", "minimum": 1 },
     "hidden_grace_ms": { "type": "number", "minimum": 0 },
     "poison_jump": { "type": "number", "minimum": 0 },
+    "match_outlier_sd": { "type": "number", "exclusiveMinimum": 0 },
     "innocent_causes": { "type": "array", "items": { "type": "string" } },
     "reference_lightest_speed_mps": { "type": ["number", "null"], "minimum": 0 },
     "weight_classes": {

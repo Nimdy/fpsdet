@@ -113,6 +113,8 @@ class GameProfile:
     hidden_track_min_samples: int = 8
     hidden_grace_ms: float = 1000
     poison_jump: float = 0.08
+    # A match whose whole lobby sits this many robust standard deviations past the window's median match.
+    match_outlier_sd: float = 5.0
     unknowable_min_samples: int = 12
     unknowable_jitter_ratio: float = 0.35
     vendor_min_r: float = 0.85

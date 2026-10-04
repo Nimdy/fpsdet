@@ -14,7 +14,7 @@ import unittest
 from pathlib import Path
 
 from fpsdet.ai_triage import redact_case, triage_case
-from fpsdet.baseline import CohortTable, build_cohorts
+from fpsdet.baseline import CohortTable, build_cohorts, screen_matches
 from fpsdet.lake import ingest_lines, read_lines
 from fpsdet.models import (
     ACTIONS,
@@ -1801,6 +1801,80 @@ class HonestLeftoverTest(unittest.TestCase):
             cases.append(_bare_case(pid, "clean"))
         annotate_vendors(cases, records, profile)
         self.assertEqual([case.player_id for case in cases if case.decision != "clean"], [])
+
+
+class MatchScreenTest(unittest.TestCase):
+    """A lobby where cheaters played each other is found before it becomes the ceiling."""
+
+    def setUp(self):
+        self.profile = GameProfile(game_id="t", min_shots=40)
+
+    def _match(self, match: str, rate: float, shots: int = 300, through: float | None = None) -> list[Event]:
+        events = []
+        hits = round(rate * shots)
+        for k in range(shots):
+            hit = k < hits
+            events.append(
+                Event(
+                    game_id="t",
+                    match_id=match,
+                    player_id=f"{match}-p{k % 10}",
+                    t_ms=k * 500,
+                    event_type="shot",
+                    skill_band="average",
+                    weapon_class="rifle",
+                    hit=hit,
+                    through_geometry=(k < round(through * hits)) if (through is not None and hit) else None,
+                )
+            )
+        return events
+
+    def _window(self) -> list[Event]:
+        events = []
+        for index in range(20):
+            events += self._match(f"m{index:02d}", 0.17 + 0.003 * index, through=0.06)
+        return events
+
+    def test_a_hack_lobby_is_flagged_and_a_strong_honest_lobby_is_not(self):
+        events = self._window() + self._match("strong", 0.27, through=0.10) + self._match("hvh", 0.62, through=0.7)
+        screen = screen_matches(events, self.profile)
+        self.assertTrue(screen.judged)
+        self.assertEqual(screen.matches, ["hvh"])
+        self.assertIn("through geometry", screen.lines[0])
+
+    def test_a_tiny_match_and_a_short_window_are_not_judged(self):
+        tiny = self._window() + self._match("tiny", 1.0, shots=5)
+        self.assertEqual(screen_matches(tiny, self.profile).matches, [])
+        short = [event for event in self._window() if event.match_id < "m05"] + self._match("hvh", 0.62)
+        self.assertFalse(screen_matches(short, self.profile).judged)
+
+    def test_baseline_flags_by_default_and_leaves_out_on_request(self):
+        events = self._window() + self._match("hvh", 0.62, through=0.7)
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "week.ndjson"
+            source.write_text(
+                "".join(
+                    json.dumps({"game_id": e.game_id, "match_id": e.match_id, "player_id": e.player_id, "t_ms": e.t_ms,
+                                "event_type": "shot", "skill_band": "average", "weapon_class": "rifle", "hit": e.hit,
+                                **({"through_geometry": e.through_geometry} if e.through_geometry is not None else {})}) + "\n"
+                    for e in events
+                ),
+                encoding="utf-8",
+            )
+            profile = Path(tmp) / "profile.json"
+            profile.write_text(json.dumps({"game_id": "t", "min_shots": 40}), encoding="utf-8")
+            flagged, screened = Path(tmp) / "flagged.json", Path(tmp) / "screened.json"
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                cli_main(["baseline", str(source), "--profile", str(profile), "--out", str(flagged)])
+                cli_main(["baseline", str(source), "--profile", str(profile), "--screen-matches", "--out", str(screened)])
+            kept = json.loads(flagged.read_text(encoding="utf-8"))
+            self.assertEqual(kept["integrity"]["status"], "poison_risk")
+            self.assertTrue(kept["integrity"]["alarms"][0].startswith("match hvh:"))
+            left = json.loads(screened.read_text(encoding="utf-8"))
+            self.assertEqual(left["integrity"]["status"], "ok")
+            self.assertEqual(len(left["integrity"]["left_out"]), 1)
+            players = {p["player_id"] for metric in left["metrics"] for p in metric["players"]}
+            self.assertFalse(any(pid.startswith("hvh") for pid in players))
 
 
 def _load_cs2_example():

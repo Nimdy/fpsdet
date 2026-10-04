@@ -30,9 +30,9 @@ $PY fetch no_cheater_present   --first 0 --count 180 --out ~/cs2cd
 $PY fetch with_cheater_present --first 0 --count 120 --out ~/cs2cd
 
 # The baseline: what humans look like. The first 120 complete no-cheater matches, no movement needed.
-# --screen leaves out hack-vs-hack lobbies nobody reviewed (see Results). Never screen the scored matches.
-$PY convert ~/cs2cd/no_cheater_present --count 120 --movement-hz 0 --screen 0.30 --out baseline.ndjson
-PYTHONPATH=src python -m fpsdet baseline baseline.ndjson --profile examples/cs2/cs2.json --out cs2-cohort.json
+# --screen-matches leaves out lobbies where cheaters played each other (see Results).
+$PY convert ~/cs2cd/no_cheater_present --count 120 --movement-hz 0 --out baseline.ndjson
+PYTHONPATH=src python -m fpsdet baseline baseline.ndjson --profile examples/cs2/cs2.json --screen-matches --out cs2-cohort.json
 
 # Scored against it: the remaining no-cheater matches, and the matches with labelled cheaters.
 $PY convert ~/cs2cd/no_cheater_present --skip-first 120 --out holdout.ndjson
@@ -68,7 +68,14 @@ Not sent, because a demo cannot say it honestly: recoil kick and the player's co
 
 Run on 2026-10-04 with the commands above: 165 complete no-cheater matches (the first 180 by number, minus abandoned ones) and 108 complete with-cheater matches (the first 120).
 
-**The baseline needed screening.** 24 of the first 120 no-cheater matches are lobbies where the whole lobby hit 30–80% of its shots, most of them through walls. The median lobby hits 19%. These look like hack-vs-hack games where nobody had been banned yet, which is what "not reviewed" allows. `--screen 0.30` left them out, keeping 96 matches and 956 players. None of the 45 held-out no-cheater matches came near the line (the highest lobby hit 25%), and 58 of the 108 with-cheater matches would have crossed it. In this run the screen changed no decision, because the players in those lobbies fired too few shots to enter the baseline. With more play per account it would matter.
+**fpsdet caught its own poisoned baseline.** `fpsdet baseline` sets every match beside the others in the window. Of the first 120 no-cheater matches, it flagged 20 where the whole lobby was far past the median match, for example:
+
+```
+match nc104: the lobby hit 49% of 334 shots (lower bound 44%); the median match hits 19% and the line is 35%;
+70% of 162 traced shots went through geometry (lower bound 64%); the median match is 8% and the line is 29%
+```
+
+These look like hack-vs-hack games where nobody had been banned yet, which is what "not reviewed" allows. Left in, they would make "past every measured human" mean "past a rage cheater". `--screen-matches` left them out, keeping 100 matches and 996 players. The lines come from the window itself, not from CS2: none of the 45 held-out no-cheater matches crosses them, and 47 of the 108 with-cheater matches would. In this run, leaving them out changed no decision, because the players in those lobbies fired too few shots to enter the baseline. With more play per account it would matter.
 
 **What the labels look like in the data.** The cheaters are not subtle:
 
@@ -102,7 +109,7 @@ Halving the per-player minimums (20 shots, 12 hits for headshot rate) as an expe
 ## Limits
 
 - **One match per player.** CS2CD pseudonymises each match separately, so nobody can be followed across matches. A player fires around 70 shots a match, and fpsdet waits for 40 shots on a weapon class (and 25 hits for headshot rate) before it scores aim. Many players are held for too little data. A studio scores a week.
-- **The baseline is unreviewed.** About 3% of players in the no-cheater matches may be cheating. "Past every measured human" is past the most extreme player in the baseline, so one unlabelled cheater in it raises the bar for everyone. Freezing the baseline from reviewed play, or adding pro matches as the top band, fixes that.
+- **The baseline is unreviewed.** The match screen catches whole lobbies of cheaters, not one quiet cheater in an honest lobby. "Past every measured human" is past the most extreme player in the baseline, so one unlabelled cheater left in it raises the bar for everyone. A baseline frozen from reviewed play does not have that problem.
 - **Gear rules cannot fire.** The CS2 server enforces movement speed and fire rate, and the spray pattern is fixed, so humans learn to cancel it. Speed is checked and should stay clean. Fire rate, metronome and recoil checks are off in this profile.
 - **No information checks.** Wallhacks are what most labelled cheaters run. Catching them needs a visibility query (what each client could see), which a demo does not contain. Approximating it from map geometry is possible and is the riskiest part to get right.
 - **Labels are the dataset's.** A VAC ban plus a reviewer's judgement. Some labelled cheaters may not have cheated in this match.

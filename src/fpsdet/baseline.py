@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import math
-from collections import defaultdict
-from dataclasses import dataclass
+from collections import Counter, defaultdict
+from dataclasses import dataclass, field
 
-from .models import BANDS, GameProfile, PlayerRecord
-from .statsutil import median, percentile
+from .models import BANDS, Event, GameProfile, PlayerRecord
+from .statsutil import median, percentile, wilson_lower
+
+# Fewer matches than this and the window's median match is not a line worth drawing.
+SCREEN_MIN_MATCHES = 10
+# MAD times this is the standard deviation of a normal sample.
+MAD_TO_SD = 1.4826
 
 
 @dataclass
@@ -135,3 +140,77 @@ def build_cohorts(records: list[PlayerRecord], profile: GameProfile) -> CohortTa
 
 def cohort_is_thick(dist: Dist | None, profile: GameProfile) -> bool:
     return _thick(dist, profile.min_cohort_players)
+
+
+@dataclass
+class MatchScreen:
+    """Matches whose whole lobby sits far outside the rest of the window."""
+
+    judged: bool = False
+    matches: list[str] = field(default_factory=list)
+    lines: list[str] = field(default_factory=list)
+
+
+def _outlier_line(rates: list[float], spreads: float) -> tuple[float, float] | None:
+    """The median rate and the line ``spreads`` robust standard deviations above it."""
+    if len(rates) < SCREEN_MIN_MATCHES:
+        return None
+    mid = median(rates)
+    spread = MAD_TO_SD * median([abs(rate - mid) for rate in rates])
+    if spread <= 0:
+        return None
+    return mid, mid + spreads * spread
+
+
+def screen_matches(events: list[Event], profile: GameProfile) -> MatchScreen:
+    """A lobby where cheaters played each other, found before it becomes the ceiling.
+
+    Nobody reviews every match before a baseline is frozen, and a hack-vs-hack lobby
+    nobody was banned from looks like any other match until its numbers sit beside the
+    window's. Each match is one point: every shot fired in it, by everyone. A match is out
+    of line when the lower bound of its hit rate, or of its rate of shots through geometry,
+    is more than ``match_outlier_sd`` robust standard deviations above the window's median
+    match. The median and the spread come from the window, so the line moves with the game.
+    A lobby of very good honest players sits a few spreads up, not five.
+    """
+    shots: Counter[str] = Counter()
+    hits: Counter[str] = Counter()
+    known: Counter[str] = Counter()
+    through: Counter[str] = Counter()
+    for event in events:
+        if event.event_type != "shot":
+            continue
+        shots[event.match_id] += 1
+        hits[event.match_id] += int(event.hit)
+        if event.through_geometry is not None:
+            known[event.match_id] += 1
+            through[event.match_id] += int(event.through_geometry)
+    # Only matches big enough to have a rate of their own set the median and the spread.
+    hit_line = _outlier_line(
+        [hits[m] / shots[m] for m in shots if shots[m] >= 5 * profile.min_shots], profile.match_outlier_sd
+    )
+    geo_line = _outlier_line(
+        [through[m] / known[m] for m in known if known[m] >= profile.min_shots], profile.match_outlier_sd
+    )
+    screen = MatchScreen(judged=hit_line is not None or geo_line is not None)
+    for match in sorted(shots):
+        reasons = []
+        # A match too small to put anyone in the baseline is not judged on its own noise.
+        if hit_line is not None and shots[match] >= profile.min_shots:
+            low = wilson_lower(hits[match], shots[match])
+            if low > hit_line[1]:
+                reasons.append(
+                    f"the lobby hit {hits[match] / shots[match]:.0%} of {shots[match]} shots (lower bound {low:.0%}); "
+                    f"the median match hits {hit_line[0]:.0%} and the line is {hit_line[1]:.0%}"
+                )
+        if geo_line is not None and known[match] >= profile.min_shots:
+            low = wilson_lower(through[match], known[match])
+            if low > geo_line[1]:
+                reasons.append(
+                    f"{through[match] / known[match]:.0%} of {known[match]} traced shots went through geometry "
+                    f"(lower bound {low:.0%}); the median match is {geo_line[0]:.0%} and the line is {geo_line[1]:.0%}"
+                )
+        if reasons:
+            screen.matches.append(match)
+            screen.lines.append(f"match {match}: " + "; ".join(reasons))
+    return screen

@@ -281,38 +281,17 @@ def _matches(folder: Path) -> list[tuple[Path, Path]]:
     return pairs
 
 
-def lobby_rates(events: list[dict]) -> tuple[float, float]:
-    """The whole lobby's share of shots that hit an enemy, and share of those hits through a wall."""
-    shots = [event for event in events if event["event_type"] == "shot"]
-    hits = [event for event in shots if event["hit"]]
-    if not shots:
-        return 0.0, 0.0
-    return len(hits) / len(shots), sum(1 for event in hits if event.get("through_geometry")) / max(1, len(hits))
-
-
 def cmd_convert(args: argparse.Namespace) -> int:
     pairs = [pair for folder in args.folders for pair in _matches(Path(folder).expanduser())]
     if args.skip_first or args.count:
         pairs = pairs[args.skip_first : args.skip_first + args.count if args.count else None]
     counts: Counter[str] = Counter()
-    written = 0
     with Path(args.out).open("w", encoding="utf-8") as out:
         for json_path, parquet_path in pairs:
-            events = convert_match(json_path, parquet_path, movement_hz=args.movement_hz)
-            if args.screen is not None:
-                accuracy, walls = lobby_rates(events)
-                if accuracy > args.screen or walls > args.screen:
-                    print(
-                        f"{json_path.parent.name}/{json_path.stem}: lobby hit {accuracy:.0%} of shots, "
-                        f"{walls:.0%} of hits through walls. Left out of the baseline.",
-                        file=sys.stderr,
-                    )
-                    continue
-            written += 1
-            for event in events:
+            for event in convert_match(json_path, parquet_path, movement_hz=args.movement_hz):
                 counts[event["event_type"]] += 1
                 out.write(json.dumps(event, separators=(",", ":")) + "\n")
-    print(f"Wrote {counts['shot']} shots and {counts['movement']} movement samples from {written} of {len(pairs)} matches to {args.out}")
+    print(f"Wrote {counts['shot']} shots and {counts['movement']} movement samples from {len(pairs)} matches to {args.out}")
     return 0
 
 
@@ -388,12 +367,6 @@ def main(argv: list[str] | None = None) -> int:
     convert.add_argument("--skip-first", type=int, default=0, help="Skip this many matches (sorted by number)")
     convert.add_argument("--count", type=int, default=0, help="Convert at most this many matches")
     convert.add_argument("--movement-hz", type=float, default=4.0, help="Movement samples per second; 0 for none")
-    convert.add_argument(
-        "--screen",
-        type=float,
-        help="Baseline only: leave out a match whose whole lobby hit more than this share of shots, or landed more "
-        "than this share of hits through walls (a hack-vs-hack lobby nobody reviewed). Never use it on scored matches",
-    )
     convert.set_defaults(func=cmd_convert)
 
     labels = sub.add_parser("labels", help="Write the dataset's cheater labels, keyed by fpsdet player id")

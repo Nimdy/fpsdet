@@ -294,6 +294,7 @@ def profile_from_dict(obj: dict) -> GameProfile:
         hidden_track_min_samples=int(obj.get("hidden_track_min_samples") or 8),
         hidden_grace_ms=float(obj.get("hidden_grace_ms") if obj.get("hidden_grace_ms") is not None else 1000),
         poison_jump=float(obj.get("poison_jump") if obj.get("poison_jump") is not None else 0.08),
+        match_outlier_sd=float(obj.get("match_outlier_sd") if obj.get("match_outlier_sd") is not None else 5.0),
         unknowable_min_samples=int(obj.get("unknowable_min_samples") or 12),
         unknowable_jitter_ratio=float(
             obj.get("unknowable_jitter_ratio")

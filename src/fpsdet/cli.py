@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 from .ai_triage import openai_compatible_transport, triage_case
-from .baseline import build_cohorts
+from .baseline import build_cohorts, screen_matches
 from .casefile import safe_name, write_case
 from .lake import ingest_lines, read_lines
 from .parse import iter_events, load_events, load_profile
@@ -182,19 +182,40 @@ def cmd_baseline(args: argparse.Namespace) -> int:
     events, errors = _events_from_args(args.events, args.lake, args.game)
     for error in errors:
         print(error, file=sys.stderr)
+    screen = screen_matches(events, profile)
+    left_out: list[str] = []
+    if args.screen_matches and screen.matches:
+        dropped = set(screen.matches)
+        events = [event for event in events if event.match_id not in dropped]
+        left_out = screen.lines
     records = summarize(events, profile)
     table = build_cohorts(records, profile)
+    alarms = [] if args.screen_matches else list(screen.lines)
+    checked = screen.judged
     if args.previous:
         previous = cohort_from_dict(read_json(args.previous))
-        alarms = poison_alarms(
+        alarms += poison_alarms(
             previous,
             table,
             jump=profile.poison_jump,
             min_players=profile.min_cohort_players,
         )
-        table.integrity = {"status": "poison_risk" if alarms else "ok", "alarms": alarms}
-        for alarm in alarms:
-            print(f"POISON RISK {alarm}", file=sys.stderr)
+        checked = True
+    table.integrity = {"status": "poison_risk" if alarms else "ok" if checked else "unchecked", "alarms": alarms}
+    if left_out:
+        table.integrity["left_out"] = left_out
+    for alarm in alarms:
+        print(f"POISON RISK {alarm}", file=sys.stderr)
+    for line in left_out:
+        print(f"LEFT OUT {line}", file=sys.stderr)
+    if screen.matches and not args.screen_matches:
+        many = len(screen.matches) > 1
+        print(
+            f"{len(screen.matches)} {'matches look like lobbies' if many else 'match looks like a lobby'} where "
+            f"cheaters played each other. Review {'them' if many else 'it'}, or pass --screen-matches to leave "
+            f"{'them' if many else 'it'} out of the baseline.",
+            file=sys.stderr,
+        )
     write_json(args.out, cohort_to_dict(table))
     if args.history:
         write_json(args.history, history_to_dict(_history_from_records(records)))
@@ -210,7 +231,8 @@ def cmd_score(args: argparse.Namespace) -> int:
     cohort = cohort_from_dict(read_json(args.cohort)) if args.cohort else None
     if cohort is not None and cohort.integrity.get("status") == "poison_risk":
         print(
-            "POISON RISK: this cohort's human ceiling moved. Freeze the last cohort you still trust.",
+            "POISON RISK: this cohort may have learned a cheat. Review the alarms below, rebuild with "
+            "--screen-matches, or freeze the last cohort you still trust.",
             file=sys.stderr,
         )
         for alarm in cohort.integrity.get("alarms") or []:
@@ -281,6 +303,11 @@ def build_parser() -> argparse.ArgumentParser:
     baseline.add_argument("--out", required=True)
     baseline.add_argument("--history", help="Also write per-player shot totals for the next window")
     baseline.add_argument("--previous", help="Prior cohort. A ceiling that jumped is stamped poison_risk")
+    baseline.add_argument(
+        "--screen-matches",
+        action="store_true",
+        help="Leave out matches whose whole lobby is far past the window's median match. Without it they are only flagged",
+    )
     baseline.set_defaults(func=cmd_baseline)
 
     score = sub.add_parser("score", help="Score events into cases. Does not ban.")
