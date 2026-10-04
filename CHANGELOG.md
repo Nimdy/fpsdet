@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased: the operations view
+## 0.3.0 (2026-10-04): the operations view and real CS2 matches
 
-The review desk opens on an operations dashboard over a synthetic week, and studios get the same view from their own runs. Running the checks on a population of 400 players, instead of 32 planted ones, exposed several rules that were fine on one player and noisy on many. Those are fixed below. Every planted demo decision is unchanged.
+The review desk opens on an operations dashboard over a synthetic week, and studios get the same view from their own runs. Running the checks on a population of 400 players, instead of 32 planted ones, exposed several rules that were fine on one player and noisy on many. Those are fixed below. Every planted demo decision is unchanged. It also runs on real Counter-Strike 2 matches with hand-labelled cheaters (`examples/cs2`), shown in the desk beside the synthetic week.
 
 ### Added
 
@@ -52,7 +52,7 @@ The synthetic week, scored nightly and weekly against a frozen baseline:
 
 The buyer's leftover correlates at r 0.89 over 13 spray positions, under the z bar. Another week of data clears it.
 
-## Earlier in this release
+## Earlier in 0.3.0
 
 Fewer honest players flagged, plus fixes, onboarding and project files. Every planted demo decision is unchanged.
 

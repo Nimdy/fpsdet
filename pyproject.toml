@@ -1,6 +1,6 @@
 [project]
 name = "fpsdet"
-version = "0.2.0"
+version = "0.3.0"
 description = "Server-side human-play and gear-rule baselines for FPS anti-cheat"
 readme = "README.md"
 license = { text = "PolyForm-Small-Business-1.0.0" }

@@ -99,7 +99,7 @@ body:
     id: version
     attributes:
       label: fpsdet version or commit
-      placeholder: 0.2.0, or a commit hash
+      placeholder: 0.3.0, or a commit hash
 
   - type: checkboxes
     id: confirm
