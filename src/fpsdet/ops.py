@@ -133,14 +133,29 @@ def _why(case: Case) -> str:
 
 
 def _scatter_key(cases: Iterable[Case], cohort: CohortTable | None) -> str:
-    """The weapon the human-ceiling scatter is drawn for: rifle when there is one, else the one most players were measured on."""
+    """The weapon the human-ceiling scatter is drawn for.
+
+    It plots accuracy against headshot rate, so it wants a weapon with both: rifle when the
+    rifle has both, else the one most players have a headshot rate on. A game with no
+    headshot rate anywhere falls back to the weapon most players were measured on.
+    """
+    accuracy: Counter[str] = Counter()
+    headshot: Counter[str] = Counter()
     if cohort is not None:
-        keys = Counter()
         for (_, key, metric), values in cohort._values.items():
             if metric == "accuracy":
-                keys[key] += len(values)
+                accuracy[key] += len(values)
+            elif metric == "headshot_rate":
+                headshot[key] += len(values)
     else:
-        keys = Counter(metric.key for case in cases for metric in case.metrics if metric.name == "accuracy" and metric.key)
+        for case in cases:
+            for metric in case.metrics:
+                if metric.key and metric.name == "accuracy":
+                    accuracy[metric.key] += 1
+                elif metric.key and metric.name == "headshot_rate":
+                    headshot[metric.key] += 1
+    both = Counter({key: n for key, n in headshot.items() if key in accuracy})
+    keys = both or accuracy
     if "rifle" in keys:
         return "rifle"
     return keys.most_common(1)[0][0] if keys else ""

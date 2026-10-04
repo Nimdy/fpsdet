@@ -567,6 +567,8 @@ const isHonest = t => t === "honest" || (OPS.honest_labels || []).includes(t);
 // A dataset may also have labels that are neither, such as a ban for something other than cheating.
 const isCheat = t => !!t && (OPS.cheat_labels ? OPS.cheat_labels.includes(t) : !isHonest(t));
 const TRUTH_WORD = LABELLED ? "Labelled" : "Planted as";
+// A panel with nothing to show stays out of the way: nobody reported, no movement sent.
+const ANY_REPORTS = OPS.rows.some(r => r.reports);
 const TRUTH_VALUES = [...new Set(rows.map(r => r.truth).filter(Boolean))].sort((a, b) => isHonest(a) - isHonest(b) || a.localeCompare(b));
 // A case's checks, most decisive first: the gear and information findings, then batch, then the tails.
 const CHECK_ORDER = Object.keys(OPS.checks);
@@ -763,15 +765,16 @@ function kpis(list) {
   tiles.push(hero);
   tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Watching"), el("p", {class: "value"}, nf.format(count("watch"))), el("p", {class: "sub"}, "Monitor. Not a case until a review fires.")));
   tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Clean"), el("p", {class: "value"}, nf.format(count("clean"))), el("p", {class: "sub"}, el("b", null, nf.format(count("insufficient_data"))), " held: too little play, or no baseline yet.")));
-  tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Reported players"), el("p", {class: "value"}, nf.format(reported.length)), el("p", {class: "sub"}, el("b", null, `${reportedReview}`), ` of them in review (${reported.length ? Math.round(100 * reportedReview / reported.length) : 0}%). Reports set the order, never the decision.`)));
+  if (ANY_REPORTS) tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Reported players"), el("p", {class: "value"}, nf.format(reported.length)), el("p", {class: "sub"}, el("b", null, `${reportedReview}`), ` of them in review (${reported.length ? Math.round(100 * reportedReview / reported.length) : 0}%). Reports set the order, never the decision.`)));
   if (HAS_TRUTH) {
     const cheats = list.filter(r => isCheat(r.truth));
     const caught = cheats.filter(r => r.decision === "review").length;
     const honest = list.filter(r => isHonest(r.truth));
     const framed = honest.filter(r => r.decision === "review").length;
     tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, LABELLED ? "Answer check · dataset labels" : "Answer check · synthetic only"), el("p", {class: "value"}, `${caught}/${nf.format(cheats.length)}`), el("p", {class: "sub"}, LABELLED ? "labelled cheaters in review. " : "planted cheats in review. ", el("b", null, String(framed)), ` of ${nf.format(honest.length)} ${LABELLED ? "players labelled clean" : "honest players"} in review.`)));
-  } else {
-    tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Server events"), el("p", {class: "value"}, nf.format(OPS.totals.events)), el("p", {class: "sub"}, `${nf.format(OPS.totals.shots)} shots, ${nf.format(OPS.totals.movement)} movement samples.`)));
+  }
+  if (!ANY_REPORTS || !HAS_TRUTH) {
+    tiles.push(el("div", {class: "kpi"}, el("p", {class: "label"}, "Server events"), el("p", {class: "value"}, nf.format(OPS.totals.events)), el("p", {class: "sub"}, OPS.totals.movement ? `${nf.format(OPS.totals.shots)} shots, ${nf.format(OPS.totals.movement)} movement samples.` : `${nf.format(OPS.totals.shots)} shots. No movement samples.`)));
   }
   box.replaceChildren(...tiles);
 }
@@ -958,6 +961,9 @@ function scatter(list) {
 
 // ---- reports, and the answer check -----------------------------------------
 function side(list) {
+  const holder = document.getElementById("card-side");
+  holder.hidden = !ANY_REPORTS;
+  if (!ANY_REPORTS) return;
   const card = cardHead(document.getElementById("card-side"), "Reports are a queue, not a verdict", "Decisions for players with and without reports. A report moves a player up the scan. It never adds to the score.", "side");
   const groups = [["Reported", list.filter(r => r.reports)], ["Not reported", list.filter(r => !r.reports)]];
   if (tables.side) {
@@ -1152,7 +1158,9 @@ function coverage() {
     card.append(dataTable(["Field", ...(days.length ? days.map(d => d.label) : []), "Week"], cov.map(c => [c.field, ...(c.daily || []).map(v => v == null ? "–" : pct(v)), pct(c.share)])));
     return;
   }
-  for (const c of cov) {
+  const sent = cov.filter(c => c.share || (c.daily || []).some(v => v));
+  if (!sent.length) card.append(el("p", {class: "empty"}, "The server sends none of the optional fields. Only the required ones are scored."));
+  for (const c of sent) {
     const row = el("div", {class: "cov-row" + (c.share ? "" : " off")});
     row.append(el("span", {class: "f", title: c.field}, c.field), el("span", {class: "n"}, c.needs));
     const strip = el("span", {class: "d", "aria-hidden": "true"});
@@ -1165,8 +1173,8 @@ function coverage() {
     row.append(strip, el("span", {class: "p"}, c.share ? pct(c.share) : "off"));
     card.append(row);
   }
-  const off = cov.filter(c => !c.share).map(c => c.needs);
-  card.append(el("p", {class: "caption"}, (off.length ? "Off this week: " + off.join(", ") + ". " : "") + "Darker is less. A step up mid-week is a server build shipping a field."));
+  const off = cov.filter(c => !sent.includes(c)).map(c => c.needs);
+  card.append(el("p", {class: "caption"}, (off.length ? "Not sent, so these checks are off: " + off.join(", ") + ". " : "") + (sent.length ? "Darker is less. A step up mid-week is a server build shipping a field." : "")));
 }
 function cohort() {
   const card = cardHead(document.getElementById("card-cohort"), "Who the baseline has", `Players per rank and weapon in the frozen baseline. Under ${OPS.min_cohort} a cell is untrained, and nothing on it is flagged.`, "cohort");
@@ -1176,24 +1184,30 @@ function cohort() {
   if (tables.cohort) {
     card.append(dataTable(["Rank", ...co.keys], co.bands.map(b => [b, ...co.keys.map(k => get(b, k))])));
   } else {
-    const grid = el("div", {class: "heat", style: `grid-template-columns: 6.5rem repeat(${co.keys.length}, minmax(0, 1fr))`});
-    grid.append(el("span", {class: "h"}, ""));
-    co.keys.forEach(k => grid.append(el("span", {class: "h", style: "text-align:center"}, k)));
     const max = Math.max(1, ...co.cells.map(c => c.players));
-    for (const b of co.bands) {
-      grid.append(el("span", {class: "h"}, b));
-      for (const k of co.keys) {
-        const n = get(b, k);
-        const thin = n < co.min;
-        const bg = thin ? "transparent" : seqColor(0.25 + 0.75 * (n / max));
-        const cell = el("span", {class: "c", style: `background:${bg};border:1px ${thin ? "dashed var(--line-bright)" : "solid transparent"};color:${thin ? "var(--muted)" : "#fff"}`}, String(n), thin ? el("small", null, "untrained") : null);
-        grid.append(cell);
-      }
+    const cell = n => {
+      const thin = n < co.min;
+      const bg = thin ? "transparent" : seqColor(0.25 + 0.75 * (n / max));
+      return el("span", {class: "c", style: `background:${bg};border:1px ${thin ? "dashed var(--line-bright)" : "solid transparent"};color:${thin ? "var(--muted)" : "#fff"}`}, String(n), thin ? el("small", null, "untrained") : null);
+    };
+    // Up to six weapons across the top. More than that reads as weapons down the side, most measured first.
+    const across = co.keys.length <= 6;
+    const SHOWN = 12;
+    const keys = across ? co.keys : [...co.keys].sort((a, b) => co.bands.reduce((s, x) => s + get(x, b), 0) - co.bands.reduce((s, x) => s + get(x, a), 0)).slice(0, SHOWN);
+    const cols = across ? co.keys : co.bands;
+    const rowsOf = across ? co.bands : keys;
+    const grid = el("div", {class: "heat", style: `grid-template-columns: ${across ? "6.5rem" : "minmax(0, 11rem)"} repeat(${cols.length}, minmax(0, 1fr))`});
+    grid.append(el("span", {class: "h"}, ""));
+    cols.forEach(c => grid.append(el("span", {class: "h", style: "text-align:center"}, c)));
+    for (const r of rowsOf) {
+      grid.append(el("span", {class: "h", title: r, style: "overflow:hidden;text-overflow:ellipsis"}, r));
+      for (const c of cols) grid.append(cell(across ? get(r, c) : get(c, r)));
     }
     card.append(grid);
+    if (!across && co.keys.length > SHOWN) card.append(el("p", {class: "caption"}, `The ${SHOWN} most-measured of ${co.keys.length} weapons. The table view has them all.`));
   }
   const moves = OPS.movement || [];
-  if (moves.length) {
+  if (OPS.totals.movement && moves.length) {
     card.append(el("h2", {style: "margin:1.1rem 0 0.3rem;font:600 0.98rem/1.3 var(--sans,system-ui,sans-serif);color:#fff"}, "Movement left out of the speed check"));
     const max = Math.max(1, ...moves.map(m => m.count));
     for (const m of moves) {
