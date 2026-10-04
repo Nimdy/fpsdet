@@ -23,6 +23,7 @@ from fpsdet.models import (
     ExtraObs,
     GameProfile,
     HistoryWindow,
+    MetricView,
     PlayerRecord,
     RecoilSummary,
     WeaponRule,
@@ -30,7 +31,7 @@ from fpsdet.models import (
 )
 from fpsdet.casefile import safe_name
 from fpsdet.cli import main as cli_main
-from fpsdet.ops import merge_payloads, merge_queue, week_payload
+from fpsdet.ops import _scatter_point, merge_payloads, merge_queue, week_payload
 from fpsdet.week import WIRE_SHIPS, build_week
 from fpsdet.parse import ParseError, load_events, load_profile, parse_event, profile_from_dict
 from fpsdet.persist import case_to_dict, write_json
@@ -1679,6 +1680,19 @@ class OpsTest(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 cli_main(["dashboard", str(Path(tmp) / "missing")])
 
+    def test_the_scatter_point_takes_both_numbers_from_one_weapon(self):
+        def metric(name: str, key: str, value: float) -> MetricView:
+            return MetricView(name, value, value, None, None, None, None, None, key=key)
+
+        case = Case("p", "t", "clean", "none", "none", "average", 0, metrics=[
+            metric("accuracy", "smg", 0.31),
+            metric("accuracy", "rifle", 0.22),
+            metric("headshot_rate", "rifle", 0.27),
+        ])
+        self.assertEqual(_scatter_point(case, "rifle"), {"acc": 0.22, "hs": 0.27})
+        # The smg has no headshot rate yet. It does not borrow the rifle's.
+        self.assertIsNone(_scatter_point(case, "smg"))
+
     def test_board_opens_on_operations_and_keeps_the_answer_key(self):
         html = render_board(build_demo())
         self.assertIn('role="tablist"', html)
@@ -1722,6 +1736,26 @@ class CadenceTest(unittest.TestCase):
         jitter = {f"j{i}": [110] * 28 + [60] for i in range(8)}
         clean = assess_player(PlayerRecord("q", "t", "average", weapons=[self._weapon(jitter)]), CohortTable(), self.profile)
         self.assertNotIn("fire_rate", clean.checks)
+
+    def test_a_glitch_in_a_two_shot_match_is_not_a_habit(self):
+        # Ten matches where the gun fired three times, one stamp 40 ms after the last: 50% of two gaps each time.
+        honest = {f"h{i}": [110 + k % 40 for k in range(30)] for i in range(30)}
+        short = {f"s{i}": [40, 160] for i in range(10)}
+        case = assess_player(PlayerRecord("p", "t", "average", weapons=[self._weapon({**honest, **short})]), CohortTable(), self.profile)
+        self.assertNotIn("fire_rate", case.checks)
+
+    def test_a_held_trigger_on_a_full_auto_is_not_a_macro(self):
+        # Sprays of eight on a 64-tick server: the 90 ms cycle lands on 6 ticks, 93 or 94 ms. Pauses between sprays.
+        spray = [94, 94, 93, 94, 94, 94, 93]
+        held = {f"m{i}": spray + [3100] + spray + [2400] + spray for i in range(10)}
+        self.assertIsNone(metronome_break(self._weapon(held), self.profile))
+        # A 20-tick server puts the same cycle on 100 ms. With tick_ms set, that is still the server's pace.
+        coarse = GameProfile(game_id="t", tick_ms=50, weapons={"rifle": WeaponRule(min_shot_interval_ms=90)})
+        stamped = {f"m{i}": [100] * 7 + [3100] + [100] * 7 for i in range(10)}
+        self.assertIsNone(metronome_break(self._weapon(stamped), coarse))
+        # A tap macro well above the cycle is still a macro.
+        tapped = {f"m{i}": [140] * 7 + [3100] + [140] * 7 for i in range(10)}
+        self.assertIsNotNone(metronome_break(self._weapon(tapped), self.profile))
 
 
 class BoundTest(unittest.TestCase):

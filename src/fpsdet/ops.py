@@ -121,16 +121,27 @@ def _why(case: Case) -> str:
     return case.observations[0] if case.observations else ""
 
 
-def _scatter_point(case: Case) -> dict | None:
-    """Accuracy and headshot rate on the first weapon that has both."""
-    by_name: dict[str, dict] = {}
+def _scatter_key(cases: Iterable[Case], cohort: CohortTable | None) -> str:
+    """The weapon the human-ceiling scatter is drawn for: rifle when there is one, else the most scored."""
+    if cohort is not None:
+        keys = Counter(key for (_, key, metric) in cohort._values if metric == "accuracy")
+    else:
+        keys = Counter(metric.key for case in cases for metric in case.metrics if metric.name == "accuracy" and metric.key)
+    if "rifle" in keys:
+        return "rifle"
+    return keys.most_common(1)[0][0] if keys else ""
+
+
+def _scatter_point(case: Case, key: str) -> dict | None:
+    """Accuracy and headshot rate on one weapon. Both must come from it, or there is no point."""
+    values: dict[str, float] = {}
     for metric in case.metrics:
-        if metric.skipped or metric.player_value is None:
+        if metric.key != key or metric.skipped or metric.player_value is None:
             continue
-        by_name.setdefault(metric.name, {"value": metric.player_value})
-    if "accuracy" not in by_name or "headshot_rate" not in by_name:
+        values.setdefault(metric.name, metric.player_value)
+    if "accuracy" not in values or "headshot_rate" not in values:
         return None
-    return {"acc": round(by_name["accuracy"]["value"], 4), "hs": round(by_name["headshot_rate"]["value"], 4)}
+    return {"acc": round(values["accuracy"], 4), "hs": round(values["headshot_rate"], 4)}
 
 
 def _coverage(events: list[Event], days: list[str] | None) -> list[dict]:
@@ -231,6 +242,7 @@ def ops_payload(
     """One JSON object for the operations view. Only ``profile`` and ``cases`` are required."""
     queue = merge_queue(cases, nightly)
     weekly = {case.player_id: case for case in cases}
+    scatter = _scatter_key(cases, cohort)
     nightly = nightly or []
     first_review: dict[str, int] = {}
     per_night: list[dict[str, str]] = []
@@ -254,7 +266,7 @@ def ops_payload(
             "nights": [night.get(case.player_id, "") for night in per_night],
             "first": first_review.get(case.player_id),
             # Numbers come from the latest batch over the whole window. The decision may be a night's.
-            "point": _scatter_point(weekly.get(case.player_id, case)),
+            "point": _scatter_point(weekly.get(case.player_id, case), scatter),
             "metrics": _metric_rows(weekly.get(case.player_id, case)),
         }
         if truth is not None:
@@ -290,8 +302,7 @@ def ops_payload(
     if cohort is not None:
         seen = {aim_key(event, profile) for event in events if event.event_type == "shot"}
         payload["cohort"] = _cohort_cells(cohort, profile, seen)
-        key = "rifle" if any(key == "rifle" for key in payload["cohort"]["keys"]) else (payload["cohort"]["keys"] or [""])[0]
-        payload["lines"] = _human_lines(cohort, profile, key)
+        payload["lines"] = _human_lines(cohort, profile, scatter)
     if truth is not None:
         payload["truth_notes"] = truth_notes or {}
     return payload

@@ -12,6 +12,7 @@ The review desk opens on an operations dashboard over a synthetic week, and stud
 - **Synthetic week** (`fpsdet.week`): 400 players, 17 planted cheats with their own start days, parties, reports, a mid-week server build that ships the wire fields, and private replays on some matches. It is scored nightly and weekly against a frozen baseline from a clean prior week. It is deterministic.
 - **`fpsdet score --out`** writes `ops.json` and an offline `dashboard.html` next to the cases.
 - **`fpsdet dashboard <folders…> --out week.html`** renders one run, or merges several nightly runs into a week. A review opened on any night stays open; watches come from the latest run.
+- **Human-ceiling scatter** takes accuracy and headshot rate from the same weapon as the lines it is drawn against. It had mixed an smg accuracy with a rifle headshot rate for about one player in ten.
 - **`checks` on every case**: machine-readable ids of what fired, so dashboards group on ids instead of reason text. Metrics carry the weapon `key`.
 - **dashboards/README.md** maps each panel to the case-JSON fields that drive it, for Grafana, Kibana, Splunk or an in-house console.
 
@@ -26,6 +27,8 @@ The review desk opens on an operations dashboard over a synthetic week, and stud
 - **Medians use a confidence bound.** Distance, recoil and declared-metric medians are tested on a distribution-free bound, as rates are. Nightly batches had put about half the honest players on watch at least once, from small-sample noise.
 - **"Past every human" means every band.** For numbers that rank does not order, such as distance, the top band's maximum was not the most extreme human. Ordinary players were "past every human" on engagement distance.
 - **Fire rate and metronome are judged per match.** A macro switched on mid-week, or one that fires in bursts with human-length pauses, used to be averaged away.
+  - A match needs at least 5 gaps on a gun before its fire-rate violations count. Otherwise one glitched stamp in a match where the gun fired twice was a 50% violation rate, and ten such matches made a review.
+  - A match whose cadence averages at the gun's own cycle (within `tick_ms` or the slack) is the server's pace, not a macro. Measuring only the gaps inside bursts had made every held trigger on a full-auto look like a metronome.
 
 The synthetic week, scored nightly and weekly against a frozen baseline:
 

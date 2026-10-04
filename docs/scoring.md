@@ -98,7 +98,7 @@ No floor, thick cohort, and the upper bound of the player's median pitch is unde
 
 ## Fire interval
 
-Per match, per weapon id (or weapon class when the id is absent). Gaps under `min_shot_interval_ms - interval_slack_ms` are violations. A match counts when at least `min_violation_rate` of its gaps are violations. The finding fires when the matches that count hold at least `min_intervals` gaps and `min_violations` violations between them. One jittery timestamp in an honest match does not make the match count. A macro switched on in the middle of a week is not diluted by the honest matches before it. This is checked even when the aim sample is still too small to score.
+Per match, per weapon id (or weapon class when the id is absent). Gaps under `min_shot_interval_ms - interval_slack_ms` are violations. A match counts when it has at least 5 gaps and at least `min_violation_rate` of them are violations. The finding fires when the matches that count hold at least `min_intervals` gaps and `min_violations` violations between them. One jittery timestamp in an honest match does not make the match count, even in a match where the gun fired only two or three times. A macro switched on in the middle of a week is not diluted by the honest matches before it. This is checked even when the aim sample is still too small to score.
 
 Set the interval to the minimum legal gap between accepted shots. For a burst weapon that is the intra-burst gap, or leave the rule off for that weapon. Slack covers one tick of timestamp jitter. Timestamps are server time.
 
@@ -120,9 +120,9 @@ When the sprays are too few, or `spray_index` is missing, the profile decides. `
 
 ## Metronome
 
-Fire interval catches gaps under the legal line. A macro that fires on the legal line, with no motor noise, does not. Only the cadence counts: gaps no longer than 2.5 times `min_shot_interval_ms`. Longer gaps are pauses between bursts. They vary the way a person's do, and they would hide a perfect cadence. Each match is judged on its own. A match counts when it has at least 5 cadence gaps, their mean is at or above the legal line, and their sample standard deviation is at or under `metronome_max_std_ms` (default 1.0 ms). Review when the matches that count hold at least `metronome_min_gaps` (default 40) cadence gaps between them.
+Fire interval catches gaps under the legal line. A macro that fires on the legal line, with no motor noise, does not. Only the cadence counts: gaps no longer than 2.5 times `min_shot_interval_ms`. Longer gaps are pauses between bursts. They vary the way a person's do, and they would hide a perfect cadence. Each match is judged on its own. A match counts when it has at least 5 cadence gaps, their mean is above the server's pace, and their sample standard deviation is at or under `metronome_max_std_ms` (default 1.0 ms). Review when the matches that count hold at least `metronome_min_gaps` (default 40) cadence gaps between them.
 
-If the mean is under the legal line, this rule returns nothing and the fire-interval rule owns the case. `WeaponRule.server_paced` true opts that weapon out: the server fired it. If `tick_ms` is set on the profile and every gap equals that tick, the stamps are quantized and the rule stays quiet.
+The server's pace is `min_shot_interval_ms` plus `tick_ms` or `interval_slack_ms`, whichever is larger. A match whose cadence averages at or under it is the server firing as fast as the gun cycles, which is what a held trigger on a full-auto does, and the rule leaves it alone. Under the legal line the fire-interval rule owns it. Set `tick_ms` when the server stamps shots on ticks: a 90 ms cycle on a 20-tick server fires every 100 ms. `WeaponRule.server_paced` true opts that weapon out entirely.
 
 ## Hidden tracking
 

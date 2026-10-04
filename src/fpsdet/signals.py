@@ -139,13 +139,17 @@ def metronome_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     Only the cadence counts: gaps inside a burst. A macro fires a burst, pauses
     while the player repositions, and fires another; the pauses vary like a
     person's do, and they would hide a perfect cadence if they were measured.
-    Each match is judged alone, so a macro switched on halfway through the week
-    is not averaged away by the honest matches before it.
+    A match whose cadence averages at the gun's own cycle (within a tick, or the
+    slack) is left alone: that is the server firing as fast as the gun cycles,
+    which every held trigger on a full-auto does. Under the legal line, the
+    fire-interval rule owns it. Each match is judged alone, so a macro switched
+    on halfway through the week is not averaged away by the honest matches
+    before it.
     """
     rule = profile.weapon_rule(weapon.weapon_class, weapon.weapon_key)
     if rule is None or rule.min_shot_interval_ms is None or rule.server_paced:
         return None
-    legal = rule.min_shot_interval_ms - rule.interval_slack_ms
+    pace = rule.min_shot_interval_ms + max(rule.interval_slack_ms, profile.tick_ms or 0)
     steady: list[int] = []
     spreads: list[float] = []
     matches = 0
@@ -153,9 +157,7 @@ def metronome_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
         cadence = [gap for gap in gaps if gap <= CADENCE_CYCLES * rule.min_shot_interval_ms]
         if len(cadence) < METRONOME_MATCH_GAPS:
             continue
-        if sum(cadence) / len(cadence) < legal:
-            continue
-        if profile.tick_ms and all(gap == profile.tick_ms for gap in cadence):
+        if sum(cadence) / len(cadence) <= pace:
             continue
         spread = sample_std([float(gap) for gap in cadence])
         if spread > profile.metronome_max_std_ms:

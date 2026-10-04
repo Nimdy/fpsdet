@@ -50,6 +50,8 @@ from .statsutil import clustered_lower, design_effect, median, median_bound, per
 
 # A rate that moves this much more between matches than chance is worth a line on the case.
 NOTE_DESIGN_EFFECT = 1.5
+# A match needs this many gaps on a gun before its own violation rate means anything.
+FIRE_MATCH_GAPS = 5
 
 
 def decide(
@@ -211,9 +213,11 @@ def _identity(record: PlayerRecord, history: list[HistoryWindow], profile: GameP
 def _fire_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     """Gaps under the cycle, counted in the matches where they are the habit.
 
-    A match counts when at least ``min_violation_rate`` of its gaps broke the
-    cycle. One jittery timestamp in an honest match does not reach that, and
-    a macro switched on midweek is not diluted by the matches before it.
+    A match counts when it has at least FIRE_MATCH_GAPS gaps and at least
+    ``min_violation_rate`` of them broke the cycle. One jittery timestamp in an
+    honest match does not reach that, even when the gun fired only two or three
+    times that match, and a macro switched on midweek is not diluted by the
+    matches before it.
     """
     rule = profile.weapon_rule(weapon.weapon_class, weapon.weapon_key)
     if rule is None or rule.min_shot_interval_ms is None:
@@ -222,7 +226,7 @@ def _fire_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     intervals = violations = matches = 0
     for gaps in match_gaps(weapon):
         bad = sum(1 for gap in gaps if gap < floor)
-        if gaps and bad / len(gaps) >= rule.min_violation_rate:
+        if len(gaps) >= FIRE_MATCH_GAPS and bad / len(gaps) >= rule.min_violation_rate:
             intervals += len(gaps)
             violations += bad
             matches += 1

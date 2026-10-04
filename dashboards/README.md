@@ -33,7 +33,7 @@ If the studio already runs Grafana, Kibana, Splunk, Metabase or its own moderati
 | Open reviews, watching, clean, held | How big is the queue? | `decision` (`review`, `watch`, `clean`, `insufficient_data`) |
 | Queue by night | Is something new happening? | `decision` per nightly run; first night a `review` appeared |
 | What fired | Which checks produce the work? | `checks`, a list of ids. The families and labels are in `ops.json` under `checks`. |
-| Human ceiling | Where do players sit against the best humans? | `metrics[]` with `name` `accuracy` and `headshot_rate`: `player_value`, `bound`, `own_p95` (the rank's line), `ceiling_extreme` (the best human), `key` (the weapon) |
+| Human ceiling | Where do players sit against the best humans? | `metrics[]` with `name` `accuracy` and `headshot_rate`: `player_value`, `bound`, `own_p95` (the rank's line), `ceiling_extreme` (the best human), `key` (the weapon). Take both numbers from the same `key` |
 | Reports are a queue | Do reports track the evidence? | `reports`, `decision` |
 | Queue table | Who does a person open next? | `review-index.json` order, or sort by `decision` then `reports`. Show `reasons[0]`. |
 | Case detail | What exactly fired? | `reasons`, `observations`, `metrics`, `party_note`, `vendor_twin`, `inherit_lags_ms`, `seal` |
