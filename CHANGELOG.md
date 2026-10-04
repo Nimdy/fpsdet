@@ -6,6 +6,7 @@ The review desk opens on an operations dashboard over a synthetic week, and stud
 
 ### Added
 
+- **Real CS2 matches** (`examples/cs2`): a converter from the CS2CD dataset (CC BY 4.0, hand-labelled cheaters) to fpsdet events, a CS2 profile, and a report against the labels. Across 1,025 clean players nobody was put in review; no labelled cheater was either, because one match gives most of them under 40 shots. The README there has the numbers and the limits.
 - **Operations view.** `demo/board.html` now has two tabs:
   - **Operations**: KPI tiles, the queue by night, what fired, the human-ceiling scatter, reports against decisions, an answer check, a sortable queue with a case drawer, field coverage per night, and baseline thickness. Every chart has a table twin.
   - **Answer key**: the 32 planted tapes. Deep links such as `board.html#card-mirror-script` still open them.

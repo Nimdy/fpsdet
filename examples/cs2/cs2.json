@@ -1,0 +1,15 @@
+{
+  "game_id": "cs2",
+  "notes": "Counter-Strike 2 matchmaking, as converted from CS2CD by examples/cs2/cs2cd.py. Not affiliated with Valve. Aim is scored per weapon class (rifle, sniper, smg, pistol, shotgun, mg). Every movement sample carries its own cap, 250 units/s (6.35 m/s, knife out), the fastest anything moves on foot; per-weapon caps are tighter but live in compiled game data, so this cap is deliberately loose. Fire-rate and metronome rules are off: CS2's cycle times are not in the public item schema, and the server enforces them anyway. The spray pattern is fixed, so recoil_pattern is learnable. tick_ms is unset because a 64-tick server's tick is 15.625 ms and the field takes whole milliseconds.",
+  "min_shots": 40,
+  "min_hits_for_headshot": 25,
+  "min_cohort_players": 30,
+  "aim_group": "weapon_class",
+  "speed_over_fraction": 0.08,
+  "speed_min_run": 25,
+  "speed_run_gap_ms": 400,
+  "recoil_pattern": "learnable",
+  "weapons": {},
+  "recoil_floors": [],
+  "extra_metrics": []
+}

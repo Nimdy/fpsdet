@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import importlib.util
 import io
 import json
 from collections import Counter
@@ -1800,6 +1801,80 @@ class HonestLeftoverTest(unittest.TestCase):
             cases.append(_bare_case(pid, "clean"))
         annotate_vendors(cases, records, profile)
         self.assertEqual([case.player_id for case in cases if case.decision != "clean"], [])
+
+
+def _load_cs2_example():
+    spec = importlib.util.spec_from_file_location("cs2cd", ROOT / "examples" / "cs2" / "cs2cd.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+class Cs2ExampleTest(unittest.TestCase):
+    """The CS2CD converter in examples/cs2. Converting needs pandas and pyarrow; the rest is plain Python."""
+
+    def setUp(self):
+        self.cs2 = _load_cs2_example()
+
+    def test_both_rank_scales_cut_on_the_game_tiers(self):
+        band = self.cs2.skill_band
+        self.assertEqual([band(12, rank) for rank in (5, 9, 13, 18)], ["developing", "average", "advanced", "elite"])
+        self.assertEqual([band(11, rating) for rating in (4000, 7000, 15000, 25000)], ["developing", "average", "advanced", "elite"])
+        self.assertEqual([band(11, 0), band(None, 5), band(12, 0)], ["unrated"] * 3)
+
+    def test_the_profile_loads(self):
+        profile = load_profile(ROOT / "examples" / "cs2" / "cs2.json")
+        self.assertEqual(profile.game_id, "cs2")
+        self.assertEqual(profile.weapons, {})
+
+    @unittest.skipUnless(importlib.util.find_spec("pandas") and importlib.util.find_spec("pyarrow"), "needs pandas and pyarrow")
+    def test_a_match_converts_to_events_fpsdet_reads(self):
+        import pandas as pd
+
+        rows = []
+        for tick in range(100, 141):
+            for steamid, team, x in (("Player_1", 2, 0.0), ("Player_2", 3, 1000.0), ("Player_3", 2, 50.0)):
+                rows.append({
+                    "tick": tick, "steamid": steamid, "team_num": team, "X": x, "Y": 0.0, "Z": 0.0,
+                    "pitch": 0.0, "yaw": 0.0 if tick < 109 else 30.0, "velocity_X": 200.0, "velocity_Y": 0.0,
+                    "is_airborne": False, "is_alive": True, "move_type": 2.0, "shots_fired": 1.0,
+                    "rank": 9, "comp_rank_type": 12, "is_warmup_period": False, "is_freeze_period": False,
+                })
+        info = {
+            "weapon_fire": [
+                {"tick": 110, "user_steamid": "Player_1", "weapon": "weapon_ak47"},
+                {"tick": 120, "user_steamid": "Player_1", "weapon": "weapon_ak47"},
+                {"tick": 125, "user_steamid": "Player_1", "weapon": "weapon_knife"},
+                {"tick": 130, "user_steamid": "Player_1", "weapon": "weapon_ak47"},
+            ],
+            "player_hurt": [
+                {"tick": 110, "attacker_steamid": "Player_1", "user_steamid": "Player_2", "hitgroup": "head", "weapon": "ak47"},
+                {"tick": 120, "attacker_steamid": "Player_1", "user_steamid": "Player_3", "hitgroup": "chest", "weapon": "ak47"},
+            ],
+            "bullet_damage": [
+                {"tick": 110, "attacker_steamid": "Player_1", "victim_steamid": "Player_2", "distance": 1000.0, "num_penetrations": 1},
+            ],
+            "cheaters": [{"steamid": "Player_1"}],
+            "CSstats_info": [{"map": "de_inferno"}],
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "with_cheater_present"
+            folder.mkdir()
+            (folder / "7.json").write_text(json.dumps(info), encoding="utf-8")
+            pd.DataFrame(rows).to_parquet(folder / "7.parquet")
+            lines = self.cs2.convert_match(folder / "7.json", folder / "7.parquet", movement_hz=16)
+        events = [parse_event(line) for line in lines]
+        shots = [event for event in events if event.event_type == "shot"]
+        # The knife is not a gun. Hurting a teammate is not a hit on an enemy.
+        self.assertEqual([(event.t_ms, event.hit) for event in shots], [(1719, True), (1875, False), (2031, False)])
+        first = shots[0]
+        self.assertEqual((first.player_id, first.match_id, first.skill_band), ("wc007-p1", "wc007", "average"))
+        self.assertEqual((first.hitbox, first.distance_m, first.through_geometry), ("head", 25.4, True))
+        self.assertAlmostEqual(first.view_delta_deg, 30.0, places=3)
+        moves = [event for event in events if event.event_type == "movement"]
+        self.assertTrue(moves and all(event.expected_max_ground_speed_mps == 6.35 for event in moves))
+        self.assertAlmostEqual(moves[0].speed_mps, 5.08, places=2)
+
 
 if __name__ == "__main__":
     unittest.main()
