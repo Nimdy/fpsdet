@@ -103,7 +103,9 @@ def design_effect(groups: list[tuple[int, int]]) -> float:
     p = sum(k for _, k in rows) / total
     if p <= 0.0 or p >= 1.0:
         return 1.0
-    chi2 = sum((k - n * p) ** 2 / (n * p * (1.0 - p)) for n, k in rows)
+    # fsum is correctly rounded on every Python. Built-in sum() of floats changed in 3.12,
+    # and the same case must carry the same bound whichever version scored it.
+    chi2 = math.fsum((k - n * p) ** 2 / (n * p * (1.0 - p)) for n, k in rows)
     return max(1.0, chi2 / (len(rows) - 1))
 
 

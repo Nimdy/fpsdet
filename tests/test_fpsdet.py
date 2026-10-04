@@ -1760,6 +1760,13 @@ class CadenceTest(unittest.TestCase):
 
 
 class BoundTest(unittest.TestCase):
+    def test_the_match_spread_does_not_depend_on_match_order_or_python_version(self):
+        # Plain float summation gives these 40 matches a different last digit forwards and backwards,
+        # and Python 3.12 changed how sum() adds floats. The bound on a case must not move with either.
+        rng = random.Random(3)
+        groups = [(n, rng.randint(0, n)) for n in (rng.randint(5, 60) for _ in range(40))]
+        self.assertEqual(design_effect(groups), design_effect(groups[::-1]))
+
     def test_a_short_sample_gets_a_wide_median_bound(self):
         short = [30.0, 31.0, 29.0, 35.0, 28.0, 33.0, 30.5, 34.0, 32.0]
         self.assertLess(median_bound(short, upper=False), 29.5)
