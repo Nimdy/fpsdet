@@ -69,15 +69,21 @@ def merge_queue(weekly: list[Case], nightly: list[list[Case]] | None = None) -> 
     """The open queue: the latest batch, plus any review a nightly batch opened.
 
     A review stays open until a person closes it, so a cheat that a night
-    caught is still in the queue even if the weekly numbers dilute it. A watch
-    is a monitor flag, not a case, so it comes from the latest batch only.
+    caught is still in the queue even if the weekly numbers dilute it. When
+    several nights opened one, the latest night's case is shown: it has the
+    most play behind it. ``merge_payloads`` follows the same rule. A watch is
+    a monitor flag, not a case, so it comes from the latest batch only.
     """
     queue = {case.player_id: case for case in weekly}
+    reviewed: dict[str, Case] = {}
     for night in nightly or []:
         for case in night:
-            current = queue.get(case.player_id)
-            if case.decision == "review" and (current is None or current.decision != "review"):
-                queue[case.player_id] = case
+            if case.decision == "review":
+                reviewed[case.player_id] = case
+    for player_id, case in reviewed.items():
+        current = queue.get(player_id)
+        if current is None or current.decision != "review":
+            queue[player_id] = case
     return queue
 
 
@@ -154,9 +160,11 @@ def _coverage(events: list[Event], days: list[str] | None) -> list[dict]:
     shots = [event for event in events if event.event_type == "shot"]
     moves = [event for event in events if event.event_type == "movement"]
 
+    def eligible(rows: list[Event], name: str) -> list[Event]:
+        return [row for row in rows if row.hit] if name == "hitbox" else rows  # a miss has no hitbox
+
     def share(rows: list[Event], name: str) -> float | None:
-        if name == "hitbox":
-            rows = [row for row in rows if row.hit]  # a miss has no hitbox
+        rows = eligible(rows, name)
         if not rows:
             return None
         have = sum(1 for row in rows if getattr(row, name) is not None)
@@ -184,7 +192,8 @@ def _coverage(events: list[Event], days: list[str] | None) -> list[dict]:
     rows = []
     for name, needs, kind in FIELDS:
         pool = shots if kind == "shot" else moves
-        row = {"field": name, "needs": needs, "kind": kind, "share": share(pool, name)}
+        # n is how many events could carry the field. Merging runs weights each night by it.
+        row = {"field": name, "needs": needs, "kind": kind, "share": share(pool, name), "n": len(eligible(pool, name))}
         if split:
             row["daily"] = [share(day_shots if kind == "shot" else day_moves, name) for day_shots, day_moves in split]
         rows.append(row)
@@ -379,7 +388,9 @@ def merge_payloads(payloads: list[dict], labels: list[str]) -> dict:
         coverage = []
         for position, field in enumerate(payloads[-1]["coverage"]):
             daily = [p["coverage"][position]["share"] for p in payloads]
-            weights = [p["totals"]["events"] for p in payloads]
+            # Each night counts by the events that could carry this field. Older runs have no n.
+            kind_total = "shots" if field["kind"] == "shot" else "movement"
+            weights = [p["coverage"][position].get("n", p["totals"].get(kind_total, 0)) for p in payloads]
             known = [(share, weight) for share, weight in zip(daily, weights) if share is not None]
             overall = round(sum(s * w for s, w in known) / max(1, sum(w for _, w in known)), 3) if known else None
             coverage.append({**field, "daily": daily, "share": overall})

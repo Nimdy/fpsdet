@@ -304,7 +304,7 @@ def profile_from_dict(obj: dict) -> GameProfile:
         vendor_min_r=float(obj.get("vendor_min_r") if obj.get("vendor_min_r") is not None else 0.85),
         vendor_min_shots=int(obj.get("vendor_min_shots") or 32),
         vendor_min_points=int(obj.get("vendor_min_points") or 12),
-        vendor_min_z=float(obj.get("vendor_min_z") or 5.0),
+        vendor_min_z=float(obj.get("vendor_min_z") if obj.get("vendor_min_z") is not None else 5.0),
         voice_min_ms=int(obj.get("voice_min_ms") or 350),
         inherit_min_events=int(obj.get("inherit_min_events") or 4),
         reference_lightest_speed_mps=float(ref) if ref is not None else None,

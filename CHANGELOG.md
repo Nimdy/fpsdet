@@ -20,6 +20,13 @@ The review desk opens on an operations dashboard over a synthetic week, and stud
 - **`checks` on every case**: machine-readable ids of what fired, so dashboards group on ids instead of reason text. Metrics carry the weapon `key`.
 - **dashboards/README.md** maps each panel to the case-JSON fields that drive it, for Grafana, Kibana, Splunk or an in-house console.
 
+### Fixed
+
+- **The band named on a case and its 95th percentile now come from the same band.** When the best human measured sat outside the top band, a case named that band but showed the top band's p95.
+- **A review opened on several nights shows the latest night's case** in both the desk and `fpsdet dashboard`. The two had disagreed: one kept the first night, the other the last.
+- **Merged field coverage counts each night by the events that could carry the field** (shots, hits for `hitbox`, movement samples), not by all events. `ops.json` coverage rows carry that count as `n`.
+- **`vendor_min_z: 0` in a profile is kept.** It had silently become 5.
+
 ### Scoring: what the population showed
 
 - **Shared leftover.**

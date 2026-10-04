@@ -134,7 +134,9 @@ def _rate_flags(
     top = cohorts.extreme(weapon.weapon_key, name, record.player_id, profile.min_cohort_players, high=True)
     best_band, best = top if top is not None else (ceiling_name, ceiling.maximum)  # type: ignore[union-attr]
     past_human = lower > best
-    view = _view(name, point, lower, own, best_band, ceiling, beyond_band=past_band, beyond_human=past_human)
+    # The band named on the case is the one holding the best human, so its p95 comes from that band too.
+    shown = ceiling if best_band == ceiling_name else cohorts.dist(best_band, weapon.weapon_key, name, record.player_id)
+    view = _view(name, point, lower, own, best_band, shown, beyond_band=past_band, beyond_human=past_human)
     view.ceiling_extreme = best
     return view, past_band, past_human, True
 
@@ -178,8 +180,9 @@ def _continuous_flags(
         best_band, extreme = top if top is not None else (ceiling_name, ceiling.minimum)
         past_band = tested < own.p05
         past_human = tested < extreme
+    shown = ceiling if best_band == ceiling_name else cohorts.dist(best_band, weapon.weapon_key, name, record.player_id)
     view = _view(
-        name, value, tested, own, best_band, ceiling, beyond_band=past_band, beyond_human=past_human
+        name, value, tested, own, best_band, shown, beyond_band=past_band, beyond_human=past_human
     )
     view.ceiling_extreme = extreme
     return view, past_band, past_human, True

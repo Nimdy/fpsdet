@@ -1701,6 +1701,24 @@ class OpsTest(unittest.TestCase):
         # The smg has no headshot rate yet. It does not borrow the rifle's.
         self.assertIsNone(_scatter_point(case, "smg"))
 
+    def test_a_review_shows_the_latest_night_that_opened_it(self):
+        def case(pid: str, decision: str, reason: str) -> Case:
+            return Case(pid, "t", decision, "human_review" if decision == "review" else "none", "none", "average", 0, reasons=[reason])
+
+        queue = merge_queue([case("a", "clean", "")], [[case("a", "review", "night 1")], [case("a", "review", "night 2")]])
+        self.assertEqual(queue["a"].reasons, ["night 2"])
+
+    def test_merged_coverage_counts_each_night_by_the_events_that_could_carry_the_field(self):
+        def night(share: float, n: int, events: int) -> dict:
+            payload = self._payload([self._row("a", "clean")])
+            payload["totals"]["events"] = events
+            payload["coverage"] = [{"field": "hitbox", "needs": "headshot rate", "kind": "shot", "share": share, "n": n}]
+            return payload
+
+        # A night with few hits but many movement samples must not outweigh a night with many hits.
+        merged = merge_payloads([night(1.0, 10, 10_000), night(0.0, 90, 100)], ["2026-09-26", "2026-09-27"])
+        self.assertEqual(merged["coverage"][0]["share"], 0.1)
+
     def test_the_queue_line_is_the_one_behind_the_decision(self):
         glitch = "4 over-cap ground samples, longest run 1 (need 25). Treated as a glitch or a blast the server did not tag, not as a cheat."
         tail = "pistol accuracy is above this rank's range and inside the best humans measured"
@@ -1797,6 +1815,23 @@ class CadenceTest(unittest.TestCase):
 
 
 class BoundTest(unittest.TestCase):
+    def test_the_named_band_and_its_p95_come_from_the_same_band(self):
+        from fpsdet.score import _rate_flags
+
+        cohorts = CohortTable()
+        for index in range(30):
+            cohorts.add("elite", "rifle", "accuracy", f"e{index}", 0.20 + index * 0.003)
+            cohorts.add("average", "rifle", "accuracy", f"a{index}", 0.10 + index * 0.012)
+        profile = GameProfile(game_id="t", min_cohort_players=30)
+        weapon = WeaponSummary("rifle", "rifle", "average", shots=200, hits=150)
+        view, _band, _human, _did = _rate_flags("accuracy", 150, 200, 0.75, PlayerRecord("p", "t", "average"), weapon, cohorts, profile)
+        # The best human measured is in the average band, not the top one, so the case names that band and its p95.
+        self.assertEqual(view.ceiling_band, "average")
+        self.assertAlmostEqual(view.ceiling_p95, cohorts.dist("average", "rifle", "accuracy", "p").p95)
+
+    def test_a_zero_vendor_z_is_kept(self):
+        self.assertEqual(profile_from_dict({"game_id": "t", "vendor_min_z": 0}).vendor_min_z, 0.0)
+
     def test_the_match_spread_does_not_depend_on_match_order_or_python_version(self):
         # Plain float summation gives these 40 matches a different last digit forwards and backwards,
         # and Python 3.12 changed how sum() adds floats. The bound on a case must not move with either.
