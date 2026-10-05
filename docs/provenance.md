@@ -20,7 +20,7 @@ The code is `fpsdet.provenance`. It uses the standard library only.
 | The detector implementation: the source of every module that can change a finding | Implemented |
 | The game profile as the scorer parsed it | Implemented |
 | The human baseline (cohort) the run compared players with, and its advisory integrity stamp | Implemented |
-| The subject player's own parsed events, in the order they were scored | Implemented |
+| The subject player's own parsed events, in the canonical timeline order the scorer reads | Implemented |
 | The account-history windows the scorer could read for the subject | Implemented |
 | One identity over the material evidence and all of the above (the evidence packet) | Implemented |
 | Other players' events that a relationship observation used | Not yet (see "What the input digest does not cover") |
@@ -45,7 +45,7 @@ Provenance says what produced a case, not that the case is correct. The packet d
       "digest": "sha256:<64 hex>",
       "modules": ["fpsdet", "fpsdet.baseline", "fpsdet.evidence", "fpsdet.models", "fpsdet.parse", "fpsdet.persist",
                   "fpsdet.pipeline", "fpsdet.provenance", "fpsdet.score", "fpsdet.signals", "fpsdet.statsutil",
-                  "fpsdet.summarize"]
+                  "fpsdet.summarize", "fpsdet.timeline"]
     },
     "cohort": {
       "mode": "external",
@@ -54,7 +54,7 @@ Provenance says what produced a case, not that the case is correct. The packet d
       "stored_digest": "matched",
       "integrity": {"recipe": "fpsdet.cohort-integrity/1", "status": "ok", "digest": "sha256:<64 hex>"}
     },
-    "inputs": {"recipe": "fpsdet.player-events/1", "digest": "sha256:<64 hex>", "events": 412, "matches": 8},
+    "inputs": {"recipe": "fpsdet.player-events/2", "digest": "sha256:<64 hex>", "events": 412, "matches": 8},
     "history": {"mode": "external", "recipe": "fpsdet.history/1", "digest": "sha256:<64 hex>", "windows": 1}
   },
   "packet": {"recipe": "fpsdet.packet/1", "status": "complete", "digest": "sha256:<64 hex>"}
@@ -107,6 +107,7 @@ The detector is every module whose code can change a finding, the evidence writt
 | `fpsdet.pipeline` | Scores a batch: in-file cohort, batch passes, the provenance stamp |
 | `fpsdet.parse` | Turns event lines and profiles into the objects scored |
 | `fpsdet.summarize` | Reduces events to per-player facts, with the speed run, the blatant recoil run and the knowledge filters |
+| `fpsdet.timeline` | The canonical player timeline every check reads ([event-normalization.md](event-normalization.md)) |
 | `fpsdet.baseline` | Cohorts and leave-one-out distributions |
 | `fpsdet.statsutil` | Bounds, percentiles, design effect |
 | `fpsdet.signals` | The gear, information and leftover detectors |
@@ -181,18 +182,23 @@ Canonical form, `fpsdet.cohort/1`:
 
 The input digest answers which exact events of this player the scorer evaluated. It is over the parsed `Event` objects, not the raw NDJSON, so spacing, key order and how a number was written in the file do not matter. A value that parses to something else does matter: `30` and `30.0` are an integer and a float, and an event with `hidden_track_ms: 0` is not one without the field.
 
-Canonical form, `fpsdet.player-events/1`:
+Canonical form, `fpsdet.player-events/2`:
 
-- **The events of one player, in the order the scorer received them.** The order is kept because the scorer is not order-neutral within a player: it lists findings, metrics and context lines in the order the player's weapons first appear, and events with the same time keep their arrival order. On the synthetic week, shuffling each player's own events changed 99 of 400 cases (metric order, context lines, one seal). Interleaving players differently while keeping each player's own order changed none. The digest follows the same rule: it moves when the player's own order moves, and not when only the interleaving with other players does. A test pins both.
-- **Every occurrence counts.** A duplicated event is a different input from a single one.
-- **All of the event.** The bytes are `fpsdet.player-events/1`, a NUL, the event count, a NUL, then for every `Event` field in name order that at least one of the events sets: the field name, a NUL, a JSON array of that field's value on each event (null where it is not set), and a NUL.
+- **The events of one player, in the canonical timeline the scorer reads** ([event-normalization.md](event-normalization.md)): match, server time, kind, `spray_index`, then the event's canonical text. Since event normalization the scorer reads nothing from arrival order, so neither does the digest. The same events listed in any order, players interleaved any way, or extras keys in any order give one digest. `run_score` builds each timeline once and both the scorer and the digest read that same list.
+- **Every occurrence counts.** A duplicated event is a different input from a single one, wherever in the file it sits.
+- **All of the event.** The bytes are `fpsdet.player-events/2`, a NUL, the event count, a NUL, then for every `Event` field in name order that at least one of the events sets: the field name, a NUL, a JSON array of that field's value on each event in timeline order (null where it is not set), and a NUL.
 - **Absent fields.** An empty mod set or an empty set of extras counts as not set. A field none of the events sets leaves no trace, so adding an optional field to `Event` later does not change existing digests.
 - **Extras** are written with sorted keys.
 - **Floats and non-finite values** are written as in the cohort digest.
 
 `inputs.events` and `inputs.matches` are counts for people. The digest already binds both.
 
-**Order is part of the input.** `fpsdet.player-events/1` binds the player's effective arrival order because fpsdet 0.x scoring currently observes that order. It does not claim that the event set is order-neutral. Normalizing the scorer's event order is a separate, tracked behaviour change ("Deterministic event normalization" in [architecture-v1.md](architecture-v1.md)); if it changes what the scorer reads, it gets a new input recipe.
+**`fpsdet.player-events/1`, before normalization.** Until event normalization, fpsdet wrote `fpsdet.player-events/1`.
+
+- **What it binds:** the same bytes as `/2`, but over the events in the order they arrived. The scorer read that order then: findings, metrics and context lines followed the first-seen weapon, and events at the same time kept their arrival order.
+- **It is not order-neutral, and never claimed to be.** It stays as it was (`fpsdet.provenance.arrival_digest`, with its P2.2 test digest pinned).
+- **Old packets:** a packet that carries it still verifies.
+- **Nothing writes it any more.** A `/1` digest and a `/2` digest of the same events differ, as they should: they describe different inputs to different scorers.
 
 **What the input digest does not cover.** It binds the subject's own events, and `cohort.digest` binds the baseline. Some observations rest on other players' events too:
 
@@ -262,7 +268,7 @@ The history rows themselves are never written into a case. Cohort files carry st
 `fpsdet.provenance.verify_packet(case)` reads a serialized case and returns what does not hold together, or nothing.
 
 1. **Observation ids.** Each id is recomputed from the observation's own fields, and the model refuses a role the scorer never gives that kind. An edited value with its old id is caught here, before the packet is considered.
-2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest.
+2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest. Old recipes stay known: a packet written with `fpsdet.player-events/1` before event normalization still verifies (`tests/fixtures/historical-packets-p23.json`).
 3. **The packet.** It is rebuilt with the same code that built it and compared.
 
 It needs no events, cohort, profile or code, and it does not prove that those sources would produce the packet again. That second level, source reproduction, is a rerun: score the same events with the same detector, profile, cohort and history, and `tools/regress.py diff` the result. `tools/regress.py verify` runs `verify_packet` on every case of a snapshot.

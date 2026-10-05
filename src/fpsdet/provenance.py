@@ -9,7 +9,7 @@ Four fingerprints, each a full SHA-256 written ``sha256:<64 hex>``:
   page change cannot move it.
 - ``cohort``: every (band, key, metric, player, value) of the baseline the run compared players
   with, and separately the advisory integrity stamp that travels with it.
-- ``inputs``: the subject player's own parsed events, in the order the scorer received them.
+- ``inputs``: the subject player's own parsed events, in the canonical timeline order the scorer reads.
 - ``history``: the account-history rows the scorer could read for the subject, when history was given.
 
 The first three are computed once per run and shared by every case in it; ``inputs`` and ``history``
@@ -34,13 +34,18 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
+from .timeline import player_timelines, timeline
+
 PROVENANCE_VERSION = 1
 # The canonicalization recipes. Bump one when the bytes it hashes would be built differently.
 PROFILE_RECIPE = "fpsdet.profile/1"
 DETECTOR_RECIPE = "fpsdet.detector/1"
 COHORT_RECIPE = "fpsdet.cohort/1"
 INTEGRITY_RECIPE = "fpsdet.cohort-integrity/1"
-INPUTS_RECIPE = "fpsdet.player-events/1"
+INPUTS_RECIPE = "fpsdet.player-events/2"
+# What fpsdet wrote before event normalization: the events in the order they arrived. Packets that
+# carry it still verify; nothing writes it any more.
+ARRIVAL_INPUTS_RECIPE = "fpsdet.player-events/1"
 HISTORY_RECIPE = "fpsdet.history/1"
 PACKET_RECIPE = "fpsdet.packet/1"
 
@@ -316,30 +321,48 @@ def _event_columns(events: list) -> list[tuple[str, list]]:
     return columns
 
 
-def player_digest(events: list) -> str:
-    """One player's parsed events, in the order the scorer received them.
-
-    Order is kept because it is not neutral: the scorer lists findings, metrics and context lines in the
-    order a player's weapons first appear, and events at the same time keep their arrival order. Each
-    occurrence counts, so a duplicated event is a different input. The bytes are the recipe, the event
-    count, then for each Event field in name order that any event sets: the name and a JSON array of
-    that field on every event, null where it is not set.
-    """
-    hasher = hashlib.sha256(INPUTS_RECIPE.encode("ascii") + b"\0" + str(len(events)).encode("ascii") + b"\0")
+def _events_digest(recipe: str, events: list) -> str:
+    """The recipe, the event count, then for each Event field in name order that any event sets: the name
+    and a JSON array of that field on every event, in the order given, null where it is not set. Each
+    occurrence counts, so a duplicated event is a different input."""
+    hasher = hashlib.sha256(recipe.encode("ascii") + b"\0" + str(len(events)).encode("ascii") + b"\0")
     for name, column in _event_columns(events):
         hasher.update(name.encode("ascii") + b"\0" + _VALUES.encode(column).encode("utf-8") + b"\0")
     return "sha256:" + hasher.hexdigest()
 
 
-def player_inputs(events: Iterable) -> dict[str, PlayerInputs]:
-    """Each player's input identity, from one pass over the run's events."""
-    grouped: dict[str, list] = {}
-    for event in events:
-        grouped.setdefault(event.player_id, []).append(event)
+def arrival_digest(events: list) -> str:
+    """``fpsdet.player-events/1``: one player's events in the order they arrived.
+
+    What fpsdet wrote before event normalization, when the scorer still read arrival order. Kept so its
+    meaning never changes; the scorer no longer writes it.
+    """
+    return _events_digest(ARRIVAL_INPUTS_RECIPE, list(events))
+
+
+def timeline_digest(events: list) -> str:
+    """``fpsdet.player-events/2`` over events already in canonical timeline order (fpsdet.timeline)."""
+    return _events_digest(INPUTS_RECIPE, events)
+
+
+def player_digest(events: Iterable) -> str:
+    """``fpsdet.player-events/2``: one player's events in the timeline order the scorer reads, whatever
+    order they arrived in. The same events in any order have one digest; a changed, added or removed
+    event, a duplicate included, has another."""
+    return timeline_digest(timeline(events))
+
+
+def timeline_inputs(timelines: Mapping[str, list]) -> dict[str, PlayerInputs]:
+    """Each player's input identity from the timelines a run already built for scoring."""
     return {
-        player_id: PlayerInputs(player_digest(rows), len(rows), len({event.match_id for event in rows}))
-        for player_id, rows in grouped.items()
+        player_id: PlayerInputs(timeline_digest(rows), len(rows), len({event.match_id for event in rows}))
+        for player_id, rows in timelines.items()
     }
+
+
+def player_inputs(events: Iterable) -> dict[str, PlayerInputs]:
+    """Each player's input identity, from the run's events."""
+    return timeline_inputs(player_timelines(events))
 
 
 @dataclass(frozen=True)
@@ -423,6 +446,7 @@ def stamp(
     cohort=None,
     cohort_mode: str | None = None,
     events: Iterable | None = None,
+    timelines: Mapping[str, list] | None = None,
     history: Mapping[str, list] | None = None,
 ) -> RunProvenance:
     """Give every case of one run its provenance. The run's part is computed once; inputs and history per player.
@@ -431,7 +455,10 @@ def stamp(
     or is None when the run was given no history.
     """
     run = run_provenance(profile, cohort, cohort_mode)
-    inputs = {} if events is None else player_inputs(events)
+    if timelines is not None:
+        inputs = timeline_inputs(timelines)  # the very timelines the scorer read
+    else:
+        inputs = {} if events is None else player_inputs(events)
     for case in cases:
         rows = None if history is None else history.get(case.player_id, [])
         case.provenance = CaseProvenance(run, inputs.get(case.player_id), history_provenance(rows))
@@ -449,12 +476,13 @@ PACKET_PROVENANCE = {
     "inputs": ("recipe", "digest", "events", "matches"),
     "history": ("mode", "recipe", "digest", "windows"),
 }
+# The recipes this fpsdet can read in a packet, by part. Old ones stay: a recipe never changes meaning.
 RECIPES = {
-    "detector": DETECTOR_RECIPE,
-    "profile": PROFILE_RECIPE,
-    "cohort": COHORT_RECIPE,
-    "inputs": INPUTS_RECIPE,
-    "history": HISTORY_RECIPE,
+    "detector": (DETECTOR_RECIPE,),
+    "profile": (PROFILE_RECIPE,),
+    "cohort": (COHORT_RECIPE,),
+    "inputs": (INPUTS_RECIPE, ARRIVAL_INPUTS_RECIPE),
+    "history": (HISTORY_RECIPE,),
 }
 _DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 
@@ -538,12 +566,12 @@ def verify_packet(case: Mapping) -> list[str]:
             problems.append(f"observation {name} is about {obs['subject_id']}, not this case's player")
     provenance = evidence.get("provenance")
     if isinstance(provenance, Mapping):
-        for part, recipe in RECIPES.items():
+        for part, recipes in RECIPES.items():
             block = provenance.get(part)
             if not isinstance(block, Mapping) or (part == "history" and block.get("mode") == "none"):
                 continue
-            if block.get("recipe") != recipe:
-                problems.append(f"provenance {part} uses recipe {block.get('recipe')!r}, not {recipe}")
+            if block.get("recipe") not in recipes:
+                problems.append(f"provenance {part} uses recipe {block.get('recipe')!r}, not one of {', '.join(recipes)}")
             if block.get("digest") is not None and not _DIGEST.fullmatch(str(block.get("digest"))):
                 problems.append(f"provenance {part} digest is not a sha256 digest")
     packet = evidence.get("packet")

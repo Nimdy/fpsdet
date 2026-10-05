@@ -20,7 +20,16 @@ from fpsdet.evidence import Observation
 from fpsdet.models import Event
 from fpsdet.parse import load_events, parse_event, profile_from_dict
 from fpsdet.persist import case_to_dict, cohort_from_dict, cohort_to_dict, event_to_dict
-from fpsdet.provenance import ProvenanceMismatch, cohort_digest, integrity_digest, player_digest, player_inputs
+from fpsdet.provenance import (
+    ProvenanceMismatch,
+    arrival_digest,
+    cohort_digest,
+    integrity_digest,
+    player_digest,
+    player_inputs,
+    timeline_digest,
+)
+from fpsdet.timeline import player_timelines
 from fpsdet.pipeline import run_score
 from fpsdet.provenance import (
     DETECTOR_MODULES,
@@ -240,7 +249,7 @@ class CaseProvenanceTest(unittest.TestCase):
         self.assertNotIn(str(PACKAGE_DIR), text)
         self.assertNotIn(str(ROOT), text)
         self.assertNotIn("def ", text)
-        self.assertNotIn("/", re.sub(r"fpsdet\.[a-z-]+/1", "", text))
+        self.assertNotIn("/", re.sub(r"fpsdet\.[a-z-]+/[0-9]+", "", text))
 
     def test_observation_ids_and_seals_do_not_depend_on_provenance(self):
         for case in self.demo.cases:
@@ -279,7 +288,9 @@ class CaseProvenanceTest(unittest.TestCase):
 
 # The planted demo's background cohort, and the one player in examples/shot.jsonl. CI checks both on 3.11 and 3.12.
 BACKGROUND_COHORT_DIGEST = "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941"
-SHOT_FILE_INPUT_DIGEST = "sha256:84f184c43e373c5bd170befdddaab430f6b19fdd5cc7b6711f22ccdc96b0f558"
+SHOT_FILE_INPUT_DIGEST = "sha256:677e699c028cf86af7c1b54dc920ff96d63c180af964d052e65e7e65ad2a1c5f"
+# The same player under player-events/1, the arrival-order recipe of P2.2. Its meaning never changes.
+SHOT_FILE_ARRIVAL_DIGEST = "sha256:84f184c43e373c5bd170befdddaab430f6b19fdd5cc7b6711f22ccdc96b0f558"
 
 
 def table_of(rows) -> CohortTable:
@@ -454,17 +465,27 @@ class InputFingerprintTest(unittest.TestCase):
     def test_the_digest_is_the_same_on_every_python(self):
         events, _ = load_events(ROOT / "examples" / "shot.jsonl")
         self.assertEqual(player_inputs(events)["p-1044"].digest, SHOT_FILE_INPUT_DIGEST)
+        self.assertEqual(arrival_digest([e for e in events if e.player_id == "p-1044"]), SHOT_FILE_ARRIVAL_DIGEST)
 
-    def test_player_events_1_binds_arrival_order(self):
-        # Since event normalization the scorer reads each player's canonical timeline, so reversing one
-        # player's events no longer changes the case. player-events/1 still describes the arrival order.
+    def test_v2_follows_the_scorer_and_v1_keeps_its_meaning(self):
+        # The scorer reads each player's canonical timeline, so the same events in another order give
+        # the same case and the same player-events/2 digest. player-events/1 still binds arrival order.
         events = [shot("w", index * 300, weapon_class="rifle", hidden_track_ms=200.0) for index in range(10)]
         events += [shot("w", 5000 + index * 300, weapon_class="smg", hidden_track_ms=200.0) for index in range(10)]
         profile = build_demo().profile
         forward, backward = run_score(events, profile)[0], run_score(list(reversed(events)), profile)[0]
         self.assertEqual(len(forward.reasons), 2)
-        self.assertEqual((forward.reasons, forward.seal), (backward.reasons, backward.seal))
-        self.assertNotEqual(player_digest(events), player_digest(list(reversed(events))))
+        self.assertEqual(case_to_dict(forward), case_to_dict(backward))
+        self.assertEqual(player_digest(events), player_digest(list(reversed(events))))
+        self.assertNotEqual(arrival_digest(events), arrival_digest(list(reversed(events))))
+        self.assertEqual(case_to_dict(forward)["evidence"]["provenance"]["inputs"]["recipe"], "fpsdet.player-events/2")
+
+    def test_v2_binds_the_very_timeline_the_scorer_read(self):
+        demo = build_demo()
+        timelines = player_timelines(demo.events)
+        for case in run_score(demo.events, demo.profile):
+            self.assertEqual(case.provenance.inputs.digest, timeline_digest(timelines[case.player_id]))
+            self.assertEqual(case.provenance.inputs.events, len(timelines[case.player_id]))
 
     def test_interleaving_players_moves_nothing(self):
         # Each player's own order kept, players interleaved differently: the same cases and the same digests.

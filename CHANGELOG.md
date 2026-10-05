@@ -19,6 +19,11 @@
 
 ### Added
 
+- **Input provenance follows the scorer: `fpsdet.player-events/2`.**
+  - **What changed:** the input digest is now taken over each player's canonical timeline, the same list the scorer reads, so the same events in any file order have one digest. Duplicates still count.
+  - **Old packets:** `fpsdet.player-events/1`, the arrival-order recipe, keeps its meaning (`arrival_digest`). Packets written with it still verify, and nothing writes it any more.
+  - **Packet recipe unchanged:** `fpsdet.packet/1` binds the input recipe by name, so it stays.
+  - **Proof at scale:** shuffling all 4.1 M TF2 events gives 2,764 of 2,764 identical cases, digests and packets included.
 - **One evidence-packet digest per case, and the account history behind it.**
   - **`evidence.provenance.history`:** the account-history windows the scorer could read for this player, as a sorted multiset (`fpsdet.history/1`), or `{"mode": "none"}` when the run had no history. The account check and the digest share one rule, `score.history_for`, so they cannot drift apart.
   - **`evidence.packet`:** a SHA-256 over the subject, game, decision, eligibility, every observation id, and the detector, profile, cohort (with its mode and integrity stamp), input and history digests (`fpsdet.packet/1`). Reason wording, context lines, the AI brief, reports and queue state are not in it.

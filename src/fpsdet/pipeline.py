@@ -6,7 +6,8 @@ from .baseline import CohortTable, build_cohorts
 from .models import Case, Event, GameProfile, HistoryWindow
 from .provenance import stamp
 from .score import annotate_batch, assess_player, history_for
-from .summarize import summarize
+from .summarize import summarize_timelines
+from .timeline import player_timelines
 
 IN_FILE_NOTE = (
     "Cohort was fit on this same file, including players under review. "
@@ -21,7 +22,9 @@ def run_score(
     history: list[HistoryWindow] | None = None,
     reports: dict[str, int] | None = None,
 ) -> list[Case]:
-    records = summarize(events, profile)
+    # One canonical timeline per player, built once: the scorer reads it and the input digest binds it.
+    timelines = player_timelines(events)
+    records = summarize_timelines(timelines, profile)
     in_file = cohort is None
     table = build_cohorts(records, profile) if cohort is None else cohort
     report_map = reports or {}
@@ -39,5 +42,5 @@ def run_score(
         cases.append(case)
     annotate_batch(cases, records, profile)
     readable = {record.player_id: history_for(record, history) for record in records} if history else None
-    stamp(cases, profile, cohort=table, cohort_mode="in_file" if in_file else "external", events=events, history=readable)
+    stamp(cases, profile, cohort=table, cohort_mode="in_file" if in_file else "external", timelines=timelines, history=readable)
     return cases

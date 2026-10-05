@@ -1,8 +1,9 @@
 """Event order: arrival order is not game state.
 
 Before event normalization (commit d45c0be) each of these fixtures showed the order events arrived in
-changing a case. Each now shows it does not. Where events are simultaneous on the server's clock and a
-check reads sequence, the test pins what simultaneity means to that check.
+changing a case. Each now shows it does not, down to the player-events/2 digest and the evidence packet.
+Where events are simultaneous on the server's clock and a check reads sequence, the test pins what
+simultaneity means to that check.
 """
 
 from __future__ import annotations
@@ -49,16 +50,10 @@ def case(events: list[Event], pid: str = "x") -> dict:
     return cases(events)[pid]
 
 
-def evidence_only(row: dict) -> dict:
-    """The case without its input provenance, which still binds arrival order until player-events/2."""
-    row = dict(row)
-    row["evidence"] = {key: value for key, value in row["evidence"].items() if key not in ("provenance", "packet")}
-    return row
-
-
 def same_case(test: unittest.TestCase, first: list[Event], second: list[Event], pid: str = "x") -> dict:
+    """The whole case, input digest and evidence packet included, is the same for both orders."""
     a, b = case(first, pid), case(second, pid)
-    test.assertEqual(evidence_only(a), evidence_only(b))
+    test.assertEqual(a, b)
     return a
 
 
@@ -140,9 +135,11 @@ class ArrivalOrderIsNotStateTest(unittest.TestCase):
         self.assertEqual(len(row["reasons"]), 2)
         self.assertIn("after c-1", row["reasons"][0])
 
-    def test_arrival_order_alone_no_longer_moves_the_case(self):
+    def test_arrival_order_alone_no_longer_moves_the_case_or_its_packet(self):
         shots = [ev(t=i * 300, hit=i % 4 == 0) for i in range(50)]
-        same_case(self, shots, list(reversed(shots)))
+        row = same_case(self, shots, list(reversed(shots)))
+        self.assertEqual(row["evidence"]["provenance"]["inputs"]["recipe"], "fpsdet.player-events/2")
+        self.assertEqual(row["evidence"]["packet"]["status"], "complete")
 
 
 class SimultaneousEventsTest(unittest.TestCase):
@@ -295,13 +292,14 @@ def shuffled_forms(events: list[Event], seed: int = 7) -> dict[str, list[Event]]
 
 
 class PermutationTest(unittest.TestCase):
-    """The same parsed events in every order a file could list them give the same cases."""
+    """The same parsed events in every order a file could list them give the same cases: every field,
+    the observation ids, the legacy seal, the player-events/2 digest and the evidence packet."""
 
     def check(self, events: list[Event], **kwargs):
         forms = shuffled_forms(events)
-        expected = {pid: evidence_only(row) for pid, row in cases(forms["original"], **kwargs).items()}
+        expected = cases(forms["original"], **kwargs)
         for name, form in forms.items():
-            got = {pid: evidence_only(row) for pid, row in cases(form, **kwargs).items()}
+            got = cases(form, **kwargs)
             self.assertEqual(sorted(got), sorted(expected), name)
             moved = [pid for pid in expected if got[pid] != expected[pid]]
             self.assertEqual(moved, [], f"{name}: {moved[:5]}")
@@ -323,9 +321,9 @@ class PermutationTest(unittest.TestCase):
 
         week = build_week()
         forms = shuffled_forms(week.events, seed=3)
-        expected = {c.player_id: evidence_only(case_to_dict(c)) for c in run_score(week.events, week.profile, week.cohort, week.history, week.reports)}
+        expected = {c.player_id: case_to_dict(c) for c in run_score(week.events, week.profile, week.cohort, week.history, week.reports)}
         for name in ("full shuffle", "each player shuffled", "partner order reversed"):
-            got = {c.player_id: evidence_only(case_to_dict(c)) for c in run_score(forms[name], week.profile, week.cohort, week.history, week.reports)}
+            got = {c.player_id: case_to_dict(c) for c in run_score(forms[name], week.profile, week.cohort, week.history, week.reports)}
             moved = [pid for pid in expected if got[pid] != expected[pid]]
             self.assertEqual(moved, [], f"{name}: {moved[:5]}")
 
