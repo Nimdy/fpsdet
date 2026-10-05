@@ -32,7 +32,7 @@ IDENTITY_VERSION = 1
 # Native observations: computed by fpsdet from events a game server wrote.
 SOURCE = "fpsdet"
 
-FAMILIES = ("physics", "weapon_rules", "human_baseline", "information", "relationship", "account_history")
+FAMILIES = ("physics", "weapon_rules", "human_baseline", "information", "challenge", "relationship", "account_history")
 
 # The role the scorer gives a finding. Together these are exactly the inputs of score.decide,
 # plus the batch passes:
@@ -65,10 +65,18 @@ KINDS: dict[str, tuple[str, str, str]] = {
     "hidden": ("information", "hidden", "review"),
     "quiet_aim": ("information", "quiet_aim", "review"),
     "wire": ("information", "wire", "review"),
+    # A planned challenge the aim followed, or the legacy private replay read as one (fpsdet.challenge).
+    # The case check id stays private_replay, so dashboards and seals do not move.
+    "occluded_motion_replay": ("challenge", "private_replay", "review"),
+    # Retired: what fpsdet wrote for the private replay before the challenge engine. Kept so packets
+    # written then still verify. The scorer no longer emits it.
     "private_replay": ("information", "private_replay", "review"),
     "leftover": ("relationship", "leftover", "watch"),
     "voice": ("relationship", "voice", "watch"),
 }
+
+# Kinds an earlier fpsdet wrote and this one does not. Still readable, never emitted.
+RETIRED_KINDS = frozenset({"private_replay"})
 
 # An observation describes evidence. It never carries an instruction to act on an account.
 FORBIDDEN_KEYS = frozenset({"action", "automated_action", "recommended_action"})

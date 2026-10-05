@@ -225,6 +225,12 @@ Canonical form, `fpsdet.history/1`:
 
 The history rows themselves are never written into a case. Cohort files carry stored digests, but history files do not yet; verifying a stored history digest on load can follow the same pattern later.
 
+## Challenge plans
+
+A planned challenge has its own public record, digested with `fpsdet.challenge-plan/1`: SHA-256 of the recipe name, a zero byte, and the canonical JSON of its id, type, version, game, match, player, counter, nonce, window and commitment. A challenge observation carries that digest, the commitment and the window in its evidence, so its observation id, and through it the packet, binds the exact plan it was judged against. Neither the secret nor any realization is in it. `fpsdet challenge verify --cases` checks a case's challenge findings against the plan files ([challenges.md](challenges.md)).
+
+The plan digest shows a record was not edited after it was digested. It is not a signature. The commitment inside it binds the plan to a realization only the server can reproduce.
+
 ## The evidence packet
 
 `evidence.packet` is one digest over the material evidence of the case: what the evidence is, and what produced it. It answers "is this the same evidence packet?"

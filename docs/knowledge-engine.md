@@ -91,7 +91,7 @@ A shot can be about more than one target, and each has its own knowledge:
 | --- | --- |
 | The enemy the shot was about (`enemy_id`) | `information_state`, `vision_state`, `audio_state`, recent perception |
 | The enemy `hidden_track_ms` says the aim stayed on | By that field's definition the server's line-of-sight and audio queries both failed for it, so it supplies vision and audio absent where the shot says nothing. If the shot says the enemy was seen or heard, it was known. If the shot says a channel was not checked, the two contradict each other. Recent perception applies |
-| The private replay body | Placed where this client's line-of-sight and audio queries fail, and never perceivable, so recent perception is not applicable. The shot's own labels are about another enemy |
+| The private replay body, or a challenge's | Placed where this client's line-of-sight and audio queries fail, and never perceivable, so recent perception is not applicable. The shot's own labels are about another enemy. For a planned challenge, the channels come from its type ([challenges.md](challenges.md)), and an enemy the same event names must itself be unknowable |
 
 ## Wire and picture
 
@@ -107,7 +107,7 @@ A person aims at the picture. A packet or memory aimbot aims at the wire. Data i
 | Check | Counts a sample when |
 | --- | --- |
 | Hidden mover | the tracked enemy is `unknowable` |
-| Private replay | the replay body is `unknowable`: every declared channel is one the replay is known to defeat |
+| Private replay, and planned challenges | the replay body is `unknowable`: every declared channel is one the replay is known to defeat |
 | Quiet aim | the shot's enemy is seen or heard (the knowable side), or `unknowable` (the unknowable side). Everything else joins neither |
 | Teammate (voice) contacts | the shot's enemy is `unknowable` |
 | Wire | the server sent the wire, the picture and the delay |

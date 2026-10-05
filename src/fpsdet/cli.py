@@ -12,7 +12,7 @@ from pathlib import Path
 from .ai_triage import openai_compatible_transport, triage_case
 from .baseline import build_cohorts, screen_matches
 from .casefile import safe_name, write_case
-from .challenge import CURRENT, Budget, ChallengeError, ChallengeRegistry, plan_file_from_dict
+from .challenge import CURRENT, Budget, ChallengeError, ChallengeRegistry, case_problems, plan_file_from_dict
 from .challenge_plan import SECRET_ENV, SecretError, load_secret, new_secret_file, plan_match, reproduce
 from .lake import ingest_lines, read_lines
 from .parse import iter_events, load_events, load_profile
@@ -35,6 +35,7 @@ from .board import write_board
 from .ops import merge_payloads, ops_payload, read_ops, write_ops
 from .opsview import render_dashboard
 from .pages import write_pages
+from .provenance import verify_packet
 from .signals import poison_alarms
 from .synthetic import build_demo, demo_rows
 from .models import HistoryWindow
@@ -341,6 +342,18 @@ def cmd_challenge_plan(args: argparse.Namespace) -> int:
     return 0
 
 
+def _read_cases(path: str) -> list[dict]:
+    """Cases from a case file, an index written by score --out, a JSON list, or one case per line."""
+    text = Path(path).read_text(encoding="utf-8")
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        return [json.loads(line) for line in text.splitlines() if line.strip()]
+    if isinstance(data, dict) and isinstance(data.get("cases"), list):
+        return data["cases"]
+    return data if isinstance(data, list) else [data]
+
+
 def cmd_challenge_verify(args: argparse.Namespace) -> int:
     files, failed = [], False
     for path in args.plans:
@@ -354,10 +367,33 @@ def cmd_challenge_verify(args: argparse.Namespace) -> int:
         players = len({plan.subject_id for plan in plan_file.plans})
         print(f"{path}: {len(plan_file.plans)} challenges for {players} players in {plan_file.match_id}; digests and schedule consistent")
     try:
-        ChallengeRegistry.from_files(files)
+        registry = ChallengeRegistry.from_files(files)
     except ChallengeError as error:
         print(f"FAIL {error}")
-        failed = True
+        failed, registry = True, ChallengeRegistry()
+    for path in args.cases or []:
+        try:
+            cases = _read_cases(path)
+        except (OSError, ValueError) as error:
+            print(f"FAIL {path}: {error}")
+            failed = True
+            continue
+        findings = problems = 0
+        for case in cases:
+            planned = [
+                obs for obs in (case.get("evidence") or {}).get("observations") or []
+                if obs.get("family") == "challenge" and ((obs.get("evidence") or {}).get("challenge") or {}).get("origin") == "planned"
+            ]
+            if not planned:
+                continue
+            findings += len(planned)
+            # The finding matches its plan, and the packet that binds the finding is intact.
+            found = case_problems(case, registry) + [f"{case.get('player_id')}: {problem}" for problem in verify_packet(case)]
+            for problem in found:
+                print(f"FAIL {path}: {problem}")
+            problems += len(found)
+        failed = failed or bool(problems)
+        print(f"{path}: {len(cases)} cases, {findings} planned challenge findings, {'every one matches its plan' if not problems else f'{problems} problems'}")
     if args.secret_file or os.environ.get(SECRET_ENV):
         secret = _secret(args.secret_file)
         for path, plan_file in zip(args.plans, files):
@@ -460,6 +496,7 @@ def build_parser() -> argparse.ArgumentParser:
     verify = actions.add_parser("verify", help="Check plan files; with the secret, check the secret plans them")
     verify.add_argument("plans", nargs="+")
     verify.add_argument("--secret-file", help=f"Hex secret file. Default: {SECRET_ENV}, if set")
+    verify.add_argument("--cases", action="append", help="Cases to check against the plans: a case file, a score --out index, or JSON lines")
     verify.set_defaults(func=cmd_challenge_verify)
     types = actions.add_parser("types", help="Print the challenge types, their requirements and limits")
     types.set_defaults(func=cmd_challenge_types)

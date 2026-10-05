@@ -209,6 +209,65 @@ A challenge counts only when the knowledge engine ([knowledge-engine.md](knowled
 
 A game that declares `radar`, `team_share`, `ability`, `objective` or `spectator` gets no challenge evidence from this type. `fpsdet challenge plan` refuses to plan it, and scoring abstains with `cause: unchecked` if a plan exists anyway. Only a future type, or version, that defeats or checks those channels can count there.
 
+## Scoring
+
+**The bar** is the hidden-mover bar, applied to each challenge on its own: at least `hidden_track_min_samples` (default 8) counted samples above 0, and an exact total of at least `hidden_track_min_ms` (default 1200 ms). One crossing is not a review. A short window cannot reach the bar, and planning refuses windows shorter than `hidden_track_min_ms`.
+
+**Challenges never add up.** Five samples on one challenge and five on another are two challenges below the bar, not one above it. Each result is kept, and every challenge the player was planned is listed, so a reviewer sees "followed 1 of 3" rather than one sum. Weighing repeated, independent challenges together needs calibration, and is left for later.
+
+**A followed challenge is a review.** It adds the reason
+
+```text
+aim stayed on challenge ch-c9822fee5e1a48b270e3a78a (occluded motion replay in m-1001) for 1600 ms across 16 samples
+```
+
+and the case check `private_replay`, which dashboards already group and the review desk already explains. Like the other information checks, it counts even when the player has too few shots for aim to be scored.
+
+## Evidence
+
+Each followed challenge is one observation:
+
+| Field | Value |
+| --- | --- |
+| `family` | `challenge` |
+| `kind` | `occluded_motion_replay` |
+| `role` | `review` |
+| `key` | the challenge id |
+| `match_ids` | the challenge's match |
+| `evidence.challenge` | `challenge_id`, `origin: "planned"`, `type`, `version`, `commitment`, `plan` (the plan digest), `window` (`start_ms`, `end_ms`) |
+| `evidence.linkage`, `evidence.scope` | `challenge_id`; `challenge`, meaning this challenge's samples alone |
+| `evidence.eligible_samples`, `tracked_samples`, `total_ms` | what the window held and what counted |
+| `evidence.knowledge` | the channels the profile declares (`required`), the ones the type defeats, the ones that cannot apply |
+| `evidence.thresholds` | `min_samples`, `min_total_ms` |
+| `context.knowledge` | the knowledge state, its basis, and the samples left out by cause |
+| `context.series` | how many challenges this player was planned in the run, by status |
+
+The evidence binds the challenge by id, plan digest and commitment. It holds no secret and no realization, and nothing in it helps predict another challenge: the next challenge's id, window and realization come from HMAC outputs this one says nothing about. The observation id covers all of it, so the evidence packet binds the challenge through the observation, as it binds every other finding. No new packet recipe was needed.
+
+### Checking a case against its plan
+
+```bash
+fpsdet challenge verify m-1001.plan.json --cases review/review-index.json
+```
+
+For each planned challenge finding, this checks that the challenge is in the plans given, that its commitment, plan digest, type, version and window match its plan, that it is cited for its own player and match, and that the case's evidence packet verifies. This is the public check. Adding `--secret-file` also shows the secret plans those plans: that check is privileged.
+
+## The legacy private replay
+
+`private_track_ms` still works, on events that name no challenge, exactly as before: the same cut, the same agreement rule at one moment, the same bar, on one aim key, across every match in the window, and the same reason text. The adapter makes its finding the same kind of observation as a planned challenge, with an identity that says what it is:
+
+| Field | Legacy value |
+| --- | --- |
+| `key`, `evidence.challenge.challenge_id` | `legacy_private_replay:<aim key>`, a label and not a planned id |
+| `evidence.challenge.origin` | `legacy_private_replay` |
+| `evidence.challenge.type` | `occluded_motion_replay`, what the field always described |
+| `version`, `commitment`, `plan`, `window` | `null`: no plan existed, and none is pretended |
+| `evidence.linkage`, `evidence.scope` | `private_track_ms`; `aim_key`, every match on one aim key added together |
+| `evidence.eligible_samples` | `null`: the legacy path never counted them |
+| `context.legacy` | says so in words |
+
+The legacy path is for compatibility and tests. It keeps the weaknesses the audit below lists: no target, no window, and crossings in unrelated matches add up. New integrations should send `challenge_id`.
+
 ## Gameplay safety
 
 The game server must keep these true for `occluded_motion_replay`. They are in every plan file under `requirements`:

@@ -10,7 +10,7 @@ The reference implementation is `src/fpsdet/`. A port in C#, C++, or Go is compa
 | --- | --- |
 | Gear rules | `speed`, `fire_rate`, `metronome`, `recoil_floor`, `recoil_learned`, `mirror` |
 | Human baseline | `accuracy`, `headshot_rate`, `median_distance`, `geometry_rate`, `extra`, `account_jump`, `rank_tail` (the watch-grade tail), `supporting` |
-| Information | `hidden`, `quiet_aim`, `private_replay`, `wire` |
+| Information | `hidden`, `quiet_aim`, `private_replay` (a challenge, below), `wire` |
 | Batch | `leftover`, `voice` |
 
 The labels and families are `fpsdet.models.CHECKS`.
@@ -153,7 +153,9 @@ Review when at least `hidden_track_min_samples` (default 8) shots have time abov
 
 ## Private replay
 
-`private_track_ms` is time, on that shot, that the aim cone contained a body the server built by replaying another player's motion on a different heading, in a volume this client could not see or hear. The official client is not given a decoy bit. Omit the field, or send 0, and nothing happens. The bar is the hidden-mover bar: at least `hidden_track_min_samples` (default 8) shots above 0, and a sum of at least `hidden_track_min_ms` (default 1200), with the same rule for shots at one moment: they count once when they agree and not at all when they disagree. One crossing is not a review. One long sample is not enough. A body this client could actually perceive, labeled private, manufactures the case. That is an emitter bug. The public speed, recoil, and aim charts are allowed to stay ordinary. This check runs even when the aim sample is still too small to score. The review desk draws that route from the planted case. The score still reads only `private_track_ms`.
+The private replay is now an active challenge: the server plans it with a secret, the events name it, and each one is judged on its own samples. [challenges.md](challenges.md) has the plan, the fields, the rules and the evidence. A planned challenge counts only for events that carry its `challenge_id`, inside its window, and only while every knowledge channel the profile declares is one the challenge defeats. Its bar is the one below, per challenge. The legacy field still scores as it always did:
+
+`private_track_ms` is time, on that shot, that the aim cone contained a body the server built by replaying another player's motion on a different heading, in a volume this client could not see or hear. The official client is not given a decoy bit. Omit the field, or send 0, and nothing happens. The bar is the hidden-mover bar: at least `hidden_track_min_samples` (default 8) shots above 0, and a sum of at least `hidden_track_min_ms` (default 1200), with the same rule for shots at one moment: they count once when they agree and not at all when they disagree. One crossing is not a review. One long sample is not enough. A body this client could actually perceive, labeled private, manufactures the case. That is an emitter bug. The public speed, recoil, and aim charts are allowed to stay ordinary. This check runs even when the aim sample is still too small to score. The review desk draws that route from the planted case. The score still reads only `private_track_ms`. On an event that names a challenge it is not read.
 
 ## Wire and picture
 

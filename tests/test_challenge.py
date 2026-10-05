@@ -3,7 +3,9 @@
 LegacyPrivateReplaySemanticsTest was written before the challenge engine (P4, phase C0) to pin what the
 private replay did, from the event field to the case: how ``private_track_ms`` is parsed, cut and agreed
 on, the bar, the reason, the observation and the seal. The engine keeps all of it for events that name no
-challenge. It no longer reads ``private_track_ms`` on an event that names one.
+challenge, with two deliberate changes: it no longer reads ``private_track_ms`` on an event that names
+one, and the finding is now an occluded motion replay in the challenge family, so its observation id
+moved. Both tests that pinned the old observation say what it was.
 
 Every secret here is drawn fresh with os.urandom when the test runs, except TEST_VECTOR_KEY: the bytes
 0 to 31, public, used only to pin the derivation recipe so it cannot drift without a failing test.
@@ -148,11 +150,22 @@ class LegacyPrivateReplaySemanticsTest(unittest.TestCase):
         self.assertEqual(case["checks"], ["private_replay"])
         self.assertEqual(case["seal"], "b9f2139acc3ba01f388dc0cd546d589e0bc0d2dca96b11c58afe6c6f1f07ee90")
         (obs,) = case["evidence"]["observations"]
-        self.assertEqual((obs["family"], obs["kind"], obs["role"], obs["key"]), ("information", "private_replay", "review", "rifle"))
+        # The P4 migration. The decision, reason, check and seal above did not move. The observation did, on
+        # purpose: it was information / private_replay, key "rifle", evidence {shots: 10, total_ms: 2000.0,
+        # thresholds: {min_shots: 8, min_total_ms: 1200}}, id obs-f527f69402a53ff6e8be4f41. It is now an
+        # occluded motion replay in the challenge family, with a visibly legacy identity and no plan.
+        self.assertEqual((obs["family"], obs["kind"], obs["role"]), ("challenge", "occluded_motion_replay", "review"))
+        self.assertEqual(obs["key"], "legacy_private_replay:rifle")
         # Every match the aim key was used in, not only the ones with replay time.
         self.assertEqual(obs["match_ids"], ["m0", "m1"])
-        self.assertEqual(obs["evidence"], {"shots": 10, "total_ms": 2000.0, "thresholds": {"min_shots": 8, "min_total_ms": 1200}})
-        self.assertEqual(obs["observation_id"], "obs-f527f69402a53ff6e8be4f41")
+        self.assertEqual(obs["evidence"]["challenge"], {
+            "challenge_id": "legacy_private_replay:rifle", "origin": "legacy_private_replay", "type": "occluded_motion_replay",
+            "version": None, "commitment": None, "plan": None, "window": None,
+        })
+        self.assertEqual((obs["evidence"]["linkage"], obs["evidence"]["scope"]), ("private_track_ms", "aim_key"))
+        self.assertEqual((obs["evidence"]["tracked_samples"], obs["evidence"]["total_ms"]), (10, 2000.0))
+        self.assertEqual(obs["evidence"]["thresholds"], {"min_samples": 8, "min_total_ms": 1200})
+        self.assertEqual(obs["observation_id"], "obs-3531edc8697cf2ba4c6889b0")
         self.assertEqual(obs["context"]["knowledge"]["status"], "unknowable")
         self.assertEqual(obs["context"]["knowledge"]["channels"], {"audio": "absent", "recent_perception": "not_applicable", "vision": "absent"})
         # Under 40 shots, aim is not scored, and the replay still is.
@@ -173,7 +186,8 @@ class LegacyPrivateReplaySemanticsTest(unittest.TestCase):
         self.assertEqual(case["seal"], "e73f0a73ef538ed1667e4bb7938b487d3de12323b3369441585381cf35b9e3ae")
         self.assertEqual(case["seal"], evidence_seal_of(case))
         (obs,) = case["evidence"]["observations"]
-        self.assertEqual((obs["family"], obs["kind"], obs["observation_id"]), ("information", "private_replay", "obs-952d9e164294a9c5fa31861a"))
+        # Was information / private_replay, obs-952d9e164294a9c5fa31861a, before the P4 migration.
+        self.assertEqual((obs["family"], obs["kind"], obs["observation_id"]), ("challenge", "occluded_motion_replay", "obs-d6b0a455423d666f8428468e"))
 
     def test_a_p3_replay_packet_verifies(self):
         fixture = json.loads((FIXTURES / "historical-packets-p3.json").read_text(encoding="utf-8"))
@@ -492,9 +506,12 @@ class PlanFileTest(unittest.TestCase):
     def test_an_edit_with_a_fresh_digest_is_caught_only_with_the_secret(self):
         _key, secret = fresh()
         planned = self.planned(secret)
-        forged = dataclasses.replace(planned.plans[0], end_ms=planned.plans[0].end_ms - 500)
+        # The last window of a player, moved by 1 ms the way that keeps the budget, so only the secret can tell.
+        index, last = max(enumerate(planned.plans), key=lambda pair: (pair[1].subject_id, pair[1].counter))
+        longer = last.end_ms - last.start_ms == planned.budget.min_duration_ms
+        forged = dataclasses.replace(last, end_ms=last.end_ms + (1 if longer else -1))
         raw = planned.to_dict()
-        raw["challenges"][0] = forged.to_dict()
+        raw["challenges"][index] = forged.to_dict()
         public = plan_file_from_dict(raw)  # consistent: the digest is not a signature
         problems = reproduce(secret, public)
         self.assertEqual([p.split(": ", 1)[1] for p in problems], ["end_ms is not what this secret plans"])
@@ -737,6 +754,111 @@ class ChallengeLinkageTest(unittest.TestCase):
                 parse_event({**base, "challenge_id": bad})
         with self.assertRaises(ParseError):
             parse_event({**base, "challenge_id": "c1", "challenge_track_ms": "80"})
+
+
+def challenge_findings(case: dict) -> list[dict]:
+    return [obs for obs in case["evidence"]["observations"] if obs["family"] == "challenge"]
+
+
+class ChallengeScoringTest(unittest.TestCase):
+    """A followed planned challenge is a review, bound to that one challenge."""
+
+    def test_a_followed_challenge_is_a_review_bound_to_its_plan(self):
+        from fpsdet.challenge import case_problems
+        from fpsdet.evidence import implied_decision
+
+        planned = plan_for()
+        (plan,) = planned.plans
+        case = scored_with(follow(plan, n=16), [planned])
+        self.assertEqual(case["decision"], "review")
+        self.assertEqual(case["automated_action"], "none")
+        self.assertEqual(case["checks"], ["private_replay"])
+        line = f"aim stayed on challenge {plan.challenge_id} (occluded motion replay in m1) for 1600 ms across 16 samples"
+        self.assertEqual(case["reasons"], [line])
+        (obs,) = challenge_findings(case)
+        self.assertEqual((obs["kind"], obs["role"], obs["key"], obs["match_ids"]), ("occluded_motion_replay", "review", plan.challenge_id, ["m1"]))
+        self.assertEqual(obs["evidence"]["challenge"], {
+            "challenge_id": plan.challenge_id, "origin": "planned", "type": "occluded_motion_replay", "version": 1,
+            "commitment": plan.commitment, "plan": plan.digest, "window": {"start_ms": plan.start_ms, "end_ms": plan.end_ms},
+        })
+        self.assertEqual((obs["evidence"]["linkage"], obs["evidence"]["scope"]), ("challenge_id", "challenge"))
+        self.assertEqual((obs["evidence"]["eligible_samples"], obs["evidence"]["tracked_samples"], obs["evidence"]["total_ms"]), (16, 16, 1600.0))
+        self.assertEqual(obs["evidence"]["knowledge"], {"required": ["vision", "audio"], "defeated": ["vision", "audio"], "not_applicable": ["recent_perception"]})
+        self.assertEqual(obs["evidence"]["thresholds"], {"min_samples": 8, "min_total_ms": 1200})
+        self.assertEqual(obs["context"]["knowledge"]["status"], "unknowable")
+        self.assertEqual(obs["context"]["series"], {"planned": 1, "followed": 1})
+        self.assertEqual(implied_decision(case["evidence"]), "review")
+        self.assertEqual(verify_packet(case), [])
+        self.assertEqual(case_problems(case, ChallengeRegistry(planned.plans)), [])
+
+    def test_below_the_bar_is_no_finding(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        for events in (follow(plan, n=7, every=300), follow(plan, n=11, every=100)):
+            case = scored_with(events, [planned])
+            self.assertEqual(challenge_findings(case), [])
+            self.assertNotEqual(case["decision"], "review")
+            self.assertEqual(results_of(case)[plan.challenge_id]["status"], "not_followed")
+
+    def test_two_challenges_never_add_up(self):
+        planned = plan_for(count=2)
+        first, second = planned.plans
+        half = follow(first, n=5, every=200) + follow(second, n=5, every=200)  # 10 samples, 2000 ms, across two
+        case = scored_with(half, [planned])
+        self.assertEqual(challenge_findings(case), [])
+        self.assertNotEqual(case["decision"], "review")
+        both = follow(first, n=10, every=200) + follow(second, n=10, every=200)
+        case = scored_with(both, [planned])
+        self.assertEqual(sorted(obs["key"] for obs in challenge_findings(case)), sorted([first.challenge_id, second.challenge_id]))
+        self.assertEqual(len(case["reasons"]), 2)
+        self.assertEqual(challenge_findings(case)[0]["context"]["series"], {"planned": 2, "followed": 2})
+
+    def test_an_abstained_challenge_is_never_a_finding(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        radar = dataclasses.replace(GAME, knowledge_channels=("vision", "audio", "radar"))
+        case = scored_with(follow(plan, n=40), [planned], radar)
+        self.assertEqual(challenge_findings(case), [])
+        self.assertNotEqual(case["decision"], "review")
+
+    def test_a_legacy_replay_and_a_planned_challenge_are_two_findings(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        legacy = [shot(i * 2000, match="m2", private_track_ms=200.0) for i in range(10)]
+        case = scored_with(follow(plan, n=16) + legacy, [planned])
+        origins = sorted(obs["evidence"]["challenge"]["origin"] for obs in challenge_findings(case))
+        self.assertEqual(origins, ["legacy_private_replay", "planned"])
+
+    def test_the_scorer_never_writes_a_retired_kind(self):
+        from fpsdet.evidence import RETIRED_KINDS
+        from fpsdet.synthetic import build_demo
+
+        kinds = {obs.kind for case in build_demo().cases for obs in case.evidence}
+        self.assertIn("occluded_motion_replay", kinds)
+        self.assertEqual(kinds & RETIRED_KINDS, set())
+
+    def test_a_case_is_checked_against_its_plan(self):
+        from fpsdet.challenge import case_problems
+
+        planned = plan_for()
+        (plan,) = planned.plans
+        case = scored_with(follow(plan, n=16), [planned])
+        registry = ChallengeRegistry(planned.plans)
+        edited = json.loads(json.dumps(case))
+        edited["evidence"]["observations"][0]["evidence"]["challenge"]["window"]["end_ms"] += 1
+        self.assertIn("window does not match its plan", " ".join(case_problems(edited, registry)))
+        self.assertTrue(verify_packet(edited))  # the edit also breaks the observation id
+        self.assertIn("is in no plan given", " ".join(case_problems(case, ChallengeRegistry())))
+        with tempfile.TemporaryDirectory() as folder:
+            plan_path, case_path, bad_path = (Path(folder) / name for name in ("plan.json", "case.json", "bad.json"))
+            plan_path.write_text(json.dumps(planned.to_dict()))
+            case_path.write_text(json.dumps(case))
+            bad_path.write_text(json.dumps({"cases": [edited]}))
+            code, printed = run_cli("challenge", "verify", str(plan_path), "--cases", str(case_path))
+            self.assertEqual(code, 0, printed)
+            self.assertIn("1 planned challenge findings, every one matches its plan", printed)
+            code, printed = run_cli("challenge", "verify", str(plan_path), "--cases", str(bad_path))
+            self.assertEqual(code, 1, printed)
 
 
 def evidence_seal_of(row: dict) -> str:

@@ -31,7 +31,7 @@ What is proven, on every planted case, every case of the synthetic week (weekly 
 | --- | --- |
 | `observation_id` | `obs-` and 24 hex digits; see Identity |
 | `source` | `fpsdet`: computed by fpsdet from events a game server wrote. The only source today |
-| `family` | Where the evidence comes from: `physics`, `weapon_rules`, `human_baseline`, `information`, `relationship`, `account_history` |
+| `family` | Where the evidence comes from: `physics`, `weapon_rules`, `human_baseline`, `information`, `challenge`, `relationship`, `account_history` |
 | `kind` | The detector. Each kind fires one case check id |
 | `role` | The role the scorer gives it in the decision (below) |
 | `subject_id` | The player the case is about |
@@ -104,7 +104,7 @@ Each row is a detector the scorer runs today. `key` is the weapon key unless the
 | Aim on a hidden mover (`hidden`) | information | `hidden` | review | `shots`, `total_ms`; min shots, min total, `grace_ms`. Audio shots and shots inside the grace window were never counted |
 | Quiet only while unknowable (`quiet_aim`) | information | `quiet_aim` | review | `knowable_median_deg`, `unknowable_median_deg`, shots on each side; max ratio, min shots each, min knowable noise |
 | Aim on the wire, not the picture (`wire`) | information | `wire` | review | `led_shots`, `shots_with_both_errors`, `led_delay_ms`, `median_wire_error_deg`, `median_picture_error_deg` over the led shots; error ratio, gap, min shots, min delay |
-| Aim on a private replay (`private_replay`) | information | `private_replay` | review | `shots`, `total_ms`; min shots, min total |
+| Aim on a private replay (`private_replay`) | challenge | `occluded_motion_replay` | review | `challenge` (id, origin, type, version, commitment, plan digest, window), `linkage`, `scope`, `eligible_samples`, `tracked_samples`, `total_ms`, `knowledge` (required, defeated, not applicable); min samples, min total. Key: the challenge id, or `legacy_private_replay:<aim key>` for the legacy field. See [challenges.md](challenges.md) |
 | Shared humanizer leftover (`leftover`) | relationship | `leftover` | watch | `partner`, `partner_in_review`, `r`, `fisher_z`, `points`, `keyed_by` (`spray` or `position`), `shared_habit_removed`; min r, min z, min points, min samples. Key: the weapon the pair matched on |
 | Teammate faster than a voice (`voice`) | relationship | `voice` | watch | `partner`, `party_id`, `fast_lags_ms`, `lags`; `voice_ms`, `min_fast`. `match_ids` are the matches of the fast lags. `depends_on` holds the partner's `hidden` observation ids |
 
@@ -114,7 +114,7 @@ Not observations, because they never change a decision: the context lines for sh
 
 ### Open points
 
-- **Private replay is `information` for now.** It is today's single-field check, not the challenge engine. When the challenge engine exists it moves to a `challenge` family with the same meaning.
+- **The private replay moved to the `challenge` family** with the challenge engine (P4): kind `occluded_motion_replay`, for a planned challenge and for the legacy `private_track_ms` field alike. The case check id stays `private_replay`. Its observation ids moved, deliberately; the kind `private_replay` in the `information` family is retired, still readable so old packets verify, and never written ([challenges.md](challenges.md)).
 - **The voice-speed teammate still finds its partner by reason text.** That selection is unchanged here. The observation records the dependency by id. `depends_on` would be empty if that text matched something other than a hidden-mover finding, such as a player id containing the words; the structural fix is deferred with the text coupling.
 - **A shared leftover has no `depends_on`.** When the partner is already a review, `partner_in_review` says so. That review comes from a combination of the partner's observations, not one of them.
 - **Some detectors do not know their matches.** The hidden, private-replay, wire and quiet-aim samples, recoil and declared numbers are summarised without a match per sample. `match_ids` is then every match on that weapon in the window, or empty.

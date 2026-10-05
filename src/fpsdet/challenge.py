@@ -618,3 +618,136 @@ def challenge_notes(results: list[ChallengeResult], unlinked: int) -> list[str]:
     if foreign:
         notes.append(f"{foreign} challenges named on this player's events were planned for another player. They were not read.")
     return notes
+
+
+# Findings. A followed challenge is a review, by the bar above, on that challenge alone. The legacy
+# private replay keeps its own bar and reason, and becomes the same kind of observation.
+
+LEGACY_ORIGIN = "legacy_private_replay"
+PLANNED_ORIGIN = "planned"
+# What private_track_ms always described: a replayed body placed where this client's line-of-sight and
+# audio queries fail. The adapter reads it as that type, with no plan, window or commitment.
+LEGACY_SPEC = OCCLUDED_MOTION_REPLAY
+
+
+def legacy_challenge_id(aim_key: str) -> str:
+    """The identity the legacy adapter gives one aim key's private replay samples. It is visibly not a
+    planned id: no plan, window or commitment ever existed for it."""
+    return f"{LEGACY_ORIGIN}:{aim_key}"
+
+
+def _knowledge(spec: ChallengeSpec, profile) -> dict:
+    return {"required": list(profile.knowledge_channels), "defeated": list(spec.defeats), "not_applicable": list(spec.not_applicable)}
+
+
+def legacy_evidence(aim_key: str, numbers: Mapping, profile) -> dict:
+    """The legacy private replay finding (signals.private_finding) as challenge evidence."""
+    return {
+        "challenge": {
+            "challenge_id": legacy_challenge_id(aim_key),
+            "origin": LEGACY_ORIGIN,
+            "type": LEGACY_SPEC.challenge_type,
+            "version": None,
+            "commitment": None,
+            "plan": None,
+            "window": None,
+        },
+        "linkage": "private_track_ms",
+        "scope": "aim_key",  # every match in the window on one aim key, as the legacy check always added them
+        "eligible_samples": None,
+        "tracked_samples": numbers["shots"],
+        "total_ms": numbers["total_ms"],
+        "knowledge": _knowledge(LEGACY_SPEC, profile),
+        "thresholds": {"min_samples": numbers["thresholds"]["min_shots"], "min_total_ms": numbers["thresholds"]["min_total_ms"]},
+    }
+
+
+def legacy_context(state: KnowledgeState, not_counted: Mapping) -> dict:
+    return {
+        "knowledge": {
+            **state.to_dict(),
+            "basis": "private_track_ms: placed where this client's line-of-sight and audio queries fail",
+            "not_counted": dict(sorted(not_counted.items())),
+        },
+        "legacy": "private_track_ms names no challenge: there is no plan, window or commitment, and time from every match on this aim key adds up",
+    }
+
+
+def challenge_line(result: ChallengeResult) -> str:
+    plan = result.plan
+    return (
+        f"aim stayed on challenge {result.challenge_id} (occluded motion replay in {plan.match_id}) "
+        f"for {result.total_ms:.0f} ms across {len(result.tracked)} samples"
+    )
+
+
+def challenge_evidence(result: ChallengeResult, profile) -> dict:
+    """A followed planned challenge, as evidence: the challenge it binds to, by id, plan digest and
+    commitment; its window; what was counted; the knowledge it needed; the bar."""
+    plan = result.plan
+    return {
+        "challenge": {
+            "challenge_id": plan.challenge_id,
+            "origin": PLANNED_ORIGIN,
+            "type": plan.challenge_type,
+            "version": plan.version,
+            "commitment": plan.commitment,
+            "plan": plan.digest,
+            "window": {"start_ms": plan.start_ms, "end_ms": plan.end_ms},
+        },
+        "linkage": "challenge_id",
+        "scope": "challenge",  # this challenge's own samples; never added to another challenge's
+        "eligible_samples": result.eligible,
+        "tracked_samples": len(result.tracked),
+        "total_ms": result.total_ms,
+        "knowledge": _knowledge(plan.spec, profile),
+        "thresholds": {"min_samples": profile.hidden_track_min_samples, "min_total_ms": profile.hidden_track_min_ms},
+    }
+
+
+def challenge_context(result: ChallengeResult, results: Iterable[ChallengeResult]) -> dict:
+    """Why it counted, what was left out, and the player's other challenges in this run. Not identity."""
+    series: dict[str, int] = {}
+    for other in results:
+        if other.plan is not None and other.plan.subject_id == result.plan.subject_id:
+            series[other.status] = series.get(other.status, 0) + 1
+    return {
+        "knowledge": {
+            **result.knowledge.to_dict(),
+            "basis": f"challenge_track_ms on events naming {result.challenge_id}; {result.plan.spec.name} defeats {', '.join(result.plan.spec.defeats)}",
+            "not_counted": dict(sorted(result.not_counted.items())),
+        },
+        "series": {"planned": sum(series.values()), **dict(sorted(series.items()))},
+    }
+
+
+def case_problems(case: Mapping, registry: ChallengeRegistry) -> list[str]:
+    """Does each planned challenge finding in a serialized case match its public plan? Checks the id,
+    plan digest, commitment, type, version, window, match and player. Needs no secret."""
+    problems = []
+    for obs in (case.get("evidence") or {}).get("observations") or []:
+        if obs.get("family") != "challenge":
+            continue
+        claim = (obs.get("evidence") or {}).get("challenge") or {}
+        if claim.get("origin") != PLANNED_ORIGIN:
+            continue
+        name = claim.get("challenge_id")
+        plan = registry.get(name) if isinstance(name, str) else None
+        if plan is None:
+            problems.append(f"{case.get('player_id')}: {name} is in no plan given")
+            continue
+        expected = {
+            "commitment": plan.commitment,
+            "plan": plan.digest,
+            "type": plan.challenge_type,
+            "version": plan.version,
+            "window": {"start_ms": plan.start_ms, "end_ms": plan.end_ms},
+        }
+        for key, value in expected.items():
+            if claim.get(key) != value:
+                problems.append(f"{case.get('player_id')}: {name} {key} does not match its plan")
+        if obs.get("subject_id") != plan.subject_id or case.get("player_id") != plan.subject_id:
+            problems.append(f"{case.get('player_id')}: {name} was planned for another player")
+        if list(obs.get("match_ids") or []) != [plan.match_id]:
+            problems.append(f"{case.get('player_id')}: {name} is cited for other matches than its plan's")
+    return problems

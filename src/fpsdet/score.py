@@ -26,7 +26,18 @@ import math
 
 from .baseline import CohortTable, Dist, cohort_is_thick, sample_std
 from .evidence import KINDS, Observation
-from .challenge import ChallengeRegistry, challenge_notes, evaluate_challenges
+from .challenge import (
+    FOLLOWED,
+    ChallengeRegistry,
+    challenge_context,
+    challenge_evidence,
+    challenge_line,
+    challenge_notes,
+    evaluate_challenges,
+    legacy_challenge_id,
+    legacy_context,
+    legacy_evidence,
+)
 from .knowledge import FUTURE_CHANNELS, presentation, private_knowledge
 from .models import (
     ACTIONS,
@@ -340,8 +351,6 @@ def _knowledge_context(kind: str, weapon: WeaponSummary, profile: GameProfile) -
             "counted_recent_perception": dict(sorted(weapon.hidden_recent.items())),
             "not_counted": skipped,
         }
-    if kind == "private_replay":
-        return {**private_knowledge(profile).to_dict(), "basis": "private_track_ms: placed where this client's line-of-sight and audio queries fail", "not_counted": skipped}
     if kind == "quiet_aim":
         return {
             "knowable": "the enemy was seen or heard at the shot",
@@ -496,7 +505,12 @@ def assess_player(
             physics = True
             reasons.append(private[0])
             fired("private_replay")
-            observe("private_replay", "review", private[0], "reasons", private[1], key=key, match_ids=where, context={"knowledge": _knowledge_context("private_replay", weapon, profile)})
+            # The legacy field, read as an occluded motion replay with no plan: same bar, same reason.
+            observe(
+                "occluded_motion_replay", "review", private[0], "reasons", legacy_evidence(key, private[1], profile),
+                key=legacy_challenge_id(key), match_ids=where,
+                context=legacy_context(private_knowledge(profile), weapon.knowledge_skipped.get("private_replay", {})),
+            )
         wire = wire_finding(weapon, profile)
         if wire:
             physics = True
@@ -863,8 +877,19 @@ def assess_player(
             observations.append(line)
             observe("supporting_extra", "supporting", line, "observations", declared, key=extra.group_key)
 
-    observations.extend(_knowledge_notes(record, profile))
     results, unlinked = evaluate_challenges(record.player_id, record.match_ids, record.challenge_samples, challenges, profile)
+    for result in results:
+        if result.status != FOLLOWED:
+            continue
+        physics = True
+        line = challenge_line(result)
+        reasons.append(line)
+        fired("private_replay")
+        observe(
+            "occluded_motion_replay", "review", line, "reasons", challenge_evidence(result, profile),
+            key=result.challenge_id, match_ids=[result.plan.match_id], context=challenge_context(result, results),
+        )
+    observations.extend(_knowledge_notes(record, profile))
     observations.extend(challenge_notes(results, unlinked))
     identity, identity_text, identity_facts, jumped = _identity(record, history, profile)
     if identity:

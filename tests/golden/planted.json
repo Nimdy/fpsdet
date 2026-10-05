@@ -2878,25 +2878,51 @@
         ],
         "status": "unknowable"
        },
+       "legacy": "private_track_ms names no challenge: there is no plan, window or commitment, and time from every match on this aim key adds up",
        "line": "rifle aim stayed on a private replay for 1600 ms across 20 shots",
        "printed_in": "reasons"
       },
       "depends_on": [],
       "evidence": {
-       "shots": 20,
+       "challenge": {
+        "challenge_id": "legacy_private_replay:rifle",
+        "commitment": null,
+        "origin": "legacy_private_replay",
+        "plan": null,
+        "type": "occluded_motion_replay",
+        "version": null,
+        "window": null
+       },
+       "eligible_samples": null,
+       "knowledge": {
+        "defeated": [
+         "vision",
+         "audio"
+        ],
+        "not_applicable": [
+         "recent_perception"
+        ],
+        "required": [
+         "vision",
+         "audio"
+        ]
+       },
+       "linkage": "private_track_ms",
+       "scope": "aim_key",
        "thresholds": {
-        "min_shots": 8,
+        "min_samples": 8,
         "min_total_ms": 1200.0
        },
-       "total_ms": 1600.0
+       "total_ms": 1600.0,
+       "tracked_samples": 20
       },
-      "family": "information",
-      "key": "rifle",
-      "kind": "private_replay",
+      "family": "challenge",
+      "key": "legacy_private_replay:rifle",
+      "kind": "occluded_motion_replay",
       "match_ids": [
        "m1"
       ],
-      "observation_id": "obs-952d9e164294a9c5fa31861a",
+      "observation_id": "obs-d6b0a455423d666f8428468e",
       "role": "review",
       "source": "fpsdet",
       "subject_id": "replay-lock"

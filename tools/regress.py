@@ -244,6 +244,16 @@ def _same_items(a: list, b: list) -> bool:
     return sorted(json.dumps(x, sort_keys=True) for x in a) == sorted(json.dumps(x, sort_keys=True) for x in b)
 
 
+# Deliberate identity migrations: an old (kind, key) and the (kind, key) the same finding has now.
+# P4: the private replay became an occluded motion replay in the challenge family.
+MIGRATED = {"private_replay": lambda key: ("occluded_motion_replay", f"legacy_private_replay:{key}")}
+
+
+def _finding(obs: dict) -> tuple[str, str]:
+    move = MIGRATED.get(obs["kind"])
+    return move(obs["key"]) if move else (obs["kind"], obs["key"])
+
+
 def classify(old: dict, new: dict) -> list[str]:
     """Why a case moved between two snapshots, by field. Floats are compared at 10 significant digits."""
     old, new = canon(old), canon(new)
@@ -253,8 +263,25 @@ def classify(old: dict, new: dict) -> list[str]:
     before = old.get("evidence") or {}
     after = new.get("evidence") or {}
     old_obs, new_obs = before.get("observations") or [], after.get("observations") or []
-    kinds = lambda rows: sorted((obs["kind"], obs["key"]) for obs in rows)
+    kinds = lambda rows: sorted(_finding(obs) for obs in rows)
     old_kinds, new_kinds = kinds(old_obs), kinds(new_obs)
+    migrated = {_finding(obs) for obs in old_obs if obs["kind"] in MIGRATED} & set(new_kinds)
+    if migrated:
+        found.append("observation-migrated-to-challenge")
+        now = {(obs["kind"], obs["key"]): obs for obs in new_obs}
+        for obs in old_obs:
+            if _finding(obs) not in migrated:
+                continue
+            after_obs = now[_finding(obs)]
+            same = (
+                obs["role"] == after_obs["role"]
+                and obs["match_ids"] == after_obs["match_ids"]
+                and obs["evidence"]["shots"] == after_obs["evidence"]["tracked_samples"]
+                and obs["evidence"]["total_ms"] == after_obs["evidence"]["total_ms"]
+                and obs["context"]["line"] == after_obs["context"]["line"]
+            )
+            if not same:
+                found.append("migrated-finding-values-changed")
     if [k for k in new_kinds if k not in old_kinds] or len(new_kinds) > len(old_kinds):
         found.append("finding-added")
     if [k for k in old_kinds if k not in new_kinds] or len(old_kinds) > len(new_kinds):
@@ -275,8 +302,8 @@ def classify(old: dict, new: dict) -> list[str]:
         if sorted(old_ids) == sorted(new_ids):
             found.append("observation-order-only")
         else:
-            moved = {(o["kind"], o["key"]) for o in old_obs} ^ {(o["kind"], o["key"]) for o in new_obs}
-            changed = [o for o in new_obs if o["observation_id"] not in old_ids]
+            moved = {_finding(o) for o in old_obs} ^ {_finding(o) for o in new_obs}
+            changed = [o for o in new_obs if o["observation_id"] not in old_ids and (o["kind"], o["key"]) not in migrated]
             if any(o["kind"] in ("leftover", "voice") for o in changed):
                 found.append("relationship-changed")
             if any(o["kind"] not in ("leftover", "voice") for o in changed) and not moved:
