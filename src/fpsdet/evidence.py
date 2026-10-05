@@ -197,6 +197,7 @@ def evidence_block(
     observations: Iterable[Observation],
     compared: Iterable[tuple[str, str]],
     provenance: Mapping | None = None,
+    challenges: list | None = None,
 ) -> dict:
     """``case["evidence"]``. ``compared`` lists each (metric, key) the scorer measured against a thick cohort.
 
@@ -204,13 +205,18 @@ def evidence_block(
     nobody could compare and a player who was compared and passed both have no finding.
     ``provenance`` (fpsdet.provenance) names the detector code and parsed profile that produced the
     observations, or is null for a case scored outside a run. It is not part of any observation id.
+    ``challenges`` is one result per challenge the player was given or named, followed or not
+    (fpsdet.challenge). The key is there only when there is one.
     """
-    return {
+    block = {
         "version": EVIDENCE_VERSION,
         "observations": [obs.to_dict() for obs in observations],
         "eligibility": {"compared": [{"metric": metric, "key": key} for metric, key in sorted(set(compared))]},
         "provenance": None if provenance is None else json.loads(canonical_json(provenance)),
     }
+    if challenges:
+        block["challenges"] = [_clean(result, "challenges") for result in challenges]
+    return block
 
 
 def _unit(obs: dict) -> str:

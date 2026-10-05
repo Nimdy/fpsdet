@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .baseline import CohortTable, build_cohorts
+from .challenge import ChallengeRegistry
 from .models import Case, Event, GameProfile, HistoryWindow
 from .provenance import stamp
 from .score import annotate_batch, assess_player, history_for
@@ -21,6 +22,7 @@ def run_score(
     cohort: CohortTable | None = None,
     history: list[HistoryWindow] | None = None,
     reports: dict[str, int] | None = None,
+    challenges: ChallengeRegistry | None = None,
 ) -> list[Case]:
     # One canonical timeline per player, built once: the scorer reads it and the input digest binds it.
     timelines = player_timelines(events)
@@ -36,6 +38,7 @@ def run_score(
             profile,
             history or [],
             report_map.get(record.player_id, 0),
+            challenges,
         )
         if in_file:
             case.observations.append(IN_FILE_NOTE)

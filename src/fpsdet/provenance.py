@@ -58,6 +58,7 @@ PACKAGE_DIR = Path(__file__).resolve().parent
 DETECTOR_MODULES = (
     "fpsdet",  # __init__.py runs on every import of the package, so it is part of what runs
     "fpsdet.baseline",
+    "fpsdet.challenge",
     "fpsdet.evidence",
     "fpsdet.knowledge",
     "fpsdet.models",
@@ -89,7 +90,6 @@ NOT_DETECTOR = {
     "fpsdet.pages": "the public site",
     "fpsdet.synthetic": "the planted demo players",
     "fpsdet.week": "the synthetic week",
-    "fpsdet.challenge": "challenge types and public plan records; only the planning commands read them so far",
     "fpsdet.challenge_plan": "plans challenges with the server secret; detection never imports it, so scoring never needs the secret",
 }
 # GameProfile fields the scorer never reads. Editing them changes no detection.

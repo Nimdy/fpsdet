@@ -26,10 +26,11 @@ from __future__ import annotations
 import hashlib
 import re
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .evidence import canonical_json
-from .knowledge import CHANNEL_ABSENT, CHANNEL_NOT_APPLICABLE, KnowledgeState, resolve
+from .knowledge import CHANNEL_ABSENT, CHANNEL_NOT_APPLICABLE, UNKNOWABLE, KnowledgeState, resolve, shot_knowledge
+from .statsutil import exact_sum
 
 # The domain prefix of every keyed derivation (fpsdet.challenge_plan). A new prefix is a new recipe.
 DERIVATION_RECIPE = "fpsdet.challenge/1"
@@ -45,6 +46,8 @@ PLAN_FILE_FORMAT = "fpsdet.challenge-plans/1"
 MAX_PER_MATCH = 4
 
 CHALLENGE_ID = re.compile(r"ch-[0-9a-f]{24}")
+# What an event may carry in challenge_id. Planned ids are narrower; anything else is reported as unplanned.
+EVENT_CHALLENGE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
 NONCE = re.compile(r"[0-9a-f]{16,64}")
 _DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 
@@ -413,3 +416,205 @@ class ChallengeRegistry:
 
     def __len__(self) -> int:
         return len(self._plans)
+
+
+# Linking responses to challenges. An event answers a challenge when it carries challenge_id. Its
+# challenge_track_ms is the time, since the previous event that named the same challenge (or since the
+# window opened), that the aim cone contained that challenge's body. Nothing else is read as a response:
+# private_track_ms on an event that names a challenge is not, and challenge time with no id is not.
+
+
+@dataclass(frozen=True, slots=True)
+class ChallengeSample:
+    """One event's claim about one challenge, read from the player's timeline."""
+
+    challenge_id: str | None
+    match_id: str
+    t_ms: int
+    track_ms: float | None
+    # When the event's own enemy could explain the aim, why: seen, heard, recent, unchecked or conflict.
+    # Empty when the event names no enemy, or that enemy was unknowable too.
+    competing: str
+
+
+def _competing(event, profile) -> str:
+    """Could a real enemy on this same event explain the aim? A challenge target is never one the client
+    could know. If the event's own enemy was seen, heard or recently perceived, aim on it explains the
+    sample; if the server named an enemy without saying whether this client could know it, nothing rules
+    that out either."""
+    if (
+        event.enemy_id is None
+        and event.information_state is None
+        and event.vision_state is None
+        and event.audio_state is None
+        and event.since_perceived_ms is None
+    ):
+        return ""
+    known = shot_knowledge(event, profile)
+    return "" if known.status == UNKNOWABLE else known.cause
+
+
+def challenge_samples(events: Iterable, profile) -> list[ChallengeSample]:
+    """Every event that names a challenge or carries challenge time, in the order given (a timeline)."""
+    return [
+        ChallengeSample(event.challenge_id, event.match_id, event.t_ms, event.challenge_track_ms, _competing(event, profile))
+        for event in events
+        if event.challenge_id is not None or event.challenge_track_ms is not None
+    ]
+
+
+FOLLOWED = "followed"
+NOT_FOLLOWED = "not_followed"
+ABSTAINED = "abstained"
+NO_SAMPLES = "no_samples"
+UNPLANNED = "unplanned"
+
+
+@dataclass
+class ChallengeResult:
+    """What one challenge showed for one player. Kept per challenge: two challenges are two results."""
+
+    challenge_id: str
+    plan: ChallengePlan | None
+    status: str = NO_SAMPLES
+    cause: str = ""  # why it abstained
+    eligible: int = 0  # moments in the window with one agreed measurement, counted or not
+    tracked: list[float] = field(default_factory=list)  # the time each counted moment added
+    not_counted: dict[str, int] = field(default_factory=dict)
+    knowledge: KnowledgeState | None = None
+
+    @property
+    def total_ms(self) -> float:
+        return exact_sum(self.tracked)
+
+    def to_dict(self) -> dict:
+        out = {
+            "challenge_id": self.challenge_id,
+            "plan": None if self.plan is None else self.plan.digest,
+            "match_id": None if self.plan is None else self.plan.match_id,
+            "status": self.status,
+            "eligible_samples": self.eligible,
+            "tracked_samples": len(self.tracked),
+            "total_ms": self.total_ms,
+            "not_counted": dict(sorted(self.not_counted.items())),
+        }
+        if self.cause:
+            out["cause"] = self.cause
+        return out
+
+
+def _skip(result: ChallengeResult, cause: str, n: int = 1) -> None:
+    result.not_counted[cause] = result.not_counted.get(cause, 0) + n
+
+
+def _moments(rows: list[ChallengeSample]):
+    start = 0
+    while start < len(rows):
+        end = start + 1
+        while end < len(rows) and (rows[end].match_id, rows[end].t_ms) == (rows[start].match_id, rows[start].t_ms):
+            end += 1
+        yield rows[start:end]
+        start = end
+
+
+def _judge(result: ChallengeResult, rows: list[ChallengeSample], plan: ChallengePlan, profile) -> None:
+    state = challenge_knowledge(plan.spec, profile)
+    result.knowledge = state
+    previous = plan.start_ms
+    for moment in _moments(rows):
+        first = moment[0]
+        if first.match_id != plan.match_id:
+            _skip(result, "other_match", len(moment))
+            continue
+        if not plan.start_ms <= first.t_ms <= plan.end_ms:
+            _skip(result, "outside_window", len(moment))
+            continue
+        # Every moment in the window that names the challenge restarts the clock, measured or not, so a
+        # value can only be cut by it, never stretched.
+        window = first.t_ms - previous
+        previous = first.t_ms
+        claims = [sample for sample in moment if sample.track_ms is not None]
+        if not claims:
+            _skip(result, "no_measurement", len(moment))
+            continue
+        if len({(sample.track_ms, sample.competing) for sample in claims}) != 1:
+            # Events at one moment are one aim. When they disagree, nothing says which is right.
+            _skip(result, "disagreed")
+            continue
+        result.eligible += 1
+        value = min(claims[0].track_ms, window)
+        if not value > 0:
+            continue
+        if claims[0].competing:
+            _skip(result, claims[0].competing)
+        elif state.status != UNKNOWABLE:
+            _skip(result, state.cause)
+        else:
+            result.tracked.append(value)
+    if state.status != UNKNOWABLE:
+        result.status, result.cause = ABSTAINED, state.cause
+    elif len(result.tracked) >= profile.hidden_track_min_samples and result.total_ms >= profile.hidden_track_min_ms:
+        result.status = FOLLOWED
+    else:
+        result.status = NOT_FOLLOWED if result.eligible else NO_SAMPLES
+
+
+def evaluate_challenges(
+    subject_id: str,
+    match_ids: Iterable[str],
+    samples: list[ChallengeSample],
+    registry: ChallengeRegistry | None,
+    profile,
+) -> tuple[list[ChallengeResult], int]:
+    """One result per challenge this player named or was planned in the matches scored, by id; and how
+    many events carried challenge time with no challenge id.
+
+    A sample counts only when its challenge is planned for this player, in this match, inside its
+    window; it is the one agreed measurement at its moment; no real enemy on the same event explains
+    it; and the challenge's target was unknowable to this client. The bar is the hidden-mover bar, on
+    each challenge alone: samples from different challenges never add up.
+    """
+    rows: dict[str, list[ChallengeSample]] = {}
+    unlinked = 0
+    for sample in samples:
+        if sample.challenge_id is None:
+            unlinked += 1
+        else:
+            rows.setdefault(sample.challenge_id, []).append(sample)
+    if registry is not None:
+        scored = set(match_ids)
+        for plan in registry.for_subject(subject_id):
+            if plan.match_id in scored:
+                rows.setdefault(plan.challenge_id, [])
+    results = []
+    for challenge_id in sorted(rows):
+        plan = None if registry is None else registry.get(challenge_id)
+        result = ChallengeResult(challenge_id, plan)
+        if plan is None:
+            result.status = UNPLANNED
+            _skip(result, "unplanned", len(rows[challenge_id]))
+        elif plan.subject_id != subject_id:
+            result.status, result.cause = ABSTAINED, "other_subject"
+            _skip(result, "other_subject", len(rows[challenge_id]))
+        else:
+            _judge(result, rows[challenge_id], plan, profile)
+        results.append(result)
+    return results, unlinked
+
+
+def challenge_notes(results: list[ChallengeResult], unlinked: int) -> list[str]:
+    """Challenge telemetry fpsdet could not read, said once, so the operator can fix the emitter or the plans."""
+    notes = []
+    if unlinked:
+        notes.append(f"{unlinked} events carried challenge_track_ms with no challenge_id. They were not read; check the emitter.")
+    unplanned = [result for result in results if result.status == UNPLANNED]
+    if unplanned:
+        events = sum(result.not_counted.get("unplanned", 0) for result in unplanned)
+        notes.append(
+            f"{events} events named {len(unplanned)} challenges this run has no plan for. They were not read; "
+            "score with the plan files (--challenges)."
+        )
+    foreign = sum(1 for result in results if result.cause == "other_subject")
+    if foreign:
+        notes.append(f"{foreign} challenges named on this player's events were planned for another player. They were not read.")
+    return notes

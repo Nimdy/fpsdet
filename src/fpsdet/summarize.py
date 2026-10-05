@@ -20,6 +20,7 @@ from .models import (
     higher_band,
     weight_class_name,
 )
+from .challenge import challenge_samples
 from .knowledge import UNKNOWABLE, KNOWN, presentation, private_knowledge, shot_knowledge, tracked_knowledge
 from .parse import aim_key, recoil_floor_for
 from .timeline import player_timelines, same_time_groups, timeline
@@ -209,7 +210,8 @@ def _track_times(shots: list[Event], profile: GameProfile) -> tuple[dict[int, fl
                     skipped[id(shot)] = ("hidden", known.cause)
         elif claims and any(ev.hidden_track_ms > 0 for ev in claims):
             skipped[id(claims[0])] = ("hidden", "disagreed")
-        claims = [ev for ev in moment if ev.private_track_ms is not None]
+        # The legacy field, on events that name no challenge. On one that does, only challenge_track_ms is read.
+        claims = [ev for ev in moment if ev.private_track_ms is not None and ev.challenge_id is None]
         if claims and len({ev.private_track_ms for ev in claims}) == 1:
             value = _windowed(claims[0].private_track_ms, window)
             if value is not None:
@@ -463,6 +465,7 @@ def _summarize_timeline(player_id: str, events: list[Event], profile: GameProfil
     record.speed = analyze_speed(events, profile)
     record.recoils = _recoil_summaries(events, profile, band)
     record.extras = _extras(events, profile)
+    record.challenge_samples = challenge_samples(events, profile)
     for event in events:
         record.match_ids.add(event.match_id)
         if event.party_id:

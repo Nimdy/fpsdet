@@ -2,7 +2,8 @@
 
 LegacyPrivateReplaySemanticsTest was written before the challenge engine (P4, phase C0) to pin what the
 private replay did, from the event field to the case: how ``private_track_ms`` is parsed, cut and agreed
-on, the bar, the reason, the observation and the seal.
+on, the bar, the reason, the observation and the seal. The engine keeps all of it for events that name no
+challenge. It no longer reads ``private_track_ms`` on an event that names one.
 
 Every secret here is drawn fresh with os.urandom when the test runs, except TEST_VECTOR_KEY: the bytes
 0 to 31, public, used only to pin the derivation recipe so it cannot drift without a failing test.
@@ -157,9 +158,10 @@ class LegacyPrivateReplaySemanticsTest(unittest.TestCase):
         # Under 40 shots, aim is not scored, and the replay still is.
         self.assertIn("rifle: 11 shots, need 40 before aim is scored", case["observations"])
 
-    def test_the_field_names_no_target(self):
-        # Two replays in one match, or a replay and an ordinary hidden enemy, cannot be told apart.
-        self.assertNotIn("challenge_id", {name for name in Event.__slots__})
+    def test_the_legacy_field_names_no_target(self):
+        # Two replays in one match, or a replay and an ordinary hidden enemy, cannot be told apart in it.
+        # Since the challenge engine a response names its challenge in challenge_id instead
+        # (ChallengeLinkageTest); this field is still read as it was, on events that name no challenge.
         (record,) = summarize([shot(0, private_track_ms=80.0, enemy_id="e1", information_state="visible")], GAME)
         self.assertEqual(record.weapons[0].private_track_ms, [80.0])
 
@@ -562,6 +564,179 @@ class PlanOutputLeakTest(unittest.TestCase):
         (spec,) = json.loads(printed)
         self.assertEqual((spec["challenge_type"], spec["defeats"]), ("occluded_motion_replay", ["vision", "audio"]))
         self.assertTrue(spec["capability"]["limits"])
+
+
+def plan_for(subject: str = "x", match: str = "m1", count: int = 1, profile=GAME, secret: ServerSecret | None = None):
+    """A real plan from a fresh secret, for one player in one match, with its windows wherever they fell."""
+    secret = secret or fresh()[1]
+    return plan_match(secret, profile, match, [subject], Budget(to_ms=1_500_000, count=count), nonce=os.urandom(16).hex())
+
+
+def follow(plan: ChallengePlan, n: int = 20, every: int = 100, track: float | None = None, pid: str | None = None,
+           offset: int = 0, kind: str = "shot", **fields) -> list[Event]:
+    """n events every `every` ms from the window's start (plus offset), each naming the challenge."""
+    rows = []
+    for index in range(1, n + 1):
+        values = {"challenge_id": plan.challenge_id, "challenge_track_ms": float(every if track is None else track), **fields}
+        rows.append(shot(plan.start_ms + offset + index * every, pid=pid or plan.subject_id, match=plan.match_id, event_type=kind, **values))
+    return rows
+
+
+def scored_with(events: list[Event], files=(), profile=GAME, pid: str = "x") -> dict:
+    registry = ChallengeRegistry.from_files(files) if files is not None else None
+    return next(case_to_dict(case) for case in run_score(events, profile, challenges=registry) if case.player_id == pid)
+
+
+def results_of(case: dict) -> dict[str, dict]:
+    return {row["challenge_id"]: row for row in case["evidence"].get("challenges", [])}
+
+
+class ChallengeLinkageTest(unittest.TestCase):
+    """A response counts only for the exact challenge it names, planned for this player, in its match and window."""
+
+    def test_a_followed_challenge_is_one_result(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        result = results_of(scored_with(follow(plan), [planned]))[plan.challenge_id]
+        self.assertEqual(result["status"], "followed")
+        self.assertEqual((result["eligible_samples"], result["tracked_samples"], result["total_ms"]), (20, 20, 2000.0))
+        self.assertEqual((result["plan"], result["match_id"], result["not_counted"]), (plan.digest, "m1", {}))
+
+    def test_time_is_cut_to_the_previous_naming_event_and_to_the_window(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        events = follow(plan, n=10, every=30, track=300.0)
+        (record,) = summarize(events, GAME)
+        from fpsdet.challenge import evaluate_challenges
+
+        (result,), _ = evaluate_challenges("x", {"m1"}, record.challenge_samples, ChallengeRegistry(planned.plans), GAME)
+        self.assertEqual(result.tracked, [30.0] * 10)  # the first one too: 30 ms since the window opened
+
+    def test_outside_the_window_does_not_count(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        early = follow(plan, n=5, offset=-1000)  # the window opens after these
+        late = [dataclasses.replace(event, t_ms=plan.end_ms + 1 + i) for i, event in enumerate(follow(plan, n=5))]
+        result = results_of(scored_with(early + late, [planned]))[plan.challenge_id]
+        self.assertEqual(result["not_counted"], {"outside_window": 10})
+        self.assertEqual((result["status"], result["tracked_samples"]), ("no_samples", 0))
+
+    def test_an_unknown_challenge_is_unplanned_and_noted(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        for files in (None, [], [plan_for(match="m9")]):
+            with self.subTest(files=files):
+                case = scored_with(follow(plan), files)
+                result = results_of(case)[plan.challenge_id]
+                self.assertEqual((result["status"], result["plan"], result["tracked_samples"]), ("unplanned", None, 0))
+                self.assertEqual(result["not_counted"], {"unplanned": 20})
+                self.assertTrue(any("no plan for" in line for line in case["observations"]))
+
+    def test_a_challenge_planned_for_another_player_is_not_read(self):
+        planned = plan_for(subject="someone-else")
+        (plan,) = planned.plans
+        case = scored_with(follow(plan, pid="x"), [planned])
+        result = results_of(case)[plan.challenge_id]
+        self.assertEqual((result["status"], result["cause"], result["tracked_samples"]), ("abstained", "other_subject", 0))
+        self.assertTrue(any("planned for another player" in line for line in case["observations"]))
+
+    def test_a_stale_id_from_another_match_is_not_read(self):
+        planned = plan_for(match="m1")
+        (plan,) = planned.plans
+        stale = [dataclasses.replace(event, match_id="m2") for event in follow(plan)]
+        result = results_of(scored_with(stale, [planned]))[plan.challenge_id]
+        self.assertEqual(result["not_counted"], {"other_match": 20})
+        self.assertEqual(result["tracked_samples"], 0)
+
+    def test_duplicates_count_once_and_disagreement_counts_nothing(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        events = follow(plan, n=10)
+        doubled = events + [dataclasses.replace(event) for event in events]
+        result = results_of(scored_with(doubled, [planned]))[plan.challenge_id]
+        self.assertEqual((result["eligible_samples"], result["tracked_samples"]), (10, 10))
+        torn = events + [dataclasses.replace(event, challenge_track_ms=50.0) for event in events[:4]]
+        result = results_of(scored_with(torn, [planned]))[plan.challenge_id]
+        self.assertEqual((result["tracked_samples"], result["not_counted"]), (6, {"disagreed": 4}))
+
+    def test_challenge_time_with_no_id_is_not_read(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        events = [dataclasses.replace(event, challenge_id=None) for event in follow(plan)]
+        case = scored_with(events, [planned])
+        self.assertEqual(results_of(case)[plan.challenge_id]["status"], "no_samples")
+        self.assertTrue(any("with no challenge_id" in line for line in case["observations"]))
+
+    def test_the_legacy_field_is_not_read_on_an_event_that_names_a_challenge(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        events = [dataclasses.replace(event, challenge_track_ms=None, private_track_ms=200.0) for event in follow(plan)]
+        (record,) = summarize(events, GAME)
+        self.assertEqual(record.weapons[0].private_track_ms, [])
+        result = results_of(scored_with(events, [planned]))[plan.challenge_id]
+        self.assertEqual((result["tracked_samples"], result["not_counted"]), (0, {"no_measurement": 20}))
+
+    def test_a_real_enemy_the_client_could_know_explains_the_sample(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        cases = {
+            "seen": {"enemy_id": "e1", "information_state": "visible"},
+            "heard": {"enemy_id": "e1", "information_state": "audio"},
+            "recent": {"enemy_id": "e1", "information_state": "unknowable", "since_perceived_ms": 200.0},
+            "unchecked": {"enemy_id": "e1"},
+            "conflict": {"enemy_id": "e1", "information_state": "visible", "vision_state": "absent"},
+        }
+        for cause, fields in cases.items():
+            with self.subTest(cause):
+                result = results_of(scored_with(follow(plan, **fields), [planned]))[plan.challenge_id]
+                self.assertEqual((result["tracked_samples"], result["not_counted"]), (0, {cause: 20}))
+                self.assertEqual(result["status"], "not_followed")
+        hidden = follow(plan, enemy_id="e1", information_state="unknowable", since_perceived_ms=5000.0)
+        self.assertEqual(results_of(scored_with(hidden, [planned]))[plan.challenge_id]["status"], "followed")
+
+    def test_a_declared_channel_the_challenge_does_not_defeat_abstains(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        for channel in ("radar", "team_share", "ability", "recent_perception"):
+            with self.subTest(channel):
+                profile = dataclasses.replace(GAME, knowledge_channels=("vision", "audio", channel))
+                result = results_of(scored_with(follow(plan), [planned], profile))[plan.challenge_id]
+                if channel == "recent_perception":  # never perceivable: not applicable, so still unknowable
+                    self.assertEqual(result["status"], "followed")
+                    continue
+                self.assertEqual((result["status"], result["cause"], result["tracked_samples"]), ("abstained", "unchecked", 0))
+                self.assertEqual(result["not_counted"], {"unchecked": 20})
+
+    def test_a_planned_challenge_with_no_response_is_listed(self):
+        planned = plan_for(count=2)
+        first, second = planned.plans
+        elsewhere = plan_for(match="m7")
+        case = scored_with(follow(first), [planned, elsewhere])
+        results = results_of(case)
+        self.assertEqual(sorted(results), sorted([first.challenge_id, second.challenge_id]))
+        self.assertEqual(results[second.challenge_id]["status"], "no_samples")
+
+    def test_movement_samples_count_like_shots(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        events = follow(plan, kind="movement")
+        self.assertEqual(results_of(scored_with(events, [planned]))[plan.challenge_id]["status"], "followed")
+
+    def test_no_challenge_telemetry_and_no_plan_here_no_block(self):
+        for files in (None, [plan_for(match="m9")], [plan_for(subject="y")]):
+            with self.subTest(files=files):
+                case = scored_with([shot(i * 2000) for i in range(5)], files)
+                self.assertNotIn("challenges", case["evidence"])
+
+    def test_parsing(self):
+        base = {"game_id": "g", "match_id": "m", "player_id": "p", "t_ms": 1}
+        event = parse_event({**base, "challenge_id": "ch-0123456789abcdef01234567", "challenge_track_ms": 80})
+        self.assertEqual((event.challenge_id, event.challenge_track_ms), ("ch-0123456789abcdef01234567", 80.0))
+        for bad in ("<script>", "a b", "", "-x", "x" * 129, 7):
+            with self.subTest(bad=bad), self.assertRaises(ParseError):
+                parse_event({**base, "challenge_id": bad})
+        with self.assertRaises(ParseError):
+            parse_event({**base, "challenge_id": "c1", "challenge_track_ms": "80"})
 
 
 def evidence_seal_of(row: dict) -> str:

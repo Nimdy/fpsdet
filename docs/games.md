@@ -22,6 +22,7 @@ Set `"aim_group": "weapon_id"` when guns inside one class are not the same fight
 | `information_state`, `aim_jitter_deg`, `enemy_id` | Whether this client could have known, how noisy the aim was, and which enemy. A bad `unknowable` label manufactures cases. |
 | `hidden_track_ms` | Time on a mover the server had not made visible. |
 | `private_track_ms` | Time on a replay of someone else's movement, placed where this client could not see or hear it. No decoy bit. |
+| `challenge_id`, `challenge_track_ms` | The same, as a planned challenge: which one, and the time on it. See [challenges.md](challenges.md). |
 | `wire_error_deg`, `picture_error_deg`, `interp_delay_ms` | Error to the snapshot just sent, error to the picture the official client draws, and the interpolation delay. Omit any one you cannot measure. |
 | `skill_band` | The queue they entered, so a pub-stomp is a watch and not a fake elite. |
 

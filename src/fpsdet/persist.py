@@ -154,7 +154,12 @@ def _case_fields(case: Case) -> dict:
         "vendor_r": case.vendor_r,
         "inherit_lags_ms": case.inherit_lags_ms,
         "checks": case.checks,
-        "evidence": evidence_block(case.evidence, case.compared_on, case.provenance.to_dict() if case.provenance else None),
+        "evidence": evidence_block(
+            case.evidence,
+            case.compared_on,
+            case.provenance.to_dict() if case.provenance else None,
+            challenges=[result.to_dict() for result in case.challenges],
+        ),
     }
 
 

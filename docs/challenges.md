@@ -149,6 +149,66 @@ fpsdet challenge verify m-1001.plan.json --secret-file /srv/game/challenge.key  
 - **Without the secret,** it checks the format, every record's digest, that every record matches the file's game, match, nonce and type, that the ids are unique, and that the schedule keeps its budget. This shows the file is consistent. It does not show who wrote it.
 - **With the secret,** it derives every record again and reports `reproduced from the secret, N of N`, or, for each record that differs, its id and which field: `challenge_id`, `start_ms`, `end_ms` or `commitment`. It never prints a value that came from the secret. A record edited and digested again passes the public check and fails this one.
 
+## Linking a response to its challenge
+
+While a challenge's window is open, the game server adds two fields to every shot and movement event of that player:
+
+```json
+{"game_id": "your-game", "match_id": "m-1001", "player_id": "p-7", "t_ms": 160200, "event_type": "movement",
+ "challenge_id": "ch-c9822fee5e1a48b270e3a78a", "challenge_track_ms": 100}
+```
+
+- **`challenge_id`** is the planned id. It is server-side telemetry: never send it to the client.
+- **`challenge_track_ms`** is milliseconds, since the previous event that named the same challenge (or since the window opened), that the aim cone contained that challenge's body. Send 0 when the aim was elsewhere: those events are the challenge's eligible samples.
+
+Score with the plans:
+
+```bash
+fpsdet score events.ndjson --profile profiles/your-game.json --challenges m-1001.plan.json
+```
+
+A sample is read only from an event that names its challenge. Nothing is inferred: the legacy `private_track_ms` on an event that names a challenge is not read, and `challenge_track_ms` without a `challenge_id` is not read either. This closes the old ambiguity about which target a time belonged to. Ordinary hidden-enemy fields are never turned into challenge evidence.
+
+A sample counts only when all of these hold:
+
+| Check | Otherwise, recorded as |
+| --- | --- |
+| The challenge is in the plans given to this run | `unplanned` |
+| It was planned for this player | `other_subject` |
+| The event is in the challenge's match | `other_match` |
+| The event is inside the window, ends included | `outside_window` |
+| The event carries `challenge_track_ms` | `no_measurement` |
+| Every event at that moment says the same thing; duplicates count once | `disagreed` |
+| The time is above 0, after it is cut to the time since the previous moment that named the challenge (or since the window opened) | nothing tracked |
+| No real enemy on the same event explains the aim. If the event names one, it must be unknowable | `seen`, `heard`, `recent`, `unchecked`, `conflict` |
+| The challenge's target is unknowable to this client (below) | `unchecked` |
+
+Every gap in the telemetry and every contradiction can only take samples away.
+
+### What the case shows
+
+`evidence.challenges` lists one result per challenge, sorted by id: the challenges this player's events named, and the challenges planned for this player in the matches scored, even with no response. Each result has the challenge id, its plan digest and match, a status, the eligible and tracked samples, the tracked time, and the samples left out by cause:
+
+| Status | Meaning |
+| --- | --- |
+| `followed` | The challenge's own samples clear the bar (below) |
+| `not_followed` | Eligible samples, below the bar |
+| `no_samples` | No eligible sample: no response, or none that could be read |
+| `abstained` | The challenge could not count: its target was not unknowable (`cause: unchecked`), or it was another player's (`cause: other_subject`) |
+| `unplanned` | No plan in this run has this id |
+
+The key is there only when there is a result. The case also says, once, how many events carried challenge time with no id, named unplanned challenges, or named another player's.
+
+## The knowledge requirement
+
+A challenge counts only when the knowledge engine ([knowledge-engine.md](knowledge-engine.md)) says its target was `unknowable` to this client. It does not get around the engine. Each type declares the channels it defeats:
+
+| Type | Defeats | Not applicable | Everything else the profile declares |
+| --- | --- | --- | --- |
+| `occluded_motion_replay`/1 | `vision`, `audio`: placed where this client's line-of-sight and audio queries fail for the whole window, silent | `recent_perception`: the body was never perceivable | `unchecked`, so the target is `unknown` and the challenge abstains |
+
+A game that declares `radar`, `team_share`, `ability`, `objective` or `spectator` gets no challenge evidence from this type. `fpsdet challenge plan` refuses to plan it, and scoring abstains with `cause: unchecked` if a plan exists anyway. Only a future type, or version, that defeats or checks those channels can count there.
+
 ## Gameplay safety
 
 The game server must keep these true for `occluded_motion_replay`. They are in every plan file under `requirements`:

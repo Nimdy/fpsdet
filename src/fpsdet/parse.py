@@ -6,6 +6,7 @@ import json
 from collections.abc import Iterable
 from pathlib import Path
 
+from .challenge import EVENT_CHALLENGE_ID
 from .knowledge import DEFAULT_CHANNELS, EVENT_CHANNEL_STATES, profile_channels
 from .models import (
     BANDS,
@@ -65,6 +66,8 @@ _RESERVED = {
     "party_id",
     "vision_state",
     "audio_state",
+    "challenge_id",
+    "challenge_track_ms",
     "utc",
 }
 
@@ -88,6 +91,13 @@ def _channel_state(obj: dict, key: str) -> str | None:
     if obj[key] not in EVENT_CHANNEL_STATES:
         raise ParseError(f"{key} must be known, absent, or unchecked")
     return obj[key]
+
+
+def _challenge_id(obj: dict) -> str | None:
+    value = _str(obj, "challenge_id")
+    if value is not None and not EVENT_CHALLENGE_ID.fullmatch(value):
+        raise ParseError("challenge_id must be 1 to 128 letters, digits, '.', '_', ':' or '-', starting with a letter or digit")
+    return value
 
 
 def _str(obj: dict, key: str, *, required: bool = False, default: str | None = None) -> str | None:
@@ -196,6 +206,8 @@ def parse_event(obj: dict) -> Event:
         party_id=_str(obj, "party_id"),
         vision_state=_channel_state(obj, "vision_state"),
         audio_state=_channel_state(obj, "audio_state"),
+        challenge_id=_challenge_id(obj),
+        challenge_track_ms=_num(obj, "challenge_track_ms"),
         extras=extras,
     )
 

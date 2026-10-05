@@ -26,6 +26,7 @@ import math
 
 from .baseline import CohortTable, Dist, cohort_is_thick, sample_std
 from .evidence import KINDS, Observation
+from .challenge import ChallengeRegistry, challenge_notes, evaluate_challenges
 from .knowledge import FUTURE_CHANNELS, presentation, private_knowledge
 from .models import (
     ACTIONS,
@@ -406,6 +407,7 @@ def assess_player(
     profile: GameProfile,
     history: list[HistoryWindow] | None = None,
     reports: int = 0,
+    challenges: ChallengeRegistry | None = None,
 ) -> Case:
     history = history or []
     reasons: list[str] = []
@@ -862,6 +864,8 @@ def assess_player(
             observe("supporting_extra", "supporting", line, "observations", declared, key=extra.group_key)
 
     observations.extend(_knowledge_notes(record, profile))
+    results, unlinked = evaluate_challenges(record.player_id, record.match_ids, record.challenge_samples, challenges, profile)
+    observations.extend(challenge_notes(results, unlinked))
     identity, identity_text, identity_facts, jumped = _identity(record, history, profile)
     if identity:
         reasons.append(identity_text)
@@ -899,6 +903,7 @@ def assess_player(
         checks=checks,
         evidence=found,
         compared_on=compared_on,
+        challenges=results,
     )
     case.seal = evidence_seal(case)
     return case

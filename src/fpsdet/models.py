@@ -225,6 +225,9 @@ class Event:
     # Per-channel knowledge of the shot's enemy, when the server reports channels one at a time.
     vision_state: str | None = None
     audio_state: str | None = None
+    # A response to a planned challenge (fpsdet.challenge): which one, and the aim time on its target.
+    challenge_id: str | None = None
+    challenge_track_ms: float | None = None
     extras: dict[str, float] = field(default_factory=dict)
 
     @property
@@ -329,6 +332,8 @@ class PlayerRecord:
     match_ids: set[str] = field(default_factory=set)
     party_ids: set[str] = field(default_factory=set)
     notes: list[str] = field(default_factory=list)
+    # Every event that named a challenge or carried challenge time, in timeline order (fpsdet.challenge).
+    challenge_samples: list = field(default_factory=list)
 
 
 @dataclass
@@ -386,6 +391,8 @@ class Case:
     compared_on: list[tuple[str, str]] = field(default_factory=list)
     # What produced the evidence: the run's detector, profile and cohort, shared, and this player's own inputs.
     provenance: CaseProvenance | None = None
+    # One result per challenge this player was given or named, followed or not (fpsdet.challenge.ChallengeResult).
+    challenges: list = field(default_factory=list)
     limits: str = (
         "This case is evidence for a person. It is not a ban. "
         "A sustained gear-rule break or a result past the best measured humans "

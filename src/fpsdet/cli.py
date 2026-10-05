@@ -251,10 +251,16 @@ def cmd_score(args: argparse.Namespace) -> int:
             print(f"- {alarm}", file=sys.stderr)
     history = history_from_dict(read_json(args.history)) if args.history else []
     reports = load_reports(read_json(args.reports)) if args.reports else {}
+    challenges = None
+    if args.challenges:
+        try:
+            challenges = ChallengeRegistry.from_files(plan_file_from_dict(read_json(path), path) for path in args.challenges)
+        except ChallengeError as error:
+            raise SystemExit(str(error))
     if args.reported_only:
         wanted = {pid for pid, count in reports.items() if count > 0}
         events = [event for event in events if event.player_id in wanted]
-    cases = run_score(events, profile, cohort, history, reports)
+    cases = run_score(events, profile, cohort, history, reports, challenges)
     _print_cases(cases)
     if args.out:
         table = cohort if cohort is not None else build_cohorts(summarize(events, profile), profile)
@@ -413,6 +419,7 @@ def build_parser() -> argparse.ArgumentParser:
     score.add_argument("--history")
     score.add_argument("--reports", help="JSON map of player_id to report count. Priority, not proof.")
     score.add_argument("--reported-only", action="store_true", help="Only score players who have reports")
+    score.add_argument("--challenges", action="append", help="A public challenge plan file. Repeat for more matches")
     score.add_argument("--out")
     score.add_argument("--ai", action="store_true", help="Attach a brief from any OpenAI-compatible endpoint")
     score.set_defaults(func=cmd_score)
