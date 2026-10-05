@@ -1034,6 +1034,8 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
         for case in cases
         if case.decision == "review" and any("hidden mover" in reason for reason in case.reasons)
     )
+    # Every partner a teammate was timed against: (case, rank key, lags). One lag list fits in the legacy field.
+    timed: dict[str, list[tuple[tuple, list[int]]]] = {}
     for party in sorted(parties):
         members = parties[party]
         cheaters = [player_id for player_id in confirmed if player_id in members]
@@ -1060,8 +1062,8 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                 case = by_case.get(mate)
                 if case is None or not lags:
                     continue
-                case.inherit_lags_ms = lags
                 fast = [lag for lag in lags if 0 <= lag < profile.voice_min_ms]
+                timed.setdefault(mate, []).append((_partner_rank(fast, profile, cheater, party), lags))
                 if len(fast) < profile.inherit_min_events:
                     continue
                 low = min(fast)
@@ -1087,6 +1089,21 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                     match_ids={match for lag, match in zip(lags, lag_matches) if 0 <= lag < profile.voice_min_ms},
                     depends_on=[obs.observation_id for obs in (partner.evidence if partner else []) if obs.kind == "hidden"],
                 )
+
+
+    for mate, candidates in timed.items():
+        by_case[mate].inherit_lags_ms = min(candidates)[1]
+
+
+def _partner_rank(fast: list[int], profile: GameProfile, cheater: str, party: str) -> tuple:
+    """Which partner's lags the legacy ``inherit_lags_ms`` keeps when a teammate was timed against several.
+
+    The strongest relationship by the check's own terms: one that reaches the watch bar, then the most
+    swings faster than a voice, then the faster median of those, then the partner and party ids. Every
+    partner that reaches the bar also has its own voice observation, whichever one is kept here.
+    """
+    reaches = len(fast) >= profile.inherit_min_events
+    return (not reaches, -len(fast), median(fast) if fast else math.inf, cheater, party)
 
 
 def annotate_batch(cases: list[Case], records: list[PlayerRecord], profile: GameProfile) -> None:

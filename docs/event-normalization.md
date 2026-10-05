@@ -59,6 +59,19 @@ None of the CS2, TF2, planted or synthetic data has simultaneous events that dis
 - The voice pass goes through parties in id order, partners in id order, and each player's contacts in match, time and enemy order.
 - Party notes were already sorted.
 
+### A teammate timed against several wallhackers
+
+A teammate in a party with two confirmed wallhackers is timed against each one. Every partner whose swings reach the watch bar has always had its own voice observation, naming the partner, the party and the fast lags. The legacy field `inherit_lags_ms` holds one list, though. It used to keep whichever partner was processed last: the last seen in the file before normalization, the highest id after it.
+
+It now keeps the strongest relationship by the check's own terms:
+
+1. a partner whose swings reach the watch bar (`inherit_min_events` swings under `voice_min_ms`) before one whose swings do not;
+2. then more swings faster than a voice;
+3. then the lower median of those swings;
+4. then the partner id and the party id.
+
+In the planted demo and the synthetic week every teammate has one partner, and the real data has no voice inputs, so no case moved.
+
 ## Output order
 
 Set-like lists come out in key order:

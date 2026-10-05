@@ -14,6 +14,7 @@
   - **Exact sums:** material float sums use `math.fsum`.
   - **What moved:** across the planted demo, the synthetic week and the CS2 and TF2 reruns, no decision and no observation changed. Lists were re-ordered, and two TF2 legacy seals moved with their reason order.
   - **Docs:** see [docs/event-normalization.md](docs/event-normalization.md).
+- **A teammate timed against two wallhackers kept the wrong lags.** `inherit_lags_ms` kept whichever partner was processed last. It now keeps the strongest relationship: one that reaches the watch bar, then the most swings faster than a voice, then the faster median, then the partner id. Each qualifying partner still has its own voice observation. No planted, synthetic or real case moved.
 - **An event could write outside the lake.** `fpsdet ingest` used `game_id` as a folder name, so a game id such as `x/../../elsewhere` appended `events.ndjson` outside `--lake`. A game id with a path separator, and a `utc` whose first ten characters are not a `YYYY-MM-DD` date, are now skipped and counted. `--dt` and `--game` must be safe too, or the command stops with a message.
 
 ### Added

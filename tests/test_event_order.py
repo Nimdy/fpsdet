@@ -222,6 +222,39 @@ class TimelineTest(unittest.TestCase):
         self.assertEqual(list(player_timelines([ev("b"), ev("a")])), ["a", "b"])
 
 
+def two_partners(first_swings: int, second_swings: int, first_lag: int = 40, second_lag: int = 60) -> list[Event]:
+    """A teammate timed against two wallhackers in one party, with a chosen number of fast swings on each."""
+    common = dict(match="w", party_id="stack", information_state="unknowable")
+    events = [ev("c-1", i * 200, enemy_id="e1", hidden_track_ms=80.0, **common) for i in range(20)]
+    events += [ev("c-2", i * 200 + 100, enemy_id="e2", hidden_track_ms=80.0, **common) for i in range(20)]
+    events += [ev("m-1", i * 200 + first_lag, enemy_id="e1", **common) for i in range(first_swings)]
+    events += [ev("m-1", i * 200 + 100 + second_lag, enemy_id="e2", **common) for i in range(second_swings)]
+    return events
+
+
+class RelationshipSelectionTest(unittest.TestCase):
+    """Which partner's lags the legacy field keeps, when a teammate was timed against several."""
+
+    def kept(self, events: list[Event]) -> list[int]:
+        forward, backward = case(events, "m-1"), case(list(reversed(events)), "m-1")
+        self.assertEqual(forward["inherit_lags_ms"], backward["inherit_lags_ms"])
+        return forward["inherit_lags_ms"]
+
+    def test_the_same_count_keeps_the_faster_partner(self):
+        events = two_partners(8, 8)
+        self.assertEqual(self.kept(events), [40] * 8)
+        partners = sorted(obs["evidence"]["partner"] for obs in case(events, "m-1")["evidence"]["observations"] if obs["kind"] == "voice")
+        self.assertEqual(partners, ["c-1", "c-2"])  # both relationships stay, as their own observations
+
+    def test_more_fast_swings_beat_a_faster_median(self):
+        self.assertEqual(self.kept(two_partners(8, 10)), [60] * 10)
+
+    def test_reaching_the_bar_beats_everything_else(self):
+        # c-2 has 3 swings at 10 ms, under the 4 the watch needs. c-1's 5 at 150 ms reach it.
+        self.assertEqual(self.kept(two_partners(5, 3, first_lag=150, second_lag=10)), [150] * 5)
+        self.assertEqual(len([o for o in case(two_partners(5, 3, first_lag=150, second_lag=10), "m-1")["evidence"]["observations"] if o["kind"] == "voice"]), 1)
+
+
 def shuffled_forms(events: list[Event], seed: int = 7) -> dict[str, list[Event]]:
     """Equivalent inputs: the same parsed events, in the orders a file could list them."""
     rng = random.Random(seed)
