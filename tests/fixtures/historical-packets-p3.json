@@ -1,0 +1,189 @@
+{
+ "cases": [
+  {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "private_replay"
+   ],
+   "decision": "review",
+   "evidence": {
+    "eligibility": {
+     "compared": [
+      {
+       "key": "rifle",
+       "metric": "accuracy"
+      },
+      {
+       "key": "rifle",
+       "metric": "median_distance"
+      }
+     ]
+    },
+    "observations": [
+     {
+      "context": {
+       "knowledge": {
+        "basis": "private_track_ms: placed where this client's line-of-sight and audio queries fail",
+        "channels": {
+         "audio": "absent",
+         "recent_perception": "not_applicable",
+         "vision": "absent"
+        },
+        "not_counted": {},
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "status": "unknowable"
+       },
+       "line": "rifle aim stayed on a private replay for 1600 ms across 20 shots",
+       "printed_in": "reasons"
+      },
+      "depends_on": [],
+      "evidence": {
+       "shots": 20,
+       "thresholds": {
+        "min_shots": 8,
+        "min_total_ms": 1200.0
+       },
+       "total_ms": 1600.0
+      },
+      "family": "information",
+      "key": "rifle",
+      "kind": "private_replay",
+      "match_ids": [
+       "m1"
+      ],
+      "observation_id": "obs-952d9e164294a9c5fa31861a",
+      "role": "review",
+      "source": "fpsdet",
+      "subject_id": "replay-lock"
+     }
+    ],
+    "packet": {
+     "digest": "sha256:c47893457e42aabd9031b83b8d96c91513721f6b9813bbaa58ff5a6a15335a31",
+     "recipe": "fpsdet.packet/1",
+     "status": "complete"
+    },
+    "provenance": {
+     "cohort": {
+      "digest": "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+      "integrity": {
+       "digest": "sha256:5f0fdccafd0565d24cc1a8e821229c9fc98ffe0aa895e609c7d725d6a5f9206b",
+       "recipe": "fpsdet.cohort-integrity/1",
+       "status": "unchecked"
+      },
+      "mode": "external",
+      "recipe": "fpsdet.cohort/1",
+      "stored_digest": "not_from_file"
+     },
+     "detector": {
+      "digest": "sha256:4a5b3d6040d6443a106634483f0c60799fa2f0252226de09b4b3974f916f52c9",
+      "modules": [
+       "fpsdet",
+       "fpsdet.baseline",
+       "fpsdet.evidence",
+       "fpsdet.knowledge",
+       "fpsdet.models",
+       "fpsdet.parse",
+       "fpsdet.persist",
+       "fpsdet.pipeline",
+       "fpsdet.provenance",
+       "fpsdet.score",
+       "fpsdet.signals",
+       "fpsdet.statsutil",
+       "fpsdet.summarize",
+       "fpsdet.timeline"
+      ],
+      "recipe": "fpsdet.detector/1"
+     },
+     "history": {
+      "digest": "sha256:5f6a4f9954ab6f3f14deabe4e6abcb010cd01c063249b3f4564de78074b650b7",
+      "mode": "external",
+      "recipe": "fpsdet.history/1",
+      "windows": 0
+     },
+     "inputs": {
+      "digest": "sha256:9e06689f0e09caac73734e373579b2ad692e8413480b396f1f31e85783c98bcd",
+      "events": 48,
+      "matches": 1,
+      "recipe": "fpsdet.player-events/2"
+     },
+     "profile": {
+      "digest": "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb",
+      "recipe": "fpsdet.profile/1"
+     },
+     "version": 1
+    },
+    "version": 1
+   },
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.11248584522204352,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.6572608492716,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897289907,
+     "ceiling_p95": 43.814691444768805,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018160586376,
+     "own_p95": 33.56448833105132,
+     "player_value": 28.6572608492716,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "replay-lock",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle aim stayed on a private replay for 1600 ms across 20 shots"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "e73f0a73ef538ed1667e4bb7938b487d3de12323b3369441585381cf35b9e3ae",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  }
+ ],
+ "note": "Written by fpsdet at eabd87c (P3, the client knowledge engine), before the challenge engine: the planted replay-lock case, whose private replay was an information observation of kind private_replay. Its packet must keep verifying after the private replay moved to the challenge family."
+}
