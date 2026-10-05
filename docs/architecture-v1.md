@@ -150,7 +150,7 @@ Every flagged case names what fired. A rank-tail watch carries its explanation o
 | 1 | Client → game server | Nothing the client claims. The server measures hits, speed, time, the kick it applied, and the command it received. | The event contract asks for server values only (docs/integration.md). | No per-field authority. A game with client-side hit registration could send client-claimed `hit` and fpsdet could not tell. |
 | 2 | Game server → events | Server judgements: `information_state`, `hidden_track_ms`, `private_track_ms`, `since_perceived_ms`, `displacement_cause`, the caps and floors. A wrong judgement manufactures a case, and the docs say so field by field. | Missing means off. Audio and the grace window are exclusions. The innocence list is an allow-list. | No emitter build or version on events, so a bad emitter cannot be traced to the cases it touched. |
 | 3 | Event text → parse | Types and three enums. | `ParseError` per line. Cases are written with `safe_name`. | NaN and Infinity are accepted (`json.loads` allows them). Schema minimums and the `hitbox` enum are not enforced. Strings are unbounded. Every file is read whole. |
-| 4 | Event text → lake paths | — | — | **`game_id` is used as a path component.** `x/../../elsewhere` writes `events.ndjson` outside the lake. Reproduced; fixed in a separate commit with this audit. |
+| 4 | Event text → lake paths | — | A game id with a path separator, or a `utc` that is not a date, is skipped (fixed with this audit). | Before the fix, `game_id` `x/../../elsewhere` wrote `events.ndjson` outside the lake. |
 | 5 | Operator files → scorer | Profile, cohort, history, reports, labels. | Profile parse checks types. Labels never reach the scorer. | The cohort shape is not validated. The profile parser turns an explicit `0` into the default for most fields, so the file is not the configuration (provenance has to hash the resolved profile). |
 | 6 | One case → another | Batch passes write one player's evidence onto another's case. | A batch tell is a watch, never a review. The voice check needs a partner already in review. Leftover pairs need r ≥ 0.85 and Fisher z ≥ 5. | The voice check finds that partner by matching the reason text `"hidden mover"`, not the `hidden` check id. |
 | 7 | Cases → people | Rendered text. | `casefile` escapes everything. The dashboards build the DOM with `textContent`, and the embedded JSON escapes `<`. | Dashboard links (`links`, `home`) come from the operator's payload unchecked. Only fpsdet's own scripts write them today. |
@@ -220,7 +220,7 @@ In order of what blocks first.
 6. **The private replay is one number per shot.** No challenge id, no commitment, no schedule, no record of when it was active. *Blocks Phase 4.*
 7. **No provenance beyond the seal** (section 6). The profile parser turns explicit zeros into defaults, so the profile must be hashed after parsing. *Blocks Phase 2.*
 8. **`CohortTable._values` is read from four modules,** and every leave-one-out lookup is a linear scan. Fine at today's sizes (TF2 scores in 7 s); a calibration pass that asks many more questions will need an index.
-9. **Input hardening** (section 5, rows 3 and 4).
+9. **Input hardening** (section 5, row 3). The lake paths (row 4) are fixed.
 10. **The leftover comparison is all pairs.** Measured at about 4 µs per pair: 100 players 0.02 s, 1,000 players 2 s, 3,000 players 18 s, per weapon key. Extrapolated, 10,000 players take about 200 s and 100,000 about 5.5 hours. Relationship work has to partition (candidates by weapon key and region, or by a coarse signature bucket, or only against accounts already in review) before it grows.
 11. **Presentation reads prose.** `ops._why` picks the queue line by matching phrases; the planted demo checks reason text. Structured observations let both read ids.
 12. **Size.** One 2,265-line test file; `board.py` is Python, HTML, CSS and JS in 2,024 lines.
@@ -422,7 +422,7 @@ Each step is one commit, run against the full suite, the demo, the board diff an
 | 0.1 This map | done | `docs/architecture-v1.md` |
 | 0.2 Whole-case behaviour lock | done | `tests/test_golden.py`, `tests/golden/*.json`, CI, `CONTRIBUTING.md` |
 | 0.3 Real-data regression tool | done | `tools/regress.py` |
-| 0.4 Lake path hardening | done, separate commit | `lake.py`, a test |
+| 0.4 Lake path hardening | done, separate commit | `lake.py`, `cli.py`, `LakeTest` |
 | 1.1 Observation model | next | new `evidence.py`: `Observation`, families, grades, canonical JSON, ids, `decide_from()`; `tests/test_observations.py` |
 | 1.2 Emit observations | | `score.py`: one `found(check, grade, text, key, evidence)` helper replaces each paired `reasons.append` and `fired`, with identical text; batch passes emit relationship observations with dependencies; the voice check reads `checks`; reports become informational observations. `models.Case.evidence`. `persist.case_to_dict` adds `"evidence"`. `ops.py` leaves it out of `ops.json` for now, so the desk does not change. |
 | 1.3 Schema and doc | | `schema/observation.schema.json`, `docs/observations.md` |

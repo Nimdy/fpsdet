@@ -519,6 +519,26 @@ class LakeTest(unittest.TestCase):
             self.assertEqual(stored, [line])
             self.assertTrue((Path(tmp) / "game=wardogs" / "dt=2026-10-02" / "events.ndjson").exists())
 
+    def test_event_text_cannot_put_a_partition_outside_the_lake(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            lake = Path(tmp) / "lake"
+            row = {"match_id": "m", "player_id": "p", "t_ms": 1}
+            lines = [
+                json.dumps({**row, "game_id": "x/../../escaped"}),
+                json.dumps({**row, "game_id": "x\\..\\escaped"}),
+                json.dumps({**row, "game_id": "wardogs", "utc": "../../../escaped"}),
+                json.dumps({**row, "game_id": "wardogs", "utc": "2026-10-02T03:00:00Z"}),
+                json.dumps({**row, "game_id": "wardogs", "utc": "late"}),
+            ]
+            result = ingest_lines(lines, lake, default_dt="2026-10-01")
+            self.assertEqual(result, {"written": 2, "skipped": 3})
+            written = sorted(str(path.relative_to(tmp)) for path in Path(tmp).rglob("events.ndjson"))
+            self.assertEqual(written, ["lake/game=wardogs/dt=2026-10-01/events.ndjson", "lake/game=wardogs/dt=2026-10-02/events.ndjson"])
+            with self.assertRaises(ValueError):
+                ingest_lines(lines, lake, default_dt="../x")
+            with self.assertRaises(ValueError):
+                read_lines(lake, game_id="../lake")
+
 
 class DemoTest(unittest.TestCase):
     def test_planted_matches(self):

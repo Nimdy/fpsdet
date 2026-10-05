@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- **An event could write outside the lake.** `fpsdet ingest` used `game_id` as a folder name, so a game id such as `x/../../elsewhere` appended `events.ndjson` outside `--lake`. A game id with a path separator, and a `utc` whose first ten characters are not a `YYYY-MM-DD` date, are now skipped and counted. `--dt` and `--game` must be safe too, or the command stops with a message.
+
 ### Added
 
 - **Architecture map** (`docs/architecture-v1.md`): the code as it is, every check by evidence family, the trust boundaries, what the seal can and cannot answer, the debt that blocks structured evidence, the proposed interfaces (observation, provenance, knowledge state, challenge, external evidence, evidence graph), and the order of work. Proposed parts are marked proposed; none of them is in the code yet.

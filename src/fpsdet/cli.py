@@ -110,7 +110,10 @@ def _events_from_args(path: str | None, lake: str | None, game: str | None):
     if path and lake:
         raise SystemExit("Pass an events file or a lake, not both.")
     if lake:
-        lines = read_lines(lake, game_id=game)
+        try:
+            lines = read_lines(lake, game_id=game)
+        except ValueError as error:
+            raise SystemExit(str(error))
         return iter_events(lines)
     if not path:
         raise SystemExit("Pass an events file or --lake.")
@@ -274,7 +277,10 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
 
 def cmd_ingest(args: argparse.Namespace) -> int:
     lines = Path(args.events).read_text(encoding="utf-8").splitlines()
-    result = ingest_lines(lines, args.lake, default_dt=args.dt)
+    try:
+        result = ingest_lines(lines, args.lake, default_dt=args.dt)
+    except ValueError as error:
+        raise SystemExit(str(error))
     print(f"Wrote {result['written']} events, skipped {result['skipped']}")
     return 0
 
