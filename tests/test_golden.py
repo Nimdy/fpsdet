@@ -196,6 +196,19 @@ class RegressToolTest(unittest.TestCase):
         ignored = ["evidence.provenance.detector"]
         self.assertEqual(self.tool.compare(self.tool.without(old, ignored), self.tool.without(new, ignored))["moved"], {})
 
+    def test_migrate_says_why_a_case_moved(self):
+        base = {"decision": "watch", "reasons": ["a", "b"], "metrics": [{"key": "rifle"}, {"key": "smg"}], "seal": "s1",
+                "evidence": {"observations": [{"observation_id": "o1", "kind": "rank_tail", "key": "rifle"}],
+                             "provenance": {"inputs": {"recipe": "fpsdet.player-events/1", "digest": "d1"}}, "packet": {"digest": "p1"}}}
+        reordered = {**base, "reasons": ["b", "a"], "metrics": [{"key": "smg"}, {"key": "rifle"}], "seal": "s2",
+                     "evidence": {**base["evidence"], "provenance": {"inputs": {"recipe": "fpsdet.player-events/2", "digest": "d2"}}, "packet": {"digest": "p2"}}}
+        self.assertEqual(sorted(self.tool.classify(base, reordered)), sorted([
+            "reason-order-only", "metric-order-only", "seal-from-reason-order",
+            "input-recipe fpsdet.player-events/1 -> fpsdet.player-events/2", "packet-changed",
+        ]))
+        self.assertIn("decision-change", self.tool.classify(base, {**base, "decision": "review"}))
+        self.assertEqual(self.tool.classify(base, base), [])
+
     def test_a_snapshot_of_the_same_run_diffs_clean(self):
         import contextlib
         import io

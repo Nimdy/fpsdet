@@ -284,6 +284,14 @@ def classify(old: dict, new: dict) -> list[str]:
         found.append("eligibility-changed")
     if old.get("seal") != new.get("seal"):
         found.append("seal-from-reason-order" if _same_items(old.get("reasons") or [], new.get("reasons") or []) and "decision-change" not in found else "seal-changed")
+    old_inputs = (before.get("provenance") or {}).get("inputs") or {}
+    new_inputs = (after.get("provenance") or {}).get("inputs") or {}
+    if old_inputs.get("recipe") != new_inputs.get("recipe"):
+        found.append(f"input-recipe {old_inputs.get('recipe')} -> {new_inputs.get('recipe')}")
+    elif old_inputs.get("digest") != new_inputs.get("digest"):
+        found.append("input-digest-changed")
+    if (before.get("packet") or {}).get("digest") != (after.get("packet") or {}).get("digest"):
+        found.append("packet-changed")
     for field in ("party_note", "vendor_twin", "vendor_r", "queue_rank", "speed", "recommended_action", "automated_action", "skill_band"):
         if old.get(field) != new.get(field):
             found.append(f"{field}-changed")
