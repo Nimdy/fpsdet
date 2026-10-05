@@ -14,6 +14,7 @@ HTML = ("index.html", "scoring.html", "wire.html", "games.html", "source.html")
 # A prefix, so a deep link such as board.html#card-wire-lock is rewritten too.
 LOCAL_DESK = 'href="../demo/board.html'
 LOCAL_SITE = 'href="../site/'
+LOCAL_DEMO = 'href="../demo/'
 
 
 def write_pages(demo: Demo, dest: str | Path | None = None) -> Path:
@@ -29,8 +30,9 @@ def write_pages(demo: Demo, dest: str | Path | None = None) -> Path:
         text = src.read_text(encoding="utf-8")
         if LOCAL_DESK not in text:
             raise ValueError(f"{name} does not link demo/board.html")
-        # Published files sit side by side. The repo copies sit in site/ and demo/.
-        (target / name).write_text(text.replace(LOCAL_DESK, 'href="board.html'), encoding="utf-8")
+        # Published files sit side by side. The repo copies sit in site/ and demo/, so every
+        # ../demo/ link (the desk, and the real-match pages beside it) loses its folder.
+        (target / name).write_text(text.replace(LOCAL_DEMO, 'href="'), encoding="utf-8")
     css = SITE / "fpsdet.css"
     if not css.is_file():
         raise FileNotFoundError(css)

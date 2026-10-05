@@ -1749,6 +1749,24 @@ class OpsTest(unittest.TestCase):
         self.assertFalse([row["id"] for row in payload["rows"] if row["decision"] == "review" and row["truth"] != "cheater"])
         self.assertTrue(any("result" in link["text"] for link in payload["links"]))
 
+    def test_the_home_page_numbers_come_from_the_tf2_run(self):
+        rows = json.loads((ROOT / "examples" / "tf2" / "desk.json").read_text(encoding="utf-8"))["rows"]
+        index = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
+        cheats = [r for r in rows if r["truth"] == "banned for cheating"]
+        never = [r for r in rows if r["truth"] == "never banned"]
+        picked = [r for r in rows if r["decision"] in ("review", "watch")]
+        hits = sum(1 for r in picked if r["truth"] == "banned for cheating")
+        random_hold = len(picked) * len(cheats) / len(rows)
+        reviews = [r for r in rows if r["decision"] == "review"]
+        # If the run changes, the home page must change with it.
+        self.assertIn(f"{hits / random_hold:.1f}×", index)
+        self.assertIn(f"It picked {len(picked)} players for a person to look at, {hits} of them banned cheaters. {len(picked)} picked at random would hold about {round(random_hold)}.", index)
+        self.assertEqual({r["truth"] for r in reviews}, {"banned for cheating"})
+        self.assertIn(f"{len(reviews)} of {len(reviews)}</p>", index)
+        self.assertIn(f"{sum(r['decision'] == 'review' for r in never)} of {len(never):,}</p>", index)
+        self.assertIn(f"{sum(r['decision'] == 'watch' for r in never)} are on watch", index)
+        self.assertIn(f"{sum(r['decision'] == 'clean' for r in cheats)} of {len(cheats)}</p>", index)
+
     def test_the_desk_links_the_real_tf2_matches(self):
         import re
         from fpsdet.pages import write_pages
