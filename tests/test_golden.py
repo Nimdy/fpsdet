@@ -2,8 +2,10 @@
 
 The evidence work adds structure beside the case JSON. Nothing a consumer already reads may move while that
 happens. tests/golden/ records the case fields as they were (decision, reasons, observations, checks, seal,
-metrics, speed, and the rest of ``case_to_dict``). This test scores the same inputs again and compares those
-fields. A new key on a case is allowed. A changed or missing one fails, and the message names the player.
+metrics, speed, the structured evidence, and the rest of ``case_to_dict``). This test scores the same inputs
+again and compares those fields. A new key on a case is allowed. A changed or missing one fails, and the message
+names the player. The evidence's ``provenance`` is left out: it names the code that ran, so it moves with any
+detector change, and tests/test_provenance.py checks it instead.
 
 To re-record after a deliberate change, run
 
@@ -45,6 +47,10 @@ def canon(value):
 
 def locked(case, keys: list[str]) -> dict:
     row = case_to_dict(case)
+    if isinstance(row.get("evidence"), dict):
+        # Provenance names the detector code and profile behind the evidence, so it moves whenever
+        # detector source does. tests/test_provenance.py checks it; this lock covers the evidence itself.
+        row["evidence"] = {key: value for key, value in row["evidence"].items() if key != "provenance"}
     return canon({key: row.get(key, "<missing>") for key in keys})
 
 
