@@ -8,6 +8,13 @@
 
 ### Added
 
+- **Evidence provenance: which baseline and which events.** `evidence.provenance` now also has `cohort` and `inputs`.
+  - **`cohort`:** a SHA-256 of every band, key, metric, player id and value in the baseline the run used. Its `mode` is `external` for a baseline given to the run, or `in_file` for one fitted on the events being scored. Its advisory integrity stamp (status, alarms, matches left out) has a separate digest and its status in plain text.
+  - **Cohort files:** `fpsdet baseline` writes both digests into the cohort file. Loading recomputes them, and a file whose values or integrity stamp were edited afterwards is refused. Older files still load and are marked `stored_digest: absent`.
+  - **`inputs`:** a SHA-256 of the subject player's own parsed events, in the order the scorer read them, with event and match counts. Each case has its own; one changed event moves only that player's digest.
+  - **Not yet covered:** other players' events behind a relationship observation, player history, and one identity over the whole packet.
+  - **Nothing else moves:** observation ids, the seal and every other field are unchanged.
+  - **Cost:** input digests cost about 2 µs per event, about 4.5 s on the 4.1 M-event TF2 run.
 - **Evidence provenance: which detector and which profile.** Each case's `evidence` now carries `provenance`, shared by every case of a run.
   - **Profile:** a SHA-256 of the game profile as the scorer parsed it. Spacing, key order, notes and values the parser reads as the default do not change it.
   - **Detector:** a SHA-256 of the source of the 12 modules that can change a finding (the package `__init__` included, since it runs on every import), listed by name. Dashboards, the desk, the site, the command line and AI prose are outside it, and a test checks the list against the scorer's imports so a new detection module cannot be left out.

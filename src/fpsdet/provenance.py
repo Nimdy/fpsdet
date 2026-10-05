@@ -1,17 +1,21 @@
 """Provenance: which detector code and which parsed game profile produced a case's evidence.
 
-Two fingerprints, each a full SHA-256 written ``sha256:<64 hex>``:
+Four fingerprints, each a full SHA-256 written ``sha256:<64 hex>``:
 
 - ``profile``: the GameProfile as the scorer sees it after parsing, not the file. The parser turns
   some explicit values into defaults, and this describes what actually ran.
 - ``detector``: the source of every module whose code can change a finding or the evidence written
   for it, read from the package that is running. Presentation code is not in it, so a dashboard or
   page change cannot move it.
+- ``cohort``: every (band, key, metric, player, value) of the baseline the run compared players
+  with, and separately the advisory integrity stamp that travels with it.
+- ``inputs``: the subject player's own parsed events, in the order the scorer received them.
 
-Both are computed once per scoring run and shared by every case in it. Neither yet binds the events
-scored, the cohort, external evidence or challenge material. Observation ids do not include
-provenance, and the case seal does not change: provenance says what produced an observation, the id
-says which observation it is.
+The first three are computed once per run and shared by every case in it; ``inputs`` is per player.
+None of this binds external evidence or challenge material, and nothing yet binds the whole packet:
+a case file can still be edited after scoring. Observation ids do not include provenance, and the
+case seal does not change: provenance says what produced an observation, the id says which
+observation it is.
 """
 
 from __future__ import annotations
@@ -21,6 +25,7 @@ import dataclasses
 import hashlib
 import json
 import math
+import operator
 import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
@@ -31,6 +36,9 @@ PROVENANCE_VERSION = 1
 # The canonicalization recipes. Bump one when the bytes it hashes would be built differently.
 PROFILE_RECIPE = "fpsdet.profile/1"
 DETECTOR_RECIPE = "fpsdet.detector/1"
+COHORT_RECIPE = "fpsdet.cohort/1"
+INTEGRITY_RECIPE = "fpsdet.cohort-integrity/1"
+INPUTS_RECIPE = "fpsdet.player-events/1"
 
 PACKAGE = "fpsdet"
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -183,12 +191,159 @@ def detector_fingerprint() -> DetectorFingerprint:
     return _fingerprint_dir(PACKAGE_DIR)
 
 
+# Values are hashed as JSON with Python's shortest round-trip float spelling, so two different floats
+# never share a spelling and nothing is rounded. NaN and the infinities are written as the tokens NaN,
+# Infinity and -Infinity, which plain JSON does not have; they are only ever hashed, never emitted.
+_VALUES = json.JSONEncoder(sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=True)
+
+
+class ProvenanceMismatch(ValueError):
+    """A file claims a digest that its own contents do not have."""
+
+
+def cohort_digest(values: Mapping[tuple[str, str, str], Iterable[tuple[str, float]]]) -> str:
+    """Every (band, key, metric, player, value) a cohort holds, sorted, each occurrence once.
+
+    The player id is part of it: scoring leaves the subject out of the distribution by id, so the same
+    numbers held by other players are a different baseline.
+    """
+    rows = sorted(
+        (band, key, metric, player_id, _VALUES.encode(value))
+        for (band, key, metric), pairs in values.items()
+        for player_id, value in pairs
+    )
+    hasher = hashlib.sha256(COHORT_RECIPE.encode("ascii") + b"\0")
+    for band, key, metric, player_id, value in rows:
+        hasher.update(_VALUES.encode([band, key, metric, player_id]).encode("utf-8") + b"\0" + value.encode("ascii") + b"\n")
+    return "sha256:" + hasher.hexdigest()
+
+
+def integrity_digest(integrity: Mapping) -> str:
+    """The advisory stamp a cohort carries (status, alarms, matches left out). Scoring never reads it."""
+    return _sha256(INTEGRITY_RECIPE.encode("ascii") + b"\0" + _json(integrity).encode("utf-8"))
+
+
+def cohort_seal(table) -> dict:
+    """What ``fpsdet baseline`` writes into a cohort file, so a later load can check the file."""
+    return {
+        "cohort": {"recipe": COHORT_RECIPE, "digest": cohort_digest(table._values)},
+        "integrity": {"recipe": INTEGRITY_RECIPE, "digest": integrity_digest(table.integrity)},
+    }
+
+
+def check_cohort_seal(table, stored) -> None:
+    """Refuse a cohort file whose stored digests do not match what it holds. No digest is trusted unchecked."""
+    if not isinstance(stored, Mapping):
+        raise ProvenanceMismatch("the cohort file's provenance is not an object")
+    expected = cohort_seal(table)
+    for part in ("cohort", "integrity"):
+        claim = stored.get(part)
+        if not isinstance(claim, Mapping) or claim.get("recipe") != expected[part]["recipe"]:
+            raise ProvenanceMismatch(f"the cohort file's {part} provenance is missing or uses a recipe this version cannot check")
+        if claim.get("digest") != expected[part]["digest"]:
+            what = "values" if part == "cohort" else "integrity stamp"
+            raise ProvenanceMismatch(
+                f"the cohort file's {what} do not match the digest it carries. It was edited after "
+                "fpsdet baseline wrote it; rebuild it rather than trust it"
+            )
+
+
+@dataclass(frozen=True)
+class CohortFingerprint:
+    mode: str  # "external": a baseline given to the run; "in_file": fitted on the very events being scored
+    digest: str
+    stored_digest: str  # "matched": the file carried a digest and it checked; "absent": an older file; "not_from_file"
+    integrity_status: str
+    integrity_digest: str
+
+    def to_dict(self) -> dict:
+        return {
+            "mode": self.mode,
+            "recipe": COHORT_RECIPE,
+            "digest": self.digest,
+            "stored_digest": self.stored_digest,
+            "integrity": {"recipe": INTEGRITY_RECIPE, "status": self.integrity_status, "digest": self.integrity_digest},
+        }
+
+
+def cohort_fingerprint(table, mode: str) -> CohortFingerprint:
+    if mode not in ("external", "in_file"):
+        raise ValueError(f"unknown cohort mode {mode!r}")
+    return CohortFingerprint(
+        mode=mode,
+        digest=cohort_digest(table._values),
+        stored_digest=getattr(table, "stored_digest", "not_from_file"),
+        integrity_status=str(table.integrity.get("status", "unchecked")),
+        integrity_digest=integrity_digest(table.integrity),
+    )
+
+
+@dataclass(frozen=True)
+class PlayerInputs:
+    digest: str
+    events: int
+    matches: int
+
+    def to_dict(self) -> dict:
+        return {"recipe": INPUTS_RECIPE, "digest": self.digest, "events": self.events, "matches": self.matches}
+
+
+_EVENT_FIELDS: tuple[str, ...] = ()
+_EVENT_VALUES = None
+# Empty containers are how an Event says a field was not sent.
+_EMPTY_IS_ABSENT = frozenset({"mod_set", "extras"})
+
+
+def _event_columns(events: list) -> list[tuple[str, list]]:
+    global _EVENT_FIELDS, _EVENT_VALUES
+    if _EVENT_VALUES is None:
+        from .models import Event
+
+        _EVENT_FIELDS = tuple(sorted(spec.name for spec in dataclasses.fields(Event)))
+        _EVENT_VALUES = operator.attrgetter(*_EVENT_FIELDS)
+    count = len(events)
+    columns = []
+    for name, column in zip(_EVENT_FIELDS, zip(*map(_EVENT_VALUES, events))):
+        if name in _EMPTY_IS_ABSENT:
+            column = tuple(value or None for value in column)
+        if column.count(None) < count:
+            columns.append((name, column))
+    return columns
+
+
+def player_digest(events: list) -> str:
+    """One player's parsed events, in the order the scorer received them.
+
+    Order is kept because it is not neutral: the scorer lists findings, metrics and context lines in the
+    order a player's weapons first appear, and events at the same time keep their arrival order. Each
+    occurrence counts, so a duplicated event is a different input. The bytes are the recipe, the event
+    count, then for each Event field in name order that any event sets: the name and a JSON array of
+    that field on every event, null where it is not set.
+    """
+    hasher = hashlib.sha256(INPUTS_RECIPE.encode("ascii") + b"\0" + str(len(events)).encode("ascii") + b"\0")
+    for name, column in _event_columns(events):
+        hasher.update(name.encode("ascii") + b"\0" + _VALUES.encode(column).encode("utf-8") + b"\0")
+    return "sha256:" + hasher.hexdigest()
+
+
+def player_inputs(events: Iterable) -> dict[str, PlayerInputs]:
+    """Each player's input identity, from one pass over the run's events."""
+    grouped: dict[str, list] = {}
+    for event in events:
+        grouped.setdefault(event.player_id, []).append(event)
+    return {
+        player_id: PlayerInputs(player_digest(rows), len(rows), len({event.match_id for event in rows}))
+        for player_id, rows in grouped.items()
+    }
+
+
 @dataclass(frozen=True)
 class RunProvenance:
     """What produced every case in one scoring run. One object, shared by every case."""
 
     profile: str
     detector: DetectorFingerprint
+    cohort: CohortFingerprint | None = None
 
     def to_dict(self) -> dict:
         detector: dict = {"recipe": DETECTOR_RECIPE, "digest": self.detector.digest, "modules": list(self.detector.modules)}
@@ -198,19 +353,33 @@ class RunProvenance:
             "version": PROVENANCE_VERSION,
             "profile": {"recipe": PROFILE_RECIPE, "digest": self.profile},
             "detector": detector,
+            "cohort": None if self.cohort is None else self.cohort.to_dict(),
         }
 
 
-def run_provenance(profile) -> RunProvenance:
-    return RunProvenance(profile_digest(profile), detector_fingerprint())
+@dataclass(frozen=True)
+class CaseProvenance:
+    """The run's provenance, shared, and the subject player's own inputs."""
+
+    run: RunProvenance
+    inputs: PlayerInputs | None = None
+
+    def to_dict(self) -> dict:
+        return {**self.run.to_dict(), "inputs": None if self.inputs is None else self.inputs.to_dict()}
 
 
-def stamp(cases: Iterable, profile) -> RunProvenance:
-    """Give every case of one run the same provenance. Computed once, not per player."""
-    provenance = run_provenance(profile)
+def run_provenance(profile, cohort=None, cohort_mode: str | None = None) -> RunProvenance:
+    fingerprint = None if cohort is None else cohort_fingerprint(cohort, cohort_mode or "external")
+    return RunProvenance(profile_digest(profile), detector_fingerprint(), fingerprint)
+
+
+def stamp(cases: Iterable, profile, *, cohort=None, cohort_mode: str | None = None, events: Iterable | None = None) -> RunProvenance:
+    """Give every case of one run its provenance. The run's part is computed once; inputs once per player."""
+    run = run_provenance(profile, cohort, cohort_mode)
+    inputs = {} if events is None else player_inputs(events)
     for case in cases:
-        case.provenance = provenance
-    return provenance
+        case.provenance = CaseProvenance(run, inputs.get(case.player_id))
+    return run
 
 
 # The guard. Tests run these over the package's own sources; scoring never does.

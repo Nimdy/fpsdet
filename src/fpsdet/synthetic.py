@@ -692,7 +692,7 @@ def build_demo(seed: int = 1) -> Demo:
     from .score import annotate_batch
 
     annotate_batch(cases, list(records.values()), profile)
-    stamp(cases, profile)
+    stamp(cases, profile, cohort=cohorts, cohort_mode="external", events=subjects)
     by_id = {case.player_id: case for case in cases}
     for player_id, decision in EXPECT.items():
         got = by_id[player_id].decision

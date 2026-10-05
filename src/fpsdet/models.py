@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from .evidence import Observation
-from .provenance import RunProvenance
+from .provenance import CaseProvenance
 
 
 INNOCENT_CAUSES = frozenset(
@@ -371,8 +371,8 @@ class Case:
     # The same findings as data (fpsdet.evidence), and each (metric, key) compared with a thick cohort.
     evidence: list[Observation] = field(default_factory=list)
     compared_on: list[tuple[str, str]] = field(default_factory=list)
-    # The detector code and parsed profile behind the evidence. One object shared by the whole run.
-    provenance: RunProvenance | None = None
+    # What produced the evidence: the run's detector, profile and cohort, shared, and this player's own inputs.
+    provenance: CaseProvenance | None = None
     limits: str = (
         "This case is evidence for a person. It is not a ban. "
         "A sustained gear-rule break or a result past the best measured humans "

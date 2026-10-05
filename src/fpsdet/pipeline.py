@@ -38,5 +38,5 @@ def run_score(
             case.observations.append(IN_FILE_NOTE)
         cases.append(case)
     annotate_batch(cases, records, profile)
-    stamp(cases, profile)
+    stamp(cases, profile, cohort=table, cohort_mode="in_file" if in_file else "external", events=events)
     return cases

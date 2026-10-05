@@ -16,7 +16,8 @@ the fields the first snapshot has. A field only the second one has is listed and
 evidence is added without moving what consumers read. Any other change is printed by field and by player,
 and the exit code is 1. With labels, decisions are also counted per label, the way the README reports them.
 ``verify`` checks that every case's structured evidence implies its decision and backs each check and reason,
-and that every case of the run carries the same provenance.
+that every case of the run carries the same detector, profile and cohort provenance, and that each has its own
+input digest.
 """
 
 from __future__ import annotations
@@ -178,7 +179,7 @@ def verify(rows: dict[str, dict]) -> dict:
     """Does each case's structured evidence explain its decision, checks and reasons?"""
     from fpsdet.evidence import KINDS, implied_decision
 
-    result = {"cases": len(rows), "explained": 0, "problems": [], "quiet_watches": 0, "quiet_watches_explained": 0, "kinds": Counter(), "provenance": Counter()}
+    result = {"cases": len(rows), "explained": 0, "problems": [], "quiet_watches": 0, "quiet_watches_explained": 0, "kinds": Counter(), "provenance": Counter(), "inputs": 0}
     for pid, row in sorted(rows.items()):
         block = row.get("evidence")
         if block is None:
@@ -186,8 +187,13 @@ def verify(rows: dict[str, dict]) -> dict:
             continue
         observations = block["observations"]
         result["kinds"].update(obs["kind"] for obs in observations)
-        stamp = block.get("provenance")
+        stamp = dict(block.get("provenance") or {})
+        inputs = stamp.pop("inputs", None)
         result["provenance"][json.dumps(stamp, sort_keys=True) if stamp else "none"] += 1
+        if inputs and str(inputs.get("digest", "")).startswith("sha256:") and inputs.get("events", 0) > 0:
+            result["inputs"] += 1
+        else:
+            result["problems"].append(f"{pid}: no input digest for this player's events")
         problems = []
         if implied_decision(block) != row["decision"]:
             problems.append(f"{pid}: decision {row['decision']}, evidence implies {implied_decision(block)}")
@@ -214,8 +220,11 @@ def cmd_verify(args: argparse.Namespace) -> int:
             continue
         block = json.loads(stamp)
         print(f"Provenance on {n} cases: profile {block['profile']['digest']}, detector {block['detector']['digest']} ({len(block['detector']['modules'])} modules)")
+        cohort = block.get("cohort") or {}
+        print(f"  cohort {cohort.get('mode')} {cohort.get('digest')}, stored digest {cohort.get('stored_digest')}, integrity {(cohort.get('integrity') or {}).get('status')}")
+    print(f"Cases with their own input digest: {result['inputs']} of {result['cases']}")
     if len(result["provenance"]) != 1 or "none" in result["provenance"]:
-        result["problems"].append("the cases of one run do not share one provenance")
+        result["problems"].append("the cases of one run do not share one detector, profile and cohort provenance")
     for problem in result["problems"][: args.show]:
         print(f"  {problem}")
     return 0 if not result["problems"] else 1

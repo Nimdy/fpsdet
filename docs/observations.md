@@ -12,8 +12,8 @@ The model is `fpsdet.evidence`. It is data only and standard library only.
 | The scorer recording every finding that feeds a decision | Implemented (`src/fpsdet/score.py`, `src/fpsdet/signals.py`) |
 | Case files (`cases/*.json`, `scan-index.json`, `review-index.json`) carry `evidence` | Implemented |
 | `ops.json`, the dashboard, the review desk and the AI brief read `evidence` | Not yet. They read what they read before, so none of them changed |
-| Provenance of the detector code and the parsed profile (`evidence.provenance`) | Implemented; see [provenance.md](provenance.md) |
-| Provenance of the events and the cohort; knowledge state, challenges, external evidence, the evidence graph | Proposed in [architecture-v1.md](architecture-v1.md); none of them is here |
+| Provenance of the detector code, the parsed profile, the cohort and the player's events (`evidence.provenance`) | Implemented; see [provenance.md](provenance.md) |
+| One identity over the whole packet; knowledge state, challenges, external evidence, the evidence graph | Proposed in [architecture-v1.md](architecture-v1.md); none of them is here |
 
 Decisions still come from `score.decide`. Nothing reads an observation back into a decision. The legacy fields stay authoritative.
 
@@ -68,7 +68,7 @@ A case carries one new key, `evidence`:
   "version": 1,
   "observations": [ ... ],
   "eligibility": {"compared": [{"metric": "accuracy", "key": "rifle"}]},
-  "provenance": {"version": 1, "profile": {...}, "detector": {...}}
+  "provenance": {"version": 1, "profile": {...}, "detector": {...}, "cohort": {...}, "inputs": {...}}
 }
 ```
 
@@ -76,7 +76,7 @@ A case carries one new key, `evidence`:
 
 `implied_decision(block)` is the decision the roles imply. It is how the tests prove the evidence explains every decision. The scorer does not call it.
 
-`provenance` says which detector code and which parsed game profile produced the observations ([provenance.md](provenance.md)). It is the same for every case of a run, and `null` on a case scored outside one.
+`provenance` says what produced the observations: the detector code, the parsed game profile, the cohort, and the subject player's own events ([provenance.md](provenance.md)). Everything but the events is shared by every case of a run. It is `null` on a case scored outside one.
 
 The case keys that were there before (`reasons`, the context lines in `observations`, `checks`, `metrics`, `seal` and the rest) do not change.
 

@@ -9,6 +9,7 @@ from pathlib import Path
 from .baseline import CohortTable
 from .evidence import evidence_block
 from .models import Case, Event, HistoryWindow, MetricView
+from .provenance import check_cohort_seal, cohort_seal
 
 
 def cohort_to_dict(table: CohortTable) -> dict:
@@ -25,7 +26,7 @@ def cohort_to_dict(table: CohortTable) -> dict:
                 ],
             }
         )
-    return {"version": 1, "metrics": metrics, "integrity": table.integrity}
+    return {"version": 1, "metrics": metrics, "integrity": table.integrity, "provenance": cohort_seal(table)}
 
 
 def cohort_from_dict(obj: dict) -> CohortTable:
@@ -36,6 +37,12 @@ def cohort_from_dict(obj: dict) -> CohortTable:
     stored = obj.get("integrity")
     if isinstance(stored, dict):
         table.integrity = stored
+    # A file that carries digests must match them, or it is refused. An older file without them still loads.
+    if obj.get("provenance") is None:
+        table.stored_digest = "absent"
+    else:
+        check_cohort_seal(table, obj["provenance"])
+        table.stored_digest = "matched"
     return table
 
 

@@ -14,6 +14,7 @@ from .baseline import build_cohorts, screen_matches
 from .casefile import safe_name, write_case
 from .lake import ingest_lines, read_lines
 from .parse import iter_events, load_events, load_profile
+from .provenance import ProvenanceMismatch
 from .persist import (
     case_to_dict,
     cohort_from_dict,
@@ -196,7 +197,10 @@ def cmd_baseline(args: argparse.Namespace) -> int:
     alarms = [] if args.screen_matches else list(screen.lines)
     checked = screen.judged
     if args.previous:
-        previous = cohort_from_dict(read_json(args.previous))
+        try:
+            previous = cohort_from_dict(read_json(args.previous))
+        except ProvenanceMismatch as error:
+            raise SystemExit(f"{args.previous}: {error}")
         alarms += poison_alarms(
             previous,
             table,
@@ -231,7 +235,10 @@ def cmd_score(args: argparse.Namespace) -> int:
     events, errors = _events_from_args(args.events, args.lake, args.game)
     for error in errors:
         print(error, file=sys.stderr)
-    cohort = cohort_from_dict(read_json(args.cohort)) if args.cohort else None
+    try:
+        cohort = cohort_from_dict(read_json(args.cohort)) if args.cohort else None
+    except ProvenanceMismatch as error:
+        raise SystemExit(f"{args.cohort}: {error}")
     if cohort is not None and cohort.integrity.get("status") == "poison_risk":
         print(
             "POISON RISK: this cohort may have learned a cheat. Review the alarms below, rebuild with "

@@ -30,6 +30,8 @@ class CohortTable:
     def __init__(self) -> None:
         self._values: dict[tuple[str, str, str], list[tuple[str, float]]] = defaultdict(list)
         self.integrity: dict = {"status": "unchecked", "alarms": []}
+        # "matched" or "absent" once read from a file with or without a stored digest (fpsdet.provenance).
+        self.stored_digest = "not_from_file"
 
     def add(self, band: str, key: str, metric: str, player_id: str, value: float) -> None:
         self._values[(band, key, metric)].append((player_id, value))

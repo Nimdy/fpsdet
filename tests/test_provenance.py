@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
 import copy
+import io
 import json
+import math
 import re
 import shutil
 import tempfile
@@ -11,10 +14,13 @@ import unittest
 from pathlib import Path
 
 from fpsdet import provenance
-from fpsdet.baseline import build_cohorts
+from fpsdet.baseline import CohortTable, build_cohorts
+from fpsdet.cli import main as cli_main
 from fpsdet.evidence import Observation
-from fpsdet.parse import profile_from_dict
-from fpsdet.persist import case_to_dict
+from fpsdet.models import Event
+from fpsdet.parse import load_events, parse_event, profile_from_dict
+from fpsdet.persist import case_to_dict, cohort_from_dict, cohort_to_dict, event_to_dict
+from fpsdet.provenance import ProvenanceMismatch, cohort_digest, integrity_digest, player_digest, player_inputs
 from fpsdet.pipeline import run_score
 from fpsdet.provenance import (
     DETECTOR_MODULES,
@@ -216,9 +222,13 @@ class CaseProvenanceTest(unittest.TestCase):
 
     def test_every_case_of_a_run_shares_one_provenance(self):
         for cases in (self.scored, self.demo.cases):
-            self.assertEqual(len({id(case.provenance) for case in cases}), 1)
-            blocks = {json.dumps(case_to_dict(case)["evidence"]["provenance"], sort_keys=True) for case in cases}
-            self.assertEqual(len(blocks), 1)
+            self.assertEqual(len({id(case.provenance.run) for case in cases}), 1)
+            shared = set()
+            for case in cases:
+                block = dict(case_to_dict(case)["evidence"]["provenance"])
+                self.assertEqual(block.pop("inputs")["digest"], case.provenance.inputs.digest)
+                shared.add(json.dumps(block, sort_keys=True))
+            self.assertEqual(len(shared), 1)
         block = case_to_dict(self.scored[0])["evidence"]["provenance"]
         self.assertEqual(block["version"], 1)
         self.assertEqual(block["profile"]["digest"], EXAMPLE_PROFILE_DIGEST)
@@ -229,7 +239,7 @@ class CaseProvenanceTest(unittest.TestCase):
         self.assertNotIn(str(PACKAGE_DIR), text)
         self.assertNotIn(str(ROOT), text)
         self.assertNotIn("def ", text)
-        self.assertNotIn("/", text.replace("fpsdet.profile/1", "").replace("fpsdet.detector/1", ""))
+        self.assertNotIn("/", re.sub(r"fpsdet\.[a-z-]+/1", "", text))
 
     def test_observation_ids_and_seals_do_not_depend_on_provenance(self):
         for case in self.demo.cases:
@@ -264,6 +274,221 @@ class CaseProvenanceTest(unittest.TestCase):
         record = summarize(self.demo.events, self.demo.profile)[0]
         cohort = build_cohorts(summarize(self.demo.population, self.demo.profile), self.demo.profile)
         self.assertIsNone(case_to_dict(assess_player(record, cohort, self.demo.profile))["evidence"]["provenance"])
+
+
+# The planted demo's background cohort, and the one player in examples/shot.jsonl. CI checks both on 3.11 and 3.12.
+BACKGROUND_COHORT_DIGEST = "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941"
+SHOT_FILE_INPUT_DIGEST = "sha256:84f184c43e373c5bd170befdddaab430f6b19fdd5cc7b6711f22ccdc96b0f558"
+
+
+def table_of(rows) -> CohortTable:
+    table = CohortTable()
+    for band, key, metric, player_id, value in rows:
+        table.add(band, key, metric, player_id, value)
+    return table
+
+
+ROWS = [
+    ("elite", "rifle", "accuracy", "a", 0.31),
+    ("elite", "rifle", "accuracy", "b", 0.35),
+    ("average", "rifle", "accuracy", "c", 0.2),
+    ("average", "smg", "headshot_rate", "d", 0.4),
+]
+
+
+class CohortFingerprintTest(unittest.TestCase):
+    def test_the_same_baseline_in_any_order_has_one_digest(self):
+        digest = cohort_digest(table_of(ROWS)._values)
+        self.assertRegex(digest, DIGEST)
+        self.assertEqual(cohort_digest(table_of(ROWS)._values), digest)
+        self.assertEqual(cohort_digest(table_of(list(reversed(ROWS)))._values), digest)
+
+    def test_each_part_of_a_row_counts(self):
+        base = cohort_digest(table_of(ROWS)._values)
+        changed = {
+            "value": ("elite", "rifle", "accuracy", "a", 0.32),
+            "player": ("elite", "rifle", "accuracy", "z", 0.31),
+            "band": ("advanced", "rifle", "accuracy", "a", 0.31),
+            "key": ("elite", "dmr", "accuracy", "a", 0.31),
+            "metric": ("elite", "rifle", "headshot_rate", "a", 0.31),
+        }
+        for what, row in changed.items():
+            self.assertNotEqual(cohort_digest(table_of([row] + ROWS[1:])._values), base, what)
+        # The same numbers held by other players are a different baseline: scoring leaves the subject out by id.
+        swapped = [("elite", "rifle", "accuracy", "b", 0.31), ("elite", "rifle", "accuracy", "a", 0.35)] + ROWS[2:]
+        self.assertNotEqual(cohort_digest(table_of(swapped)._values), base)
+        # Every occurrence counts.
+        self.assertNotEqual(cohort_digest(table_of(ROWS + ROWS[:1])._values), base)
+        # Nothing is rounded: values one float apart are different baselines.
+        nudged = [("elite", "rifle", "accuracy", "a", math.nextafter(0.31, 1.0))] + ROWS[1:]
+        self.assertNotEqual(cohort_digest(table_of(nudged)._values), base)
+
+    def test_the_digest_is_the_same_on_every_python(self):
+        demo = build_demo()
+        cohort = build_cohorts(summarize(demo.population, demo.profile), demo.profile)
+        self.assertEqual(cohort_digest(cohort._values), BACKGROUND_COHORT_DIGEST)
+
+    def test_a_file_in_any_layout_loads_to_the_same_baseline(self):
+        table = table_of(ROWS)
+        written = cohort_to_dict(table)
+        shuffled = dict(reversed(list(written.items())))
+        shuffled["metrics"] = [dict(row, players=list(reversed(row["players"]))) for row in reversed(written["metrics"])]
+        for text in (json.dumps(written, indent=2), json.dumps(shuffled, separators=(",", ":"))):
+            loaded = cohort_from_dict(json.loads(text))
+            self.assertEqual(cohort_digest(loaded._values), cohort_digest(table._values))
+            self.assertEqual(loaded.stored_digest, "matched")
+
+    def test_an_older_file_still_loads_and_is_digested(self):
+        legacy = cohort_to_dict(table_of(ROWS))
+        del legacy["provenance"]
+        loaded = cohort_from_dict(legacy)
+        self.assertEqual(loaded.stored_digest, "absent")
+        self.assertEqual(provenance.cohort_fingerprint(loaded, "external").digest, cohort_digest(table_of(ROWS)._values))
+
+    def test_a_file_that_does_not_match_its_digest_is_refused(self):
+        written = cohort_to_dict(table_of(ROWS))
+        edited = json.loads(json.dumps(written))
+        edited["metrics"][0]["players"][0]["value"] = 0.99
+        with self.assertRaises(ProvenanceMismatch):
+            cohort_from_dict(edited)
+        claimed = json.loads(json.dumps(written))
+        claimed["provenance"]["cohort"]["digest"] = "sha256:" + "0" * 64
+        with self.assertRaises(ProvenanceMismatch):
+            cohort_from_dict(claimed)
+        hidden = json.loads(json.dumps(written))
+        hidden["integrity"] = {"status": "ok", "alarms": []}  # someone clears a poison warning
+        with self.assertRaises(ProvenanceMismatch):
+            cohort_from_dict(hidden)
+        future = json.loads(json.dumps(written))
+        future["provenance"]["cohort"]["recipe"] = "fpsdet.cohort/9"
+        with self.assertRaises(ProvenanceMismatch):
+            cohort_from_dict(future)
+
+    def test_the_integrity_stamp_is_separate_from_the_baseline(self):
+        table = table_of(ROWS)
+        before = provenance.cohort_fingerprint(table, "external")
+        table.integrity = {"status": "poison_risk", "alarms": ["match m9: the lobby hit 92%"]}
+        after = provenance.cohort_fingerprint(table, "external")
+        self.assertEqual(after.digest, before.digest)
+        self.assertNotEqual(after.integrity_digest, before.integrity_digest)
+        self.assertEqual((before.integrity_status, after.integrity_status), ("unchecked", "poison_risk"))
+        self.assertEqual(integrity_digest({"alarms": [], "status": "ok"}), integrity_digest({"status": "ok", "alarms": []}))
+
+    def test_the_command_line_writes_a_sealed_baseline_and_scores_against_it(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            events = Path(tmp) / "week.ndjson"
+            cohort = Path(tmp) / "cohort.json"
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                cli_main(["sample", "--out", str(events)])
+                cli_main(["baseline", str(events), "--profile", str(PROFILE_PATH), "--out", str(cohort)])
+                cli_main(["score", str(events), "--profile", str(PROFILE_PATH), "--cohort", str(cohort), "--out", str(Path(tmp) / "cases")])
+            stored = json.loads(cohort.read_text(encoding="utf-8"))
+            case = json.loads((Path(tmp) / "cases" / "rage.json").read_text(encoding="utf-8"))
+            block = case["evidence"]["provenance"]["cohort"]
+            self.assertEqual((block["mode"], block["stored_digest"]), ("external", "matched"))
+            self.assertEqual(block["digest"], stored["provenance"]["cohort"]["digest"])
+            self.assertEqual(block["integrity"]["status"], stored["integrity"]["status"])
+            stored["metrics"][0]["players"][0]["value"] += 0.01
+            cohort.write_text(json.dumps(stored), encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()), self.assertRaises(SystemExit) as stop:
+                cli_main(["score", str(events), "--profile", str(PROFILE_PATH), "--cohort", str(cohort)])
+            self.assertIn("do not match the digest", str(stop.exception))
+
+    def test_a_baseline_fitted_on_the_scored_events_says_so(self):
+        demo = build_demo()
+        cases = run_score(demo.events, demo.profile)
+        block = case_to_dict(cases[0])["evidence"]["provenance"]["cohort"]
+        fitted = build_cohorts(summarize(demo.events, demo.profile), demo.profile)
+        self.assertEqual((block["mode"], block["stored_digest"], block["digest"]), ("in_file", "not_from_file", cohort_digest(fitted._values)))
+        external = run_score(demo.events, demo.profile, build_cohorts(summarize(demo.population, demo.profile), demo.profile))
+        self.assertEqual(case_to_dict(external[0])["evidence"]["provenance"]["cohort"]["mode"], "external")
+
+
+def shot(player_id: str = "p", t_ms: int = 0, **values) -> Event:
+    fields = dict(game_id="g", match_id="m1", player_id=player_id, t_ms=t_ms, event_type="shot", skill_band="average", weapon_class="rifle")
+    fields.update(values)
+    return Event(**fields)
+
+
+class InputFingerprintTest(unittest.TestCase):
+    def test_the_same_parsed_events_have_the_same_digest(self):
+        events = [shot(t_ms=index * 100, hit=index % 3 == 0, distance_m=20.0 + index) for index in range(10)]
+        self.assertEqual(player_digest(events), player_digest([shot(t_ms=index * 100, hit=index % 3 == 0, distance_m=20.0 + index) for index in range(10)]))
+        self.assertRegex(player_digest(events), DIGEST)
+
+    def test_raw_formatting_does_not_matter(self):
+        raw = [{"game_id": "g", "match_id": "m1", "player_id": "p", "t_ms": 100 * i, "hit": True, "distance_m": 31, "dmg": 4.5, "zap": 1} for i in range(5)]
+        spaced = [parse_event(json.loads(json.dumps(row, indent=3))) for row in raw]
+        reordered = [parse_event(dict(reversed(list(row.items())))) for row in raw]
+        self.assertEqual(player_digest(spaced), player_digest(reordered))
+        self.assertEqual(reordered[0].extras, {"zap": 1.0, "dmg": 4.5})  # extras arrive in another order and still match
+
+    def test_a_changed_event_moves_only_its_own_player(self):
+        events = [shot("a", 0, hit=True), shot("a", 100), shot("b", 0, hit=True), shot("b", 100)]
+        before = player_inputs(events)
+        changed = events[:3] + [shot("b", 100, distance_m=40.0)]
+        after = player_inputs(changed)
+        self.assertEqual(after["a"], before["a"])
+        self.assertNotEqual(after["b"].digest, before["b"].digest)
+
+    def test_every_occurrence_counts(self):
+        events = [shot(t_ms=0, hit=True), shot(t_ms=100)]
+        digest = player_digest(events)
+        self.assertNotEqual(player_digest(events + events[:1]), digest)
+        self.assertNotEqual(player_digest(events[:1]), digest)
+        found = player_inputs(events + [shot(t_ms=50, match_id="m2")])["p"]
+        self.assertEqual((found.events, found.matches), (3, 2))
+
+    def test_absent_and_present_stay_distinct(self):
+        self.assertEqual(player_digest([shot(mod_set=())]), player_digest([shot()]))  # an empty mod set is not sent
+        self.assertNotEqual(player_digest([shot(hidden_track_ms=0.0)]), player_digest([shot()]))  # zero is a value
+        self.assertNotEqual(player_digest([shot(distance_m=30.0)]), player_digest([shot(distance_m=30)]))
+
+    def test_values_that_are_not_finite_are_hashed_the_same_way_every_time(self):
+        nan = parse_event(json.loads('{"game_id": "g", "match_id": "m", "player_id": "p", "t_ms": 0, "distance_m": NaN}'))
+        inf = parse_event(json.loads('{"game_id": "g", "match_id": "m", "player_id": "p", "t_ms": 0, "distance_m": Infinity}'))
+        self.assertEqual(player_digest([nan]), player_digest([parse_event(event_to_dict(nan))]))
+        self.assertEqual(len({player_digest([nan]), player_digest([inf]), player_digest([shot(match_id="m", distance_m=1.0)])}), 3)
+
+    def test_the_digest_is_the_same_on_every_python(self):
+        events, _ = load_events(ROOT / "examples" / "shot.jsonl")
+        self.assertEqual(player_inputs(events)["p-1044"].digest, SHOT_FILE_INPUT_DIGEST)
+
+    def test_order_counts_because_the_scorer_reads_it(self):
+        # The case lists findings in the order a player's weapons first appear, so reversing one
+        # player's events can change the case, and must change the digest.
+        events = [shot("w", index * 300, weapon_class="rifle", hidden_track_ms=200.0) for index in range(10)]
+        events += [shot("w", 5000 + index * 300, weapon_class="smg", hidden_track_ms=200.0) for index in range(10)]
+        profile = build_demo().profile
+        forward, backward = run_score(events, profile)[0], run_score(list(reversed(events)), profile)[0]
+        self.assertEqual(len(forward.reasons), 2)
+        self.assertEqual(forward.reasons, list(reversed(backward.reasons)))
+        self.assertNotEqual(forward.seal, backward.seal)
+        self.assertNotEqual(forward.provenance.inputs.digest, backward.provenance.inputs.digest)
+
+    def test_interleaving_players_moves_nothing(self):
+        # Each player's own order kept, players interleaved differently: the same cases and the same digests.
+        demo = build_demo()
+        cohort = build_cohorts(summarize(demo.population, demo.profile), demo.profile)
+        by_player: dict[str, list] = {}
+        for event in demo.events:
+            by_player.setdefault(event.player_id, []).append(event)
+        regrouped = [event for player in sorted(by_player, reverse=True) for event in by_player[player]]
+        first = {case.player_id: case_to_dict(case) for case in run_score(demo.events, demo.profile, cohort)}
+        second = {case.player_id: case_to_dict(case) for case in run_score(regrouped, demo.profile, cohort)}
+        self.assertEqual(first, second)
+
+    def test_inputs_leave_observation_ids_and_seals_alone(self):
+        demo = build_demo()
+        for case in demo.cases:
+            stamped = case_to_dict(case)["evidence"]
+            kept, case.provenance = case.provenance, provenance.CaseProvenance(case.provenance.run, None)
+            try:
+                self.assertEqual(case_to_dict(case)["evidence"]["observations"], stamped["observations"])
+                self.assertEqual(evidence_seal(case), case.seal)
+            finally:
+                case.provenance = kept
+            self.assertEqual(stamped["provenance"]["inputs"]["events"], sum(1 for event in demo.events if event.player_id == case.player_id))
 
 
 if __name__ == "__main__":

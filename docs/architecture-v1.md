@@ -38,7 +38,7 @@ These hold before, during and after the work below. A change that breaks one sto
 | Detect | `signals.py` | 407 | Mirror, metronome, hidden mover, private replay, wire, quiet aim, leftover residual and signature, poison alarms, `evidence_seal`. |
 | Decide | `score.py` | 826 | `assess_player` (every per-player check and the decision), `decide`, the fire-interval rule, the human-baseline comparisons, and the batch passes: shared leftover, voice-speed teammate, party notes. |
 | Evidence | `evidence.py` | — | *Added in P1.* `Observation`, the `evidence` block on each case, `implied_decision` (a check, not used by the scorer). See [observations.md](observations.md). |
-| Evidence | `provenance.py` | — | *Added in P2.1.* Digests of the detector source and the parsed profile in `evidence.provenance`, and the guard that keeps the detector module list honest. See [provenance.md](provenance.md). |
+| Evidence | `provenance.py` | — | *Added in P2.1, extended in P2.2.* Digests of the detector source, the parsed profile, the cohort (and its integrity stamp) and each player's events in `evidence.provenance`; the guard that keeps the detector module list honest; the check that refuses a cohort file whose stored digest does not match. See [provenance.md](provenance.md). |
 | Orchestrate | `pipeline.py` | 40 | `run_score`: summarize, cohort (frozen or in-file), assess, batch. |
 | Order | `priority.py` | 23 | Scan order (reports first) and review order (decision first). |
 | Output | `persist.py` | 166 | JSON shapes for cohort, history, reports, case, event. |
@@ -165,7 +165,7 @@ Every flagged case names what fired. A rank-tail watch carries its explanation o
 - **What it cannot answer.** Which scorer, which profile, which cohort, which events, which game build. Two runs with different profiles that write the same reason text get the same seal. The reason text is prose, so rewording a sentence changes the seal although no evidence changed.
 - **Shape versions.** Case JSON, cohort and history carry `"version": 1`. `ops.json` has none.
 - **In-file cohorts** are marked by a context line on every case, not by a field.
-- **Since P2.1:** `evidence.provenance` names the detector source and the parsed profile by SHA-256 ([provenance.md](provenance.md)). Which events and which cohort are still not bound. The seal above is unchanged.
+- **Since P2.1 and P2.2:** `evidence.provenance` names the detector source, the parsed profile, the cohort and the subject player's events by SHA-256 ([provenance.md](provenance.md)). A cohort file carries its digests and is refused if they do not match. Still not bound: other players' events behind a relationship observation, player history, and one identity over the whole packet. The seal above is unchanged.
 
 ## 7. What keeps honest players out of review (implemented)
 
@@ -221,7 +221,7 @@ In order of what blocks first.
 4. **Batch passes rewrite finished cases,** and the voice check selects partners by reason text. *Phase 1 and 7.*
 5. **Knowledge is scattered.** Audio exclusion, the grace window and the unknowable selection sit inside `summarize._weapon_summaries`; thresholds in `signals.py`; the emitter computes the rest. `information_state` has three values and no notion of which sources the server actually checked. *Blocks Phase 3.*
 6. **The private replay is one number per shot.** No challenge id, no commitment, no schedule, no record of when it was active. *Blocks Phase 4.*
-7. **No provenance beyond the seal** (section 6). The profile parser turns explicit zeros into defaults, so the profile must be hashed after parsing. *Partly resolved in P2.1: the detector source and the parsed profile are bound. Events and cohort are next.*
+7. **No provenance beyond the seal** (section 6). The profile parser turns explicit zeros into defaults, so the profile must be hashed after parsing. *Mostly resolved in P2.1 and P2.2: the detector source, the parsed profile, the cohort and each player's events are bound. One identity over the whole packet is next.*
 8. **`CohortTable._values` is read from four modules,** and every leave-one-out lookup is a linear scan. Fine at today's sizes (TF2 scores in 7 s); a calibration pass that asks many more questions will need an index.
 9. **Input hardening** (section 5, row 3). The lake paths (row 4) are fixed.
 10. **The leftover comparison is all pairs.** Measured at about 4 µs per pair: 100 players 0.02 s, 1,000 players 2 s, 3,000 players 18 s, per weapon key. Extrapolated, 10,000 players take about 200 s and 100,000 about 5.5 hours. Relationship work has to partition (candidates by weapon key and region, or by a coarse signature bucket, or only against accounts already in review) before it grows.
@@ -286,7 +286,7 @@ Rules:
 
 ### 10.2 Provenance
 
-*Partly implemented in P2.1: `profile` and the detector source (`scorer_source` below, written as `detector`). The rest of this sketch, the cohort, history, inputs, game build, challenges, external sources and `evidence_id`, is still proposed. [provenance.md](provenance.md) is the reference.*
+*Partly implemented in P2.1 and P2.2: `profile`, the detector source (`scorer_source` below, written as `detector`), `cohort` (with its integrity stamp kept apart, and a `mode` of `external` or `in_file`) and `inputs`. `window` became the `events` and `matches` counts. Still proposed: history, game build, challenges, external sources and `evidence_id`. [provenance.md](provenance.md) is the reference.*
 
 ```python
 @dataclass(frozen=True)
@@ -440,7 +440,8 @@ Each step is one commit, run against the full suite, the demo, the board diff an
 | 1.2 Emit observations | done | `score.py` records an observation beside each sentence it already writes; `signals.py` detectors return their numbers through `*_finding` functions behind the old ones; batch passes record relationship observations, the voice watch with `depends_on`. `models.Case.evidence`, `persist.case_to_dict` adds `"evidence"`; `ops.json` and the AI brief leave it out. Deferred by decision: the voice check still selects partners by text; reports are not observations. |
 | 1.3 Schema and doc | doc done | `docs/observations.md` done; `schema/observation.schema.json` waits for the versioned schemas (Phase 15) |
 | 2.1 Provenance: detector and profile | done | `provenance.py`; `pipeline.py` and the planted demo stamp each run; `persist.case_to_dict` writes `evidence.provenance`; `tests/test_provenance.py`; `docs/provenance.md` |
-| 2.2 Provenance: cohort and inputs | next | cohort digest in `persist.cohort_to_dict` and on each case; a per-case digest of the events scored for that player |
+| 2.2 Provenance: cohort and inputs | done | cohort and integrity digests, written into cohort files and checked on load; `mode` external or in-file; a per-player digest of the events scored, in the scorer's order; `docs/provenance.md` |
+| 2.3 Evidence packet identity | next | one digest over the subject, the detector, profile, cohort and input digests, the eligibility and the observations |
 | 3.1 Knowledge engine | | new `knowledge.py`; `summarize.py` delegates the audio, grace and unknowable decisions to it, unchanged; `parse.py` and the event schema gain optional channel fields; information observations carry the knowledge summary; `tests/test_knowledge.py` (the ten scenarios); `docs/knowledge-engine.md` |
 
 ### P1
