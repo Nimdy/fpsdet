@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Unit tests
-        run: PYTHONPATH=src python -m unittest tests.test_fpsdet tests.test_golden tests.test_observations tests.test_provenance tests.test_packet tests.test_event_order tests.test_knowledge tests.test_challenge -v
+        run: PYTHONPATH=src python -m unittest tests.test_fpsdet tests.test_golden tests.test_observations tests.test_provenance tests.test_packet tests.test_event_order tests.test_knowledge tests.test_challenge tests.test_external -v
       - name: Planted demo
         # Writes demo/board.html. Exits non-zero if any planted case got the wrong decision.
         run: PYTHONPATH=src python -m fpsdet demo

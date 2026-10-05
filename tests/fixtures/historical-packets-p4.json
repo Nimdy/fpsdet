@@ -1,0 +1,551 @@
+{
+ "cases": [
+  {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "private_replay"
+   ],
+   "decision": "review",
+   "evidence": {
+    "eligibility": {
+     "compared": [
+      {
+       "key": "rifle",
+       "metric": "accuracy"
+      },
+      {
+       "key": "rifle",
+       "metric": "median_distance"
+      }
+     ]
+    },
+    "observations": [
+     {
+      "context": {
+       "knowledge": {
+        "basis": "private_track_ms: placed where this client's line-of-sight and audio queries fail",
+        "channels": {
+         "audio": "absent",
+         "recent_perception": "not_applicable",
+         "vision": "absent"
+        },
+        "not_counted": {},
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "status": "unknowable"
+       },
+       "legacy": "private_track_ms names no challenge: there is no plan, window or commitment, and time from every match on this aim key adds up",
+       "line": "rifle aim stayed on a private replay for 1600 ms across 20 shots",
+       "printed_in": "reasons"
+      },
+      "depends_on": [],
+      "evidence": {
+       "challenge": {
+        "challenge_id": "legacy_private_replay:rifle",
+        "commitment": null,
+        "origin": "legacy_private_replay",
+        "plan": null,
+        "type": "occluded_motion_replay",
+        "version": null,
+        "window": null
+       },
+       "eligible_samples": null,
+       "knowledge": {
+        "defeated": [
+         "vision",
+         "audio"
+        ],
+        "not_applicable": [
+         "recent_perception"
+        ],
+        "required": [
+         "vision",
+         "audio"
+        ]
+       },
+       "linkage": "private_track_ms",
+       "scope": "aim_key",
+       "thresholds": {
+        "min_samples": 8,
+        "min_total_ms": 1200.0
+       },
+       "total_ms": 1600.0,
+       "tracked_samples": 20
+      },
+      "family": "challenge",
+      "key": "legacy_private_replay:rifle",
+      "kind": "occluded_motion_replay",
+      "match_ids": [
+       "m1"
+      ],
+      "observation_id": "obs-d6b0a455423d666f8428468e",
+      "role": "review",
+      "source": "fpsdet",
+      "subject_id": "replay-lock"
+     }
+    ],
+    "packet": {
+     "digest": "sha256:201af2f685fb7761bbe96ce4e79a86228a0f3a9eefbeac7984254bbfb1dcf188",
+     "recipe": "fpsdet.packet/1",
+     "status": "complete"
+    },
+    "provenance": {
+     "cohort": {
+      "digest": "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+      "integrity": {
+       "digest": "sha256:5f0fdccafd0565d24cc1a8e821229c9fc98ffe0aa895e609c7d725d6a5f9206b",
+       "recipe": "fpsdet.cohort-integrity/1",
+       "status": "unchecked"
+      },
+      "mode": "external",
+      "recipe": "fpsdet.cohort/1",
+      "stored_digest": "not_from_file"
+     },
+     "detector": {
+      "digest": "sha256:6fcf0757be8085c6ecec0e609fb444f6b4db0953f79456eeb8145942048f2d1a",
+      "modules": [
+       "fpsdet",
+       "fpsdet.baseline",
+       "fpsdet.challenge",
+       "fpsdet.evidence",
+       "fpsdet.knowledge",
+       "fpsdet.models",
+       "fpsdet.parse",
+       "fpsdet.persist",
+       "fpsdet.pipeline",
+       "fpsdet.provenance",
+       "fpsdet.score",
+       "fpsdet.signals",
+       "fpsdet.statsutil",
+       "fpsdet.summarize",
+       "fpsdet.timeline"
+      ],
+      "recipe": "fpsdet.detector/1"
+     },
+     "history": {
+      "digest": "sha256:5f6a4f9954ab6f3f14deabe4e6abcb010cd01c063249b3f4564de78074b650b7",
+      "mode": "external",
+      "recipe": "fpsdet.history/1",
+      "windows": 0
+     },
+     "inputs": {
+      "digest": "sha256:9e06689f0e09caac73734e373579b2ad692e8413480b396f1f31e85783c98bcd",
+      "events": 48,
+      "matches": 1,
+      "recipe": "fpsdet.player-events/2"
+     },
+     "profile": {
+      "digest": "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb",
+      "recipe": "fpsdet.profile/1"
+     },
+     "version": 1
+    },
+    "version": 1
+   },
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.11248584522204352,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.6572608492716,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897289907,
+     "ceiling_p95": 43.814691444768805,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018160586376,
+     "own_p95": 33.56448833105132,
+     "player_value": 28.6572608492716,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "replay-lock",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle aim stayed on a private replay for 1600 ms across 20 shots"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "e73f0a73ef538ed1667e4bb7938b487d3de12323b3369441585381cf35b9e3ae",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "evidence": {
+    "eligibility": {
+     "compared": [
+      {
+       "key": "rifle",
+       "metric": "accuracy"
+      },
+      {
+       "key": "rifle",
+       "metric": "headshot_rate"
+      },
+      {
+       "key": "rifle",
+       "metric": "median_distance"
+      }
+     ]
+    },
+    "observations": [],
+    "packet": {
+     "digest": "sha256:303948365f9d58bf05c7ec16f0a98a3e168f95eb8ea00ce557896f960a7321f4",
+     "recipe": "fpsdet.packet/1",
+     "status": "complete"
+    },
+    "provenance": {
+     "cohort": {
+      "digest": "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+      "integrity": {
+       "digest": "sha256:5f0fdccafd0565d24cc1a8e821229c9fc98ffe0aa895e609c7d725d6a5f9206b",
+       "recipe": "fpsdet.cohort-integrity/1",
+       "status": "unchecked"
+      },
+      "mode": "external",
+      "recipe": "fpsdet.cohort/1",
+      "stored_digest": "not_from_file"
+     },
+     "detector": {
+      "digest": "sha256:6fcf0757be8085c6ecec0e609fb444f6b4db0953f79456eeb8145942048f2d1a",
+      "modules": [
+       "fpsdet",
+       "fpsdet.baseline",
+       "fpsdet.challenge",
+       "fpsdet.evidence",
+       "fpsdet.knowledge",
+       "fpsdet.models",
+       "fpsdet.parse",
+       "fpsdet.persist",
+       "fpsdet.pipeline",
+       "fpsdet.provenance",
+       "fpsdet.score",
+       "fpsdet.signals",
+       "fpsdet.statsutil",
+       "fpsdet.summarize",
+       "fpsdet.timeline"
+      ],
+      "recipe": "fpsdet.detector/1"
+     },
+     "history": {
+      "digest": "sha256:5f6a4f9954ab6f3f14deabe4e6abcb010cd01c063249b3f4564de78074b650b7",
+      "mode": "external",
+      "recipe": "fpsdet.history/1",
+      "windows": 0
+     },
+     "inputs": {
+      "digest": "sha256:63c2707f6e756984c640740f40c358138f1e273089d2c93fb3abd76eef710a6d",
+      "events": 200,
+      "matches": 1,
+      "recipe": "fpsdet.player-events/2"
+     },
+     "profile": {
+      "digest": "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb",
+      "recipe": "fpsdet.profile/1"
+     },
+     "version": 1
+    },
+    "version": 1
+   },
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.28262881030903614,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.37,
+     "own_p95": 0.36,
+     "player_value": 0.335,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.3658926444991267,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857142857142,
+     "ceiling_p95": 0.5074626865671642,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.5142857142857142,
+     "own_p95": 0.5074626865671642,
+     "player_value": 0.4626865671641791,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 40,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897289907,
+     "ceiling_p95": 43.814691444768805,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 45.14391897289907,
+     "own_p95": 43.814691444768805,
+     "player_value": 40.0,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "elite-human",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "5c9c13f71bf8db79b365e1cc63aa0c1f1ebbf046f0630053a45df67172cf6c36",
+   "skill_band": "elite",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "leftover"
+   ],
+   "decision": "watch",
+   "evidence": {
+    "eligibility": {
+     "compared": [
+      {
+       "key": "rifle",
+       "metric": "accuracy"
+      },
+      {
+       "key": "rifle",
+       "metric": "median_distance"
+      }
+     ]
+    },
+    "observations": [
+     {
+      "context": {
+       "line": "leftover command matches clone-source (r 1.00), who is already a review in this batch",
+       "printed_in": "reasons"
+      },
+      "depends_on": [],
+      "evidence": {
+       "fisher_z": 48.119772272,
+       "keyed_by": "position",
+       "partner": "clone-source",
+       "partner_in_review": true,
+       "points": 47,
+       "r": 1.0,
+       "shared_habit_removed": false,
+       "thresholds": {
+        "min_points": 32,
+        "min_r": 0.85,
+        "min_samples": 32,
+        "min_z": 5.0
+       }
+      },
+      "family": "relationship",
+      "key": "rifle",
+      "kind": "leftover",
+      "match_ids": [],
+      "observation_id": "obs-1436a54beaf57101259ffba1",
+      "role": "watch",
+      "source": "fpsdet",
+      "subject_id": "clone-buyer"
+     }
+    ],
+    "packet": {
+     "digest": "sha256:0da2006822ae062a90eb537950fa2eeaeff9819a85d3d2af84290d9c42eba97f",
+     "recipe": "fpsdet.packet/1",
+     "status": "complete"
+    },
+    "provenance": {
+     "cohort": {
+      "digest": "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+      "integrity": {
+       "digest": "sha256:5f0fdccafd0565d24cc1a8e821229c9fc98ffe0aa895e609c7d725d6a5f9206b",
+       "recipe": "fpsdet.cohort-integrity/1",
+       "status": "unchecked"
+      },
+      "mode": "external",
+      "recipe": "fpsdet.cohort/1",
+      "stored_digest": "not_from_file"
+     },
+     "detector": {
+      "digest": "sha256:6fcf0757be8085c6ecec0e609fb444f6b4db0953f79456eeb8145942048f2d1a",
+      "modules": [
+       "fpsdet",
+       "fpsdet.baseline",
+       "fpsdet.challenge",
+       "fpsdet.evidence",
+       "fpsdet.knowledge",
+       "fpsdet.models",
+       "fpsdet.parse",
+       "fpsdet.persist",
+       "fpsdet.pipeline",
+       "fpsdet.provenance",
+       "fpsdet.score",
+       "fpsdet.signals",
+       "fpsdet.statsutil",
+       "fpsdet.summarize",
+       "fpsdet.timeline"
+      ],
+      "recipe": "fpsdet.detector/1"
+     },
+     "history": {
+      "digest": "sha256:5f6a4f9954ab6f3f14deabe4e6abcb010cd01c063249b3f4564de78074b650b7",
+      "mode": "external",
+      "recipe": "fpsdet.history/1",
+      "windows": 0
+     },
+     "inputs": {
+      "digest": "sha256:f2fa9d4ebc85e49b80eeeb874452329176abc5ea7512845e42f23baf302b3969",
+      "events": 48,
+      "matches": 1,
+      "recipe": "fpsdet.player-events/2"
+     },
+     "profile": {
+      "digest": "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb",
+      "recipe": "fpsdet.profile/1"
+     },
+     "version": 1
+    },
+    "version": 1
+   },
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.11248584522204352,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.6572608492716,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897289907,
+     "ceiling_p95": 43.814691444768805,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018160586376,
+     "own_p95": 33.56448833105132,
+     "player_value": 28.6572608492716,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "clone-buyer",
+   "queue_rank": 2,
+   "reasons": [
+    "leftover command matches clone-source (r 1.00), who is already a review in this batch"
+   ],
+   "recommended_action": "monitor",
+   "reports": 0,
+   "seal": "61f20d5529e86f4443664e631fc07854c20a7527ff5e3eaa0ea58c742433cc4d",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": 1.0,
+   "vendor_twin": "clone-source",
+   "version": 1
+  }
+ ],
+ "note": "Written by fpsdet at ce00ac6 (P4, the challenge engine), before external evidence: the planted replay-lock (a legacy challenge observation), elite-human (clean) and clone-buyer (a batch watch). Their packets use fpsdet.packet/1 and must keep verifying after fpsdet.packet/2."
+}
