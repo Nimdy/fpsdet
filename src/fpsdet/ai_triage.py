@@ -94,6 +94,9 @@ def triage_case(
     redact_ids: bool = True,
     known_ids: Iterable[str] = (),
 ) -> str:
+    # The brief reads the case as it always has. The structured evidence names other players and
+    # matches, and is not redacted yet, so it does not leave the machine.
+    case = {key: value for key, value in case.items() if key != "evidence"}
     payload = redact_case(case, known_ids) if redact_ids else case
     body = {
         "messages": [

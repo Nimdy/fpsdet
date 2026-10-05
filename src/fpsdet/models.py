@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from .evidence import Observation
+
 
 INNOCENT_CAUSES = frozenset(
     {
@@ -268,6 +270,12 @@ class SpeedReport:
     spike_samples: int = 0
     cap_source: str = "none"
     detail: str = ""
+    # Where the longest over-cap run was, and its fastest sample against the cap that sample had.
+    run_match: str = ""
+    run_start_ms: int | None = None
+    run_end_ms: int | None = None
+    run_peak_mps: float | None = None
+    run_peak_cap_mps: float | None = None
 
 
 @dataclass
@@ -359,6 +367,9 @@ class Case:
     inherit_lags_ms: list[int] = field(default_factory=list)
     # Machine-readable ids of what fired, from CHECKS. Dashboards group on these, not on reason text.
     checks: list[str] = field(default_factory=list)
+    # The same findings as data (fpsdet.evidence), and each (metric, key) compared with a thick cohort.
+    evidence: list[Observation] = field(default_factory=list)
+    compared_on: list[tuple[str, str]] = field(default_factory=list)
     limits: str = (
         "This case is evidence for a person. It is not a ban. "
         "A sustained gear-rule break or a result past the best measured humans "

@@ -65,7 +65,7 @@ PYTHONPATH=src python3 -m fpsdet score --lake ./lake \
 3. `baseline` learns what humans on each rank and weapon look like. It prints one `POISON RISK` line, for match `raid-9`: a planted aimbot's lobby that hit 92% of its shots. On a real week, review that match, or rebuild with `--screen-matches` to leave it out.
 4. `score` writes the cases.
 
-`cases/` gets one JSON file and one offline HTML page per player. It also gets:
+`cases/` gets one JSON file and one offline HTML page per player. Each case JSON has the sentences a reviewer reads and, under `evidence`, the same findings as data: which check fired, the role it played in the decision, and the numbers behind it ([docs/observations.md](docs/observations.md)). It also gets:
 - `scan-index.json` (reported players first)
 - `review-index.json` (strongest evidence first)
 - `features.csv`

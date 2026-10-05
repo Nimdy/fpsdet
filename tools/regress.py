@@ -8,12 +8,14 @@ is. Snapshot the run before a change, snapshot it again after, and diff:
     # ...change the scorer...
     PYTHONPATH=src python tools/regress.py snapshot ... --out after.jsonl
     python tools/regress.py diff before.jsonl after.jsonl --labels labels.json
+    PYTHONPATH=src python tools/regress.py verify after.jsonl
 
 A snapshot is one line per player: the case exactly as ``fpsdet score`` writes it, with floats cut to 10
 significant digits so the last bit of a float sum cannot differ between Python versions. ``diff`` compares
 the fields the first snapshot has. A field only the second one has is listed and allowed: that is how new
 evidence is added without moving what consumers read. Any other change is printed by field and by player,
 and the exit code is 1. With labels, decisions are also counted per label, the way the README reports them.
+``verify`` checks that every case's structured evidence implies its decision and backs each check and reason.
 """
 
 from __future__ import annotations
@@ -128,6 +130,43 @@ def cmd_diff(args: argparse.Namespace) -> int:
     return 1
 
 
+def verify(rows: dict[str, dict]) -> dict:
+    """Does each case's structured evidence explain its decision, checks and reasons?"""
+    from fpsdet.evidence import KINDS, implied_decision
+
+    result = {"cases": len(rows), "explained": 0, "problems": [], "quiet_watches": 0, "quiet_watches_explained": 0, "kinds": Counter()}
+    for pid, row in sorted(rows.items()):
+        block = row.get("evidence")
+        if block is None:
+            result["problems"].append(f"{pid}: no evidence")
+            continue
+        observations = block["observations"]
+        result["kinds"].update(obs["kind"] for obs in observations)
+        problems = []
+        if implied_decision(block) != row["decision"]:
+            problems.append(f"{pid}: decision {row['decision']}, evidence implies {implied_decision(block)}")
+        if {KINDS[obs["kind"]][1] for obs in observations} != set(row["checks"]):
+            problems.append(f"{pid}: checks do not match the evidence")
+        if sorted(obs["context"]["line"] for obs in observations if obs["context"]["printed_in"] == "reasons") != sorted(row["reasons"]):
+            problems.append(f"{pid}: reasons do not match the evidence")
+        if row["decision"] == "watch" and not row["reasons"]:
+            result["quiet_watches"] += 1
+            result["quiet_watches_explained"] += int(not problems)
+        result["problems"] += problems
+        result["explained"] += int(not problems)
+    return result
+
+
+def cmd_verify(args: argparse.Namespace) -> int:
+    result = verify(read_snapshot(args.snapshot))
+    print(f"{result['explained']} of {result['cases']} cases explained by their evidence")
+    print(f"Watches with no reason line: {result['quiet_watches']}, explained by evidence: {result['quiet_watches_explained']}")
+    print("Observations by kind: " + ", ".join(f"{kind} {n}" for kind, n in result["kinds"].most_common()))
+    for problem in result["problems"][: args.show]:
+        print(f"  {problem}")
+    return 0 if not result["problems"] else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -145,6 +184,10 @@ def main(argv: list[str] | None = None) -> int:
     diff.add_argument("--labels", help="JSON map of player id to label, to count decisions per label")
     diff.add_argument("--show", type=int, default=20, help="How many moved players to list")
     diff.set_defaults(func=cmd_diff)
+    check = sub.add_parser("verify", help="Check that each case's evidence explains its decision, checks and reasons. Needs PYTHONPATH=src")
+    check.add_argument("snapshot")
+    check.add_argument("--show", type=int, default=20)
+    check.set_defaults(func=cmd_verify)
     args = parser.parse_args(argv)
     return args.func(args)
 

@@ -7,6 +7,7 @@ from dataclasses import fields
 from pathlib import Path
 
 from .baseline import CohortTable
+from .evidence import evidence_block
 from .models import Case, Event, HistoryWindow, MetricView
 
 
@@ -139,6 +140,7 @@ def case_to_dict(case: Case) -> dict:
         "vendor_r": case.vendor_r,
         "inherit_lags_ms": case.inherit_lags_ms,
         "checks": case.checks,
+        "evidence": evidence_block(case.evidence, case.compared_on),
     }
 
 

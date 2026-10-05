@@ -37,6 +37,7 @@ These hold before, during and after the work below. A change that breaks one sto
 | Stats | `statsutil.py` | 116 | Median, nearest-rank percentile, Wilson bounds, order-statistic median bound, design effect, clustered bound. |
 | Detect | `signals.py` | 407 | Mirror, metronome, hidden mover, private replay, wire, quiet aim, leftover residual and signature, poison alarms, `evidence_seal`. |
 | Decide | `score.py` | 826 | `assess_player` (every per-player check and the decision), `decide`, the fire-interval rule, the human-baseline comparisons, and the batch passes: shared leftover, voice-speed teammate, party notes. |
+| Evidence | `evidence.py` | — | *Added in P1.* `Observation`, the `evidence` block on each case, `implied_decision` (a check, not used by the scorer). See [observations.md](observations.md). |
 | Orchestrate | `pipeline.py` | 40 | `run_score`: summarize, cohort (frozen or in-file), assess, batch. |
 | Order | `priority.py` | 23 | Scan order (reports first) and review order (decision first). |
 | Output | `persist.py` | 166 | JSON shapes for cohort, history, reports, case, event. |
@@ -120,7 +121,7 @@ The `family` column in `models.CHECKS` today is `gear`, `baseline`, `information
 | `hidden` | information | information | decisive | `hidden_track_ms`, `information_state` (audio dropped), `since_perceived_ms` (grace) | under 8 samples or 1,200 ms | `signals.hidden_break` |
 | `quiet_aim` | information | information | decisive | `aim_jitter_deg` with `information_state` | under 12 per side; knowable median under 0.05° | `signals.smoothness_break` |
 | `wire` | information | information | decisive | `wire_error_deg`, `picture_error_deg`, `interp_delay_ms` | delay ≤ 0, negative error, no separation; under 8 shots or 1,200 ms | `signals.wire_break` |
-| `private_replay` | information | challenge | decisive | `private_track_ms` | under 8 samples or 1,200 ms | `signals.private_break` |
+| `private_replay` | information | challenge (recorded as `information` until the challenge engine exists) | decisive | `private_track_ms` | under 8 samples or 1,200 ms | `signals.private_break` |
 | `leftover` | batch | relationship | batch watch | recoil command residuals, per weapon key | under 32 samples or 12 points; r < 0.85 or Fisher z < 5 | `score.annotate_vendors` |
 | `voice` | batch | relationship | batch watch | unknowable contacts with `enemy_id`, same `party_id`, same `match_id` | no partner already in review for a hidden mover; under 4 fast lags | `score.annotate_inheritance` |
 | (party note) | — | relationship | context | `party_id` | — | `score.annotate_parties` |
@@ -212,9 +213,9 @@ python tools/regress.py diff before.jsonl after.jsonl --labels labels.json
 
 In order of what blocks first.
 
-1. **Findings are sentences.** `assess_player` appends a reason string and, separately, a check id. Nothing links a sentence to its check, its numbers, its thresholds or its window. *Blocks Phase 1.*
-2. **Decision inputs are local variables.** `physics`, the family sets and the counters live inside `assess_player` and are thrown away, so nobody can recompute a decision from the evidence. *Blocks Phase 1.*
-3. **`Case.observations` is taken.** It holds free-text context lines that consumers already read. The new protocol cannot use that JSON key. *Phase 1 uses a new key.*
+1. **Findings are sentences.** `assess_player` appends a reason string and, separately, a check id. Nothing links a sentence to its check, its numbers, its thresholds or its window. *Resolved in P1: each finding is also an observation that carries its check, its numbers and its sentence.*
+2. **Decision inputs are local variables.** `physics`, the family sets and the counters live inside `assess_player` and are thrown away, so nobody can recompute a decision from the evidence. *Resolved in P1: roles and `eligibility.compared` reproduce every decision; `score.decide` still makes it.*
+3. **`Case.observations` is taken.** It holds free-text context lines that consumers already read. The new protocol cannot use that JSON key. *Resolved in P1: the new key is `evidence`.*
 4. **Batch passes rewrite finished cases,** and the voice check selects partners by reason text. *Phase 1 and 7.*
 5. **Knowledge is scattered.** Audio exclusion, the grace window and the unknowable selection sit inside `summarize._weapon_summaries`; thresholds in `signals.py`; the emitter computes the rest. `information_state` has three values and no notion of which sources the server actually checked. *Blocks Phase 3.*
 6. **The private replay is one number per shot.** No challenge id, no commitment, no schedule, no record of when it was active. *Blocks Phase 4.*
@@ -225,7 +226,7 @@ In order of what blocks first.
 11. **Presentation reads prose.** `ops._why` picks the queue line by matching phrases; the planted demo checks reason text. Structured observations let both read ids.
 12. **Size.** One 2,265-line test file; `board.py` is Python, HTML, CSS and JS in 2,024 lines.
 13. **AI input** is not framed as data and not bounded (section 5, row 8). *Phase 12.*
-14. **`MetricView` has no sample sizes** (shots, matches, cohort n). Calibration needs them. *Phase 1 records them in the evidence payload.*
+14. **`MetricView` has no sample sizes** (shots, matches, cohort n). Calibration needs them. *Resolved in P1 for every finding: trials, samples, matches and cohort players are in its evidence. `MetricView` itself is unchanged.*
 15. **Spec and code disagree on headshot coverage.** docs/scoring.md says headshot rate is skipped unless hits with a hitbox cover 90% of hits. `build_cohorts` applies that; `assess_player` does not, so a player whose emitter sends hitboxes on some hits is still scored on those. Measured: in TF2, 17 of the 783 player-weapons scored on headshot rate have coverage under 90% (older logs carry no headshot data); none of the 17 has a headshot flag, so no decision depends on it today. CS2: 0 of 488. An emitter that sends `hitbox` only on headshots would frame players. Fix in its own commit, behind the locks.
 
 ## 10. Proposed interfaces
@@ -239,6 +240,14 @@ All proposed. Plain dataclasses and JSON, standard library only. One new top-lev
 `reasons`, `observations` (the context lines), `checks`, `metrics` and `seal` stay as they are.
 
 ### 10.1 Observation
+
+*Implemented in P1, narrower than proposed below; [observations.md](observations.md) is the reference.* What was built differs in five ways:
+
+- Roles are `review`, `past_human`, `account_change`, `supporting` and `watch`, one per `decide()` input. They replace the proposed grades; `context` and `informational` are not roles, because nothing emits them.
+- Only the families something emits exist: no `challenge`, `external` or `report` yet. The private replay is `information`.
+- No `statistic`, `alternatives`, `started_ms` or `ended_ms` fields. Bounds sit inside `evidence`, and alternatives are Phase 5.
+- `dependencies` is `depends_on`, and `text` lives in `context.line`.
+- The block also carries `eligibility.compared`, so clean and `insufficient_data` are told apart without an invented observation.
 
 ```python
 FAMILIES = ("physics", "weapon_rules", "human_baseline", "information", "challenge",
@@ -403,7 +412,7 @@ Each box is a module with one job and a test file of its own. The decision stays
 | The committed desk is what the scorer writes | CI `git diff --exit-code demo/board.html` |
 | Real TF2 and CS2 results do not move | `RealDataContractTest` on the committed desks; `tools/regress.py diff` on a local rerun |
 | `automated_action` stays `none` | `GoldenPlantedTest`, `GoldenWeekTest` |
-| Reports never change evidence | Phase 1 test: removing every report leaves every observation id and decision unchanged |
+| Reports never change evidence | `RecordedFindingsTest.test_reports_change_no_evidence` (P1) |
 | Evidence identity ignores UI changes | Phase 2 test |
 | No secret challenge material in public artifacts | Phase 4 leak test over case JSON, `ops.json`, the desk and the site |
 | AI cannot change a decision | Phase 12 test: a hostile brief leaves decision, seal and evidence unchanged |
@@ -423,9 +432,9 @@ Each step is one commit, run against the full suite, the demo, the board diff an
 | 0.2 Whole-case behaviour lock | done | `tests/test_golden.py`, `tests/golden/*.json`, CI, `CONTRIBUTING.md` |
 | 0.3 Real-data regression tool | done | `tools/regress.py` |
 | 0.4 Lake path hardening | done, separate commit | `lake.py`, `cli.py`, `LakeTest` |
-| 1.1 Observation model | next | new `evidence.py`: `Observation`, families, grades, canonical JSON, ids, `decide_from()`; `tests/test_observations.py` |
-| 1.2 Emit observations | | `score.py`: one `found(check, grade, text, key, evidence)` helper replaces each paired `reasons.append` and `fired`, with identical text; batch passes emit relationship observations with dependencies; the voice check reads `checks`; reports become informational observations. `models.Case.evidence`. `persist.case_to_dict` adds `"evidence"`. `ops.py` leaves it out of `ops.json` for now, so the desk does not change. |
-| 1.3 Schema and doc | | `schema/observation.schema.json`, `docs/observations.md` |
+| 1.1 Observation model | done | `evidence.py`: `Observation`, families, roles, canonical JSON, ids, `implied_decision`; `tests/test_observations.py` |
+| 1.2 Emit observations | done | `score.py` records an observation beside each sentence it already writes; `signals.py` detectors return their numbers through `*_finding` functions behind the old ones; batch passes record relationship observations, the voice watch with `depends_on`. `models.Case.evidence`, `persist.case_to_dict` adds `"evidence"`; `ops.json` and the AI brief leave it out. Deferred by decision: the voice check still selects partners by text; reports are not observations. |
+| 1.3 Schema and doc | doc done | `docs/observations.md` done; `schema/observation.schema.json` waits for the versioned schemas (Phase 15) |
 | 2.1 Provenance | | new `provenance.py`; `cli.py` (input digests); `persist.cohort_to_dict` (cohort provenance); `tests/test_provenance.py` (same inputs same id; a material profile change moves it; a cohort change moves it; a UI change does not) |
 | 3.1 Knowledge engine | | new `knowledge.py`; `summarize.py` delegates the audio, grace and unknowable decisions to it, unchanged; `parse.py` and the event schema gain optional channel fields; information observations carry the knowledge summary; `tests/test_knowledge.py` (the ten scenarios); `docs/knowledge-engine.md` |
 

@@ -304,7 +304,8 @@ def ops_payload(
         if truth is not None:
             row["truth"] = truth.get(case.player_id, "honest")
         if case.decision != "clean" or case.reports or (truth and truth.get(case.player_id, "honest") != "honest"):
-            row["case"] = case_to_dict(case)
+            # The views do not read the structured evidence yet, so ops.json and the desk stay as they were.
+            row["case"] = {key: value for key, value in case_to_dict(case).items() if key != "evidence"}
         rows.append(row)
 
     events = events or []

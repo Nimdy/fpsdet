@@ -25,6 +25,7 @@ from __future__ import annotations
 import math
 
 from .baseline import CohortTable, Dist, cohort_is_thick, sample_std
+from .evidence import KINDS, Observation
 from .models import (
     ACTIONS,
     Case,
@@ -36,15 +37,15 @@ from .models import (
 )
 from .signals import (
     evidence_seal,
-    hidden_break,
+    hidden_finding,
+    keyed_match_gaps,
     leftover_signature,
-    match_gaps,
-    metronome_break,
-    mirror_check,
-    private_break,
+    metronome_finding,
+    mirror_check_finding,
+    private_finding,
     pearson,
-    smoothness_break,
-    wire_break,
+    smoothness_finding,
+    wire_finding,
 )
 from .statsutil import clustered_lower, design_effect, median, median_bound, percentile, wilson_upper
 
@@ -117,6 +118,22 @@ def _rate_flags(
     ``deff`` shrinks the sample when the rate swings between matches more than
     independent shots would, so one hot match cannot carry the bound.
     """
+    view, band, human, did, _facts = _rate_compare(name, successes, total, point, record, weapon, cohorts, profile, deff)
+    return view, band, human, did
+
+
+def _rate_compare(
+    name: str,
+    successes: int,
+    total: int,
+    point: float,
+    record: PlayerRecord,
+    weapon: WeaponSummary,
+    cohorts: CohortTable,
+    profile: GameProfile,
+    deff: float = 1.0,
+) -> tuple[MetricView, bool, bool, bool, dict]:
+    """``_rate_flags``, and the numbers it compared (empty when it could not compare)."""
     own = cohorts.dist(weapon.skill_band, weapon.weapon_key, name, record.player_id)
     ceiling_name = cohorts.ceiling_band(
         weapon.weapon_key, name, record.player_id, profile.min_cohort_players
@@ -128,7 +145,7 @@ def _rate_flags(
     )
     if total <= 0 or not cohort_is_thick(own, profile) or not cohort_is_thick(ceiling, profile):
         why = "cohort for this weapon and rank is still thinner than min_cohort_players"
-        return _view(name, point, None, own, ceiling_name, ceiling, beyond_band=False, beyond_human=False, skipped=why), False, False, False
+        return _view(name, point, None, own, ceiling_name, ceiling, beyond_band=False, beyond_human=False, skipped=why), False, False, False, {}
     lower = clustered_lower(successes, total, deff)
     past_band = lower > own.p95  # type: ignore[union-attr]
     top = cohorts.extreme(weapon.weapon_key, name, record.player_id, profile.min_cohort_players, high=True)
@@ -138,7 +155,19 @@ def _rate_flags(
     shown = ceiling if best_band == ceiling_name else cohorts.dist(best_band, weapon.weapon_key, name, record.player_id)
     view = _view(name, point, lower, own, best_band, shown, beyond_band=past_band, beyond_human=past_human)
     view.ceiling_extreme = best
-    return view, past_band, past_human, True
+    facts = {
+        "metric": name,
+        "successes": successes,
+        "trials": total,
+        "observed": point,
+        "matches": len(weapon.per_match),
+        "bound": {"method": "wilson_lower", "level": 0.95, "design_effect": deff, "value": lower},
+        "rank": {"band": weapon.skill_band, "players": own.n, "p95": own.p95},  # type: ignore[union-attr]
+        "ceiling": {"band": best_band, "players": shown.n, "max": best},  # type: ignore[union-attr]
+        "past_rank": past_band,
+        "past_human": past_human,
+    }
+    return view, past_band, past_human, True, facts
 
 
 def _continuous_flags(
@@ -151,8 +180,12 @@ def _continuous_flags(
     *,
     direction: str,
     bound: float | None = None,
-) -> tuple[MetricView, bool, bool, bool]:
-    """``bound`` is the conservative end of the player's number, when the number has one."""
+    samples: int = 0,
+) -> tuple[MetricView, bool, bool, bool, dict]:
+    """``bound`` is the conservative end of the player's number, when the number has one.
+
+    Also returns the numbers it compared, empty when it could not compare.
+    """
     own = cohorts.dist(weapon.skill_band, weapon.weapon_key, name, record.player_id)
     ceiling_name = cohorts.ceiling_band(
         weapon.weapon_key, name, record.player_id, profile.min_cohort_players
@@ -164,7 +197,7 @@ def _continuous_flags(
     )
     if not cohort_is_thick(own, profile) or not cohort_is_thick(ceiling, profile):
         why = "cohort for this weapon and rank is still thinner than min_cohort_players"
-        return _view(name, value, value, own, ceiling_name, ceiling, beyond_band=False, beyond_human=False, skipped=why), False, False, False
+        return _view(name, value, value, own, ceiling_name, ceiling, beyond_band=False, beyond_human=False, skipped=why), False, False, False, {}
     assert own is not None and ceiling is not None
     # Past the rank is the rank's tail. Past humans is past every human measured,
     # the same bar the rates use. The top band's p95 is crossed by one player in twenty.
@@ -185,10 +218,26 @@ def _continuous_flags(
         name, value, tested, own, best_band, shown, beyond_band=past_band, beyond_human=past_human
     )
     view.ceiling_extreme = extreme
-    return view, past_band, past_human, True
+    high = direction == "high"
+    facts: dict = {
+        "metric": name,
+        "observed": value,
+        "samples": samples,
+        "direction": direction,
+        "rank": {"band": weapon.skill_band, "players": own.n, **({"p95": own.p95} if high else {"p05": own.p05})},
+        "ceiling": {"band": best_band, "players": shown.n if shown else None, ("max" if high else "min"): extreme},
+        "past_rank": past_band,
+        "past_human": past_human,
+    }
+    if bound is not None:
+        facts["bound"] = {"method": "median_order_statistic", "side": "lower" if high else "upper", "level": 0.95, "value": bound}
+    return view, past_band, past_human, True, facts
 
 
-def _identity(record: PlayerRecord, history: list[HistoryWindow], profile: GameProfile) -> tuple[bool, str]:
+def _identity(
+    record: PlayerRecord, history: list[HistoryWindow], profile: GameProfile
+) -> tuple[bool, str, dict, WeaponSummary | None]:
+    """The first weapon on which this window is confidently above the account's own history."""
     for weapon in record.weapons:
         matched = [
             row
@@ -206,15 +255,29 @@ def _identity(record: PlayerRecord, history: list[HistoryWindow], profile: GameP
         upper = wilson_upper(hits, shots)
         gap = lower - upper
         if gap >= profile.self_jump_gap:
-            return True, (
+            text = (
                 f"{weapon.weapon_key} accuracy is confidently above this account's own history "
                 f"by {gap:.0%} (history upper {upper:.0%}, this window lower {lower:.0%})"
             )
-    return False, ""
+            facts = {
+                "metric": "accuracy",
+                "band": weapon.skill_band,
+                "history": {"windows": len(matched), "shots": shots, "hits": hits, "bound": {"method": "wilson_upper", "level": 0.95, "value": upper}},
+                "window": {
+                    "shots": weapon.shots,
+                    "hits": weapon.hits,
+                    "matches": len(weapon.per_match),
+                    "bound": {"method": "wilson_lower", "level": 0.95, "design_effect": deff, "value": lower},
+                },
+                "gap": gap,
+                "thresholds": {"self_jump_gap": profile.self_jump_gap, "min_shots": profile.min_shots},
+            }
+            return True, text, facts, weapon
+    return False, "", {}, None
 
 
-def _fire_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
-    """Gaps under the cycle, counted in the matches where they are the habit.
+def _fire_break(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict] | None:
+    """Gaps under the cycle, counted in the matches where they are the habit. Returns (sentence, numbers).
 
     A match counts when it has at least FIRE_MATCH_GAPS gaps and at least
     ``min_violation_rate`` of them broke the cycle. One jittery timestamp in an
@@ -227,19 +290,62 @@ def _fire_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
         return None
     floor = rule.min_shot_interval_ms - rule.interval_slack_ms
     intervals = violations = matches = 0
-    for gaps in match_gaps(weapon):
+    counted: list[dict] = []
+    for match_id, gun, gaps in keyed_match_gaps(weapon):
         bad = sum(1 for gap in gaps if gap < floor)
         if len(gaps) >= FIRE_MATCH_GAPS and bad / len(gaps) >= rule.min_violation_rate:
             intervals += len(gaps)
             violations += bad
             matches += 1
+            counted.append({"match_id": match_id, "gun": gun, "gaps": len(gaps), "under_floor": bad})
     if intervals >= rule.min_intervals and violations >= rule.min_violations:
         where = f" in {matches} matches" if matches > 1 else ""
-        return (
+        text = (
             f"{weapon.weapon_key} fired faster than its cycle "
             f"({violations}/{intervals} gaps under {floor} ms{where})"
         )
+        return text, {
+            "gaps": intervals,
+            "under_floor": violations,
+            "matches": matches,
+            "floor_ms": floor,
+            "counted": counted,
+            "thresholds": {
+                "cycle_ms": rule.min_shot_interval_ms,
+                "slack_ms": rule.interval_slack_ms,
+                "min_gaps_per_match": FIRE_MATCH_GAPS,
+                "min_violation_rate": rule.min_violation_rate,
+                "min_gaps": rule.min_intervals,
+                "min_under_floor": rule.min_violations,
+            },
+        }
     return None
+
+
+def _speed_facts(record: PlayerRecord, profile: GameProfile) -> dict:
+    speed = record.speed
+    return {
+        "longest_run": speed.longest_run,
+        "over_cap_samples": speed.violations,
+        "eligible_samples": speed.eligible,
+        "cap_source": speed.cap_source,
+        "run": {
+            "match_id": speed.run_match,
+            "start_ms": speed.run_start_ms,
+            "end_ms": speed.run_end_ms,
+            "peak_mps": speed.run_peak_mps,
+            "cap_mps": speed.run_peak_cap_mps,
+        },
+        "thresholds": {
+            "min_run": profile.speed_min_run,
+            "over_fraction": profile.speed_over_fraction,
+            "run_gap_ms": profile.speed_run_gap_ms,
+        },
+    }
+
+
+def _matches_in(rows: list[dict]) -> set[str]:
+    return {row["match_id"] for row in rows if row["match_id"]}
 
 
 def assess_player(
@@ -256,10 +362,27 @@ def assess_player(
     untrained: list[str] = []
     physics = False
     checks: list[str] = []
+    found: list[Observation] = []
+    compared_on: list[tuple[str, str]] = []
 
     def fired(check: str) -> None:
         if check not in checks:
             checks.append(check)
+
+    def observe(kind: str, role: str, line: str, printed_in: str, evidence: dict, *, key: str = "", match_ids=(), context=None) -> None:
+        """The finding just written as a sentence, kept as data. The sentence and the check id are unchanged."""
+        found.append(
+            Observation(
+                family=KINDS[kind][0],
+                kind=kind,
+                role=role,
+                subject_id=record.player_id,
+                key=key,
+                match_ids=tuple(sorted(match_ids)),
+                evidence=evidence,
+                context={"line": line, "printed_in": printed_in, **(context or {})},
+            )
+        )
 
     human_families: set[str] = set()
     beyond_band = 0
@@ -273,8 +396,20 @@ def assess_player(
 
     if record.speed.sustained:
         physics = True
-        reasons.append(record.speed.detail or "sustained ground speed over the gear cap")
+        line = record.speed.detail or "sustained ground speed over the gear cap"
+        reasons.append(line)
         fired("speed")
+        speed = record.speed
+        observe(
+            "speed", "review", line, "reasons", _speed_facts(record, profile),
+            match_ids=[speed.run_match] if speed.run_match else (),
+            context={"excluded": {
+                "innocent_cause": speed.excluded_innocent,
+                "unknown_cause": speed.excluded_unknown,
+                "airborne_or_unknown_ground": speed.excluded_airborne,
+                "no_cap": speed.missing_cap,
+            }},
+        )
     elif record.speed.spike_samples:
         observations.append(record.speed.detail)
     elif record.speed.detail:
@@ -282,36 +417,44 @@ def assess_player(
 
     for weapon in record.weapons:
         first_metric = len(metrics)
+        key = weapon.weapon_key
+        where = weapon.match_ids
         fire = _fire_break(weapon, profile)
         if fire:
             physics = True
-            reasons.append(fire)
+            reasons.append(fire[0])
             fired("fire_rate")
-        steady = metronome_break(weapon, profile)
+            observe("fire_rate", "review", fire[0], "reasons", fire[1], key=key, match_ids=_matches_in(fire[1]["counted"]))
+        steady = metronome_finding(weapon, profile)
         if steady:
             physics = True
-            reasons.append(steady)
+            reasons.append(steady[0])
             fired("metronome")
-        hidden = hidden_break(weapon, profile)
+            observe("metronome", "review", steady[0], "reasons", steady[1], key=key, match_ids=_matches_in(steady[1]["counted"]))
+        hidden = hidden_finding(weapon, profile)
         if hidden:
             physics = True
-            reasons.append(hidden)
+            reasons.append(hidden[0])
             fired("hidden")
-        private = private_break(weapon, profile)
+            observe("hidden", "review", hidden[0], "reasons", hidden[1], key=key, match_ids=where)
+        private = private_finding(weapon, profile)
         if private:
             physics = True
-            reasons.append(private)
+            reasons.append(private[0])
             fired("private_replay")
-        wire = wire_break(weapon, profile)
+            observe("private_replay", "review", private[0], "reasons", private[1], key=key, match_ids=where)
+        wire = wire_finding(weapon, profile)
         if wire:
             physics = True
-            reasons.append(wire)
+            reasons.append(wire[0])
             fired("wire")
-        smooth = smoothness_break(weapon, profile)
+            observe("wire", "review", wire[0], "reasons", wire[1], key=key, match_ids=where)
+        smooth = smoothness_finding(weapon, profile)
         if smooth:
             physics = True
-            reasons.append(smooth)
+            reasons.append(smooth[0])
             fired("quiet_aim")
+            observe("quiet_aim", "review", smooth[0], "reasons", smooth[1], key=key, match_ids=where)
         if weapon.shots < profile.min_shots:
             observations.append(
                 f"{weapon.weapon_key}: {weapon.shots} shots, need {profile.min_shots} before aim is scored"
@@ -323,7 +466,7 @@ def assess_player(
                 f"{weapon.weapon_key} accuracy varies between matches {acc_deff:.1f}x more than chance, "
                 "so its bound is wider."
             )
-        acc_view, band, human, did = _rate_flags(
+        acc_view, band, human, did, facts = _rate_compare(
             "accuracy",
             weapon.hits,
             weapon.shots,
@@ -336,26 +479,30 @@ def assess_player(
         )
         metrics.append(acc_view)
         compared = compared or did
+        if did:
+            compared_on.append(("accuracy", key))
         beyond_band += int(band)
         if band and not human:
             fired("rank_tail")
         if human:
             human_families.add("accuracy")
             fired("accuracy")
-            reasons.append(
+            line = (
                 f"{weapon.weapon_key} accuracy lower bound {acc_view.bound:.0%} is past the best "
                 f"measured {acc_view.ceiling_band} human ({acc_view.ceiling_extreme:.0%})"
             )
+            reasons.append(line)
+            observe("accuracy", "past_human", line, "reasons", facts, key=key, match_ids=where)
         elif band:
-            observations.append(
-                f"{weapon.weapon_key} accuracy is above this rank's range and inside the best humans measured"
-            )
+            line = f"{weapon.weapon_key} accuracy is above this rank's range and inside the best humans measured"
+            observations.append(line)
+            observe("rank_tail", "watch", line, "observations", facts, key=key, match_ids=where)
         if acc_view.skipped:
             observations.append(f"{weapon.weapon_key} accuracy: {acc_view.skipped}")
 
         if weapon.head_known_hits >= profile.min_hits_for_headshot:
             hs_deff = design_effect([(row[2], row[3]) for row in weapon.per_match.values()])
-            hs_view, band, human, did = _rate_flags(
+            hs_view, band, human, did, facts = _rate_compare(
                 "headshot_rate",
                 weapon.head_hits,
                 weapon.head_known_hits,
@@ -368,6 +515,8 @@ def assess_player(
             )
             metrics.append(hs_view)
             compared = compared or did
+            if did:
+                compared_on.append(("headshot_rate", key))
             beyond_band += int(band)
             if band and not human:
                 fired("rank_tail")
@@ -375,20 +524,22 @@ def assess_player(
                 human_families.add("headshot_rate")
                 fired("headshot_rate")
             if human:
-                reasons.append(
+                line = (
                     f"{weapon.weapon_key} headshot lower bound {hs_view.bound:.0%} is past the best "
                     f"measured {hs_view.ceiling_band} human ({hs_view.ceiling_extreme:.0%})"
                 )
+                reasons.append(line)
+                observe("headshot_rate", "past_human", line, "reasons", facts, key=key, match_ids=where)
             elif band:
-                observations.append(
-                    f"{weapon.weapon_key} headshot rate is above this rank's range and inside the best humans measured"
-                )
+                line = f"{weapon.weapon_key} headshot rate is above this rank's range and inside the best humans measured"
+                observations.append(line)
+                observe("rank_tail", "watch", line, "observations", facts, key=key, match_ids=where)
             if hs_view.skipped:
                 observations.append(f"{weapon.weapon_key} headshots: {hs_view.skipped}")
 
         if len(weapon.distances) >= profile.min_shots:
             dist_value = median(weapon.distances)
-            dist_view, band, human, did = _continuous_flags(
+            dist_view, band, human, did, facts = _continuous_flags(
                 "median_distance",
                 dist_value,
                 record,
@@ -397,26 +548,31 @@ def assess_player(
                 profile,
                 direction="high",
                 bound=median_bound(weapon.distances, upper=False),
+                samples=len(weapon.distances),
             )
             metrics.append(dist_view)
             compared = compared or did
+            if did:
+                compared_on.append(("median_distance", key))
             beyond_band += int(band)
             if band and not human:
                 fired("rank_tail")
             if human:
                 human_families.add("median_distance")
                 fired("median_distance")
-                reasons.append(
+                line = (
                     f"{weapon.weapon_key} median engagement {dist_value:.0f} m (lower bound {dist_view.bound:.0f} m) is past the farthest measured "
                     f"{dist_view.ceiling_band} human ({dist_view.ceiling_extreme:.0f} m)"
                 )
+                reasons.append(line)
+                observe("median_distance", "past_human", line, "reasons", facts, key=key, match_ids=where)
             elif band:
-                observations.append(
-                    f"{weapon.weapon_key} median engagement distance is above this rank's range and inside the farthest humans measured"
-                )
+                line = f"{weapon.weapon_key} median engagement distance is above this rank's range and inside the farthest humans measured"
+                observations.append(line)
+                observe("rank_tail", "watch", line, "observations", facts, key=key, match_ids=where)
 
         if weapon.geometry_known >= profile.min_shots:
-            geo_view, band, human, did = _rate_flags(
+            geo_view, band, human, did, facts = _rate_compare(
                 "geometry_rate",
                 weapon.geometry_true,
                 weapon.geometry_known,
@@ -428,72 +584,97 @@ def assess_player(
             )
             metrics.append(geo_view)
             compared = compared or did
+            if did:
+                compared_on.append(("geometry_rate", key))
             beyond_band += int(band)
             if band and not human:
                 fired("rank_tail")
             if human:
                 human_families.add("geometry_rate")
                 fired("geometry_rate")
-                reasons.append(
-                    f"{weapon.weapon_key} shots through geometry are past the best measured human rate"
-                )
+                line = f"{weapon.weapon_key} shots through geometry are past the best measured human rate"
+                reasons.append(line)
+                observe("geometry_rate", "past_human", line, "reasons", facts, key=key, match_ids=where)
             elif band:
-                observations.append(
-                    f"{weapon.weapon_key} shots through geometry are above this rank's range and inside the best humans measured"
-                )
+                line = f"{weapon.weapon_key} shots through geometry are above this rank's range and inside the best humans measured"
+                observations.append(line)
+                observe("rank_tail", "watch", line, "observations", facts, key=key, match_ids=where)
 
         if len(weapon.view_deltas) >= profile.min_shots:
             view_value = percentile(sorted(weapon.view_deltas), 0.95)
-            view, _band, human, did = _continuous_flags(
-                "view_p95", view_value, record, weapon, cohorts, profile, direction="high"
+            view, _band, human, did, facts = _continuous_flags(
+                "view_p95", view_value, record, weapon, cohorts, profile, direction="high", samples=len(weapon.view_deltas)
             )
             metrics.append(view)
             if did and human:
                 supporting_families.add("view")
                 fired("supporting")
-                observations.append(f"{weapon.weapon_key} view snaps sit past every measured human")
+                line = f"{weapon.weapon_key} view snaps sit past every measured human"
+                observations.append(line)
+                observe("view_snaps", "supporting", line, "observations", facts, key=key, match_ids=where)
 
         if len(weapon.acquire_ms) >= profile.min_shots:
             acquire_med = median(weapon.acquire_ms)
             acquire_dev = sample_std(weapon.acquire_ms)
-            med_view, _b1, human1, did1 = _continuous_flags(
-                "acquire_median", acquire_med, record, weapon, cohorts, profile, direction="low"
+            med_view, _b1, human1, did1, med_facts = _continuous_flags(
+                "acquire_median", acquire_med, record, weapon, cohorts, profile, direction="low", samples=len(weapon.acquire_ms)
             )
-            dev_view, _b2, human2, _did2 = _continuous_flags(
-                "acquire_std", acquire_dev, record, weapon, cohorts, profile, direction="low"
+            dev_view, _b2, human2, _did2, dev_facts = _continuous_flags(
+                "acquire_std", acquire_dev, record, weapon, cohorts, profile, direction="low", samples=len(weapon.acquire_ms)
             )
             metrics.extend([med_view, dev_view])
             if did1 and (human1 or human2):
                 supporting_families.add("acquire")
                 fired("supporting")
-                observations.append(
-                    f"{weapon.weapon_key} target-acquire timing is tighter than the human low end"
-                )
+                line = f"{weapon.weapon_key} target-acquire timing is tighter than the human low end"
+                observations.append(line)
+                observe("acquire_timing", "supporting", line, "observations", {"metric": "acquire_ms", "median": med_facts, "spread": dev_facts}, key=key, match_ids=where)
         for view in metrics[first_metric:]:
             view.key = weapon.weapon_key
 
     for recoil in record.recoils:
-        mirror, mirror_note = mirror_check(recoil, profile)
+        build = recoil.build_key
+        mirror, mirror_note = mirror_check_finding(recoil, profile)
         if mirror:
             physics = True
-            reasons.append(mirror)
+            reasons.append(mirror[0])
             fired("mirror")
+            observe("mirror", "review", mirror[0], "reasons", mirror[1], key=build)
         elif mirror_note:
             observations.append(mirror_note)
         if recoil.blatant:
             physics = True
             floor = recoil.floor if recoil.floor is not None else 0.0
-            reasons.append(
+            line = (
                 f"{recoil.build_key} recoil stayed under {profile.recoil_floor_fraction:.0%} of the "
                 f"build floor ({floor:.2f} deg) for {recoil.longest_low_run} shots"
             )
+            reasons.append(line)
             fired("recoil_floor")
+            observe("recoil_floor", "review", line, "reasons", {
+                "floor_deg": recoil.floor,
+                "longest_low_run": recoil.longest_low_run,
+                "low_shots": recoil.low_samples,
+                "shots": len(recoil.pitches),
+                "thresholds": {
+                    "floor_fraction": profile.recoil_floor_fraction,
+                    "min_run": profile.recoil_min_run,
+                    "min_spray_index": profile.recoil_min_spray_index,
+                },
+            }, key=build)
             continue
         if len(recoil.pitches) < profile.recoil_min_run:
             continue
         player_med = median(recoil.pitches)
         # Low recoil is the finding, so test the high end of the median.
         pitch_high = median_bound(recoil.pitches, upper=True)
+        pitch = {
+            "metric": "recoil",
+            "observed": player_med,
+            "samples": len(recoil.pitches),
+            "direction": "low",
+            "bound": {"method": "median_order_statistic", "side": "upper", "level": 0.95, "value": pitch_high},
+        }
         if recoil.untrained:
             ceiling_name = cohorts.ceiling_band(
                 recoil.build_key, "recoil", record.player_id, profile.min_cohort_players
@@ -510,28 +691,44 @@ def assess_player(
                 )
                 continue
             learned_floor = ceiling.mid * profile.recoil_floor_fraction
+            learned = {
+                **pitch,
+                "ceiling": {"band": ceiling_name, "players": ceiling.n, "min": ceiling.minimum, "p05": ceiling.p05, "median": ceiling.mid},
+                "learned_floor": learned_floor,
+                "thresholds": {"floor_fraction": profile.recoil_floor_fraction},
+            }
             if pitch_high < ceiling.minimum and ceiling.mid > 0 and pitch_high < learned_floor:
                 physics = True
                 fired("recoil_learned")
-                reasons.append(
+                line = (
                     f"{recoil.build_key} recoil median {player_med:.2f} deg is far under every measured "
                     f"human on this build (lowest {ceiling.minimum:.2f}, median {ceiling.mid:.2f})"
                 )
+                reasons.append(line)
+                observe("recoil_learned", "review", line, "reasons", learned, key=build)
             elif pitch_high < ceiling.p05:
                 beyond_band += 1
                 fired("rank_tail")
-                observations.append(
-                    f"{recoil.build_key} recoil is in the low tail of humans who use this build"
-                )
+                line = f"{recoil.build_key} recoil is in the low tail of humans who use this build"
+                observations.append(line)
+                observe("rank_tail", "watch", line, "observations", learned, key=build)
             compared = True
+            compared_on.append(("recoil", build))
             continue
         # A designer floor exists and the spray was not blatant. Still learn the human tail.
         own = cohorts.dist(recoil.skill_band, recoil.build_key, "recoil", record.player_id)
         if cohort_is_thick(own, profile) and own is not None and pitch_high < own.p05:
             beyond_band += 1
             fired("rank_tail")
-            observations.append(f"{recoil.build_key} recoil is low for humans on this build, above the hard floor")
+            line = f"{recoil.build_key} recoil is low for humans on this build, above the hard floor"
+            observations.append(line)
+            observe("rank_tail", "watch", line, "observations", {
+                **pitch,
+                "rank": {"band": recoil.skill_band, "players": own.n, "p05": own.p05},
+                "floor_deg": recoil.floor,
+            }, key=build)
             compared = True
+            compared_on.append(("recoil", build))
 
     for extra in record.extras:
         spec = next((item for item in profile.extra_metrics if item.name == extra.name), None)
@@ -550,6 +747,7 @@ def assess_player(
             observations.append(f"{extra.name} on {extra.group_key} is waiting for a baseline")
             continue
         compared = True
+        compared_on.append((extra.name, extra.group_key))
         # The tail is one player in twenty. Past humans is past every one measured.
         if extra.direction == "high":
             tail = extra_bound > dist.p95
@@ -576,25 +774,44 @@ def assess_player(
                 key=extra.group_key,
             )
         )
+        high = extra.direction == "high"
+        declared = {
+            "metric": extra.name,
+            "declared_as": extra.kind,
+            "group": extra.group_key,
+            "direction": extra.direction,
+            "observed": player_med,
+            "samples": len(extra.values),
+            "bound": {"method": "median_order_statistic", "side": "lower" if high else "upper", "level": 0.95, "value": extra_bound},
+            "cohort": {"players": dist.n, **({"p95": dist.p95, "max": extreme} if high else {"p05": dist.p05, "min": extreme})},
+            "past_tail": tail,
+            "past_human": past,
+        }
         if tail and not past and extra.kind == "primary":
             beyond_band += 1
             fired("rank_tail")
-            observations.append(f"{extra.name} median {player_med:.3g} is in the human tail, inside every measured human")
+            tail_line = f"{extra.name} median {player_med:.3g} is in the human tail, inside every measured human"
+            observations.append(tail_line)
+            observe("rank_tail", "watch", tail_line, "observations", declared, key=extra.group_key)
         if not past:
             continue
         if extra.kind == "primary":
             human_families.add(f"extra:{extra.name}")
             fired("extra")
             reasons.append(line)
+            observe("extra", "past_human", line, "reasons", declared, key=extra.group_key)
         else:
             supporting_families.add(f"extra:{extra.name}")
             fired("supporting")
             observations.append(line)
+            observe("supporting_extra", "supporting", line, "observations", declared, key=extra.group_key)
 
-    identity, identity_text = _identity(record, history, profile)
+    identity, identity_text, identity_facts, jumped = _identity(record, history, profile)
     if identity:
         reasons.append(identity_text)
         fired("account_jump")
+        assert jumped is not None
+        observe("account_jump", "account_change", identity_text, "reasons", identity_facts, key=jumped.weapon_key, match_ids=jumped.match_ids)
 
     decision = decide(
         physics=physics,
@@ -624,15 +841,40 @@ def assess_player(
         untrained=untrained,
         speed=record.speed,
         checks=checks,
+        evidence=found,
+        compared_on=compared_on,
     )
     case.seal = evidence_seal(case)
     return case
 
 
-def _watch_for_batch(case: Case, reason: str, rank: int, check: str) -> None:
+def _batch_observation(
+    case: Case, kind: str, line: str, printed_in: str, evidence: dict, *, key: str = "", match_ids=(), depends_on=()
+) -> Observation:
+    return Observation(
+        family=KINDS[kind][0],
+        kind=kind,
+        role="watch",
+        subject_id=case.player_id,
+        key=key,
+        match_ids=tuple(sorted(match_ids)),
+        evidence=evidence,
+        depends_on=tuple(depends_on),
+        context={"line": line, "printed_in": printed_in},
+    )
+
+
+def _watch_for_batch(
+    case: Case, reason: str, rank: int, kind: str, evidence: dict, *, key: str = "", match_ids=(), depends_on=()
+) -> None:
     """A batch tell can move a clean player to watch. It does not make a review."""
+    check = KINDS[kind][1]
     if check not in case.checks:
         case.checks.append(check)
+    printed_in = "observations" if case.decision == "review" else "reasons"
+    case.evidence.append(
+        _batch_observation(case, kind, reason, printed_in, evidence, key=key, match_ids=match_ids, depends_on=depends_on)
+    )
     if case.decision == "review":
         case.observations.append(reason)
         return
@@ -661,15 +903,17 @@ def _center(players: dict[str, dict[tuple[str, int], float]]) -> None:
         players[player_id] = {key: value - means[key] for key, value in points.items()}
 
 
-def _signature_r(
+def _signature_match(
     left: dict[tuple[str, int], float],
     right: dict[tuple[str, int], float],
     profile: GameProfile,
-) -> float | None:
+) -> dict | None:
+    """r, the points it was measured on, how they were keyed, and the Fisher z; None under the bar."""
     common = sorted(set(left) & set(right))
     if not common:
         return None
-    need = profile.vendor_min_shots if common[0][0] == "position" else profile.vendor_min_points
+    keyed_by = common[0][0]
+    need = profile.vendor_min_shots if keyed_by == "position" else profile.vendor_min_points
     if len(common) < need:
         return None
     correlation = pearson([left[key] for key in common], [right[key] for key in common])
@@ -678,7 +922,9 @@ def _signature_r(
     # Every pair on a build is a test. A short signature needs a stronger r to clear the same
     # bar: Fisher z = atanh(r) * sqrt(n - 3). Five is about one chance pair in three million.
     fisher = math.atanh(min(correlation, 0.999999)) * math.sqrt(len(common) - 3)
-    return correlation if fisher >= profile.vendor_min_z else None
+    if fisher < profile.vendor_min_z:
+        return None
+    return {"r": correlation, "points": len(common), "keyed_by": keyed_by, "fisher_z": fisher, "min_points": need}
 
 
 def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: GameProfile) -> None:
@@ -704,31 +950,51 @@ def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: Ga
             longest[recoil.weapon_key] = samples
             builds.setdefault(recoil.weapon_key, {})[record.player_id] = points
     best: dict[tuple[str, str], float] = {}
-    for players in builds.values():
-        if len(players) >= profile.min_cohort_players:
+    measured: dict[tuple[str, str], dict] = {}
+    for weapon_key, players in builds.items():
+        centered = len(players) >= profile.min_cohort_players
+        if centered:
             _center(players)
         ids = sorted(players)
         for left_index, left in enumerate(ids):
             for right in ids[left_index + 1 :]:
-                correlation = _signature_r(players[left], players[right], profile)
+                found = _signature_match(players[left], players[right], profile)
+                correlation = None if found is None else found["r"]
                 if correlation is None or correlation < profile.vendor_min_r:
                     continue
                 if correlation > best.get((left, right), -2.0):
                     best[(left, right)] = correlation
+                    measured[(left, right)] = {**found, "weapon_key": weapon_key, "centered": centered}  # type: ignore[dict-item]
     confirmed = {case.player_id for case in cases if case.decision == "review"}
     for (left, right), correlation in sorted(best.items()):
         pair_confirmed = left in confirmed or right in confirmed
+        pair = measured[(left, right)]
         for player_id, other in ((left, right), (right, left)):
             case = by_case.get(player_id)
             if case is None:
                 continue
             _remember_twin(case, other, correlation)
+            facts = {
+                "partner": other,
+                "partner_in_review": other in confirmed,
+                "r": correlation,
+                "fisher_z": pair["fisher_z"],
+                "points": pair["points"],
+                "keyed_by": pair["keyed_by"],
+                "shared_habit_removed": pair["centered"],
+                "thresholds": {
+                    "min_r": profile.vendor_min_r,
+                    "min_z": profile.vendor_min_z,
+                    "min_points": pair["min_points"],
+                    "min_samples": profile.vendor_min_shots,
+                },
+            }
             if pair_confirmed and player_id in confirmed:
                 if "leftover" not in case.checks:
                     case.checks.append("leftover")
-                case.observations.append(
-                    f"leftover command matches {other} (r {correlation:.2f})"
-                )
+                line = f"leftover command matches {other} (r {correlation:.2f})"
+                case.observations.append(line)
+                case.evidence.append(_batch_observation(case, "leftover", line, "observations", facts, key=pair["weapon_key"]))
                 continue
             if pair_confirmed:
                 reason = (
@@ -740,7 +1006,7 @@ def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: Ga
                     f"leftover command matches {other} (r {correlation:.2f}). "
                     "Nobody in the pair is a review yet"
                 )
-            _watch_for_batch(case, reason, 2, "leftover")
+            _watch_for_batch(case, reason, 2, "leftover", facts, key=pair["weapon_key"])
 
 
 def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile: GameProfile) -> None:
@@ -771,6 +1037,7 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                 if mate == cheater or mate not in contacts:
                     continue
                 lags: list[int] = []
+                lag_matches: list[str] = []
                 for match, moment, enemy in contacts[mate]:
                     # t_ms restarts every match. Only a swing in the same match can follow a callout.
                     priors = [
@@ -781,6 +1048,7 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                     if not priors:
                         continue
                     lags.append(moment - max(priors))
+                    lag_matches.append(match)
                 case = by_case.get(mate)
                 if case is None or not lags:
                     continue
@@ -791,6 +1059,8 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                 low = min(fast)
                 high = max(fast)
                 span = f"{low} ms" if low == high else f"{low}–{high} ms"
+                # The partner was chosen above by the text of its reason. The dependency is recorded by id.
+                partner = by_case.get(cheater)
                 _watch_for_batch(
                     case,
                     (
@@ -799,6 +1069,15 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                     ),
                     1,
                     "voice",
+                    {
+                        "partner": cheater,
+                        "party_id": party,
+                        "fast_lags_ms": fast,
+                        "lags": len(lags),
+                        "thresholds": {"voice_ms": profile.voice_min_ms, "min_fast": profile.inherit_min_events},
+                    },
+                    match_ids={match for lag, match in zip(lags, lag_matches) if 0 <= lag < profile.voice_min_ms},
+                    depends_on=[obs.observation_id for obs in (partner.evidence if partner else []) if obs.kind == "hidden"],
                 )
 
 

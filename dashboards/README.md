@@ -37,6 +37,7 @@ If the studio already runs Grafana, Kibana, Splunk, Metabase or its own moderati
 | Reports are a queue | Do reports track the evidence? | `reports`, `decision` |
 | Queue table | Who does a person open next? | `review-index.json` order, or sort by `decision` then `reports`. Show `reasons[0]`. |
 | Case detail | What exactly fired? | `reasons`, `observations`, `metrics`, `party_note`, `vendor_twin`, `inherit_lags_ms`, `seal` |
+| Why it fired, as numbers | Which detector, in what role, on which numbers? | `evidence.observations[]` in the case files: `kind`, `role`, `key`, `evidence`. Not in `ops.json` yet. See [docs/observations.md](../docs/observations.md) |
 | What the server sends | Which checks are switched off by missing fields? | `ops.json` → `coverage`: share of events per field, and per night when runs are merged |
 | Who the baseline has | Which ranks and weapons are still untrained? | `ops.json` → `cohort`: players per band and weapon key, and `min_cohort_players` |
 | Movement left out | Are blasts and vehicles being tagged? | `ops.json` → `movement`: counts by `displacement_cause` |

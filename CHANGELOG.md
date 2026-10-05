@@ -8,6 +8,13 @@
 
 ### Added
 
+- **Structured evidence on every case.** Case JSON has a new key, `evidence`. Every finding that feeds a decision is also kept as data there: the detector, its evidence family, the role the scorer gives it, the matches, and the numbers it compared (the bound and its method, the rank's line and the best human's, sample and cohort sizes, the thresholds). Nothing else changed:
+  - The sentences, check ids, decisions and seals are unchanged.
+  - The decision the evidence implies matches the scorer's on every planted case, on all 400 synthetic-week players (weekly and nightly), and on the real CS2 (1,529) and TF2 (2,764) reruns.
+  - The 78 TF2 watches that have no reason line are now explained by their evidence.
+  - `ops.json`, the desk and the AI brief do not read it yet.
+
+  The model is `fpsdet.evidence`; [docs/observations.md](docs/observations.md) maps every detector. `tools/regress.py verify` runs the same check on a real-data rerun.
 - **Architecture map** (`docs/architecture-v1.md`): the code as it is, every check by evidence family, the trust boundaries, what the seal can and cannot answer, the debt that blocks structured evidence, the proposed interfaces (observation, provenance, knowledge state, challenge, external evidence, evidence graph), and the order of work. Proposed parts are marked proposed; none of them is in the code yet.
 - **Whole-case behaviour lock** (`tests/test_golden.py`). Every field of every planted case, and of all 400 players in the synthetic week, weekly and nightly, is recorded in `tests/golden/`; so are the committed CS2 and TF2 results by label. A change that moves any of them fails and names the player. CI runs it on Python 3.11 and 3.12.
 - **`tools/regress.py`** snapshots a scored run and diffs two snapshots case by case: a new field is allowed, a moved one fails. It is the regression check for the real-match runs, which are too large to commit. Re-scoring the local CS2 and TF2 inputs reproduces both committed desks player for player.

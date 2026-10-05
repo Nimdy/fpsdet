@@ -50,6 +50,8 @@ def analyze_speed(events: list[Event], profile: GameProfile) -> SpeedReport:
     samples.sort(key=lambda ev: (ev.match_id, ev.t_ms))
     limit = 1.0 + profile.speed_over_fraction
     run = 0
+    run_start = 0
+    run_peak = (0.0, 1.0)  # (speed, cap) of the fastest sample in the current run, against its own cap
     prev: Event | None = None
     for event in samples:
         cap, source = _resolve_cap(event, profile)
@@ -92,6 +94,17 @@ def analyze_speed(events: list[Event], profile: GameProfile) -> SpeedReport:
         if over:
             report.violations += 1
             run = run + 1 if same_run and run > 0 else 1
+            speed = event.speed_mps or 0.0
+            if run == 1:
+                run_start = event.t_ms
+                run_peak = (speed, cap)
+            elif speed / cap > run_peak[0] / run_peak[1]:
+                run_peak = (speed, cap)
+            if run > report.longest_run:
+                report.run_match = event.match_id
+                report.run_start_ms = run_start
+                report.run_end_ms = event.t_ms
+                report.run_peak_mps, report.run_peak_cap_mps = run_peak
             report.longest_run = max(report.longest_run, run)
         else:
             run = 0

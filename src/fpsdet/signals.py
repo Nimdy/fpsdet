@@ -47,6 +47,12 @@ def mirror_break(applied: list[float], command: list[float], profile: GameProfil
     correlation by ``mirror_lag_gap``, and the kick has to actually move.
     A flat kick has no correlation to test and is left to the recoil floor.
     """
+    found = mirror_finding(applied, command, profile)
+    return None if found is None else found[0]
+
+
+def mirror_finding(applied: list[float], command: list[float], profile: GameProfile) -> tuple[str, dict] | None:
+    """``mirror_break``, with the numbers it compared."""
     count = min(len(applied), len(command))
     if count < profile.mirror_min_shots:
         return None
@@ -62,10 +68,21 @@ def mirror_break(applied: list[float], command: list[float], profile: GameProfil
     if lagged is not None and same_tick > lagged - profile.mirror_lag_gap:
         return None
     lagged_text = "n/a" if lagged is None else f"{lagged:.2f}"
-    return (
+    text = (
         f"player command matched the server kick on the same tick "
         f"(r {same_tick:.2f}) and was looser at a human lag (r {lagged_text}), {count} shots"
     )
+    return text, {
+        "same_tick_r": same_tick,
+        "lagged_r": lagged,
+        "shots": count,
+        "thresholds": {
+            "max_r": profile.mirror_max_r,
+            "lag_shots": profile.mirror_lag_shots,
+            "lag_gap": profile.mirror_lag_gap,
+            "min_shots": profile.mirror_min_shots,
+        },
+    }
 
 
 # A spray index needs this many sprays before its usual kick is known.
@@ -82,6 +99,14 @@ def _by_spray(spray: list[int | None], count: int) -> dict[int, list[int]] | Non
 
 
 def mirror_check(recoil: RecoilSummary, profile: GameProfile) -> tuple[str | None, str | None]:
+    """``mirror_check_finding`` without the numbers: (finding, note)."""
+    found, note = mirror_check_finding(recoil, profile)
+    return (None if found is None else found[0]), note
+
+
+def mirror_check_finding(
+    recoil: RecoilSummary, profile: GameProfile
+) -> tuple[tuple[str, dict] | None, str | None]:
     """Run the mirror test on the part of the kick a person could not have learned.
 
     A memorised spray pattern is anticipated on the same tick by a practiced
@@ -90,7 +115,7 @@ def mirror_check(recoil: RecoilSummary, profile: GameProfile) -> tuple[str | Non
     kick that changes from spray to spray. Nobody can anticipate that. A
     script that reads it still cancels it on the same tick.
 
-    Returns (finding, note). The note says why the test did not run.
+    Returns ((sentence, numbers) or None, note). The note says why the test did not run.
     """
     count = min(len(recoil.applied), len(recoil.compensation))
     if count < profile.mirror_min_shots:
@@ -107,12 +132,14 @@ def mirror_check(recoil: RecoilSummary, profile: GameProfile) -> tuple[str | Non
             spray = recoil.spray
             kick_left = [applied[p] - kick_mean[spray[p]] for p in keep]  # type: ignore[index]
             cmd_left = [command[p] - cmd_mean[spray[p]] for p in keep]  # type: ignore[index]
-            found = mirror_break(kick_left, cmd_left, profile)
+            found = mirror_finding(kick_left, cmd_left, profile)
             if found:
-                found += ", after the spray pattern was removed"
-            return found, None
+                text, numbers = found
+                return (text + ", after the spray pattern was removed", {**numbers, "pattern_removed": True}), None
+            return None, None
     if profile.recoil_pattern == "random":
-        return mirror_break(applied, command, profile), None
+        found = mirror_finding(applied, command, profile)
+        return (None if found is None else (found[0], {**found[1], "pattern_removed": False})), None
     return None, (
         f"{recoil.build_key} mirror check needs {PATTERN_MIN_SPRAYS} sprays that reach the same "
         "spray_index, so a memorised pattern is not mistaken for a script. "
@@ -128,12 +155,27 @@ METRONOME_MATCH_GAPS = 5
 
 def match_gaps(weapon: WeaponSummary) -> list[list[int]]:
     """Fire gaps one match at a time. A summary built by hand has one pooled list."""
+    return [gaps for _match, _gun, gaps in keyed_match_gaps(weapon)]
+
+
+def keyed_match_gaps(weapon: WeaponSummary) -> list[tuple[str, str, list[int]]]:
+    """(match_id, gun, gaps) one match at a time. A pooled list built by hand has no match."""
     if weapon.fire_matches:
-        return list(weapon.fire_matches.values())
-    return [weapon.fire_gaps] if weapon.fire_gaps else []
+        rows = []
+        for where, gaps in weapon.fire_matches.items():
+            match_id, _, gun = where.rpartition("|")
+            rows.append((match_id, gun, gaps))
+        return rows
+    return [("", "", weapon.fire_gaps)] if weapon.fire_gaps else []
 
 
 def metronome_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
+    """``metronome_finding`` without the numbers."""
+    found = metronome_finding(weapon, profile)
+    return None if found is None else found[0]
+
+
+def metronome_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict] | None:
     """Legal gaps with no variation. The server-paced weapons opt out.
 
     Only the cadence counts: gaps inside a burst. A macro fires a burst, pauses
@@ -153,7 +195,8 @@ def metronome_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     steady: list[int] = []
     spreads: list[float] = []
     matches = 0
-    for gaps in match_gaps(weapon):
+    counted: list[dict] = []
+    for match_id, gun, gaps in keyed_match_gaps(weapon):
         cadence = [gap for gap in gaps if gap <= CADENCE_CYCLES * rule.min_shot_interval_ms]
         if len(cadence) < METRONOME_MATCH_GAPS:
             continue
@@ -165,27 +208,56 @@ def metronome_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
         steady.extend(cadence)
         spreads.append(spread)
         matches += 1
+        counted.append({"match_id": match_id, "gun": gun, "gaps": len(cadence), "std_ms": spread, "mean_ms": sum(cadence) / len(cadence)})
     if len(steady) < profile.metronome_min_gaps:
         return None
     mean = sum(steady) / len(steady)
     where = f" in {matches} matches" if matches > 1 else ""
-    return (
+    text = (
         f"{weapon.weapon_key} fire interval std {max(spreads):.2f} ms across {len(steady)} legal gaps{where} "
         f"(mean {mean:.0f} ms)"
     )
+    return text, {
+        "steady_gaps": len(steady),
+        "matches": matches,
+        "max_std_ms": max(spreads),
+        "mean_ms": mean,
+        "counted": counted,
+        "thresholds": {
+            "cycle_ms": rule.min_shot_interval_ms,
+            "pace_ms": pace,
+            "cadence_cycles": CADENCE_CYCLES,
+            "max_std_ms": profile.metronome_max_std_ms,
+            "min_gaps": profile.metronome_min_gaps,
+            "min_gaps_per_match": METRONOME_MATCH_GAPS,
+        },
+    }
 
 
 def hidden_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     """Time the aim spent on an enemy the server had not made visible."""
+    found = hidden_finding(weapon, profile)
+    return None if found is None else found[0]
+
+
+def hidden_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict] | None:
+    """``hidden_break``, with the numbers. Audio shots and shots in the grace window never got here."""
     samples = [ms for ms in weapon.hidden_track_ms if ms > 0]
     if len(samples) < profile.hidden_track_min_samples:
         return None
     total = sum(samples)
     if total < profile.hidden_track_min_ms:
         return None
-    return (
-        f"{weapon.weapon_key} aim stayed on a hidden mover for {total:.0f} ms across {len(samples)} shots"
-    )
+    text = f"{weapon.weapon_key} aim stayed on a hidden mover for {total:.0f} ms across {len(samples)} shots"
+    return text, {
+        "shots": len(samples),
+        "total_ms": total,
+        "thresholds": {
+            "min_shots": profile.hidden_track_min_samples,
+            "min_total_ms": profile.hidden_track_min_ms,
+            "grace_ms": profile.hidden_grace_ms,
+        },
+    }
 
 
 def private_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
@@ -195,15 +267,24 @@ def private_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     server's measurement of its own private body. A body this client could see,
     labeled private, is an emitter bug.
     """
+    found = private_finding(weapon, profile)
+    return None if found is None else found[0]
+
+
+def private_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict] | None:
+    """``private_break``, with the numbers."""
     samples = [ms for ms in weapon.private_track_ms if ms > 0]
     if len(samples) < profile.hidden_track_min_samples:
         return None
     total = sum(samples)
     if total < profile.hidden_track_min_ms:
         return None
-    return (
-        f"{weapon.weapon_key} aim stayed on a private replay for {total:.0f} ms across {len(samples)} shots"
-    )
+    text = f"{weapon.weapon_key} aim stayed on a private replay for {total:.0f} ms across {len(samples)} shots"
+    return text, {
+        "shots": len(samples),
+        "total_ms": total,
+        "thresholds": {"min_shots": profile.hidden_track_min_samples, "min_total_ms": profile.hidden_track_min_ms},
+    }
 
 
 # A shot is on the wire when the snapshot explains the aim and the picture does not.
@@ -222,26 +303,51 @@ def wire_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     may sit to the picture. Omit a side, or send a delay that has not started,
     and that shot does not count.
     """
+    found = wire_finding(weapon, profile)
+    return None if found is None else found[0]
+
+
+def wire_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict] | None:
+    """``wire_break``, with the numbers."""
     led: list[float] = []
+    led_wire: list[float] = []
+    led_picture: list[float] = []
+    sent = 0
     for wire, picture, delay in zip(
         weapon.wire_error_deg, weapon.picture_error_deg, weapon.interp_delay_ms
     ):
         if delay <= 0 or wire < 0 or picture < 0:
             continue
+        sent += 1
         if picture - wire < WIRE_MIN_GAP_DEG:
             continue
         if picture <= 0 or wire > WIRE_ERROR_RATIO * picture:
             continue
         led.append(delay)
+        led_wire.append(wire)
+        led_picture.append(picture)
     if len(led) < profile.hidden_track_min_samples:
         return None
     total = sum(led)
     if total < profile.hidden_track_min_ms:
         return None
-    return (
+    text = (
         f"{weapon.weapon_key} aim matched the wire snapshot instead of the drawn picture on "
         f"{len(led)} shots ({total:.0f} ms of interpolation delay in total)"
     )
+    return text, {
+        "led_shots": len(led),
+        "shots_with_both_errors": sent,
+        "led_delay_ms": total,
+        "median_wire_error_deg": median(led_wire),
+        "median_picture_error_deg": median(led_picture),
+        "thresholds": {
+            "max_error_ratio": WIRE_ERROR_RATIO,
+            "min_gap_deg": WIRE_MIN_GAP_DEG,
+            "min_shots": profile.hidden_track_min_samples,
+            "min_delay_ms": profile.hidden_track_min_ms,
+        },
+    }
 
 
 def poison_alarms(
@@ -276,6 +382,16 @@ def smoothness_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     all the time has no drop to score. Samples with no information_state are
     ignored, because a missing label is not evidence.
     """
+    found = smoothness_finding(weapon, profile)
+    return None if found is None else found[0]
+
+
+# Aim noise under this, in degrees, is too quiet to drop further. Nothing to compare.
+SMOOTH_MIN_KNOWABLE_DEG = 0.05
+
+
+def smoothness_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict] | None:
+    """``smoothness_break``, with the numbers."""
     knowable = weapon.knowable_jitter
     unknowable = weapon.unknowable_jitter
     if (
@@ -285,12 +401,23 @@ def smoothness_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
         return None
     know = median(knowable)
     hidden = median(unknowable)
-    if know < 0.05 or hidden > profile.unknowable_jitter_ratio * know:
+    if know < SMOOTH_MIN_KNOWABLE_DEG or hidden > profile.unknowable_jitter_ratio * know:
         return None
-    return (
+    text = (
         f"{weapon.weapon_key} aim noise dropped to {hidden:.2f} deg while this client could not "
         f"have known (knowable median {know:.2f} deg, {len(unknowable)} samples)"
     )
+    return text, {
+        "knowable_median_deg": know,
+        "unknowable_median_deg": hidden,
+        "knowable_shots": len(knowable),
+        "unknowable_shots": len(unknowable),
+        "thresholds": {
+            "max_ratio": profile.unknowable_jitter_ratio,
+            "min_shots_each": profile.unknowable_min_samples,
+            "min_knowable_deg": SMOOTH_MIN_KNOWABLE_DEG,
+        },
+    }
 
 
 def command_residual(
