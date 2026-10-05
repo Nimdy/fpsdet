@@ -12,6 +12,8 @@ from pathlib import Path
 from .ai_triage import openai_compatible_transport, triage_case
 from .baseline import build_cohorts, screen_matches
 from .casefile import safe_name, write_case
+from .challenge import CURRENT, Budget, ChallengeError, ChallengeRegistry, plan_file_from_dict
+from .challenge_plan import SECRET_ENV, SecretError, load_secret, new_secret_file, plan_match, reproduce
 from .lake import ingest_lines, read_lines
 from .parse import iter_events, load_events, load_profile
 from .provenance import ProvenanceMismatch
@@ -292,6 +294,85 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
+def _secret(path: str | None):
+    try:
+        secret, warnings = load_secret(path)
+    except SecretError as error:
+        raise SystemExit(str(error))
+    for warning in warnings:
+        print(f"warning: {warning}", file=sys.stderr)
+    return secret
+
+
+def cmd_challenge_keygen(args: argparse.Namespace) -> int:
+    try:
+        new_secret_file(args.out)
+    except FileExistsError:
+        raise SystemExit(f"{args.out} exists; fpsdet does not overwrite a secret")
+    print(f"Wrote a new challenge secret to {args.out}, readable by its owner only. Keep it on the game server.")
+    return 0
+
+
+def cmd_challenge_plan(args: argparse.Namespace) -> int:
+    profile = load_profile(args.profile)
+    secret = _secret(args.secret_file)
+    budget = Budget(
+        to_ms=args.to_ms,
+        count=args.count,
+        from_ms=args.from_ms,
+        cooldown_ms=args.cooldown_ms,
+        min_duration_ms=args.min_duration_ms,
+        max_duration_ms=args.max_duration_ms,
+    )
+    try:
+        planned = plan_match(secret, profile, args.match, args.player, budget, nonce=args.nonce)
+    except ChallengeError as error:
+        raise SystemExit(str(error))
+    write_json(args.out, planned.to_dict())
+    players = len({plan.subject_id for plan in planned.plans})
+    print(f"Wrote {len(planned.plans)} challenges for {players} players in {planned.match_id} to {args.out}.")
+    print("It holds no key and no realization. Keep it on the server until the match is over.")
+    return 0
+
+
+def cmd_challenge_verify(args: argparse.Namespace) -> int:
+    files, failed = [], False
+    for path in args.plans:
+        try:
+            plan_file = plan_file_from_dict(read_json(path), str(path))
+        except (OSError, ValueError) as error:
+            print(f"FAIL {error}")
+            failed = True
+            continue
+        files.append(plan_file)
+        players = len({plan.subject_id for plan in plan_file.plans})
+        print(f"{path}: {len(plan_file.plans)} challenges for {players} players in {plan_file.match_id}; digests and schedule consistent")
+    try:
+        ChallengeRegistry.from_files(files)
+    except ChallengeError as error:
+        print(f"FAIL {error}")
+        failed = True
+    if args.secret_file or os.environ.get(SECRET_ENV):
+        secret = _secret(args.secret_file)
+        for path, plan_file in zip(args.plans, files):
+            problems = reproduce(secret, plan_file)
+            if problems:
+                failed = True
+                print(f"FAIL {path}: the secret does not plan this file")
+                for problem in problems[:20]:
+                    print(f"  {problem}")
+            else:
+                print(f"{path}: reproduced from the secret, {len(plan_file.plans)} of {len(plan_file.plans)}")
+    else:
+        print(f"Not reproduced: no secret given (--secret-file or {SECRET_ENV}). Only the server can show its secret plans these challenges.")
+    return 1 if failed else 0
+
+
+def cmd_challenge_types(args: argparse.Namespace) -> int:
+    print(json.dumps([spec.to_dict() for spec in CURRENT.values()], indent=2))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="fpsdet", description="Human-play and gear-rule baselines for FPS servers.")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -349,6 +430,32 @@ def build_parser() -> argparse.ArgumentParser:
     ingest.add_argument("--lake", required=True)
     ingest.add_argument("--dt", help="UTC day YYYY-MM-DD when events have no utc field")
     ingest.set_defaults(func=cmd_ingest)
+
+    challenge = sub.add_parser("challenge", help="Plan and check server challenges. The secret stays on the server")
+    actions = challenge.add_subparsers(dest="action", required=True)
+    keygen = actions.add_parser("keygen", help="Write a new random challenge secret to a new file, owner-only")
+    keygen.add_argument("--out", required=True)
+    keygen.set_defaults(func=cmd_challenge_keygen)
+    plan = actions.add_parser("plan", help="Write one match's public challenge plan: ids, windows, commitments")
+    plan.add_argument("--profile", required=True)
+    plan.add_argument("--match", required=True)
+    plan.add_argument("--player", action="append", required=True, help="A player to challenge. Repeat for more")
+    plan.add_argument("--to-ms", type=int, required=True, help="The latest a challenge may end, in match time")
+    plan.add_argument("--from-ms", type=int, default=Budget.from_ms, help="No challenge before this. Default 60000")
+    plan.add_argument("--count", type=int, default=Budget.count, help="Challenges per player in this match, at most 4. Default 1")
+    plan.add_argument("--cooldown-ms", type=int, default=Budget.cooldown_ms, help="At least this long between challenges. Default 60000")
+    plan.add_argument("--min-duration-ms", type=int, default=Budget.min_duration_ms)
+    plan.add_argument("--max-duration-ms", type=int, default=Budget.max_duration_ms)
+    plan.add_argument("--nonce", help="Reuse a plan's nonce to reproduce it. Default: a fresh random one")
+    plan.add_argument("--secret-file", help=f"Hex secret file; /dev/fd/N works. Default: {SECRET_ENV}")
+    plan.add_argument("--out", required=True)
+    plan.set_defaults(func=cmd_challenge_plan)
+    verify = actions.add_parser("verify", help="Check plan files; with the secret, check the secret plans them")
+    verify.add_argument("plans", nargs="+")
+    verify.add_argument("--secret-file", help=f"Hex secret file. Default: {SECRET_ENV}, if set")
+    verify.set_defaults(func=cmd_challenge_verify)
+    types = actions.add_parser("types", help="Print the challenge types, their requirements and limits")
+    types.set_defaults(func=cmd_challenge_types)
     return parser
 
 
