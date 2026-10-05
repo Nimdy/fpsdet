@@ -62,8 +62,8 @@ Run on 2026-10-04: 4,567 RGL bans, of which 314 accounts banned for cheating. 22
 | | Review | Watch | Clean | Held for too little data | Flagged |
 | --- | --- | --- | --- | --- | --- |
 | Banned for cheating (189 with aimed shots) | 3 | 48 | 131 | 7 | 27% |
-| Never banned (1,746) | 0 | 29 | 1,576 | 141 | 1.7% |
-| Banned for something else (821) | 0 | 17 | 728 | 76 | 2.1% |
+| Never banned (1,746) | 0 | 30 | 1,575 | 141 | 1.7% |
+| Banned for something else (821) | 0 | 16 | 729 | 76 | 1.9% |
 
 Most never-banned players appear in only a few of these matches, and fewer matches mean wider bounds, so the fair comparison is at equal evidence. Players with 15 to 20 matches each:
 
@@ -71,12 +71,14 @@ Most never-banned players appear in only a few of these matches, and fewer match
 | --- | --- | --- | --- |
 | Banned for cheating | 80 | 37.5% | 2 |
 | Never banned | 228 | 2.6% | 0 |
-| Banned for something else | 61 | 4.9% | 0 |
+| Banned for something else | 61 | 3.3% | 0 |
 
 - **Every review is a banned cheater.** Two have Ambassador or revolver accuracy confidently past the best human measured (a lower bound of 62% against 52%, and 52% against 51%). The third has an AWPer Hand headshot rate with a lower bound of 70% against a best human of 59%.
 - **Most catches are watches.** One number past every human is a watch; a review needs two kinds. Most flagged cheaters were above their rank's range and inside the best humans, or past every human on one weapon.
 - **The weapons behind the flags** are the ones aim cheats help most: sniper rifles (21 cheaters, counting the AWPer Hand), the scattergun (12), the Ambassador and Enforcer (5), and SMGs, shotguns and revolvers.
 - **Most cheaters still look clean (131 of 189).** A cheat that does not move hit rates, such as a wallhack or ESP, leaves nothing in a per-match count. So does a cheat used in some matches and not others, or one tuned to stay inside human aim.
+
+**Headshot counts that do not add up are dropped.** In about 1 in 80 sniper matches, the log's headshot count is larger than the player's hits with every gun that can headshot. Capped, those matches read as "every hit was a head" and set a best human of 100% on the sniper rifle that nobody could pass. The converter now sends no hitbox for those matches.
 
 **Kills per minute helps a little.** Across classes, kills per minute and, for snipers, headshot kills per minute rank cheaters above honest players far more often than not (83% of the time for snipers). Declared as extra numbers, they added one review and two watches, all banned cheaters, and moved no honest player. They add little because fpsdet flags a number only past the best human measured, and most cheaters, though better than average, stay inside that range. Better than average is not evidence fpsdet acts on; that is what keeps honest players out of review.
 

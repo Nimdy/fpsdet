@@ -2145,6 +2145,14 @@ class Tf2ExampleTest(unittest.TestCase):
         self.assertFalse({e["player_id"] for e in scored} & {e["player_id"] for e in baseline})
         self.assertFalse(any(sid in json.dumps(scored + baseline) for sid in (cheater, steady, "[U:1:")))
 
+    def test_headshots_that_do_not_add_up_are_not_sent(self):
+        log = {"info": {"map": "cp_x", "total_length": 600, "hasHS_hit": True, "date": 86400},
+               "players": {"[U:1:1]": {"headshots_hit": 9, "class_stats": [{"type": "sniper", "weapon": {"sniperrifle": {"shots": 20, "hits": 6}}}]}}}
+        events = self.tf2.match_events(1, log, {"[U:1:1]": "p"})["p"]
+        # 9 headshots on 6 hits cannot be right. Capping would read as every hit a head, so no hitbox is sent.
+        self.assertEqual(sum(e["hit"] for e in events), 6)
+        self.assertFalse(any("hitbox" in e for e in events))
+
     def test_per_minute_rates_ride_on_each_long_stints_first_shot(self):
         log = {
             "info": {"map": "cp_x", "total_length": 1800, "hasHS": True, "hasHS_hit": True, "date": 86400},

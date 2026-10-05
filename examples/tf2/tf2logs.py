@@ -271,6 +271,9 @@ def match_events(log_id: int, log: dict, player_ids: dict[str, str]) -> dict[str
         head_left = int(player.get("headshots_hit") or 0) if headshots_known else 0
         head_hits: dict[str, int] = {}
         total = sum(min(w["hits"], w["shots"]) for _, _, w in head_capable)
+        # More headshots than hits on every gun that can headshot: the counts do not add up, and a
+        # capped "every hit was a head" would set a best human no one can pass. Trust no headshots here.
+        player_headshots_known = headshots_known and head_left <= total
         for cls, name, w in head_capable:
             share = round(head_left * min(w["hits"], w["shots"]) / total) if total else 0
             head_hits[name] = min(share, w["hits"])
@@ -283,7 +286,7 @@ def match_events(log_id: int, log: dict, player_ids: dict[str, str]) -> dict[str
             for k in range(shots):
                 event = {**base, "player_id": pid, "t_ms": k * step, "event_type": "shot",
                          "weapon_class": cls, "weapon_id": name, "hit": k < hits}
-                if k < hits and headshots_known and name in HEADSHOT:
+                if k < hits and player_headshots_known and name in HEADSHOT:
                     event["hitbox"] = "head" if k < heads else "upper_torso"
                 out[pid].append(event)
         _rates(out[pid], player, bool(info.get("hasHS")))
