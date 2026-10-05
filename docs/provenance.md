@@ -4,8 +4,10 @@ A case's evidence now says what produced it:
 
 - the detector code,
 - the game configuration,
-- the human baseline the player was compared with, and
-- the player's own events.
+- the human baseline the player was compared with,
+- the player's own events,
+- the account history it was checked against, and
+- one packet digest that binds all of that to the observations and the decision.
 
 A reviewer, an auditor or another system can tell whether two cases were scored the same way, and spot when they were not, without trusting whoever handed the case over.
 
@@ -19,13 +21,14 @@ The code is `fpsdet.provenance`. It uses the standard library only.
 | The game profile as the scorer parsed it | Implemented |
 | The human baseline (cohort) the run compared players with, and its advisory integrity stamp | Implemented |
 | The subject player's own parsed events, in the order they were scored | Implemented |
+| The account-history windows the scorer could read for the subject | Implemented |
+| One identity over the material evidence and all of the above (the evidence packet) | Implemented |
 | Other players' events that a relationship observation used | Not yet (see "What the input digest does not cover") |
-| Player history (the account-jump windows) | Not yet |
 | External evidence, challenge seeds | Not yet |
-| One tamper-evident identity over the whole evidence packet | Not yet (the next step) |
+| Who produced the packet (authenticity) | Not yet; it needs a server-held signing key |
 | What a reviewer then did | Not yet; that stays in the studio's own review tool |
 
-Provenance says what produced a case, not that the case is correct. Nothing yet ties the observations and these digests together under one identity, so a case file can still be edited after scoring without that being detectable from the file alone.
+Provenance says what produced a case, not that the case is correct. The packet digest makes an edited case detectable against a digest someone stored, but not on its own: SHA-256 proves content identity, not origin, and whoever edits a case can recompute it.
 
 ## Where it is
 
@@ -51,8 +54,10 @@ Provenance says what produced a case, not that the case is correct. Nothing yet 
       "stored_digest": "matched",
       "integrity": {"recipe": "fpsdet.cohort-integrity/1", "status": "ok", "digest": "sha256:<64 hex>"}
     },
-    "inputs": {"recipe": "fpsdet.player-events/1", "digest": "sha256:<64 hex>", "events": 412, "matches": 8}
-  }
+    "inputs": {"recipe": "fpsdet.player-events/1", "digest": "sha256:<64 hex>", "events": 412, "matches": 8},
+    "history": {"mode": "external", "recipe": "fpsdet.history/1", "digest": "sha256:<64 hex>", "windows": 1}
+  },
+  "packet": {"recipe": "fpsdet.packet/1", "status": "complete", "digest": "sha256:<64 hex>"}
 }
 ```
 
@@ -60,7 +65,7 @@ Provenance says what produced a case, not that the case is correct. Nothing yet 
 - `digest` is a full SHA-256, written `sha256:` and 64 lowercase hex digits.
 - `modules` is the detector boundary, so a reviewer can see what the digest covers. It holds module names only: no paths, no source.
 - If a module's source cannot be read (for example, a build that ships only bytecode), `detector.digest` is null and `detector.missing` names those modules. Nothing is guessed.
-- `fpsdet.pipeline.run_score` stamps every case of a run. `profile`, `detector` and `cohort` are one object shared by the run. `inputs` is the subject player's own. The planted demo does the same.
+- `fpsdet.pipeline.run_score` stamps every case of a run. `profile`, `detector` and `cohort` are one object shared by the run. `inputs` and `history` are the subject player's own. The planted demo does the same.
 - A case built by calling `assess_player` directly has `"provenance": null`.
 - `cohort` or `inputs` is null when the run did not supply it.
 
@@ -69,7 +74,8 @@ Costs, measured:
 - **Detector source:** read once per process and cached, about 1 ms.
 - **Profile digest:** about 0.1 ms per run.
 - **Cohort digest:** about 9 ms per run for TF2's 4,927 baseline rows.
-- **Input digests:** the only part that grows with the data, at about 2 µs per event, because every value of every event is hashed. On the TF2 run (4.1 M events) scoring went from 6.3 s to 10.8 s, about a tenth of a full load-and-score run. On the synthetic week, the weekly batch went from 0.64 s to 0.99 s.
+- **Input digests:** the only part that grows with the data, at about 1.3 to 2 µs per event, because every value of every event is hashed. On the TF2 run (4.1 M events) scoring went from 6.3 s to 10.8 s, about a tenth of a full load-and-score run. On the synthetic week, the weekly batch went from 0.64 s to 0.99 s. Measured stage by stage on the 4.07 M CS2 events, the time is in reading every field of every event and encoding it; `hashlib` itself is under 5%. Two column-building variants gave the same digests bit for bit but no material speed-up, so the code is unchanged.
+- **History digests and the packet:** see "The history digest" and "The evidence packet".
 
 ### Versioning
 
@@ -186,6 +192,8 @@ Canonical form, `fpsdet.player-events/1`:
 
 `inputs.events` and `inputs.matches` are counts for people. The digest already binds both.
 
+**Order is part of the input.** `fpsdet.player-events/1` binds the player's effective arrival order because fpsdet 0.x scoring currently observes that order. It does not claim that the event set is order-neutral. Normalizing the scorer's event order is a separate, tracked behaviour change ("Deterministic event normalization" in [architecture-v1.md](architecture-v1.md)); if it changes what the scorer reads, it gets a new input recipe.
+
 **What the input digest does not cover.** It binds the subject's own events, and `cohort.digest` binds the baseline. Some observations rest on other players' events too:
 
 - a shared leftover compares two players' recoil commands,
@@ -193,10 +201,100 @@ Canonical form, `fpsdet.player-events/1`:
 
 The party note, a context line rather than an observation, also names other players' decisions. Those observations name their partner in `evidence` and, for the voice watch, in `depends_on`, but the partner's events are not in this case's input digest. Binding them is part of the packet identity that comes next. Until then, a relationship observation can depend on events this case's provenance does not cover.
 
+## The history digest
+
+The account check compares this window's accuracy with the player's own earlier windows. Its input is the history file: one row per player, weapon key and rank band, with shots and hits.
+
+**Scope: what the scorer can read for the subject.** The scorer reads a history row for a player when the row's player id is the player's, and its weapon key and band are ones the player used in this window. It adds up shots and hits over those rows. `score.history_for` is that rule, and both the account check and the digest use it, so they cannot drift apart. Rows of other players, or of weapons and bands the player did not use now, cannot change the case, so they are not in its digest. Changing one player's history moves only that player's history digest.
+
+Canonical form, `fpsdet.history/1`:
+
+- **The rows as a multiset.** The check adds them up, so their order cannot matter and is not in the digest; a repeated row counts twice, as the scorer counts it.
+- **The bytes:** `fpsdet.history/1`, a NUL, the row count, a NUL, then each row as the JSON array `[player_id, weapon_key, skill_band, shots, hits]`, sorted by that text, one per line.
+
+**Modes.**
+
+- `{"mode": "none"}`: the run was given no history. An empty history file is the same input to the scorer and gets the same mode.
+- `{"mode": "external", "recipe": "fpsdet.history/1", "digest": ..., "windows": n}`: the run was given history. `windows` is how many rows the scorer could read for this player, which can be 0. That case reads exactly like `none` to the scorer, but the mode says a history was supplied.
+
+The history rows themselves are never written into a case. Cohort files carry stored digests, but history files do not yet; verifying a stored history digest on load can follow the same pattern later.
+
+## The evidence packet
+
+`evidence.packet` is one digest over the material evidence of the case: what the evidence is, and what produced it. It answers "is this the same evidence packet?"
+
+```json
+"packet": {"recipe": "fpsdet.packet/1", "status": "complete", "digest": "sha256:<64 hex>"}
+```
+
+**What it binds** (`fpsdet.packet/1`), as canonical JSON:
+
+| Field | From |
+| --- | --- |
+| `evidence_version`, `provenance_version` | The shapes it was read with |
+| `subject`, `game` | `player_id`, `game_id` |
+| `decision` | The case's decision. The same observations under another decision are another packet |
+| `eligibility` | `evidence.eligibility`, which with the roles reproduces the decision |
+| `observations` | Every observation id, sorted. Each id covers that observation's family, kind, role, subject, key, matches, dependencies and evidence. The partner and party in a relationship observation are therefore bound through it, not repeated |
+| `provenance.detector` | recipe, digest, modules |
+| `provenance.profile` | recipe, digest |
+| `provenance.cohort` | mode, recipe, digest, stored digest, and the integrity stamp's recipe, status and digest |
+| `provenance.inputs` | recipe, digest, events, matches |
+| `provenance.history` | mode, recipe, digest, windows |
+
+**What it leaves out:**
+
+- The reason sentences and the context lines, since rewording is not new evidence.
+- `observations[].context`.
+- The AI brief.
+- Reports, since a report changes queue order, not evidence. This is an evidence packet, not a queue-state record.
+- `queue_rank`, `party_note`, `metrics`, `limits` and `untrained`.
+- The legacy `seal`, and anything a dashboard or page shows.
+
+**Why integrity is bound when it does not change the score.** Two packets scored against the same baseline numbers, one stamped `poison_risk` and one not, were presented to a reviewer with different warnings. As review artefacts they are not the same, even though every number in them is.
+
+**Why the cohort mode is bound.** An external baseline and a baseline fitted on the scored events are different evidence even if their tables happened to hash alike: independence is part of the provenance.
+
+**Incomplete packets.** A packet needs a profile, a detector digest, a cohort, inputs and a history mode. A case scored outside `run_score`, by calling `assess_player` directly, lacks them. It gets `{"recipe": "fpsdet.packet/1", "status": "incomplete", "missing": [...]}` and no digest. Nothing is filled with placeholders and called complete.
+
+### Checking a packet
+
+`fpsdet.provenance.verify_packet(case)` reads a serialized case and returns what does not hold together, or nothing.
+
+1. **Observation ids.** Each id is recomputed from the observation's own fields, and the model refuses a role the scorer never gives that kind. An edited value with its old id is caught here, before the packet is considered.
+2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest.
+3. **The packet.** It is rebuilt with the same code that built it and compared.
+
+It needs no events, cohort, profile or code, and it does not prove that those sources would produce the packet again. That second level, source reproduction, is a rerun: score the same events with the same detector, profile, cohort and history, and `tools/regress.py diff` the result. `tools/regress.py verify` runs `verify_packet` on every case of a snapshot.
+
+**Caught:** an edited observation value, an edited observation id, an observation with a recomputed id (the packet moves), a changed role, the decision, the eligibility, the subject or game, and any detector, profile, cohort, cohort mode, integrity, input or history digest.
+
+**Not caught, by design:** a reworded reason or context line, a new AI brief, a changed report count or queue rank, a different party note.
+
+### What the digest does and does not prove
+
+The packet digest gives content addressing and a deterministic evidence identity. Compared with a digest stored elsewhere, for example in the studio's review tool when a case was opened, it shows whether the case changed since.
+
+It does not prove who produced the case. Anyone who edits a case can recompute every id and the packet digest, so it is not tamper-proof on its own. Authenticity comes from a signature over the packet digest with a key only the scoring server holds:
+
+```text
+server-held private key  ->  sign(packet digest)  ->  anyone with the public key can check it
+```
+
+That is a later step. Nothing is signed today.
+
+### The packet and the seal
+
+| | Legacy `seal` | `evidence.packet` |
+| --- | --- | --- |
+| Covers | Player, game, decision, the reason sentences | The material evidence and all provenance |
+| Moves when | A sentence is reworded | Evidence, decision or provenance changes |
+| Kept for | Compatibility: reviewers and tools already store it | Structured evidence identity, and a future signature |
+
 ## What does not change
 
 - **Observation ids.** An id says which observation this is; provenance says what produced it. A different profile or detector does not change an id for the same evidence, and an id does not include provenance. Tests pin both.
-- **The case seal.** The v1 seal is still the hash of the player, the game, the decision and the reasons. An identity that also covers the observations and all of this provenance is the next step.
+- **The case seal.** The v1 seal is still the hash of the player, the game, the decision and the reasons. The packet digest is the structured identity beside it, not a replacement.
 - **Every other case field.** Checked on every planted and synthetic case by `tests/test_golden.py`, which locks the evidence except its provenance. Checked on the real CS2 and TF2 reruns by `tools/regress.py diff`.
 
 ## Checking a run
@@ -205,4 +303,4 @@ The party note, a context line rather than an observation, also names other play
 PYTHONPATH=src python tools/regress.py verify snapshot.jsonl
 ```
 
-This prints the provenance the run shares: the detector, the profile, the cohort with its mode, stored digest and integrity status. It counts the cases that carry their own input digest, and names any that do not.
+This prints the provenance the run shares: the detector, the profile, the cohort with its mode, stored digest and integrity status. It counts the cases that carry their own input digest, checks every evidence packet with `verify_packet`, and names any case that does not hold together.

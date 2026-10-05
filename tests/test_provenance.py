@@ -227,6 +227,7 @@ class CaseProvenanceTest(unittest.TestCase):
             for case in cases:
                 block = dict(case_to_dict(case)["evidence"]["provenance"])
                 self.assertEqual(block.pop("inputs")["digest"], case.provenance.inputs.digest)
+                block.pop("history")  # per player too: the history rows the scorer could read for them
                 shared.add(json.dumps(block, sort_keys=True))
             self.assertEqual(len(shared), 1)
         block = case_to_dict(self.scored[0])["evidence"]["provenance"]

@@ -5,7 +5,7 @@ from __future__ import annotations
 from .baseline import CohortTable, build_cohorts
 from .models import Case, Event, GameProfile, HistoryWindow
 from .provenance import stamp
-from .score import annotate_batch, assess_player
+from .score import annotate_batch, assess_player, history_for
 from .summarize import summarize
 
 IN_FILE_NOTE = (
@@ -38,5 +38,6 @@ def run_score(
             case.observations.append(IN_FILE_NOTE)
         cases.append(case)
     annotate_batch(cases, records, profile)
-    stamp(cases, profile, cohort=table, cohort_mode="in_file" if in_file else "external", events=events)
+    readable = {record.player_id: history_for(record, history) for record in records} if history else None
+    stamp(cases, profile, cohort=table, cohort_mode="in_file" if in_file else "external", events=events, history=readable)
     return cases

@@ -234,18 +234,22 @@ def _continuous_flags(
     return view, past_band, past_human, True, facts
 
 
+def history_for(record: PlayerRecord, history: list[HistoryWindow]) -> list[HistoryWindow]:
+    """The history rows the account check can read for this player: its own, on a weapon key and band it used now.
+
+    Provenance fingerprints exactly these rows, so the two cannot drift apart.
+    """
+    used = {(weapon.weapon_key, weapon.skill_band) for weapon in record.weapons}
+    return [row for row in history if row.player_id == record.player_id and (row.weapon_key, row.skill_band) in used]
+
+
 def _identity(
     record: PlayerRecord, history: list[HistoryWindow], profile: GameProfile
 ) -> tuple[bool, str, dict, WeaponSummary | None]:
     """The first weapon on which this window is confidently above the account's own history."""
+    own = history_for(record, history)
     for weapon in record.weapons:
-        matched = [
-            row
-            for row in history
-            if row.player_id == record.player_id
-            and row.weapon_key == weapon.weapon_key
-            and row.skill_band == weapon.skill_band
-        ]
+        matched = [row for row in own if row.weapon_key == weapon.weapon_key and row.skill_band == weapon.skill_band]
         shots = sum(row.shots for row in matched)
         hits = sum(row.hits for row in matched)
         if shots < profile.min_shots or weapon.shots < profile.min_shots:

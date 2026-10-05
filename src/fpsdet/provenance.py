@@ -10,12 +10,14 @@ Four fingerprints, each a full SHA-256 written ``sha256:<64 hex>``:
 - ``cohort``: every (band, key, metric, player, value) of the baseline the run compared players
   with, and separately the advisory integrity stamp that travels with it.
 - ``inputs``: the subject player's own parsed events, in the order the scorer received them.
+- ``history``: the account-history rows the scorer could read for the subject, when history was given.
 
-The first three are computed once per run and shared by every case in it; ``inputs`` is per player.
-None of this binds external evidence or challenge material, and nothing yet binds the whole packet:
-a case file can still be edited after scoring. Observation ids do not include provenance, and the
-case seal does not change: provenance says what produced an observation, the id says which
-observation it is.
+The first three are computed once per run and shared by every case in it; ``inputs`` and ``history``
+are per player. ``packet`` then binds the subject, the decision, the observations, the eligibility
+and all of this provenance into one evidence-packet digest. A digest proves content identity, not
+origin: anyone who edits a case can recompute it. Signing it with a server key is a later step.
+Observation ids do not include provenance, and the case seal does not change: provenance says what
+produced an observation, the id says which observation it is.
 """
 
 from __future__ import annotations
@@ -39,6 +41,8 @@ DETECTOR_RECIPE = "fpsdet.detector/1"
 COHORT_RECIPE = "fpsdet.cohort/1"
 INTEGRITY_RECIPE = "fpsdet.cohort-integrity/1"
 INPUTS_RECIPE = "fpsdet.player-events/1"
+HISTORY_RECIPE = "fpsdet.history/1"
+PACKET_RECIPE = "fpsdet.packet/1"
 
 PACKAGE = "fpsdet"
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -338,6 +342,39 @@ def player_inputs(events: Iterable) -> dict[str, PlayerInputs]:
 
 
 @dataclass(frozen=True)
+class HistoryProvenance:
+    mode: str  # "none": the run was given no history; "external": it was
+    digest: str | None = None
+    windows: int = 0
+
+    def to_dict(self) -> dict:
+        if self.mode == "none":
+            return {"mode": "none"}
+        return {"mode": self.mode, "recipe": HISTORY_RECIPE, "digest": self.digest, "windows": self.windows}
+
+
+def history_digest(rows: Iterable) -> str:
+    """The history windows the scorer could read for one player, as a sorted multiset.
+
+    The account check adds up shots and hits over the matching windows, so their order cannot matter
+    and a repeated window counts twice. Each window is the JSON array [player_id, weapon_key,
+    skill_band, shots, hits]; the windows are sorted by that text, one per line.
+    """
+    lines = sorted(
+        _VALUES.encode([row.player_id, row.weapon_key, row.skill_band, row.shots, row.hits]) for row in rows
+    )
+    payload = HISTORY_RECIPE.encode("ascii") + b"\0" + str(len(lines)).encode("ascii") + b"\0"
+    return _sha256(payload + "".join(line + "\n" for line in lines).encode("utf-8"))
+
+
+def history_provenance(rows: list | None) -> HistoryProvenance:
+    """``rows`` is None when the run was given no history, else the subject's readable rows (maybe none)."""
+    if rows is None:
+        return HistoryProvenance("none")
+    return HistoryProvenance("external", history_digest(rows), len(rows))
+
+
+@dataclass(frozen=True)
 class RunProvenance:
     """What produced every case in one scoring run. One object, shared by every case."""
 
@@ -359,13 +396,18 @@ class RunProvenance:
 
 @dataclass(frozen=True)
 class CaseProvenance:
-    """The run's provenance, shared, and the subject player's own inputs."""
+    """The run's provenance, shared, and the subject player's own inputs and history."""
 
     run: RunProvenance
     inputs: PlayerInputs | None = None
+    history: HistoryProvenance | None = None
 
     def to_dict(self) -> dict:
-        return {**self.run.to_dict(), "inputs": None if self.inputs is None else self.inputs.to_dict()}
+        return {
+            **self.run.to_dict(),
+            "inputs": None if self.inputs is None else self.inputs.to_dict(),
+            "history": None if self.history is None else self.history.to_dict(),
+        }
 
 
 def run_provenance(profile, cohort=None, cohort_mode: str | None = None) -> RunProvenance:
@@ -373,13 +415,148 @@ def run_provenance(profile, cohort=None, cohort_mode: str | None = None) -> RunP
     return RunProvenance(profile_digest(profile), detector_fingerprint(), fingerprint)
 
 
-def stamp(cases: Iterable, profile, *, cohort=None, cohort_mode: str | None = None, events: Iterable | None = None) -> RunProvenance:
-    """Give every case of one run its provenance. The run's part is computed once; inputs once per player."""
+def stamp(
+    cases: Iterable,
+    profile,
+    *,
+    cohort=None,
+    cohort_mode: str | None = None,
+    events: Iterable | None = None,
+    history: Mapping[str, list] | None = None,
+) -> RunProvenance:
+    """Give every case of one run its provenance. The run's part is computed once; inputs and history per player.
+
+    ``history`` maps each player to the history rows the scorer could read for them (``score.history_for``),
+    or is None when the run was given no history.
+    """
     run = run_provenance(profile, cohort, cohort_mode)
     inputs = {} if events is None else player_inputs(events)
     for case in cases:
-        case.provenance = CaseProvenance(run, inputs.get(case.player_id))
+        rows = None if history is None else history.get(case.player_id, [])
+        case.provenance = CaseProvenance(run, inputs.get(case.player_id), history_provenance(rows))
     return run
+
+
+# The evidence packet. One digest over what the evidence is and what produced it, read from the
+# serialized case, so building it and checking it are the same code.
+
+# The provenance fields the packet binds, by part. A key added to a part later is not bound by packet/1.
+PACKET_PROVENANCE = {
+    "detector": ("recipe", "digest", "modules"),
+    "profile": ("recipe", "digest"),
+    "cohort": ("mode", "recipe", "digest", "stored_digest", "integrity"),
+    "inputs": ("recipe", "digest", "events", "matches"),
+    "history": ("mode", "recipe", "digest", "windows"),
+}
+RECIPES = {
+    "detector": DETECTOR_RECIPE,
+    "profile": PROFILE_RECIPE,
+    "cohort": COHORT_RECIPE,
+    "inputs": INPUTS_RECIPE,
+    "history": HISTORY_RECIPE,
+}
+_DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
+
+
+def _missing(provenance) -> list[str]:
+    """What a complete packet needs and this case's provenance lacks."""
+    if not isinstance(provenance, Mapping):
+        return ["provenance"]
+    missing = [part for part in PACKET_PROVENANCE if not isinstance(provenance.get(part), Mapping)]
+    detector = provenance.get("detector")
+    if isinstance(detector, Mapping) and detector.get("digest") is None:
+        missing.append("detector source")
+    return missing
+
+
+def packet_material(case: Mapping) -> dict:
+    """The canonical content of the evidence packet. Reason text, context, reports and the brief are not in it."""
+    evidence = case["evidence"]
+    provenance = evidence["provenance"]
+    return {
+        "recipe": PACKET_RECIPE,
+        "evidence_version": evidence["version"],
+        "provenance_version": provenance["version"],
+        "subject": case["player_id"],
+        "game": case["game_id"],
+        "decision": case["decision"],
+        "eligibility": evidence["eligibility"],
+        "observations": sorted(obs["observation_id"] for obs in evidence["observations"]),
+        "provenance": {
+            part: {key: provenance[part].get(key) for key in keys} for part, keys in PACKET_PROVENANCE.items()
+        },
+    }
+
+
+def packet_block(case: Mapping) -> dict:
+    """``case["evidence"]["packet"]``: the digest of a complete packet, or what keeps it from being complete."""
+    missing = _missing(case["evidence"].get("provenance"))
+    if missing:
+        return {"recipe": PACKET_RECIPE, "status": "incomplete", "missing": missing}
+    digest = _sha256(_json(packet_material(case)).encode("utf-8"))
+    return {"recipe": PACKET_RECIPE, "status": "complete", "digest": digest}
+
+
+def verify_packet(case: Mapping) -> list[str]:
+    """Is a serialized case internally consistent? Empty when it is.
+
+    Every observation id is recomputed from the observation's own fields first, so an edited value
+    with a copied id is caught. Then the provenance recipes are checked and the packet digest is
+    recomputed. This needs no events, cohort or code: it says the packet is the packet it claims to
+    be, not that the sources would produce it again, and not who produced it.
+    """
+    from .evidence import EVIDENCE_VERSION, Observation
+
+    evidence = case.get("evidence") if isinstance(case, Mapping) else None
+    if not isinstance(evidence, Mapping):
+        return ["the case has no evidence block"]
+    problems: list[str] = []
+    if evidence.get("version") != EVIDENCE_VERSION:
+        problems.append(f"evidence version {evidence.get('version')!r} is not one this fpsdet reads")
+    for obs in evidence.get("observations") or []:
+        name = obs.get("observation_id") if isinstance(obs, Mapping) else None
+        try:
+            rebuilt = Observation(
+                family=obs["family"],
+                kind=obs["kind"],
+                role=obs["role"],
+                subject_id=obs["subject_id"],
+                key=obs["key"],
+                match_ids=tuple(obs["match_ids"]),
+                evidence=obs["evidence"],
+                depends_on=tuple(obs["depends_on"]),
+                context=obs.get("context") or {},
+                source=obs["source"],
+            )
+        except (KeyError, TypeError, ValueError) as error:
+            problems.append(f"observation {name}: {error}")
+            continue
+        if rebuilt.observation_id != name:
+            problems.append(f"observation {name} does not match its own contents")
+        if obs["subject_id"] != case.get("player_id"):
+            problems.append(f"observation {name} is about {obs['subject_id']}, not this case's player")
+    provenance = evidence.get("provenance")
+    if isinstance(provenance, Mapping):
+        for part, recipe in RECIPES.items():
+            block = provenance.get(part)
+            if not isinstance(block, Mapping) or (part == "history" and block.get("mode") == "none"):
+                continue
+            if block.get("recipe") != recipe:
+                problems.append(f"provenance {part} uses recipe {block.get('recipe')!r}, not {recipe}")
+            if block.get("digest") is not None and not _DIGEST.fullmatch(str(block.get("digest"))):
+                problems.append(f"provenance {part} digest is not a sha256 digest")
+    packet = evidence.get("packet")
+    if not isinstance(packet, Mapping):
+        return problems + ["the evidence has no packet"]
+    try:
+        expected = packet_block(case)
+    except (KeyError, TypeError) as error:
+        return problems + [f"the packet cannot be rebuilt: {error!r}"]
+    if packet.get("status") != expected["status"]:
+        problems.append(f"the packet says {packet.get('status')!r} but its provenance makes it {expected['status']!r}")
+    elif expected["status"] == "complete" and packet.get("digest") != expected["digest"]:
+        problems.append("the packet digest does not match the evidence and provenance it covers")
+    return problems
 
 
 # The guard. Tests run these over the package's own sources; scoring never does.

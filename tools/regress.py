@@ -10,14 +10,15 @@ is. Snapshot the run before a change, snapshot it again after, and diff:
     python tools/regress.py diff before.jsonl after.jsonl --labels labels.json
     PYTHONPATH=src python tools/regress.py verify after.jsonl
 
-A snapshot is one line per player: the case exactly as ``fpsdet score`` writes it, with floats cut to 10
-significant digits so the last bit of a float sum cannot differ between Python versions. ``diff`` compares
+A snapshot is one line per player: the case exactly as ``fpsdet score`` writes it. ``diff`` cuts floats to 10
+significant digits on both sides, so the last bit of a float sum cannot differ between Python versions; the
+evidence is stored exactly, because ``verify`` recomputes its ids. ``diff`` compares
 the fields the first snapshot has. A field only the second one has is listed and allowed: that is how new
 evidence is added without moving what consumers read. Any other change is printed by field and by player,
 and the exit code is 1. With labels, decisions are also counted per label, the way the README reports them.
 ``verify`` checks that every case's structured evidence implies its decision and backs each check and reason,
-that every case of the run carries the same detector, profile and cohort provenance, and that each has its own
-input digest.
+that every case of the run carries the same detector, profile and cohort provenance, that each has its own
+input digest, and that every evidence packet is complete and verifies (fpsdet.provenance.verify_packet).
 """
 
 from __future__ import annotations
@@ -57,7 +58,7 @@ def cmd_snapshot(args: argparse.Namespace) -> int:
     target.parent.mkdir(parents=True, exist_ok=True)
     with target.open("w", encoding="utf-8") as handle:
         for case in sorted(cases, key=lambda c: c.player_id):
-            handle.write(json.dumps(canon(case_to_dict(case)), sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
+            handle.write(json.dumps(case_to_dict(case), sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
     decisions = Counter(case.decision for case in cases)
     print(f"Wrote {len(cases)} cases from {len(events)} events to {target}: {dict(sorted(decisions.items()))}")
     return 0
@@ -104,7 +105,7 @@ def compare(before: dict[str, dict], after: dict[str, dict]) -> dict:
     transitions: Counter = Counter()
     added: Counter = Counter()
     for pid in sorted(set(before) & set(after)):
-        old, now = before[pid], after[pid]
+        old, now = canon(before[pid]), canon(after[pid])
         changed = [key for key in old if key not in now or not subsumes(old[key], now[key])]
         if changed:
             moved[pid] = changed
@@ -178,8 +179,9 @@ def cmd_diff(args: argparse.Namespace) -> int:
 def verify(rows: dict[str, dict]) -> dict:
     """Does each case's structured evidence explain its decision, checks and reasons?"""
     from fpsdet.evidence import KINDS, implied_decision
+    from fpsdet.provenance import verify_packet
 
-    result = {"cases": len(rows), "explained": 0, "problems": [], "quiet_watches": 0, "quiet_watches_explained": 0, "kinds": Counter(), "provenance": Counter(), "inputs": 0}
+    result = {"cases": len(rows), "explained": 0, "problems": [], "quiet_watches": 0, "quiet_watches_explained": 0, "kinds": Counter(), "provenance": Counter(), "inputs": 0, "packets": Counter()}
     for pid, row in sorted(rows.items()):
         block = row.get("evidence")
         if block is None:
@@ -187,8 +189,15 @@ def verify(rows: dict[str, dict]) -> dict:
             continue
         observations = block["observations"]
         result["kinds"].update(obs["kind"] for obs in observations)
+        packet = block.get("packet") or {}
+        result["packets"][packet.get("status", "missing")] += 1
+        problems_in_packet = verify_packet(row)
+        if packet.get("status") != "complete":
+            problems_in_packet.append(f"packet is {packet.get('status', 'missing')}: {packet.get('missing')}")
+        result["problems"] += [f"{pid}: {problem}" for problem in problems_in_packet]
         stamp = dict(block.get("provenance") or {})
         inputs = stamp.pop("inputs", None)
+        stamp.pop("history", None)  # per player, like the inputs
         result["provenance"][json.dumps(stamp, sort_keys=True) if stamp else "none"] += 1
         if inputs and str(inputs.get("digest", "")).startswith("sha256:") and inputs.get("events", 0) > 0:
             result["inputs"] += 1
@@ -223,6 +232,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
         cohort = block.get("cohort") or {}
         print(f"  cohort {cohort.get('mode')} {cohort.get('digest')}, stored digest {cohort.get('stored_digest')}, integrity {(cohort.get('integrity') or {}).get('status')}")
     print(f"Cases with their own input digest: {result['inputs']} of {result['cases']}")
+    print("Evidence packets: " + ", ".join(f"{status} {n}" for status, n in sorted(result["packets"].items())) + "; every one checked by verify_packet")
     if len(result["provenance"]) != 1 or "none" in result["provenance"]:
         result["problems"].append("the cases of one run do not share one detector, profile and cohort provenance")
     for problem in result["problems"][: args.show]:

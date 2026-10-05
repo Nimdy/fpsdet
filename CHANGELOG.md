@@ -8,6 +8,13 @@
 
 ### Added
 
+- **One evidence-packet digest per case, and the account history behind it.**
+  - **`evidence.provenance.history`:** the account-history windows the scorer could read for this player, as a sorted multiset (`fpsdet.history/1`), or `{"mode": "none"}` when the run had no history. The account check and the digest share one rule, `score.history_for`, so they cannot drift apart.
+  - **`evidence.packet`:** a SHA-256 over the subject, game, decision, eligibility, every observation id, and the detector, profile, cohort (with its mode and integrity stamp), input and history digests (`fpsdet.packet/1`). Reason wording, context lines, the AI brief, reports and queue state are not in it.
+  - **No placeholders:** a case scored outside a run gets `"status": "incomplete"` and no digest.
+  - **`fpsdet.provenance.verify_packet`** checks a serialized case on its own. It recomputes every observation id from its contents first, so an edited value is caught even if the id is copied, then rebuilds the packet. `tools/regress.py verify` runs it on every case: all 1,529 CS2 and 2,764 TF2 packets verify.
+  - **Not a signature:** anyone who edits a case can recompute the digest. It proves content identity against a stored digest, not who produced the case.
+  - **Unchanged:** the seal and every other field.
 - **Evidence provenance: which baseline and which events.** `evidence.provenance` now also has `cohort` and `inputs`.
   - **`cohort`:** a SHA-256 of every band, key, metric, player id and value in the baseline the run used. Its `mode` is `external` for a baseline given to the run, or `in_file` for one fitted on the events being scored. Its advisory integrity stamp (status, alarms, matches left out) has a separate digest and its status in plain text.
   - **Cohort files:** `fpsdet baseline` writes both digests into the cohort file. Loading recomputes them, and a file whose values or integrity stamp were edited afterwards is refused. Older files still load and are marked `stored_digest: absent`.

@@ -48,9 +48,10 @@ def canon(value):
 def locked(case, keys: list[str]) -> dict:
     row = case_to_dict(case)
     if isinstance(row.get("evidence"), dict):
-        # Provenance names the detector code and profile behind the evidence, so it moves whenever
-        # detector source does. tests/test_provenance.py checks it; this lock covers the evidence itself.
-        row["evidence"] = {key: value for key, value in row["evidence"].items() if key != "provenance"}
+        # Provenance names the detector code behind the evidence, and the packet digest binds it, so both
+        # move whenever detector source does. tests/test_provenance.py and tests/test_packet.py check them;
+        # this lock covers the evidence itself.
+        row["evidence"] = {key: value for key, value in row["evidence"].items() if key not in ("provenance", "packet")}
     return canon({key: row.get(key, "<missing>") for key in keys})
 
 

@@ -12,8 +12,8 @@ The model is `fpsdet.evidence`. It is data only and standard library only.
 | The scorer recording every finding that feeds a decision | Implemented (`src/fpsdet/score.py`, `src/fpsdet/signals.py`) |
 | Case files (`cases/*.json`, `scan-index.json`, `review-index.json`) carry `evidence` | Implemented |
 | `ops.json`, the dashboard, the review desk and the AI brief read `evidence` | Not yet. They read what they read before, so none of them changed |
-| Provenance of the detector code, the parsed profile, the cohort and the player's events (`evidence.provenance`) | Implemented; see [provenance.md](provenance.md) |
-| One identity over the whole packet; knowledge state, challenges, external evidence, the evidence graph | Proposed in [architecture-v1.md](architecture-v1.md); none of them is here |
+| Provenance of the detector code, the parsed profile, the cohort, the player's events and history (`evidence.provenance`), and one evidence-packet digest over all of it (`evidence.packet`) | Implemented; see [provenance.md](provenance.md) |
+| A signature over the packet; knowledge state, challenges, external evidence, the evidence graph | Proposed in [architecture-v1.md](architecture-v1.md); none of them is here |
 
 Decisions still come from `score.decide`. Nothing reads an observation back into a decision. The legacy fields stay authoritative.
 
@@ -68,7 +68,8 @@ A case carries one new key, `evidence`:
   "version": 1,
   "observations": [ ... ],
   "eligibility": {"compared": [{"metric": "accuracy", "key": "rifle"}]},
-  "provenance": {"version": 1, "profile": {...}, "detector": {...}, "cohort": {...}, "inputs": {...}}
+  "provenance": {"version": 1, "profile": {...}, "detector": {...}, "cohort": {...}, "inputs": {...}, "history": {...}},
+  "packet": {"recipe": "fpsdet.packet/1", "status": "complete", "digest": "sha256:..."}
 }
 ```
 
@@ -127,7 +128,7 @@ Not observations, because they never change a decision: the context lines for sh
 {"v": 1, "source", "family", "kind", "role", "subject_id", "key", "match_ids", "depends_on", "evidence"}
 ```
 
-Canonical JSON means sorted keys, no spaces, UTF-8, and no NaN. `context` is not material, so rewording an explanation does not move an id. Nothing random, counted, or timed goes in, so the same evidence scored twice has the same id and changed evidence has a different one. The id is not the case seal and does not change it. It does not include provenance either: the id says which observation this is, provenance says what produced it, so the same evidence keeps its id under another profile or a later detector.
+Canonical JSON means sorted keys, no spaces, UTF-8, and no NaN. `context` is not material, so rewording an explanation does not move an id. Nothing random, counted, or timed goes in, so the same evidence scored twice has the same id and changed evidence has a different one. The id is not the case seal and does not change it. It does not include provenance either: the id says which observation this is, provenance says what produced it, so the same evidence keeps its id under another profile or a later detector. The evidence packet ([provenance.md](provenance.md#the-evidence-packet)) binds the ids, and `verify_packet` recomputes every id from its observation before trusting it.
 
 ## What can go in
 

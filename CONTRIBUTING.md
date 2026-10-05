@@ -20,7 +20,7 @@ fpsdet is under the [PolyForm Small Business License 1.0.0](LICENSE.md). It is s
 Python 3.11 or newer. Nothing to install.
 
 ```bash
-PYTHONPATH=src python3 -m unittest tests.test_fpsdet tests.test_golden tests.test_observations tests.test_provenance
+PYTHONPATH=src python3 -m unittest tests.test_fpsdet tests.test_golden tests.test_observations tests.test_provenance tests.test_packet
 PYTHONPATH=src python3 -m fpsdet demo
 ```
 

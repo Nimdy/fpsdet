@@ -689,10 +689,11 @@ def build_demo(seed: int = 1) -> Demo:
             assess_player(record, cohorts, profile, history, reports.get(record.player_id, 0))
         )
     from .provenance import stamp
-    from .score import annotate_batch
+    from .score import annotate_batch, history_for
 
     annotate_batch(cases, list(records.values()), profile)
-    stamp(cases, profile, cohort=cohorts, cohort_mode="external", events=subjects)
+    readable = {player_id: history_for(record, history) for player_id, record in records.items()}
+    stamp(cases, profile, cohort=cohorts, cohort_mode="external", events=subjects, history=readable)
     by_id = {case.player_id: case for case in cases}
     for player_id, decision in EXPECT.items():
         got = by_id[player_id].decision

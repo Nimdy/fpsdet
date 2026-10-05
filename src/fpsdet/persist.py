@@ -9,7 +9,7 @@ from pathlib import Path
 from .baseline import CohortTable
 from .evidence import evidence_block
 from .models import Case, Event, HistoryWindow, MetricView
-from .provenance import check_cohort_seal, cohort_seal
+from .provenance import check_cohort_seal, cohort_seal, packet_block
 
 
 def cohort_to_dict(table: CohortTable) -> dict:
@@ -91,6 +91,13 @@ def load_reports(obj: dict) -> dict[str, int]:
 
 
 def case_to_dict(case: Case) -> dict:
+    """The case as JSON data. The evidence packet digest is computed from this same data, as a verifier would."""
+    row = _case_fields(case)
+    row["evidence"]["packet"] = packet_block(row)
+    return row
+
+
+def _case_fields(case: Case) -> dict:
     def metric(row: MetricView) -> dict:
         return {
             "name": row.name,
