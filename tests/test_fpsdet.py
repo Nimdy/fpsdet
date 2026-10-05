@@ -1749,6 +1749,33 @@ class OpsTest(unittest.TestCase):
         self.assertFalse([row["id"] for row in payload["rows"] if row["decision"] == "review" and row["truth"] != "cheater"])
         self.assertTrue(any("result" in link["text"] for link in payload["links"]))
 
+    def test_the_decoys_page_is_linked_honest_and_drawn_from_the_tf2_run(self):
+        from fpsdet.pages import write_pages
+
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = write_pages(build_demo(), tmp)
+            page = (dest / "decoys.html").read_text(encoding="utf-8")
+            board = (dest / "board.html").read_text(encoding="utf-8")
+            index = (dest / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="decoys.html"', index)
+        self.assertIn('href="decoys.html"', board)
+        self.assertIn('href="board.html#tape-replay"', page)
+        self.assertIn("This does not end cheating", page)
+        self.assertIn("Automated action: none", page)
+        self.assertIn("private_track_ms", page)
+        self.assertIn("Can it be countered?", page)
+        self.assertNotIn("<script", page)
+        rows = json.loads((ROOT / "examples" / "tf2" / "desk.json").read_text(encoding="utf-8"))["rows"]
+        def sniper(label):
+            return [m for r in rows if r["truth"] == label for m in r["metrics"] if m["key"] == "sniperrifle" and m["name"] == "accuracy"]
+        honest, cheats = sniper("never banned"), sniper("banned for cheating")
+        best = max(m["human"] for m in honest + cheats)
+        past = sum(1 for m in cheats if m["value"] > best)
+        # The chart's caption is the run's, not a number typed in.
+        self.assertIn(f"sniper rifle accuracy for {len(honest)} never-banned players and {len(cheats)} players banned for cheating", page)
+        self.assertIn(f"Only {past} of the {len(cheats)} banned cheaters are past that line", page)
+        self.assertIn(f"best human measured {best:.0%}", page)
+
     def test_the_home_page_numbers_come_from_the_tf2_run(self):
         rows = json.loads((ROOT / "examples" / "tf2" / "desk.json").read_text(encoding="utf-8"))["rows"]
         index = (ROOT / "site" / "index.html").read_text(encoding="utf-8")

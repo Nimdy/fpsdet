@@ -141,6 +141,10 @@ If the server never sends an enemy's position to a client that cannot see or hea
 
 [docs/culling.md](docs/culling.md) explains how the two fit together.
 
+## Add one thing: decoys
+
+Statistics catch a cheater who is past every human. A careful one stays inside the human range: on the real TF2 matches, 131 of 189 banned cheaters still looked clean. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear, replaying another player's real movement; the game never draws it, and only software reading memory or packets can follow it. fpsdet scores the tracking from one field, `private_track_ms`. The [decoys page](https://nimdy.github.io/detect-FPS-hackers/decoys.html) explains it with diagrams, lists the rules that keep honest players safe, and answers whether it can be countered.
+
 ## Wire it to your game
 
 The dedicated server writes one JSON object per shot and per movement sample.

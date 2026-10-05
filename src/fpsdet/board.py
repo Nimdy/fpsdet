@@ -1062,6 +1062,7 @@ body.view-ops::after { content: none; }
     <a class="nav-link" href="../site/games.html"><span>04</span>Games</a>
     <a class="nav-link" href="../site/source.html"><span>05</span>Source</a>
     <a class="nav-link" href="#ops" aria-current="page"><span>06</span>Desk</a>
+    <a class="nav-link" href="../site/decoys.html"><span>07</span>Decoys</a>
   </nav>
   <div class="tabs" role="tablist" aria-label="Desk views">
     <a role="tab" id="tab-ops" href="#ops" aria-controls="ops" aria-selected="true"><span>A</span>Operations · a synthetic week</a>
