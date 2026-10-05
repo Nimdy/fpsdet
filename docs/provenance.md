@@ -30,7 +30,7 @@ Two cases with the same detector and profile digests were scored by the same cod
     "detector": {
       "recipe": "fpsdet.detector/1",
       "digest": "sha256:<64 hex>",
-      "modules": ["fpsdet.baseline", "fpsdet.evidence", "fpsdet.models", "fpsdet.parse", "fpsdet.persist",
+      "modules": ["fpsdet", "fpsdet.baseline", "fpsdet.evidence", "fpsdet.models", "fpsdet.parse", "fpsdet.persist",
                   "fpsdet.pipeline", "fpsdet.provenance", "fpsdet.score", "fpsdet.signals", "fpsdet.statsutil",
                   "fpsdet.summarize"]
     }
@@ -69,6 +69,7 @@ The detector is every module whose code can change a finding, the evidence writt
 
 | Module | Why it is in |
 | --- | --- |
+| `fpsdet` (`__init__.py`) | Runs on every import of the package, before any module. Its `__version__` is in it, so a release moves the digest |
 | `fpsdet.pipeline` | Scores a batch: in-file cohort, batch passes, the provenance stamp |
 | `fpsdet.parse` | Turns event lines and profiles into the objects scored |
 | `fpsdet.summarize` | Reduces events to per-player facts, with the speed run, the blatant recoil run and the knowledge filters |
@@ -93,13 +94,12 @@ Not in it, and why:
 | `fpsdet.priority` | Queue order, after the decision |
 | `fpsdet.lake` | Raw event storage. Which events were scored is input provenance, the next packet |
 | `fpsdet.synthetic`, `fpsdet.week` | The planted demo and the synthetic week |
-| `fpsdet` (`__init__.py`) | A version string and two re-exports |
 
 Presentation code is outside the boundary so that a new chart, a reworded page or a dashboard fix does not make old evidence look as if a different detector produced it. The static pages under `site/` are never read at all.
 
 **The guard.** The boundary is an explicit list, `DETECTOR_MODULES`, and nothing else is read at run time. A test checks that list against the code itself:
 
-- It parses the imports, including imports inside functions, of `pipeline`, `parse` and `persist`, and follows every package module they reach.
+- It parses the imports, including imports inside functions, of the package `__init__`, `pipeline`, `parse` and `persist`, and follows every package module they reach. The `__init__` is a root because Python runs it before any module of the package, so code placed there runs whatever is imported.
 - That reachable set must equal `DETECTOR_MODULES` exactly.
 - Every other module in the package must be listed in `NOT_DETECTOR` with a reason.
 - Detection code may not import any module in `NOT_DETECTOR`.

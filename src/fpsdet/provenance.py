@@ -39,6 +39,7 @@ PACKAGE_DIR = Path(__file__).resolve().parent
 # profile, cohort or history is read. Tests derive the same set from the imports of DETECTOR_ROOTS
 # and fail when the two disagree, so a new detection module cannot fall outside the fingerprint.
 DETECTOR_MODULES = (
+    "fpsdet",  # __init__.py runs on every import of the package, so it is part of what runs
     "fpsdet.baseline",
     "fpsdet.evidence",
     "fpsdet.models",
@@ -51,13 +52,12 @@ DETECTOR_MODULES = (
     "fpsdet.statsutil",
     "fpsdet.summarize",
 )
-# Where detection starts: scoring a batch, reading events and profiles, reading cohorts and history
-# and writing the case and its evidence.
-DETECTOR_ROOTS = ("fpsdet.pipeline", "fpsdet.parse", "fpsdet.persist")
+# Where detection starts: the package's own __init__ (it runs before any module), scoring a batch,
+# reading events and profiles, reading cohorts and history and writing the case and its evidence.
+DETECTOR_ROOTS = ("fpsdet", "fpsdet.pipeline", "fpsdet.parse", "fpsdet.persist")
 # Every other module of the package, and why it is not detection. A test fails when a module is in
 # neither list, or when detection code imports one of these.
 NOT_DETECTOR = {
-    "fpsdet": "the package marker: a version string and two re-exports",
     "fpsdet.__main__": "starts the command line",
     "fpsdet.cli": "the command line: reads files, prints, writes outputs",
     "fpsdet.casefile": "writes a finished case as JSON and an HTML page",

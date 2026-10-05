@@ -188,6 +188,12 @@ class RegressToolTest(unittest.TestCase):
         result = self.tool.compare(nested, deeper)
         self.assertEqual((result["moved"], sorted(result["added"])), ({}, ["evidence.observations[].note", "evidence.provenance"]))
         self.assertEqual(self.tool.compare(deeper, nested)["moved"], {"a": ["evidence"]})
+        # The detector digest moves with any code change; --ignore leaves it out of both sides.
+        old = {"a": {"evidence": {"provenance": {"detector": {"digest": "x"}, "profile": {"digest": "p"}}}}}
+        new = {"a": {"evidence": {"provenance": {"detector": {"digest": "y"}, "profile": {"digest": "p"}}}}}
+        self.assertEqual(self.tool.compare(old, new)["moved"], {"a": ["evidence"]})
+        ignored = ["evidence.provenance.detector"]
+        self.assertEqual(self.tool.compare(self.tool.without(old, ignored), self.tool.without(new, ignored))["moved"], {})
 
     def test_a_snapshot_of_the_same_run_diffs_clean(self):
         import contextlib

@@ -114,6 +114,24 @@ def compare(before: dict[str, dict], after: dict[str, dict]) -> dict:
     return {"gone": gone, "new": new, "moved": moved, "fields": fields, "transitions": transitions, "added": added}
 
 
+def without(rows: dict[str, dict], paths: list[str]) -> dict[str, dict]:
+    """The rows with each dotted path removed, such as evidence.provenance.detector, which moves with any code change."""
+    if not paths:
+        return rows
+    out = {}
+    for pid, row in rows.items():
+        row = json.loads(json.dumps(row))
+        for path in paths:
+            *parents, last = path.split(".")
+            node = row
+            for name in parents:
+                node = node.get(name) if isinstance(node, dict) else None
+            if isinstance(node, dict):
+                node.pop(last, None)
+        out[pid] = row
+    return out
+
+
 def by_label(rows: dict[str, dict], labels: dict[str, str]) -> dict[str, Counter]:
     table: dict[str, Counter] = {}
     for pid, row in rows.items():
@@ -123,6 +141,9 @@ def by_label(rows: dict[str, dict], labels: dict[str, str]) -> dict[str, Counter
 
 def cmd_diff(args: argparse.Namespace) -> int:
     before, after = read_snapshot(args.before), read_snapshot(args.after)
+    before, after = without(before, args.ignore), without(after, args.ignore)
+    if args.ignore:
+        print("Ignored: " + ", ".join(args.ignore))
     result = compare(before, after)
     print(f"{len(before)} cases before, {len(after)} after")
     if result["added"]:
@@ -216,6 +237,7 @@ def main(argv: list[str] | None = None) -> int:
     diff.add_argument("after")
     diff.add_argument("--labels", help="JSON map of player id to label, to count decisions per label")
     diff.add_argument("--show", type=int, default=20, help="How many moved players to list")
+    diff.add_argument("--ignore", action="append", default=[], help="A dotted path to leave out of both, such as evidence.provenance.detector. Repeatable")
     diff.set_defaults(func=cmd_diff)
     check = sub.add_parser("verify", help="Check that each case's evidence explains its decision, checks and reasons. Needs PYTHONPATH=src")
     check.add_argument("snapshot")

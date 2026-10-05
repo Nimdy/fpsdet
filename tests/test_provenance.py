@@ -185,6 +185,17 @@ class DetectorBoundaryTest(unittest.TestCase):
             "fpsdet.opsview is listed as not detector code, but detection code imports it",
         ])
 
+    def test_the_package_init_is_detection_code(self):
+        # It runs on every import of the package, before any module, so it is fingerprinted and guarded.
+        self.assertIn("fpsdet", DETECTOR_MODULES)
+        self.assertNotIn("fpsdet", NOT_DETECTOR)
+        sources = package_sources()
+        sources["fpsdet"] += "\nfrom . import opsview\n"
+        self.assertEqual(manifest_problems(sources), [
+            "fpsdet.opsview is imported by detection code but is not in DETECTOR_MODULES",
+            "fpsdet.opsview is listed as not detector code, but detection code imports it",
+        ])
+
     def test_a_new_module_must_be_classified(self):
         sources = {**package_sources(), "fpsdet.export": "import json\n"}
         self.assertEqual(manifest_problems(sources), ["fpsdet.export is not classified: add it to DETECTOR_MODULES or NOT_DETECTOR"])

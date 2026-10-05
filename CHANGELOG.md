@@ -10,7 +10,7 @@
 
 - **Evidence provenance: which detector and which profile.** Each case's `evidence` now carries `provenance`, shared by every case of a run.
   - **Profile:** a SHA-256 of the game profile as the scorer parsed it. Spacing, key order, notes and values the parser reads as the default do not change it.
-  - **Detector:** a SHA-256 of the source of the 11 modules that can change a finding, listed by name. Dashboards, the desk, the site, the command line and AI prose are outside it, and a test checks the list against the scorer's imports so a new detection module cannot be left out.
+  - **Detector:** a SHA-256 of the source of the 12 modules that can change a finding (the package `__init__` included, since it runs on every import), listed by name. Dashboards, the desk, the site, the command line and AI prose are outside it, and a test checks the list against the scorer's imports so a new detection module cannot be left out.
   - **Identical everywhere:** both digests are the same on Python 3.11 and 3.12 and in any checkout folder.
   - **Nothing else moves:** observation ids, the seal and every other field are unchanged.
   - **Not yet bound:** the events scored and the cohort. [docs/provenance.md](docs/provenance.md) says what it proves and what it does not.
