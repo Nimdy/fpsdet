@@ -238,5 +238,21 @@ class PacketTest(unittest.TestCase):
         self.assertEqual([obs["observation_id"] for obs in row["evidence"]["observations"]], expected)
 
 
+class HistoricalPacketTest(unittest.TestCase):
+    """Cases written by an earlier fpsdet must keep verifying: a recipe never changes its meaning."""
+
+    def test_p23_packets_still_verify(self):
+        from pathlib import Path
+
+        fixture = json.loads((Path(__file__).resolve().parent / "fixtures" / "historical-packets-p23.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(fixture["cases"]), 2)
+        for case in fixture["cases"]:
+            self.assertEqual(case["evidence"]["provenance"]["inputs"]["recipe"], "fpsdet.player-events/1")
+            self.assertEqual(verify_packet(case), [], case["player_id"])
+            edited = copy.deepcopy(case)
+            edited["decision"] = "clean" if case["decision"] != "clean" else "watch"
+            self.assertTrue(verify_packet(edited))
+
+
 if __name__ == "__main__":
     unittest.main()
