@@ -26,6 +26,7 @@ import math
 
 from .baseline import CohortTable, Dist, cohort_is_thick, sample_std
 from .evidence import KINDS, Observation
+from .knowledge import FUTURE_CHANNELS, presentation, private_knowledge
 from .models import (
     ACTIONS,
     Case,
@@ -326,6 +327,53 @@ def _fire_break(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict]
     return None
 
 
+def _knowledge_context(kind: str, weapon: WeaponSummary, profile: GameProfile) -> dict:
+    """Why the knowledge engine let these samples count, and what it kept out. Context: not identity."""
+    skipped = {cause: n for cause, n in sorted(weapon.knowledge_skipped.get(kind, {}).items())}
+    required = list(profile.knowledge_channels)
+    if kind == "hidden":
+        return {
+            "status": "unknowable",
+            "required": required,
+            "basis": "hidden_track_ms: the server's line-of-sight and audio queries both failed for the tracked enemy",
+            "counted_recent_perception": dict(sorted(weapon.hidden_recent.items())),
+            "not_counted": skipped,
+        }
+    if kind == "private_replay":
+        return {**private_knowledge(profile).to_dict(), "basis": "private_track_ms: placed where this client's line-of-sight and audio queries fail", "not_counted": skipped}
+    if kind == "quiet_aim":
+        return {
+            "knowable": "the enemy was seen or heard at the shot",
+            "unknowable": "every declared channel was checked and failed",
+            "required": required,
+            "not_counted": skipped,
+        }
+    return {}
+
+
+def _knowledge_notes(record: PlayerRecord, profile: GameProfile) -> list[str]:
+    """Telemetry the knowledge engine could not trust, said once, so a reviewer can fix the emitter."""
+    notes = []
+    for weapon in record.weapons:
+        seen = weapon.knowledge_skipped.get("hidden", {}).get("seen", 0)
+        torn = sum(causes.get("conflict", 0) + causes.get("disagreed", 0) for causes in weapon.knowledge_skipped.values())
+        parts = []
+        if seen:
+            parts.append(f"{seen} carried hidden-mover time for an enemy the server also marked visible")
+        if torn:
+            parts.append(f"{torn} carried knowledge telemetry that contradicted itself")
+        if parts:
+            notes.append(f"{weapon.weapon_key}: {' and '.join(parts)}. The information checks did not count them; check the emitter.")
+    unreported = [name for name in profile.knowledge_channels if name in FUTURE_CHANNELS]
+    unchecked = any(causes.get("unchecked", 0) for weapon in record.weapons for causes in weapon.knowledge_skipped.values())
+    if unreported and unchecked:
+        notes.append(
+            f"The profile declares {', '.join(unreported)}, which no event reports, so information samples were not "
+            "known either way and the information checks did not count them."
+        )
+    return notes
+
+
 def _speed_facts(record: PlayerRecord, profile: GameProfile) -> dict:
     speed = record.speed
     return {
@@ -440,25 +488,28 @@ def assess_player(
             physics = True
             reasons.append(hidden[0])
             fired("hidden")
-            observe("hidden", "review", hidden[0], "reasons", hidden[1], key=key, match_ids=where)
+            observe("hidden", "review", hidden[0], "reasons", hidden[1], key=key, match_ids=where, context={"knowledge": _knowledge_context("hidden", weapon, profile)})
         private = private_finding(weapon, profile)
         if private:
             physics = True
             reasons.append(private[0])
             fired("private_replay")
-            observe("private_replay", "review", private[0], "reasons", private[1], key=key, match_ids=where)
+            observe("private_replay", "review", private[0], "reasons", private[1], key=key, match_ids=where, context={"knowledge": _knowledge_context("private_replay", weapon, profile)})
         wire = wire_finding(weapon, profile)
         if wire:
             physics = True
             reasons.append(wire[0])
             fired("wire")
-            observe("wire", "review", wire[0], "reasons", wire[1], key=key, match_ids=where)
+            observe("wire", "review", wire[0], "reasons", wire[1], key=key, match_ids=where, context={"knowledge": {
+                "client_data": "the snapshot the server sent (wire)",
+                "human_perception": "the position the official client draws (picture), one interpolation delay earlier",
+            }})
         smooth = smoothness_finding(weapon, profile)
         if smooth:
             physics = True
             reasons.append(smooth[0])
             fired("quiet_aim")
-            observe("quiet_aim", "review", smooth[0], "reasons", smooth[1], key=key, match_ids=where)
+            observe("quiet_aim", "review", smooth[0], "reasons", smooth[1], key=key, match_ids=where, context={"knowledge": _knowledge_context("quiet_aim", weapon, profile)})
         if weapon.shots < profile.min_shots:
             observations.append(
                 f"{weapon.weapon_key}: {weapon.shots} shots, need {profile.min_shots} before aim is scored"
@@ -810,6 +861,7 @@ def assess_player(
             observations.append(line)
             observe("supporting_extra", "supporting", line, "observations", declared, key=extra.group_key)
 
+    observations.extend(_knowledge_notes(record, profile))
     identity, identity_text, identity_facts, jumped = _identity(record, history, profile)
     if identity:
         reasons.append(identity_text)
@@ -853,7 +905,7 @@ def assess_player(
 
 
 def _batch_observation(
-    case: Case, kind: str, line: str, printed_in: str, evidence: dict, *, key: str = "", match_ids=(), depends_on=()
+    case: Case, kind: str, line: str, printed_in: str, evidence: dict, *, key: str = "", match_ids=(), depends_on=(), context=None
 ) -> Observation:
     return Observation(
         family=KINDS[kind][0],
@@ -864,12 +916,12 @@ def _batch_observation(
         match_ids=tuple(sorted(match_ids)),
         evidence=evidence,
         depends_on=tuple(depends_on),
-        context={"line": line, "printed_in": printed_in},
+        context={"line": line, "printed_in": printed_in, **(context or {})},
     )
 
 
 def _watch_for_batch(
-    case: Case, reason: str, rank: int, kind: str, evidence: dict, *, key: str = "", match_ids=(), depends_on=()
+    case: Case, reason: str, rank: int, kind: str, evidence: dict, *, key: str = "", match_ids=(), depends_on=(), context=None
 ) -> None:
     """A batch tell can move a clean player to watch. It does not make a review."""
     check = KINDS[kind][1]
@@ -877,7 +929,7 @@ def _watch_for_batch(
         case.checks.append(check)
     printed_in = "observations" if case.decision == "review" else "reasons"
     case.evidence.append(
-        _batch_observation(case, kind, reason, printed_in, evidence, key=key, match_ids=match_ids, depends_on=depends_on)
+        _batch_observation(case, kind, reason, printed_in, evidence, key=key, match_ids=match_ids, depends_on=depends_on, context=context)
     )
     if case.decision == "review":
         case.observations.append(reason)
@@ -1088,6 +1140,11 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                     },
                     match_ids={match for lag, match in zip(lags, lag_matches) if 0 <= lag < profile.voice_min_ms},
                     depends_on=[obs.observation_id for obs in (partner.evidence if partner else []) if obs.kind == "hidden"],
+                    context={"knowledge": {
+                        "contacts": "both players' shots on an enemy that was unknowable to the shooter",
+                        "required": list(profile.knowledge_channels),
+                        "teammates": "a relationship check: it times a swing against the partner's, and does not assume the teammate could not have been told",
+                    }},
                 )
 
 

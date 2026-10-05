@@ -263,6 +263,10 @@ class WeaponSummary:
     match_ids: set[str] = field(default_factory=set)
     # match_id -> [shots, hits, head_known_hits, head_hits]. Shots in one match are not independent.
     per_match: dict[str, list[int]] = field(default_factory=dict)
+    # Information samples the knowledge engine kept out, by check and cause (perceived, recent, unchecked,
+    # conflict, disagreed), and the recent-perception state of the hidden samples it counted.
+    knowledge_skipped: dict[str, dict[str, int]] = field(default_factory=dict)
+    hidden_recent: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass

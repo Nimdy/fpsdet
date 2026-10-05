@@ -2152,6 +2152,15 @@
     "observations": [
      {
       "context": {
+       "knowledge": {
+        "knowable": "the enemy was seen or heard at the shot",
+        "not_counted": {},
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "unknowable": "every declared channel was checked and failed"
+       },
        "line": "rifle aim noise dropped to 0.08 deg while this client could not have known (knowable median 0.90 deg, 24 samples)",
        "printed_in": "reasons"
       },
@@ -2261,6 +2270,14 @@
     "observations": [
      {
       "context": {
+       "knowledge": {
+        "contacts": "both players' shots on an enemy that was unknowable to the shooter",
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "teammates": "a relationship check: it times a swing against the partner's, and does not assume the teammate could not have been told"
+       },
        "line": "8 swings on a hidden enemy landed 40 ms after wall-eye, under the 350 ms a voice needs",
        "printed_in": "reasons"
       },
@@ -2847,6 +2864,20 @@
     "observations": [
      {
       "context": {
+       "knowledge": {
+        "basis": "private_track_ms: placed where this client's line-of-sight and audio queries fail",
+        "channels": {
+         "audio": "absent",
+         "recent_perception": "not_applicable",
+         "vision": "absent"
+        },
+        "not_counted": {},
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "status": "unknowable"
+       },
        "line": "rifle aim stayed on a private replay for 1600 ms across 20 shots",
        "printed_in": "reasons"
       },
@@ -3192,6 +3223,18 @@
     "observations": [
      {
       "context": {
+       "knowledge": {
+        "basis": "hidden_track_ms: the server's line-of-sight and audio queries both failed for the tracked enemy",
+        "counted_recent_perception": {
+         "unchecked": 20
+        },
+        "not_counted": {},
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "status": "unknowable"
+       },
        "line": "rifle aim stayed on a hidden mover for 1600 ms across 20 shots",
        "printed_in": "reasons"
       },
@@ -3519,6 +3562,10 @@
     "observations": [
      {
       "context": {
+       "knowledge": {
+        "client_data": "the snapshot the server sent (wire)",
+        "human_perception": "the position the official client draws (picture), one interpolation delay earlier"
+       },
        "line": "rifle aim matched the wire snapshot instead of the drawn picture on 48 shots (4800 ms of interpolation delay in total)",
        "printed_in": "reasons"
       },

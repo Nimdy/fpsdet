@@ -20,6 +20,7 @@ from .models import (
     higher_band,
     weight_class_name,
 )
+from .knowledge import UNKNOWABLE, KNOWN, presentation, private_knowledge, shot_knowledge, tracked_knowledge
 from .parse import aim_key, recoil_floor_for
 from .timeline import player_timelines, same_time_groups, timeline
 
@@ -172,45 +173,63 @@ def _windowed(value: float | None, gap: int | None) -> float | None:
     return value if value > 0 else None
 
 
-def _recently_perceived(event: Event, profile: GameProfile) -> bool:
-    """This client saw or heard that enemy a moment ago. Tracking where they went is human."""
-    return event.since_perceived_ms is not None and event.since_perceived_ms < profile.hidden_grace_ms
+def _knowledge_fields(event: Event) -> tuple:
+    return (event.information_state, event.vision_state, event.audio_state, event.since_perceived_ms)
 
 
-def _track_times(shots: list[Event], profile: GameProfile) -> tuple[dict[int, float], dict[int, float]]:
-    """The hidden-mover and private-replay time each shot adds, keyed by id(shot).
+def _track_times(shots: list[Event], profile: GameProfile) -> tuple[dict[int, float], dict[int, float], dict[int, tuple[str, str]]]:
+    """The hidden-mover and private-replay time each shot adds, keyed by id(shot), and why any shot
+    with time was left out: (check, cause).
 
     Each server moment (one match and time) adds at most one sample to each, cut to the time since
     the player's previous moment in that match. Shots at one moment are one aim. When the shots there
     that report a track time agree, it counts once; when they disagree, nothing at that moment says
-    which is right, so it adds nothing. ``shots`` must be in timeline order.
+    which is right, so it adds nothing. A sample counts only when the knowledge engine says its target
+    was unknowable to this client: never when it was seen, heard, recently perceived, or not known
+    either way. ``shots`` must be in timeline order.
     """
     hidden: dict[int, float] = {}
     private: dict[int, float] = {}
+    skipped: dict[int, tuple[str, str]] = {}
+    replay = private_knowledge(profile)  # the same for every shot of the run
     previous: Event | None = None
     for moment in same_time_groups(shots):
         first = moment[0]
         window = first.t_ms - previous.t_ms if previous is not None and previous.match_id == first.match_id else None
         previous = first
         claims = [ev for ev in moment if ev.hidden_track_ms is not None]
-        if claims and len({(ev.hidden_track_ms, ev.information_state, ev.since_perceived_ms) for ev in claims}) == 1:
+        if claims and len({(ev.hidden_track_ms, *_knowledge_fields(ev)) for ev in claims}) == 1:
             shot = claims[0]
             value = _windowed(shot.hidden_track_ms, window)
-            # Sound is knowable. Following footsteps through a wall, or a body
-            # that just broke line of sight, is a player, not a wallhack.
-            if value is not None and shot.information_state != "audio" and not _recently_perceived(shot, profile):
-                hidden[id(shot)] = value
+            if value is not None:
+                known = tracked_knowledge(shot, profile)
+                if known.status == UNKNOWABLE:
+                    hidden[id(shot)] = value
+                else:
+                    skipped[id(shot)] = ("hidden", known.cause)
+        elif claims and any(ev.hidden_track_ms > 0 for ev in claims):
+            skipped[id(claims[0])] = ("hidden", "disagreed")
         claims = [ev for ev in moment if ev.private_track_ms is not None]
         if claims and len({ev.private_track_ms for ev in claims}) == 1:
             value = _windowed(claims[0].private_track_ms, window)
             if value is not None:
-                private[id(claims[0])] = value
-    return hidden, private
+                if replay.status == UNKNOWABLE:
+                    private[id(claims[0])] = value
+                else:
+                    skipped[id(claims[0])] = ("private_replay", replay.cause)
+        elif claims and any(ev.private_track_ms > 0 for ev in claims):
+            skipped[id(claims[0])] = ("private_replay", "disagreed")
+    return hidden, private, skipped
+
+
+def _skip(summary: WeaponSummary, check: str, cause: str) -> None:
+    causes = summary.knowledge_skipped.setdefault(check, {})
+    causes[cause] = causes.get(cause, 0) + 1
 
 
 def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> list[WeaponSummary]:
     shots = [ev for ev in events if ev.event_type == "shot"]
-    hidden_times, private_times = _track_times(shots, profile)
+    hidden_times, private_times, track_skipped = _track_times(shots, profile)
     groups: dict[str, list[Event]] = defaultdict(list)
     for event in shots:
         groups[aim_key(event, profile)].append(event)
@@ -247,27 +266,32 @@ def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> l
                 summary.view_deltas.append(event.view_delta_deg)
             if event.acquire_ms is not None:
                 summary.acquire_ms.append(event.acquire_ms)
-            recent = _recently_perceived(event, profile)
             if id(event) in hidden_times:
                 summary.hidden_track_ms.append(hidden_times[id(event)])
+                recent = tracked_knowledge(event, profile).channel("recent_perception")
+                summary.hidden_recent[recent] = summary.hidden_recent.get(recent, 0) + 1
             if id(event) in private_times:
                 summary.private_track_ms.append(private_times[id(event)])
-            if (
-                event.wire_error_deg is not None
-                and event.picture_error_deg is not None
-                and event.interp_delay_ms is not None
-            ):
-                summary.wire_error_deg.append(event.wire_error_deg)
-                summary.picture_error_deg.append(event.picture_error_deg)
-                summary.interp_delay_ms.append(event.interp_delay_ms)
-            # Inside the grace window an unknowable label is not yet evidence either way.
-            unknowable = event.information_state == "unknowable" and not recent
-            if event.aim_jitter_deg is not None and unknowable:
-                summary.unknowable_jitter.append(event.aim_jitter_deg)
-            elif event.aim_jitter_deg is not None and event.information_state in {"visible", "audio"}:
-                summary.knowable_jitter.append(event.aim_jitter_deg)
-            if unknowable and event.enemy_id:
-                summary.hidden_contacts.append((event.match_id, event.t_ms, event.enemy_id))
+            if id(event) in track_skipped:
+                _skip(summary, *track_skipped[id(event)])
+            shown = presentation(event)
+            if shown is not None:
+                summary.wire_error_deg.append(shown.wire_error_deg)
+                summary.picture_error_deg.append(shown.picture_error_deg)
+                summary.interp_delay_ms.append(shown.interp_delay_ms)
+            if event.aim_jitter_deg is not None or event.enemy_id:
+                known = shot_knowledge(event, profile)
+                # Quiet aim compares aim while the enemy is seen or heard with aim while it is unknowable.
+                # Known only from memory (the grace window), or not known either way: neither side.
+                if event.aim_jitter_deg is not None:
+                    if known.status == UNKNOWABLE:
+                        summary.unknowable_jitter.append(event.aim_jitter_deg)
+                    elif known.status == KNOWN and known.perceived_now:
+                        summary.knowable_jitter.append(event.aim_jitter_deg)
+                    else:
+                        _skip(summary, "quiet_aim", known.cause)
+                if known.status == UNKNOWABLE and event.enemy_id:
+                    summary.hidden_contacts.append((event.match_id, event.t_ms, event.enemy_id))
             phys_id = event.weapon_id or event.weapon_class
             by_match[(event.match_id, phys_id)].append(event)
         # Matches and guns in key order; each one's shots in time order, as the timeline gave them.

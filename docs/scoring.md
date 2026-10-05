@@ -132,15 +132,20 @@ Fire interval catches gaps under the legal line. A macro that fires on the legal
 
 The server's pace is `min_shot_interval_ms` plus `tick_ms` or `interval_slack_ms`, whichever is larger. A match whose cadence averages at or under it is the server firing as fast as the gun cycles, which is what a held trigger on a full-auto does, and the rule leaves it alone. Under the legal line the fire-interval rule owns it. Set `tick_ms` when the server stamps shots on ticks: a 90 ms cycle on a 20-tick server fires every 100 ms. `WeaponRule.server_paced` true opts that weapon out entirely.
 
+## What the client could know
+
+Every information check below asks `fpsdet.knowledge` one question: could this client know this enemy at this moment? The answer is `known` (a legal channel exposed it), `unknowable` (every channel in the profile's `knowledge_channels`, default vision and audio, was checked and failed), or `unknown` (anything else: an unchecked declared channel, or telemetry that contradicts itself). The checks act only on `unknowable`. Recent perception (`since_perceived_ms` under `hidden_grace_ms`) makes an enemy known. [knowledge-engine.md](knowledge-engine.md) has the full rules.
+
 ## Hidden tracking
 
 `hidden_track_ms` is time, since this player's previous shot in the match, that the aim stayed in a tight cone of an enemy this client could neither see nor hear. Omit the field, or send 0, and nothing happens.
 
-Three things are not a wallhack, and the scorer drops them:
+A sample counts only when the tracked enemy is `unknowable`. Four things are not a wallhack, and the scorer drops them:
 
 - **Sound.** A shot labeled `information_state: "audio"` does not count. Following footsteps through a wall is a skill.
 - **A body that just broke line of sight.** Send `since_perceived_ms`, the time since this client last saw or heard that enemy. Under `hidden_grace_ms` (default 1000) the shot does not count. Tracking where someone just went, or spraying the cover they ducked behind, is human. The same grace keeps those shots out of the unknowable smoothness sample and the teammate check.
 - **A running total.** Each value is cut to the time since the player's previous shot in that match. An emitter that sends a running total cannot count the same second once per shot in a spray.
+- **An enemy the shot says was visible.** Hidden time on it contradicts the label. It is not counted, and the case names the emitter problem.
 
 Shots at the same match and time are one aim, so a moment adds at most one sample: once when its shots that report a hidden time agree on it (and on `information_state` and `since_perceived_ms`), and nothing when they disagree. The sum is exact (`math.fsum`), so it does not depend on order or Python version.
 

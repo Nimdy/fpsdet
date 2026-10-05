@@ -19,6 +19,15 @@
 
 ### Added
 
+- **The client knowledge engine** (`fpsdet.knowledge`, [docs/knowledge-engine.md](docs/knowledge-engine.md)). Every information check now asks one question: could this client know this enemy at this moment? The answer is `known`, `unknowable` (every channel the game declares was checked and failed) or `unknown`.
+  - **The rule:** unchecked is never absent. A declared channel nobody reported, or telemetry that contradicts itself, means `unknown`, and the checks abstain. Missing telemetry can only make fpsdet say less.
+  - **Profile field `knowledge_channels`:** defaults to vision and audio, which is what `unknowable` has always meant. A game with a radar or teammate callouts can declare those, and the checks then wait until its server reports them.
+  - **Event fields `vision_state` and `audio_state`:** report one channel at a time, including "not checked".
+  - **Checks routed through it:** hidden mover, private replay, quiet aim and teammate contacts. The legacy `information_state` maps onto it exactly.
+  - **Evidence:** each information finding's context records the knowledge behind it and the samples kept out.
+  - **Contradictions:** contradictory telemetry is named on the case.
+  - **One change on purpose:** a shot labelled visible that also carries hidden-mover time no longer counts; no case in any data set had one.
+  - **Otherwise unchanged:** no decision, reason, observation id or seal moved. Profile digests, and so packets, moved because profiles gained the field.
 - **Input provenance follows the scorer: `fpsdet.player-events/2`.**
   - **What changed:** the input digest is now taken over each player's canonical timeline, the same list the scorer reads, so the same events in any file order have one digest. Duplicates still count.
   - **Old packets:** `fpsdet.player-events/1`, the arrival-order recipe, keeps its meaning (`arrival_digest`). Packets written with it still verify, and nothing writes it any more.

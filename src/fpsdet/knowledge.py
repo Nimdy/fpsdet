@@ -76,11 +76,13 @@ class KnowledgeState:
 
     @property
     def cause(self) -> str:
-        """One word for why: perceived, recent, unknowable, conflict, or unchecked."""
+        """One word for why: seen, heard, recent, unknowable, conflict, or unchecked."""
         if self.conflict:
             return "conflict"
         if self.status == KNOWN:
-            return "perceived" if self.perceived_now else "recent"
+            if self.channel("vision") == CHANNEL_KNOWN:
+                return "seen"
+            return "heard" if self.channel("audio") == CHANNEL_KNOWN else "recent"
         return UNKNOWABLE if self.status == UNKNOWABLE else "unchecked"
 
     def to_dict(self) -> dict:

@@ -1,8 +1,8 @@
 """Client knowledge: what this client could lawfully know about a target at the time of a shot.
 
-CurrentInformationSemanticsTest pins, before the knowledge engine exists, exactly which samples each
-information check receives today. The engine must reproduce every one of them, except where a test
-says it documents behaviour the engine deliberately changes.
+CurrentInformationSemanticsTest was written before the knowledge engine (commit f60fbd2) to pin exactly
+which samples each information check received. The engine reproduces every one of them but one: a shot
+labelled visible that also carries hidden time contradicts itself, and is no longer counted.
 """
 
 from __future__ import annotations
@@ -60,10 +60,11 @@ class CurrentInformationSemanticsTest(unittest.TestCase):
         ]
         self.assertEqual(weapon(shots).hidden_track_ms, [300.0, 301.0, 304.0, 306.0])
 
-    def test_a_visible_shot_with_hidden_time_counts_today(self):
-        # The shot's enemy is labelled visible, yet the hidden time says neither seen nor heard. Today it
-        # counts. The knowledge engine treats this as contradictory telemetry and drops it.
-        self.assertEqual(weapon([ev(0, hidden_track_ms=300.0, information_state="visible")]).hidden_track_ms, [300.0])
+    def test_a_visible_shot_with_hidden_time_no_longer_counts(self):
+        # The shot's enemy is labelled visible, yet the hidden time says neither seen nor heard. Before the
+        # knowledge engine it counted. A visible enemy is known, so it does not, and the emitter is named.
+        summary = weapon([ev(0, hidden_track_ms=300.0, information_state="visible")])
+        self.assertEqual((summary.hidden_track_ms, summary.knowledge_skipped), ([], {"hidden": {"seen": 1}}))
 
     def test_quiet_aim_populations(self):
         shots = [
@@ -233,6 +234,124 @@ class ProfileChannelsTest(unittest.TestCase):
 
     def test_the_declared_channels_are_part_of_the_profile_digest(self):
         self.assertNotEqual(profile_digest(GAME), profile_digest(WITH_TEAM))
+
+
+def scored(events: list[Event], profile=PROFILE) -> dict:
+    from fpsdet.persist import case_to_dict
+    from fpsdet.pipeline import run_score
+
+    return case_to_dict(run_score(events, profile)[0])
+
+
+def hidden_shots(**fields) -> list[Event]:
+    """Ten shots two seconds apart, each with 300 ms on a hidden mover: a review if the mover was unknowable."""
+    return [ev(i * 2000, hidden_track_ms=300.0, **fields) for i in range(10)]
+
+
+def quiet(**unknowable_fields) -> list[Event]:
+    """Twelve noisy shots on a seen enemy, then twelve still ones on an enemy described by the fields."""
+    seen = [ev(i * 2000, aim_jitter_deg=1.0, information_state="visible") for i in range(12)]
+    still = [ev(30000 + i * 2000, aim_jitter_deg=0.05, **unknowable_fields) for i in range(12)]
+    return seen + still
+
+
+TEAM = dataclasses.replace(PROFILE, knowledge_channels=("vision", "audio", "team_share"))
+
+
+class HiddenMoverControlsTest(unittest.TestCase):
+    """The hidden mover counts tracking only when the knowledge engine says the target was unknowable."""
+
+    def test_unknowable_is_the_only_way_in(self):
+        self.assertEqual(scored(hidden_shots(information_state="unknowable"))["decision"], "review")
+        self.assertEqual(scored(hidden_shots())["decision"], "review")  # the field itself says neither seen nor heard
+        for fields in (
+            dict(information_state="audio"),  # heard now
+            dict(information_state="visible"),  # seen now
+            dict(information_state="unknowable", since_perceived_ms=100.0),  # just lost
+            dict(vision_state="unchecked", audio_state="absent"),  # the server did not look
+            dict(vision_state="absent", audio_state="unchecked"),  # the server did not listen
+        ):
+            self.assertNotEqual(scored(hidden_shots(**fields))["decision"], "review", fields)
+        self.assertNotEqual(scored(hidden_shots(information_state="unknowable"), TEAM)["decision"], "review")
+
+    def test_contradictory_telemetry_abstains_and_names_the_emitter(self):
+        visible = scored(hidden_shots(information_state="visible"))
+        self.assertTrue(any("also marked visible" in line for line in visible["observations"]))
+        torn = scored(hidden_shots(information_state="unknowable", vision_state="known"))
+        self.assertNotEqual(torn["decision"], "review")
+        self.assertTrue(any("contradicted itself" in line for line in torn["observations"]))
+
+    def test_an_unreported_channel_is_said_once(self):
+        row = scored(hidden_shots(information_state="unknowable"), TEAM)
+        self.assertEqual(sum("declares team_share" in line for line in row["observations"]), 1)
+
+    def test_the_finding_carries_the_knowledge_behind_it(self):
+        row = scored(hidden_shots(information_state="unknowable") + [ev(30000, hidden_track_ms=300.0, information_state="audio")])
+        (hidden,) = [obs for obs in row["evidence"]["observations"] if obs["kind"] == "hidden"]
+        knowledge = hidden["context"]["knowledge"]
+        self.assertEqual((knowledge["status"], knowledge["required"]), ("unknowable", ["vision", "audio"]))
+        self.assertEqual((knowledge["counted_recent_perception"], knowledge["not_counted"]), ({"unchecked": 10}, {"heard": 1}))
+        self.assertNotIn("knowledge", hidden["evidence"])  # context, not identity
+
+
+class QuietAimControlsTest(unittest.TestCase):
+    """Seen or heard on one side, unknowable on the other; anything not known either way on neither."""
+
+    def assertQuiet(self, fields: dict, expected: bool):
+        checks = scored(quiet(**fields))["checks"]
+        self.assertEqual("quiet_aim" in checks, expected, fields)
+
+    def test_the_populations(self):
+        self.assertQuiet(dict(vision_state="absent", audio_state="absent"), True)
+        self.assertQuiet(dict(information_state="unknowable", since_perceived_ms=2000.0), True)  # outside grace
+        self.assertQuiet(dict(vision_state="absent"), False)  # audio unchecked
+        self.assertQuiet(dict(audio_state="absent"), False)  # vision unchecked
+        self.assertQuiet(dict(information_state="unknowable", since_perceived_ms=100.0), False)  # recent: neither side
+        self.assertQuiet(dict(vision_state="known", audio_state="absent"), False)  # seen: the knowable side
+        self.assertQuiet(dict(vision_state="absent", audio_state="known"), False)  # heard: the knowable side
+        self.assertQuiet(dict(information_state="unknowable", vision_state="known"), False)  # contradicts itself
+
+    def test_unknown_samples_dilute_neither_side(self):
+        summary = weapon(quiet(vision_state="absent") + [ev(90000, aim_jitter_deg=0.5)])
+        self.assertEqual((len(summary.knowable_jitter), summary.unknowable_jitter), (12, []))
+        self.assertEqual(summary.knowledge_skipped["quiet_aim"], {"unchecked": 13})
+
+
+class PrivateReplayControlsTest(unittest.TestCase):
+    def test_the_replay_counts_only_while_every_declared_channel_is_proven_absent(self):
+        shots = [ev(i * 2000, private_track_ms=200.0, information_state="visible") for i in range(10)]
+        self.assertEqual(scored(shots)["decision"], "review")
+        row = scored(shots, TEAM)
+        self.assertNotEqual(row["decision"], "review")
+        self.assertEqual(weapon_of(shots, TEAM).knowledge_skipped["private_replay"], {"unchecked": 10})
+
+
+class WireControlsTest(unittest.TestCase):
+    """The wire is data the client holds; the picture is what a person sees."""
+
+    def shots(self, wire: float, picture: float) -> list[Event]:
+        return [ev(i * 2000, wire_error_deg=wire, picture_error_deg=picture, interp_delay_ms=150.0) for i in range(12)]
+
+    def test_a_person_follows_the_picture_and_a_packet_aimbot_the_wire(self):
+        self.assertNotIn("wire", scored(self.shots(wire=2.0, picture=0.1))["checks"])
+        row = scored(self.shots(wire=0.1, picture=2.0))
+        self.assertIn("wire", row["checks"])
+        (wire,) = [obs for obs in row["evidence"]["observations"] if obs["kind"] == "wire"]
+        self.assertIn("client_data", wire["context"]["knowledge"])
+
+
+class TeammateControlsTest(unittest.TestCase):
+    def test_a_teammate_contact_needs_an_unknowable_enemy(self):
+        unknowable = [ev(i * 200, information_state="unknowable", enemy_id="e1") for i in range(4)]
+        self.assertEqual(len(weapon(unknowable).hidden_contacts), 4)
+        self.assertEqual(weapon_of(unknowable, TEAM).hidden_contacts, [])  # teammates' talk is declared, unreported
+        self.assertEqual(weapon([ev(0, vision_state="absent", enemy_id="e1")]).hidden_contacts, [])
+
+
+def weapon_of(events: list[Event], profile):
+    (record,) = summarize(events, profile)
+    (summary,) = record.weapons
+    return summary
 
 
 if __name__ == "__main__":
