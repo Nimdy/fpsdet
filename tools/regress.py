@@ -267,6 +267,10 @@ def classify(old: dict, new: dict) -> list[str]:
         found.append(f"{label}-order-only" if _same_items(a, b) else f"{label}-changed")
     old_ids = [obs["observation_id"] for obs in old_obs]
     new_ids = [obs["observation_id"] for obs in new_obs]
+    if old_ids == new_ids and old_obs != new_obs:
+        found.append("observation-context-only" if all(
+            {k: v for k, v in a.items() if k != "context"} == {k: v for k, v in b.items() if k != "context"}
+            for a, b in zip(old_obs, new_obs)) else "observation-changed-same-id")
     if old_ids != new_ids:
         if sorted(old_ids) == sorted(new_ids):
             found.append("observation-order-only")

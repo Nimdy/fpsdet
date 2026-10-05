@@ -139,10 +139,28 @@ Context is not part of an observation's identity, so adding it moved no observat
 
 ## What changed when the engine arrived
 
-Measured on the planted demo, the synthetic week, and the CS2 and TF2 reruns (these two carry no information fields):
+Every case was compared from just before the engine (event normalization, `eea40de`) to after it (`tools/regress.py migrate`). The data sets were the planted demo, the synthetic week (weekly and nightly), and the real CS2 and TF2 reruns.
 
-- **One case, behaviour changed on purpose:** a shot labelled `visible` that also carries hidden-mover time is no longer counted. It contradicts itself, and a visible enemy is known. No case in any data set had one.
-- **Evidence:** information findings gained their knowledge context.
-- **Profile digest:** profiles gained `knowledge_channels`, so every profile digest moved, and with it every evidence packet.
+| | Cases | Decisions | Reviews | Watches | Reasons | Context lines | Observation ids | Seals | Observation context | Packets |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Planted | 32 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 5 | 32 |
+| Synthetic weekly | 400 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6 | 400 |
+| Synthetic nightly | 2,669 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 14 | 2,669 |
+| CS2 | 1,529 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1,529 |
+| TF2 | 2,764 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2,764 |
 
-Nothing else moved.
+What moved:
+
+- **Observation context.** The information findings gained their knowledge context: the planted hidden mover, private replay, quiet aim, wire and teammate watch, and the same findings in the synthetic week.
+- **Packets.** Every packet moved because two of the digests it binds moved. The profile digest moved because profiles gained `knowledge_channels`, and the detector digest moved because the code changed. The input digests did not move: no event's bytes changed.
+- **Real data.** CS2 and TF2 carry no information fields, so nothing but provenance could move there.
+
+All 1,529 CS2 and 2,764 TF2 packets verify.
+
+**The one deliberate change:** a shot labelled `visible` that also carries hidden-mover time is no longer counted. It contradicts itself, and a visible enemy is known. No case in any data set had one.
+
+**Cost**, measured back to back against `eea40de` on one machine:
+
+- On the synthetic week (178,020 events, most of them labelled), summarizing went from 0.37 s to 0.43 s. Each distinct combination of labels is worked out once and shared.
+- Scoring the real runs, which carry no labels, did not change beyond run-to-run noise.
+- Peak memory rose by about 58 MB on 4 million events, for the two new optional event fields.

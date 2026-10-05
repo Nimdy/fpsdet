@@ -208,6 +208,10 @@ class RegressToolTest(unittest.TestCase):
         ]))
         self.assertIn("decision-change", self.tool.classify(base, {**base, "decision": "review"}))
         self.assertEqual(self.tool.classify(base, base), [])
+        explained = {**base, "evidence": {**base["evidence"], "observations": [{**base["evidence"]["observations"][0], "context": {"knowledge": {}}}]}}
+        self.assertEqual(self.tool.classify(base, explained), ["observation-context-only"])
+        restated = {**base, "evidence": {**base["evidence"], "observations": [{**base["evidence"]["observations"][0], "role": "review"}]}}
+        self.assertEqual(self.tool.classify(base, restated), ["observation-changed-same-id"])
 
     def test_a_snapshot_of_the_same_run_diffs_clean(self):
         import contextlib
