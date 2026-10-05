@@ -22,6 +22,7 @@ DATA=~/tf2
 python examples/tf2/tf2logs.py cohort --out $DATA          # RGL's ban list
 python examples/tf2/tf2logs.py fetch --out $DATA --plan    # match lists only: how much would be fetched
 python examples/tf2/tf2logs.py fetch --out $DATA           # each cheater's recent team matches before the ban
+python examples/tf2/tf2logs.py honest --out $DATA          # 150 honest players per half, 20 matches each
 python examples/tf2/tf2logs.py convert $DATA               # baseline.ndjson, scored.ndjson, labels.json
 
 PYTHONPATH=src python -m fpsdet baseline $DATA/baseline.ndjson --profile examples/tf2/tf2.json --screen-matches --out $DATA/cohort.json
@@ -36,8 +37,8 @@ PYTHONPATH=src python -m fpsdet demo
 ## Who is in it
 
 - **Labelled cheaters:** RGL accounts banned for cheating (not for helping a cheater, or for selling cheats) with at least 20 team matches on logs.tf before the ban. For each, the most recent team matches before the ban: 6v6, prolander or highlander, 12 or more players.
-- **Honest players:** everyone in those same matches whom RGL never banned for anything, with at least 8 matches in the sample. They played the same lobbies at the same level. A fixed bit of each pseudonym sends half of them to the baseline and half to be scored, so nobody is judged against a baseline that includes them.
-- A banned player's matches count only before the ban date.
+- **Honest players:** everyone in those same matches whom RGL never banned for anything, with at least 8 matches in the sample. They played the same lobbies at the same level. A fixed bit of each pseudonym sends half of them to the baseline and half to be scored, so nobody is judged against a baseline that includes them. On top of them, `honest` takes 150 players from each half, in an order fixed by their pseudonyms, and fetches each one's 20 most recent team matches, so cheaters have an honest comparison with as much evidence.
+- **Equal evidence:** every player keeps at most their 20 latest matches, and a banned player's count only before the ban date.
 
 ## What the converter sends
 
@@ -54,32 +55,32 @@ Only aimed, hitscan weapons are sent: scatterguns, pistols, shotguns, sniper rif
 
 ## Results
 
-Run on 2026-10-04: 4,567 RGL bans, of which 314 accounts banned for cheating. 228 had at least 20 team matches on logs.tf before the ban, and their 20 most recent were fetched: 4,482 matches. 85% of them carry the server's headshot counts. The baseline came from 914 honest players in those matches (670 with enough shots on some weapon); the lobby screen found nothing to leave out. The other half of the honest players, the cheaters, and everyone RGL banned for something else were scored against it.
+Run on 2026-10-04: 4,567 RGL bans, of which 314 accounts banned for cheating. 228 had at least 20 team matches on logs.tf before the ban. Their 20 most recent, plus 20 each for 300 honest players, came to 10,218 matches; 84% carry the server's headshot counts. The baseline came from 2,095 honest players (1,662 with enough shots on some weapon), and the lobby screen found nothing to leave out. The cheaters, the other half of the honest players, and everyone RGL banned for something else were scored against it.
 
-**What fpsdet added.** From the servers' shot and hit counts alone, without the labels, fpsdet picked 88 of the 1,577 scored players for a person to look at: 3 to review and 85 to watch. 53 of the 88 are banned cheaters (60%). 88 players picked at random would hold about 11, so its picks were 4.9 times better than chance. All 3 reviews were banned cheaters, and none of the 677 never-banned players went to review. Every decision, reason, bound and baseline line here is fpsdet's; the shot counts are the servers', and the labels are RGL's.
-
-**fpsdet separated the cheaters from the honest players, and put no honest player in review.**
+**What fpsdet added.** From the servers' shot and hit counts alone, without the labels, fpsdet picked 97 of the 2,764 scored players for a person to look at: 3 to review and 94 to watch. 51 of the 97 are banned cheaters (53%). 97 players picked at random would hold about 7, so its picks were nearly 8 times better than chance. All 3 reviews were banned cheaters, and none of the 1,746 never-banned players went to review. Every decision, reason, bound and baseline line here is fpsdet's; the shot counts are the servers', and the labels are RGL's.
 
 | | Review | Watch | Clean | Held for too little data | Flagged |
 | --- | --- | --- | --- | --- | --- |
-| Banned for cheating (192 with aimed shots) | 3 | 50 | 135 | 4 | 28% |
-| Never banned (677) | 0 | 12 | 588 | 77 | 1.8% |
-| Banned for something else (701) | 0 | 22 | 595 | 84 | 3.1% |
+| Banned for cheating (189 with aimed shots) | 3 | 48 | 131 | 7 | 27% |
+| Never banned (1,746) | 0 | 29 | 1,576 | 141 | 1.7% |
+| Banned for something else (821) | 0 | 17 | 728 | 76 | 2.1% |
 
-Honest players had fewer matches in the sample (median 5) than the cheaters (median 14), and more matches mean tighter bounds. At equal evidence, players with 15 to 20 matches each:
+Most never-banned players appear in only a few of these matches, and fewer matches mean wider bounds, so the fair comparison is at equal evidence. Players with 15 to 20 matches each:
 
 | | Players | Flagged | Review |
 | --- | --- | --- | --- |
-| Banned for cheating | 64 | 41% | 2 |
-| Never banned | 34 | 2.9% | 0 |
-| Banned for something else | 22 | 9.1% | 0 |
+| Banned for cheating | 80 | 37.5% | 2 |
+| Never banned | 228 | 2.6% | 0 |
+| Banned for something else | 61 | 4.9% | 0 |
 
-- **Every review is a labelled cheater.** All three have revolver or Ambassador accuracy confidently past the best human measured, for example a lower bound of 62% against a best human of 46%.
-- **Most catches are watches.** One number past every human is a watch; a review needs two. Many cheaters were past every human on one weapon, or above the rank's range and inside the best humans.
-- **The weapons behind the flags** are the ones aim cheats help most: sniper rifles (24 cheaters, counting the AWPer Hand), the scattergun (12), the Ambassador (5), and shotguns, SMGs and revolvers.
-- **Most cheaters still look clean (135 of 192).** A cheat that does not move hit rates, such as a wallhack or ESP, leaves nothing in a per-match count. So does a cheat used in some matches and not others, or one tuned to stay inside human aim.
+- **Every review is a banned cheater.** Two have Ambassador or revolver accuracy confidently past the best human measured (a lower bound of 62% against 52%, and 52% against 51%). The third has an AWPer Hand headshot rate with a lower bound of 70% against a best human of 59%.
+- **Most catches are watches.** One number past every human is a watch; a review needs two kinds. Most flagged cheaters were above their rank's range and inside the best humans, or past every human on one weapon.
+- **The weapons behind the flags** are the ones aim cheats help most: sniper rifles (21 cheaters, counting the AWPer Hand), the scattergun (12), the Ambassador and Enforcer (5), and SMGs, shotguns and revolvers.
+- **Most cheaters still look clean (131 of 189).** A cheat that does not move hit rates, such as a wallhack or ESP, leaves nothing in a per-match count. So does a cheat used in some matches and not others, or one tuned to stay inside human aim.
 
-**What this shows.** With many server-logged matches per player, fpsdet does what it says on real play: it flags labelled cheaters at many times the rate of honest players, and reserves review for the confident cases. It is not a complete detector. On these logs it sees hit rates only, so it catches cheaters whose aim is better than humans', and it waits for two kinds of evidence before asking a person to review.
+**Kills per minute helps a little.** Across classes, kills per minute and, for snipers, headshot kills per minute rank cheaters above honest players far more often than not (83% of the time for snipers). Declared as extra numbers, they added one review and two watches, all banned cheaters, and moved no honest player. They add little because fpsdet flags a number only past the best human measured, and most cheaters, though better than average, stay inside that range. Better than average is not evidence fpsdet acts on; that is what keeps honest players out of review.
+
+**What this shows.** With many server-logged matches per player, fpsdet does what it says on real play: it flags banned cheaters at about 14 times the rate of never-banned players with the same evidence, and keeps review for the confident cases. It is not a complete detector. On these logs it sees hit rates and kill rates only, so it catches cheaters whose aim is better than every human's, and it waits for two kinds of evidence before asking a person to review.
 
 ## Limits
 

@@ -126,6 +126,36 @@ def _day(epoch: int) -> str:
     return time.strftime("%Y-%m-%d", time.gmtime(epoch))
 
 
+def _download(root: Path, wanted: list[int], workers: int) -> None:
+    """Match logs not yet on disk, a couple of requests in flight with a pause after each."""
+    (root / "logs").mkdir(exist_ok=True)
+    missing = [log_id for log_id in wanted if not (root / "logs" / f"{log_id}.json").exists()]
+
+    def fetch_one(log_id: int) -> None:
+        target = root / "logs" / f"{log_id}.json"
+        partial = target.with_suffix(".part")
+        partial.write_bytes(get(LOG.format(log_id=log_id)))
+        partial.replace(target)  # a run stopped halfway never leaves half a file behind
+        time.sleep(PAUSE_S)
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for done, _ in enumerate(pool.map(fetch_one, missing), start=1):
+            if done % 200 == 0:
+                print(f"fetched {done} of {len(missing)}", file=sys.stderr)
+
+
+def _team_matches(root: Path, steamid: str, before: str | None = None) -> list[dict]:
+    """A player's team matches on logs.tf, newest first. The list is fetched once and cached."""
+    listing = root / "lists" / f"{steamid}.json"
+    if not listing.exists():
+        listing.parent.mkdir(exist_ok=True)
+        listing.write_bytes(get(LOG_LIST.format(steamid=steamid)))
+        time.sleep(PAUSE_S)
+    logs = json.loads(listing.read_text(encoding="utf-8")).get("logs", [])
+    team = [log for log in logs if log.get("players", 0) >= MIN_PLAYERS and (before is None or _day(log["date"]) < before)]
+    return sorted(team, key=lambda log: log["date"], reverse=True)
+
+
 def cmd_fetch(args: argparse.Namespace) -> int:
     """Each labelled account's most recent team matches before its ban, and nothing else."""
     root = Path(args.out).expanduser()
@@ -152,22 +182,56 @@ def cmd_fetch(args: argparse.Namespace) -> int:
     print(f"{len(chosen)} labelled accounts {dict(labels)}, {len(wanted)} matches to fetch", file=sys.stderr)
     if args.plan:
         return 0
-    missing = [log_id for log_id in wanted if not (root / "logs" / f"{log_id}.json").exists()]
-
-    def fetch_one(log_id: int) -> None:
-        target = root / "logs" / f"{log_id}.json"
-        partial = target.with_suffix(".part")
-        partial.write_bytes(get(LOG.format(log_id=log_id)))
-        partial.replace(target)  # a run stopped halfway never leaves half a file behind
-        time.sleep(PAUSE_S)
-
-    # A couple of requests in flight, each followed by a pause: about two a second in all.
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        for done, _ in enumerate(pool.map(fetch_one, missing), start=1):
-            if done % 200 == 0:
-                print(f"fetched {done} of {len(missing)}", file=sys.stderr)
+    _download(root, wanted, args.workers)
     print(f"Have {len(wanted)} match logs for {len(chosen)} labelled accounts in {root / 'logs'}")
     return 0
+
+
+def cmd_honest(args: argparse.Namespace) -> int:
+    """More honest players, each with as many matches as a cheater has.
+
+    The comparison that matters is at equal evidence, and most honest players appear in only a
+    few of the cheaters' matches. This picks never-banned players from those same lobbies, in
+    each half, ordered by their keyed pseudonym (a fixed random order nobody chose), and fetches
+    each one's most recent team matches. The baseline half thickens the baseline; the scored
+    half gives cheaters an honest comparison with as many matches.
+    """
+    root = Path(args.out).expanduser()
+    banned = json.loads((root / "bans.json").read_text(encoding="utf-8"))
+    flagged = {steam3(clean) for raw in banned if (clean := steamid64(raw))}
+    key = _key(root)
+    seen: Counter[str] = Counter()
+    for path in (root / "logs").glob("*.json"):
+        for steam_id in (json.loads(path.read_text(encoding="utf-8")).get("players") or {}):
+            seen[steam_id] += 1
+    pool = sorted(
+        (sid for sid, count in seen.items() if sid not in flagged and count >= 3),
+        key=lambda sid: _pseudonym(key, sid),
+    )
+    chosen: dict[str, list[int]] = {}
+    per_side: Counter[str] = Counter()
+    for steam_id in pool:
+        side = _side(_pseudonym(key, steam_id))
+        if per_side[side] >= args.players:
+            if all(per_side[s] >= args.players for s in ("baseline", "scored")):
+                break
+            continue
+        steamid = str(int(steam_id[5:-1]) + 76561197960265728)
+        team = _team_matches(root, steamid)
+        if len(team) >= args.per_account:
+            chosen[steamid] = [log["id"] for log in team[: args.per_account]]
+            per_side[side] += 1
+    wanted = sorted({log_id for ids in chosen.values() for log_id in ids})
+    (root / "honest.json").write_text(json.dumps(chosen), encoding="utf-8")
+    print(f"{len(chosen)} honest players {dict(per_side)}, {len(wanted)} matches to fetch", file=sys.stderr)
+    _download(root, wanted, args.workers)
+    print(f"Have {len(wanted)} match logs for {len(chosen)} honest players")
+    return 0
+
+
+def _side(pid: str) -> str:
+    """A fixed bit of the pseudonym: half the honest players build the baseline, half are scored."""
+    return "scored" if int(pid[-1], 16) % 2 else "baseline"
 
 
 def _pseudonym(key: bytes, steam_id: str) -> str:
@@ -222,7 +286,40 @@ def match_events(log_id: int, log: dict, player_ids: dict[str, str]) -> dict[str
                 if k < hits and headshots_known and name in HEADSHOT:
                     event["hitbox"] = "head" if k < heads else "upper_torso"
                 out[pid].append(event)
+        _rates(out[pid], player, bool(info.get("hasHS")))
     return out
+
+
+# A class stint shorter than this gives a per-minute rate too noisy to count.
+RATE_MIN_MINUTES = 5.0
+# Classes whose headshot kills are aimed: the sniper rifles, and the spy's Ambassador.
+HEADSHOT_CLASSES = ("sniper", "spy")
+
+
+def _rates(events: list[dict], player: dict, headshot_kills_known: bool) -> None:
+    """Per-minute rates for each class the player spent long enough on, on that class's first shot event.
+
+    These are declared numbers (extra_metrics in tf2.json): fpsdet takes each player's median over
+    their matches and compares it with every human measured. The log counts headshot kills for the
+    whole match, so they go to whichever headshot class the player spent longer on.
+    """
+    stints = [stats for stats in player.get("class_stats") or [] if (stats.get("total_time") or 0) / 60 >= RATE_MIN_MINUTES]
+    first = {}
+    for event in events:
+        first.setdefault(event["weapon_class"], event)
+    headshot_class = max(
+        (stats for stats in stints if stats.get("type") in HEADSHOT_CLASSES),
+        key=lambda stats: stats.get("total_time") or 0,
+        default=None,
+    )
+    for stats in stints:
+        event = first.get(stats.get("type"))
+        if event is None:
+            continue
+        minutes = stats["total_time"] / 60
+        event["kills_per_min"] = round((stats.get("kills") or 0) / minutes, 4)
+        if headshot_kills_known and stats is headshot_class:
+            event["headshot_kills_per_min"] = round((player.get("headshots") or 0) / minutes, 4)
 
 
 def cmd_convert(args: argparse.Namespace) -> int:
@@ -231,40 +328,46 @@ def cmd_convert(args: argparse.Namespace) -> int:
     An honest player is one RGL never banned, seen in the same lobbies as the labelled accounts.
     A fixed bit of each pseudonym sends half of them to the baseline and half to be scored, so no
     one is judged against a baseline that includes them. A banned player's matches count only
-    before the ban date. Honest players need at least --min-matches matches in these logs.
+    before the ban date. Every player keeps at most their --max-matches latest matches, so a cheater
+    whose older matches turn up in someone else's lobby does not get more evidence than anyone else.
+    Honest players need at least --min-matches matches in these logs.
     """
     root = Path(args.root).expanduser()
     banned = json.loads((root / "bans.json").read_text(encoding="utf-8"))
     by_steam3 = {steam3(clean): ban for raw, ban in banned.items() if (clean := steamid64(raw))}
     key = _key(root)
     logs = sorted((root / "logs").glob("*.json"), key=lambda path: int(path.stem))
-    seen: Counter[str] = Counter()
+    eligible: dict[str, list[tuple[str, int]]] = defaultdict(list)
     for path in logs:
         log = json.loads(path.read_text(encoding="utf-8"))
+        day = _day(int((log.get("info") or {}).get("date") or 0))
         for steam_id in (log.get("players") or {}):
-            seen[steam_id] += 1
+            ban = by_steam3.get(steam_id)
+            if ban is None or day < ban["banned"]:
+                eligible[steam_id].append((day, int(path.stem)))
     labels: dict[str, str] = {}
     sides: dict[str, str] = {}
     player_ids: dict[str, str] = {}
-    for steam_id, count in seen.items():
+    kept: set[tuple[str, int]] = set()
+    for steam_id, matches in eligible.items():
         ban = by_steam3.get(steam_id)
         pid = _pseudonym(key, steam_id)
-        if ban is None and count < args.min_matches:
+        if ban is None and len(matches) < args.min_matches:
             continue
         player_ids[steam_id] = pid
         labels[pid] = ban["label"] if ban else "not banned"
-        sides[pid] = "scored" if ban or int(pid[-1], 16) % 2 else "baseline"
+        sides[pid] = "scored" if ban else _side(pid)
+        kept.update((steam_id, log_id) for _, log_id in sorted(matches, reverse=True)[: args.max_matches])
     counts: Counter[str] = Counter()
     with (root / "baseline.ndjson").open("w", encoding="utf-8") as baseline, (root / "scored.ndjson").open("w", encoding="utf-8") as scored:
         for path in logs:
             log = json.loads(path.read_text(encoding="utf-8"))
-            day = _day(int((log.get("info") or {}).get("date") or 0))
+            log_id = int(path.stem)
             active = {
-                steam_id: pid for steam_id, pid in player_ids.items()
-                if steam_id in (log.get("players") or {})
-                and (by_steam3.get(steam_id) is None or day < by_steam3[steam_id]["banned"])
+                steam_id: player_ids[steam_id] for steam_id in (log.get("players") or {})
+                if steam_id in player_ids and (steam_id, log_id) in kept
             }
-            for pid, events in match_events(int(path.stem), log, active).items():
+            for pid, events in match_events(log_id, log, active).items():
                 handle = scored if sides[pid] == "scored" else baseline
                 counts[sides[pid]] += len(events)
                 for event in events:
@@ -374,9 +477,16 @@ def main(argv: list[str] | None = None) -> int:
     fetch.add_argument("--workers", type=int, default=2, help="Requests in flight at once; keep it small")
     fetch.add_argument("--plan", action="store_true", help="Fetch only the match lists and say how many matches would be fetched")
     fetch.set_defaults(func=cmd_fetch)
+    honest = sub.add_parser("honest", help="Fetch more honest players from the same lobbies, as many matches each as a cheater")
+    honest.add_argument("--out", required=True)
+    honest.add_argument("--players", type=int, default=150, help="Honest players per half")
+    honest.add_argument("--per-account", type=int, default=20)
+    honest.add_argument("--workers", type=int, default=2)
+    honest.set_defaults(func=cmd_honest)
     convert = sub.add_parser("convert", help="Write baseline.ndjson, scored.ndjson and labels.json")
     convert.add_argument("root", help="The --out folder given to fetch")
     convert.add_argument("--min-matches", type=int, default=8, help="Honest players need this many matches in the logs")
+    convert.add_argument("--max-matches", type=int, default=20, help="Every player keeps at most this many of their latest matches")
     convert.set_defaults(func=cmd_convert)
     report = sub.add_parser("report", help="Decisions against the labels")
     report.add_argument("cases", help="Folder written by fpsdet score --out")

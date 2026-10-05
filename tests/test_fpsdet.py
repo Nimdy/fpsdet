@@ -2145,6 +2145,43 @@ class Tf2ExampleTest(unittest.TestCase):
         self.assertFalse({e["player_id"] for e in scored} & {e["player_id"] for e in baseline})
         self.assertFalse(any(sid in json.dumps(scored + baseline) for sid in (cheater, steady, "[U:1:")))
 
+    def test_per_minute_rates_ride_on_each_long_stints_first_shot(self):
+        log = {
+            "info": {"map": "cp_x", "total_length": 1800, "hasHS": True, "hasHS_hit": True, "date": 86400},
+            "players": {"[U:1:1]": {"headshots": 3, "headshots_hit": 4, "class_stats": [
+                {"type": "sniper", "kills": 6, "total_time": 600, "weapon": {"sniperrifle": {"shots": 20, "hits": 10}}},
+                {"type": "scout", "kills": 2, "total_time": 120, "weapon": {"scattergun": {"shots": 30, "hits": 20}}},
+            ]}},
+        }
+        events = self.tf2.match_events(1, log, {"[U:1:1]": "p"})["p"]
+        with_rates = [e for e in events if "kills_per_min" in e]
+        # One sniper event carries 6 kills and 3 headshot kills over 10 minutes. Two minutes of scout is too short.
+        self.assertEqual(len(with_rates), 1)
+        self.assertEqual((with_rates[0]["weapon_class"], with_rates[0]["kills_per_min"], with_rates[0]["headshot_kills_per_min"]), ("sniper", 0.6, 0.3))
+        self.assertEqual(parse_event(with_rates[0]).extras, {"kills_per_min": 0.6, "headshot_kills_per_min": 0.3})
+
+    def test_every_player_keeps_at_most_their_latest_matches(self):
+        cheater, steady = "76561197960265729", "76561197960265730"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "logs").mkdir()
+            # Banned on 1970-02-01 (day 31). 30 matches before it, 5 after.
+            (root / "bans.json").write_text(json.dumps({cheater: {"label": "cheater", "banned": "1970-02-01"}}), encoding="utf-8")
+            for day in range(1, 36):
+                log = {"info": {"map": "cp_x", "total_length": 600, "date": day * 86400},
+                       "players": {self.tf2.steam3(sid): {"class_stats": [{"type": "scout", "weapon": {"scattergun": {"shots": 10, "hits": 5}}}]}
+                                   for sid in (cheater, steady)}}
+                (root / "logs" / f"{day}.json").write_text(json.dumps(log), encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.tf2.main(["convert", tmp, "--max-matches", "20"])
+            events = [json.loads(line) for name in ("scored.ndjson", "baseline.ndjson")
+                      for line in (root / name).read_text(encoding="utf-8").splitlines()]
+            key = bytes.fromhex((root / "pseudonym.key").read_text(encoding="utf-8"))
+        matches = lambda sid: sorted(int(e["match_id"][2:]) for e in events if e["player_id"] == self.tf2._pseudonym(key, self.tf2.steam3(sid)))
+        # The cheater's 20 latest before the ban, the honest player's 20 latest overall.
+        self.assertEqual(sorted(set(matches(cheater))), list(range(11, 31)))
+        self.assertEqual(sorted(set(matches(steady))), list(range(16, 36)))
+
     def test_the_desk_page_names_the_labels_and_keeps_neither_kind_apart(self):
         ops = {"rows": [
             {"id": "tf-a", "decision": "review", "metrics": [{"name": "accuracy"}, {"name": "view_p95"}],
