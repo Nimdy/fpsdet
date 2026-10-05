@@ -78,6 +78,7 @@ Run on 2026-10-04 with the commands above: 165 complete no-cheater matches (the 
 
 ### What it did well
 
+- **Its picks were mostly cheaters.** From the servers' numbers alone, fpsdet picked 18 of 1,529 players to watch, and 14 of them (78%) are labelled cheaters, where 18 picked at random would hold about 6. It picked few, because one match is little evidence.
 - **No honest player was framed.** Of 1,025 clean players, none went to review, and none of the 575 in hand-reviewed matches was even watched.
 - **It held instead of guessing.** A player with too few shots on a weapon was held for too little data, and a weapon with too few measured humans was left unscored, with the reason written on the case.
 - **It caught its own poisoned baseline.** `fpsdet baseline` sets every match beside the others in the window. Of the first 120 "no cheater" matches, it flagged 20 where the whole lobby was far past the median match, for example:

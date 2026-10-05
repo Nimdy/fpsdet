@@ -380,6 +380,8 @@ def cmd_desk(args: argparse.Namespace) -> int:
             "synthetic": False,
             "truth_kind": "labelled",
             "truth_source": "CS2CD, a public dataset with cheaters labelled by hand,",
+            "label_source": "CS2CD's hand labels",
+            "data_source": "shots, hits, hitgroups, wall penetrations and movement, recorded by the CS2 servers in their demos",
             "honest_labels": list(HONEST_LABELS),
             "truth_notes": LABEL_NOTES,
             "notes": {

@@ -355,6 +355,16 @@ body.view-ops::after { content: none; }
 #ops .ops-filters button { background: transparent; color: var(--signal); border: 1px solid var(--line-bright); border-radius: 6px; padding: 0.3rem 0.6rem; font: inherit; font-size: 0.82rem; cursor: pointer; }
 #ops .ops-showing { margin-left: auto; font: 12px/1.4 var(--mono, ui-monospace, monospace); color: var(--muted); }
 
+#ops .ops-found { margin-top: 1rem; }
+#ops .found { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 0.7rem; }
+#ops .found > div { display: grid; align-content: start; gap: 4px; padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+#ops .found p { margin: 0; }
+#ops .found .k { font-size: 0.78rem; color: var(--muted); }
+#ops .found .v { font: 600 1.7rem/1.1 var(--sans, system-ui, sans-serif); color: #fff; }
+#ops .found .s { font-size: 0.8rem; color: var(--ink); }
+#ops .ours { margin: 0.8rem 0 0; font-size: 0.82rem; color: var(--muted); }
+#ops .ours b { color: var(--ink); font-weight: 600; }
+@media (max-width: 900px) { #ops .found { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 #ops .ops-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
 #ops .span-12 { grid-column: span 12; } #ops .span-8 { grid-column: span 8; } #ops .span-7 { grid-column: span 7; }
 #ops .span-6 { grid-column: span 6; } #ops .span-5 { grid-column: span 5; } #ops .span-4 { grid-column: span 4; }
@@ -492,6 +502,7 @@ body.view-ops::after { content: none; }
       <ul class="ops-notes" id="ops-notes"></ul>
     </div>
   </div>
+  <article class="ops-card ops-found" id="card-found" hidden></article>
   <form class="ops-filters" id="ops-filters" aria-label="Filters" onsubmit="return false"></form>
   <div class="kpis" id="ops-kpis"></div>
   <div class="ops-split">
@@ -733,6 +744,38 @@ function header() {
   const status = (OPS.integrity || {}).status || "unchecked";
   notes.append(el("li", null, "Baseline integrity: ", el("b", null, status)));
   notes.append(el("li", null, "Automated action: ", el("b", null, "none")));
+}
+
+// ---- what fpsdet found -------------------------------------------------------
+// The whole run, not the filtered view: what scoring the server's numbers bought, checked against answers fpsdet never saw.
+function found() {
+  const holder = document.getElementById("card-found");
+  holder.hidden = !HAS_TRUTH;
+  if (!HAS_TRUTH) return;
+  const n = rows.length;
+  const cheats = rows.filter(r => isCheat(r.truth));
+  const honest = rows.filter(r => isHonest(r.truth));
+  const picked = rows.filter(r => r.decision === "review" || r.decision === "watch");
+  const reviewed = rows.filter(r => r.decision === "review");
+  const hits = picked.filter(r => isCheat(r.truth)).length;
+  const reviewHits = reviewed.filter(r => isCheat(r.truth)).length;
+  const framed = honest.filter(r => r.decision === "review").length;
+  const random = n ? picked.length * cheats.length / n : 0;
+  const cheatWord = LABELLED ? "labelled cheaters" : "planted cheats";
+  const honestWord = LABELLED ? "players labelled clean" : "honest players";
+  const card = cardHead(holder, "What fpsdet found", LABELLED
+    ? `fpsdet scored every player from the game server's numbers alone. The labels were added afterwards, only to check it.`
+    : `fpsdet scored every player from the server's events alone. The planted answers are only used to check it.`, null);
+  const tile = (k, v, s) => el("div", null, el("p", {class: "k"}, k), el("p", {class: "v"}, v), el("p", {class: "s"}, s));
+  card.append(el("div", {class: "found"},
+    tile("Picked for a person to look at", `${nf.format(picked.length)} of ${nf.format(n)}`, `${reviewed.length} to review, ${picked.length - reviewed.length} to watch. Everyone else was clean or held for too little play.`),
+    tile("Cheaters among the picks", picked.length ? pct(hits / picked.length) : "–", picked.length ? `${hits} of ${picked.length} are ${cheatWord}. ${picked.length} picked at random would hold about ${Math.round(random)}${random > 0 ? ` (${(hits / random).toFixed(1)}× better)` : ""}.` : "Nobody was picked."),
+    tile("Reviews that were cheaters", reviewed.length ? `${reviewHits} of ${reviewed.length}` : "none", reviewed.length ? "Review needs two kinds of number past every human, or a gear rule broken." : "No player had enough evidence for a review."),
+    tile(`${honestWord[0].toUpperCase() + honestWord.slice(1)} put in review`, `${framed} of ${nf.format(honest.length)}`, `${honest.filter(r => r.decision === "watch").length} of them on watch, a monitor flag and not a case.`)));
+  card.append(el("p", {class: "ours"},
+    el("b", null, "Made by fpsdet: "), "every decision, reason, confidence bound, best-human line, queue order and chart on this page. ",
+    el("b", null, LABELLED ? "From the game servers: " : "From the synthetic week: "), LABELLED ? (OPS.data_source || "the shot and hit counts") + ". " : "every event, and the planted answers. ",
+    LABELLED ? el("b", null, `From ${OPS.label_source || "the dataset"}: `) : null, LABELLED ? "the labels, which fpsdet never saw." : null));
 }
 
 // ---- KPI tiles -------------------------------------------------------------
@@ -1225,6 +1268,7 @@ function render() {
   // The filter row is sticky and can wrap; the case panel sits just under it.
   root.style.setProperty("--ops-filter-h", document.getElementById("ops-filters").offsetHeight + "px");
   document.getElementById("ops-showing").textContent = `Showing ${nf.format(list.length)} of ${nf.format(rows.length)} players`;
+  found();
   kpis(list);
   nightly(list);
   checks(list);

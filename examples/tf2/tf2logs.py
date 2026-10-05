@@ -339,6 +339,8 @@ def cmd_desk(args: argparse.Namespace) -> int:
             "synthetic": False,
             "truth_kind": "labelled",
             "truth_source": "RGL's public ban list",
+            "label_source": "RGL's public ban list",
+            "data_source": "each weapon's shots, hits and sniper headshots, counted by the TF2 servers and kept by logs.tf",
             "honest_labels": ["never banned"],
             "cheat_labels": ["banned for cheating"],
             "truth_notes": LABEL_NOTES,

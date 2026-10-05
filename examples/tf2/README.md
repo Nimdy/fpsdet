@@ -56,6 +56,8 @@ Only aimed, hitscan weapons are sent: scatterguns, pistols, shotguns, sniper rif
 
 Run on 2026-10-04: 4,567 RGL bans, of which 314 accounts banned for cheating. 228 had at least 20 team matches on logs.tf before the ban, and their 20 most recent were fetched: 4,482 matches. 85% of them carry the server's headshot counts. The baseline came from 914 honest players in those matches (670 with enough shots on some weapon); the lobby screen found nothing to leave out. The other half of the honest players, the cheaters, and everyone RGL banned for something else were scored against it.
 
+**What fpsdet added.** From the servers' shot and hit counts alone, without the labels, fpsdet picked 88 of the 1,577 scored players for a person to look at: 3 to review and 85 to watch. 53 of the 88 are banned cheaters (60%). 88 players picked at random would hold about 11, so its picks were 4.9 times better than chance. All 3 reviews were banned cheaters, and none of the 677 never-banned players went to review. Every decision, reason, bound and baseline line here is fpsdet's; the shot counts are the servers', and the labels are RGL's.
+
 **fpsdet separated the cheaters from the honest players, and put no honest player in review.**
 
 | | Review | Watch | Clean | Held for too little data | Flagged |

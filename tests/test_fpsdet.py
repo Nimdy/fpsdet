@@ -1767,6 +1767,9 @@ class OpsTest(unittest.TestCase):
         # Every review is a labelled cheater, and no raw SteamID reaches the page.
         self.assertEqual({row["truth"] for row in payload["rows"] if row["decision"] == "review"}, {"banned for cheating"})
         self.assertIsNone(re.search(r"7656\d{13}|\[U:1:\d+\]", page))
+        # The page says what fpsdet made and where the data and the labels came from.
+        self.assertIn('id="card-found"', page)
+        self.assertTrue(payload["label_source"] and payload["data_source"])
 
     def test_board_opens_on_operations_and_keeps_the_answer_key(self):
         html = render_board(build_demo())
