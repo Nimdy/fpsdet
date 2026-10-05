@@ -1,0 +1,2473 @@
+{
+ "cases": {
+  "account-changed": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "account_jump"
+   ],
+   "decision": "watch",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1894249201,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.235,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1836889135,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2765957447,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "account-changed",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle accuracy is confidently above this account's own history by 12% (history upper 7%, this window lower 19%)"
+   ],
+   "recommended_action": "monitor",
+   "reports": 0,
+   "seal": "25e5b2741028779a7deb291e106cd6e860c2b086b223ca95afd92f67918772fc",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "adrenaline": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "adrenaline",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "94013f3406215086db700ac57edede582d26c42761612b8eefe2ac6e89825130",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "server",
+    "detail": "",
+    "eligible": 30,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "angle-holder": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 25.0,
+     "ceiling_band": null,
+     "ceiling_extreme": null,
+     "ceiling_p95": null,
+     "key": "rifle",
+     "name": "acquire_median",
+     "own_max": null,
+     "own_p95": null,
+     "player_value": 25.0,
+     "skipped": "cohort for this weapon and rank is still thinner than min_cohort_players"
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.0,
+     "ceiling_band": null,
+     "ceiling_extreme": null,
+     "ceiling_p95": null,
+     "key": "rifle",
+     "name": "acquire_std",
+     "own_max": null,
+     "own_p95": null,
+     "player_value": 0.0,
+     "skipped": "cohort for this weapon and rank is still thinner than min_cohort_players"
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "angle-holder",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "3ab36aa6457121254d7908f1d1195608c0ddf07b13d56bd0e20db8b4f6854748",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "blasted": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [
+    "30 movement samples excluded (explosion, knockback, vehicle, parachute, ability, or another innocence tag)."
+   ],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "blasted",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "3d92d2f3ee0b95ce298ef9e41005adb4ccbdcc0bb4d7ceaab9e30902ac7c7ec6",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "curve",
+    "detail": "30 movement samples excluded (explosion, knockback, vehicle, parachute, ability, or another innocence tag).",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 30,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "callout-friend": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [
+    800,
+    860,
+    920,
+    980,
+    1040,
+    1100,
+    1160,
+    1220
+   ],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1",
+    "radar-window"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.09597103454,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1607142857,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [
+    "stack-radar"
+   ],
+   "party_note": "party stack-radar also has radar-friend, wall-eye at watch or review in this batch",
+   "player_id": "callout-friend",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "abf3fdec275f483c5712db2cde7d148f21f3bd8f6bba419c00ebfe3761f73679",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "clone-buyer": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "leftover"
+   ],
+   "decision": "watch",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "clone-buyer",
+   "queue_rank": 2,
+   "reasons": [
+    "leftover command matches clone-source (r 1.00), who is already a review in this batch"
+   ],
+   "recommended_action": "monitor",
+   "reports": 0,
+   "seal": "61f20d5529e86f4443664e631fc07854c20a7527ff5e3eaa0ea58c742433cc4d",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": 1.0,
+   "vendor_twin": "clone-source",
+   "version": 1
+  },
+  "clone-source": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "mirror",
+    "leftover"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [
+    "leftover command matches clone-buyer (r 1.00)"
+   ],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "clone-source",
+   "queue_rank": 0,
+   "reasons": [
+    "player command matched the server kick on the same tick (r -0.96) and was looser at a human lag (r 0.13), 48 shots"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "90bf35c245b79a7492351b7dcefa79bcf48b90925b2f95f37d1d4abf7de8eb27",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": 1.0,
+   "vendor_twin": "clone-buyer",
+   "version": 1
+  },
+  "elite-human": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.2826288103,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.37,
+     "own_p95": 0.36,
+     "player_value": 0.335,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.3658926445,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.5142857143,
+     "own_p95": 0.5074626866,
+     "player_value": 0.4626865672,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 40,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 45.14391897,
+     "own_p95": 43.81469144,
+     "player_value": 40.0,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "elite-human",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "5c9c13f71bf8db79b365e1cc63aa0c1f1ebbf046f0630053a45df67172cf6c36",
+   "skill_band": "elite",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "fire-rate": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "fire_rate"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1154690901,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1833333333,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "fire-rate",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle fired faster than its cycle (59/59 gaps under 75 ms)"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "c480e1720c5a310832d259474d97448509e42220a84c81f752c1e57e54dee3f5",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "glitch": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [
+    "2 over-cap ground samples, longest run 2 (need 25). Treated as a glitch or a blast the server did not tag, not as a cheat."
+   ],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "glitch",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "e7321a070027b3f5fbb4b8431f35ce00014486b73aea4989cf442da8a9c2ca96",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "curve",
+    "detail": "2 over-cap ground samples, longest run 2 (need 25). Treated as a glitch or a blast the server did not tag, not as a cheat.",
+    "eligible": 32,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 2,
+    "missing_cap": 0,
+    "spike_samples": 2,
+    "sustained": false,
+    "violations": 2
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "late-compensate": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "late-compensate",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "36c570b217f56ce6500dd95ee239d5416c20426711fcb6ec0db0fc56d04005fb",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "legal-heavy": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "legal-heavy",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "6ec7be057871b0e20d7d62f3c5182c8fcaa06bbf65e268b903187cfad77cc193",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "curve",
+    "detail": "",
+    "eligible": 30,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "listened": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "listened",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "16da5a930ba72f2672fb0d56f6dc797498d8af6a9224f02cbd13e320228bf4d7",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "metronome": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "metronome"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1154690901,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1833333333,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "metronome",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle fire interval std 0.00 ms across 59 legal gaps (mean 140 ms)"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "1a65c78ebbcfcbfc244f9e7554c9b4a09e4de5d5f8a4299b5427b57cb866c322",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "mirror-script": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "mirror"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "mirror-script",
+   "queue_rank": 0,
+   "reasons": [
+    "player command matched the server kick on the same tick (r -1.00) and was looser at a human lag (r 0.12), 48 shots"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "472cd39982d1deb18374eafd7ae8f79cd21cd879a74862c597ccd227c8bf566c",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "modded-recoil": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "modded-recoil",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "56d2c4cdd261320847eb06548afacffca71681792266f947540d9ec65ccb3fb7",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "new-gun": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [
+    "newgun| has recoil samples but no curve and not enough humans yet. Not flagged."
+   ],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "new-gun",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "46faf07547693b8130f508c3409eb3208f17cb6f771aeb4121568a6e5dc2801f",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [
+    "newgun|"
+   ],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "no-recoil": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "recoil_floor"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "no-recoil",
+   "queue_rank": 0,
+   "reasons": [
+    "ak| recoil stayed under 25% of the build floor (1.60 deg) for 197 shots"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "4191cccf7ddf4b1310f704e0f8eb5d29e9c5013c38358b60033e132946fb3d64",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "picture-track": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "picture-track",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "21e4c8c52a5b5ff796ac388b765c7942d9df15d5ade86006b657d91523f96406",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "quiet-radar": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "quiet_aim"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "quiet-radar",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle aim noise dropped to 0.08 deg while this client could not have known (knowable median 0.90 deg, 24 samples)"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "46b3812899c2ed93b40476c3b2c1d9f57843e8f833d9b9f14cc847e5ab076b42",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "radar-friend": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "voice"
+   ],
+   "decision": "watch",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [
+    40,
+    40,
+    40,
+    40,
+    40,
+    40,
+    40,
+    40
+   ],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "radar-window"
+   ],
+   "metrics": [],
+   "observations": [
+    "rifle: 8 shots, need 40 before aim is scored"
+   ],
+   "party_ids": [
+    "stack-radar"
+   ],
+   "party_note": "party stack-radar also has wall-eye at watch or review in this batch",
+   "player_id": "radar-friend",
+   "queue_rank": 1,
+   "reasons": [
+    "8 swings on a hidden enemy landed 40 ms after wall-eye, under the 350 ms a voice needs"
+   ],
+   "recommended_action": "monitor",
+   "reports": 0,
+   "seal": "df78061f1171e3bf73b6152e193cdc2a96588ba6758243aa875451f6d76c1fa4",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "rage": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "accuracy",
+    "headshot_rate",
+    "median_distance"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "raid-9"
+   ],
+   "metrics": [
+    {
+     "beyond_band": true,
+     "beyond_human": true,
+     "bound": 0.8883736683,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.925,
+     "skipped": null
+    },
+    {
+     "beyond_band": true,
+     "beyond_human": true,
+     "bound": 0.8182264842,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.8648648649,
+     "skipped": null
+    },
+    {
+     "beyond_band": true,
+     "beyond_human": true,
+     "bound": 80,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 80.0,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [
+    "stack-1"
+   ],
+   "party_note": "party stack-1 also has weight-cheat at watch or review in this batch",
+   "player_id": "rage",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle accuracy lower bound 89% is past the best measured elite human (37%)",
+    "rifle headshot lower bound 82% is past the best measured elite human (51%)",
+    "rifle median engagement 80 m (lower bound 80 m) is past the farthest measured elite human (45 m)"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "37c873baf9dfc249beaaae13c5225313dfbec85766f22fc34f3b738813399a2b",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "rank-outlier": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "rank_tail"
+   ],
+   "decision": "watch",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": true,
+     "beyond_human": false,
+     "bound": 0.2873663627,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.34,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1996735265,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2794117647,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [
+    "rifle accuracy is above this rank's range and inside the best humans measured"
+   ],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "rank-outlier",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "monitor",
+   "reports": 0,
+   "seal": "3376d4d8ceaf8ef0ba88bbdce64d7d9f071c813c119fd2be4e6b4a8cd816e660",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "real-fight": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "real-fight",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "27c2b48298ee438a7bb3334ffd1555f8ff28b71608788d672bbcb5d1b2645b72",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "replay-lock": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "private_replay"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "replay-lock",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle aim stayed on a private replay for 1600 ms across 20 shots"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "e73f0a73ef538ed1667e4bb7938b487d3de12323b3369441585381cf35b9e3ae",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "reported-streamer": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [
+    "25 player reports put this account at the front of the scan. Reports are not a finding."
+   ],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "reported-streamer",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 25,
+   "seal": "b1df74317c04b874cca6f46c53c09882ba56f824491a5040f0fa1f431d4385d6",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "small-sample": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "insufficient_data",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [],
+   "observations": [
+    "rifle: 10 shots, need 40 before aim is scored"
+   ],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "small-sample",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "5563a5a3aa90ac761fc9deb82b9ed17f5e4d253082b22cedee466d54d56b8d82",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "steady-hands": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "steady-hands",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "88948e833d2fd82963b1cc359e9d8c615c653f21f6fe39cdda99b24df5b9cfc3",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "wall-eye": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "hidden"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "radar-window"
+   ],
+   "metrics": [],
+   "observations": [
+    "rifle: 20 shots, need 40 before aim is scored"
+   ],
+   "party_ids": [
+    "stack-radar"
+   ],
+   "party_note": "party stack-radar also has radar-friend at watch or review in this batch",
+   "player_id": "wall-eye",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle aim stayed on a hidden mover for 1600 ms across 20 shots"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "f4e41c84a0541dd7c23fe5902f1443ea76060c979415fae8b9ee7c6213460dbd",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "weak-human": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.05376595663,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.08,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 12,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 12.0,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "weak-human",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "28013c75c1ff74a13791810a785ddf3e67f763c9367319d930f5432a670eaa29",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "weight-cheat": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "speed"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1396809228,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857143,
+     "ceiling_p95": 0.5074626866,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333,
+     "own_p95": 0.3333333333,
+     "player_value": 0.2777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [
+    "stack-1"
+   ],
+   "party_note": "party stack-1 also has rage at watch or review in this batch",
+   "player_id": "weight-cheat",
+   "queue_rank": 0,
+   "reasons": [
+    "Ground speed stayed over the gear cap for 30 samples with displacement_cause none. Cap source: curve. If this was a ragdoll or explosion, the server did not mark it."
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "38a9196464d795a318c348d38bf77ff4c265e3daddfd0391516f65af9a94d177",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "curve",
+    "detail": "Ground speed stayed over the gear cap for 30 samples with displacement_cause none. Cap source: curve. If this was a ragdoll or explosion, the server did not mark it.",
+    "eligible": 30,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 30,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": true,
+    "violations": 30
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  "wire-lock": {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "wire"
+   ],
+   "decision": "review",
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1124858452,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.65726085,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897,
+     "ceiling_p95": 43.81469144,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018161,
+     "own_p95": 33.56448833,
+     "player_value": 28.65726085,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "wire-lock",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle aim matched the wire snapshot instead of the drawn picture on 48 shots (4800 ms of interpolation delay in total)"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "c7cb8015f55ae67e3b47b14270f137df0b58517778e45060cf1d093319268f45",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  }
+ },
+ "keys": [
+  "version",
+  "player_id",
+  "game_id",
+  "decision",
+  "recommended_action",
+  "automated_action",
+  "skill_band",
+  "reports",
+  "reasons",
+  "observations",
+  "metrics",
+  "match_ids",
+  "party_ids",
+  "party_note",
+  "untrained",
+  "speed",
+  "ai_brief",
+  "limits",
+  "seal",
+  "queue_rank",
+  "vendor_twin",
+  "vendor_r",
+  "inherit_lags_ms",
+  "checks"
+ ]
+}

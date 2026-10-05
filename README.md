@@ -231,7 +231,8 @@ The public site is `site/*.html`. `fpsdet pages` writes it, plus a fresh desk, i
 
 ```
 src/fpsdet/        the scorer, no runtime dependencies
-tests/             behaviour locks, including the planted demo
+tests/             behaviour locks, including the planted demo and the recorded cases in tests/golden/
+tools/regress.py   snapshot a scored run and diff two snapshots case by case
 profiles/          game profiles; replace the numbers with your server's
 schema/            event and profile JSON Schemas
 examples/          a shot and movement file, report counts, a Unity emitter, real CS2 and TF2 matches
