@@ -1,0 +1,30 @@
+{
+  "format": "fpsdet.external-adapter/1",
+  "name": "example-integrity",
+  "version": 1,
+  "provider": "example-integrity",
+  "source_class": "client_integrity",
+  "telemetry_domain": "endpoint_memory",
+  "fields": {
+    "subject_id": "player.pseudonym",
+    "match_id": "session.match",
+    "kind": "detection.type",
+    "started_ms": "detection.window.from_ms",
+    "ended_ms": "detection.window.to_ms",
+    "observed_at": "reported_at",
+    "confidence": "detection.score",
+    "provider_record_id": "id"
+  },
+  "constants": {
+    "confidence_scale": "score",
+    "confidence_meaning": "example-integrity anomaly score from 0 to 100; higher is more anomalous; not a probability"
+  },
+  "directions": {
+    "memory_integrity_anomaly": "adverse",
+    "integrity_ok": "favorable"
+  },
+  "metadata": {
+    "module": "detection.module",
+    "client_build": "client.build"
+  }
+}

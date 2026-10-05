@@ -1,0 +1,20 @@
+{
+  "format": "fpsdet.external-adapter/1",
+  "name": "example-account-status",
+  "version": 1,
+  "provider": "example-account-status",
+  "source_class": "account_status",
+  "telemetry_domain": "account_history",
+  "fields": {
+    "subject_id": "account",
+    "kind": "status",
+    "observed_at": "recorded_on",
+    "provider_record_id": "entry"
+  },
+  "constants": {
+    "direction": "adverse"
+  },
+  "metadata": {
+    "scope": "scope"
+  }
+}

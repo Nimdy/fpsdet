@@ -1,0 +1,23 @@
+{
+  "format": "fpsdet.external-adapter/1",
+  "name": "example-league-admin",
+  "version": 1,
+  "provider": "example-league-admin",
+  "source_class": "tournament_finding",
+  "telemetry_domain": "human_review",
+  "fields": {
+    "subject_id": "player_id",
+    "match_id": "match",
+    "kind": "ruling",
+    "observed_at": "ruled_on",
+    "provider_record_id": "case_no"
+  },
+  "directions": {
+    "confirmed_cheating": "adverse",
+    "cleared": "favorable",
+    "under_investigation": "context"
+  },
+  "metadata": {
+    "panel": "panel"
+  }
+}

@@ -91,6 +91,7 @@ NOT_DETECTOR = {
     "fpsdet.synthetic": "the planted demo players",
     "fpsdet.week": "the synthetic week",
     "fpsdet.challenge_plan": "plans challenges with the server secret; detection never imports it, so scoring never needs the secret",
+    "fpsdet.external": "external records and adapters; scoring does not read them yet",
 }
 # GameProfile fields the scorer never reads. Editing them changes no detection.
 PROFILE_NOT_MATERIAL = frozenset({"notes"})

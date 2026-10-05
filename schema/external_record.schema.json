@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Nimdy/detect-FPS-hackers/schema/external_record.schema.json",
+  "title": "fpsdet external record (fpsdet.external/1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "provider", "source_class", "kind", "direction", "subject_id"],
+  "properties": {
+    "format": { "const": "fpsdet.external/1" },
+    "provider": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$" },
+    "provider_group": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$" },
+    "source_class": { "enum": ["client_integrity", "platform_attestation", "account_status", "tournament_finding", "human_review", "custom_detector"] },
+    "telemetry_domain": { "enum": ["endpoint_memory", "endpoint_process", "endpoint_input", "platform_attestation", "server_behavior", "account_history", "human_review", "unspecified"] },
+    "kind": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "direction": { "enum": ["adverse", "favorable", "context"] },
+    "subject_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "match_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "started_ms": { "type": "integer", "minimum": 0, "maximum": 10000000000 },
+    "ended_ms": { "type": "integer", "minimum": 0, "maximum": 10000000000 },
+    "observed_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}(:\\d{2}(\\.\\d{1,6})?)?(Z|[+-]\\d{2}:\\d{2}))?$" },
+    "confidence": { "type": ["number", "string"] },
+    "confidence_scale": { "enum": ["probability", "score", "label", "unspecified"] },
+    "confidence_meaning": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "provider_record_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "metadata": {
+      "type": "object",
+      "maxProperties": 16,
+      "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$" },
+      "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+    }
+  }
+}
