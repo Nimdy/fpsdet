@@ -124,7 +124,7 @@ The `family` column in `models.CHECKS` today is `gear`, `baseline`, `information
 | `hidden` | information | information | decisive | `hidden_track_ms`, `information_state` (audio dropped), `since_perceived_ms` (grace) | under 8 samples or 1,200 ms | `signals.hidden_break` |
 | `quiet_aim` | information | information | decisive | `aim_jitter_deg` with `information_state` | under 12 per side; knowable median under 0.05° | `signals.smoothness_break` |
 | `wire` | information | information | decisive | `wire_error_deg`, `picture_error_deg`, `interp_delay_ms` | delay ≤ 0, negative error, no separation; under 8 shots or 1,200 ms | `signals.wire_break` |
-| `private_replay` | information | challenge (recorded as `information` until the challenge engine exists) | decisive | `private_track_ms` | under 8 samples or 1,200 ms | `signals.private_break` |
+| `private_replay` | challenge (P4: kind `occluded_motion_replay`) | challenge | decisive | `challenge_id` and `challenge_track_ms`, or the legacy `private_track_ms` | under 8 samples or 1,200 ms, on one challenge (legacy: on one aim key) | `challenge.evaluate_challenges`; legacy `signals.private_break` |
 | `leftover` | batch | relationship | batch watch | recoil command residuals, per weapon key | under 32 samples or 12 points; r < 0.85 or Fisher z < 5 | `score.annotate_vendors` |
 | `voice` | batch | relationship | batch watch | unknowable contacts with `enemy_id`, same `party_id`, same `match_id` | no partner already in review for a hidden mover; under 4 fast lags | `score.annotate_inheritance` |
 | (party note) | — | relationship | context | `party_id` | — | `score.annotate_parties` |
@@ -222,7 +222,7 @@ In order of what blocks first.
 3. **`Case.observations` is taken.** It holds free-text context lines that consumers already read. The new protocol cannot use that JSON key. *Resolved in P1: the new key is `evidence`.*
 4. **Batch passes rewrite finished cases,** and the voice check selects partners by reason text. *Phase 1 and 7.*
 5. **Knowledge is scattered.** Audio exclusion, the grace window and the unknowable selection sit inside `summarize._weapon_summaries`; thresholds in `signals.py`; the emitter computes the rest. `information_state` has three values and no notion of which sources the server actually checked. *Blocks Phase 3.*
-6. **The private replay is one number per shot.** No challenge id, no commitment, no schedule, no record of when it was active. *Blocks Phase 4.*
+6. **The private replay is one number per shot.** No challenge id, no commitment, no schedule, no record of when it was active. *Resolved in P4 for planned challenges: a keyed plan per player and match, `challenge_id` on the events, a window, a commitment; the legacy field still works as it did.*
 7. **No provenance beyond the seal** (section 6). The profile parser turns explicit zeros into defaults, so the profile must be hashed after parsing. *Mostly resolved in P2.1 and P2.2: the detector source, the parsed profile, the cohort and each player's events are bound. One identity over the whole packet is next.*
 8. **`CohortTable._values` is read from four modules,** and every leave-one-out lookup is a linear scan. Fine at today's sizes (TF2 scores in 7 s); a calibration pass that asks many more questions will need an index.
 9. **Input hardening** (section 5, row 3). The lake paths (row 4) are fixed.
@@ -248,7 +248,7 @@ All proposed. Plain dataclasses and JSON, standard library only. One new top-lev
 *Implemented in P1, narrower than proposed below; [observations.md](observations.md) is the reference.* What was built differs in five ways:
 
 - Roles are `review`, `past_human`, `account_change`, `supporting` and `watch`, one per `decide()` input. They replace the proposed grades; `context` and `informational` are not roles, because nothing emits them.
-- Only the families something emits exist: no `challenge`, `external` or `report` yet. The private replay is `information`.
+- Only the families something emits exist: no `external` or `report` yet. The private replay was `information` until P4 made it `challenge`.
 - No `statistic`, `alternatives`, `started_ms` or `ended_ms` fields. Bounds sit inside `evidence`, and alternatives are Phase 5.
 - `dependencies` is `depends_on`, and `text` lives in `context.line`.
 - The block also carries `eligibility.compared`, so clean and `insufficient_data` are told apart without an invented observation.
@@ -353,6 +353,8 @@ class Challenge:
 
 The realisation (route source, heading, delay, speed, place, timing) is derived from `HMAC-SHA256(server_secret, match | subject | slot)`. The detector can be public; the next challenge cannot be predicted without the secret. Neither the secret nor the realisation is ever written to a case, a dashboard, the desk or a fixture.
 
+*Implemented in P4, differently in the details; [challenges.md](challenges.md) is the reference.* The spec (`ChallengeSpec`), the public plan (`ChallengePlan`), the secret realization (`challenge_plan.Realization`) and each player's result (`ChallengeResult`) are separate types, and only `challenge_plan` sees the secret. The id is 96 bits (`ch-` and 24 hex digits); the HMAC message is framed and carries the game, a public nonce, the type and its version as well; the commitment is SHA-256 over the public plan fields and the 256-bit realization material, which needs no extra salt. Legal visibility and audio are not per-challenge fields: the type declares the channels it defeats, and the knowledge engine decides. Activation is the scheduled window. The result lives in `evidence.challenges`, not in the plan.
+
 ### 10.5 ExternalObservation
 
 ```python
@@ -421,7 +423,7 @@ Each box is a module with one job and a test file of its own. The decision stays
 | Reports never change evidence | `RecordedFindingsTest.test_reports_change_no_evidence` (P1) |
 | Evidence identity ignores UI changes | `DetectorFingerprintTest` (P2.1): editing any presentation module, or a static page, leaves the detector digest unchanged |
 | An edited case is detectable from the case alone | `PacketTest` (P2.3): `verify_packet` catches edits to evidence, ids, roles, decision, eligibility and every provenance digest; wording, briefs, reports and queue state are ignored |
-| No secret challenge material in public artifacts | Phase 4 leak test over case JSON, `ops.json`, the desk and the site |
+| No secret challenge material in public artifacts | `SecretLeakTest` (P4) over every file a challenged `fpsdet score --out` writes and prints, the evidence and packet, the AI brief body, `challenge verify` output, error text and the desk; `PlanOutputLeakTest` over plan files and command output |
 | AI cannot change a decision | Phase 12 test: a hostile brief leaves decision, seal and evidence unchanged |
 | A new check has an honest control | `CONTRIBUTING.md` rule; review |
 
@@ -447,13 +449,12 @@ Each step is one commit, run against the full suite, the demo, the board diff an
 | 2.3 History and evidence packet identity | done | `score.history_for` shared by the account check and its provenance; `fpsdet.history/1`; `fpsdet.packet/1` and `verify_packet`; `tools/regress.py verify` checks every packet; `tests/test_packet.py` |
 | Deterministic event normalization | done | `fpsdet.timeline`; simultaneous-event rules per check; key-ordered output; `math.fsum`; deterministic partner selection; `fpsdet.player-events/2`; [event-normalization.md](event-normalization.md). The plan was: 1. Characterise every place scoring depends on a player's event arrival order (weapon, build and declared-metric first appearance; equal-time ties; float sums). 2. Define a canonical per-player order. 3. Fix a deterministic tie-break for equal timestamps. 4. Prove which decision and output changes are intended, case by case. 5. Rerun CS2 and TF2. 6. Only then, if what the scorer reads changes, introduce a new input recipe beside `fpsdet.player-events/1`. |
 | 3.1 Knowledge engine | done | `knowledge.py` (known, unknown, unknowable; channels known, absent, unchecked, not applicable); profile `knowledge_channels`; event `vision_state`, `audio_state`; hidden mover, private replay, quiet aim and teammate contacts read it; knowledge context on information findings; contradiction notes; `tests/test_knowledge.py`; [knowledge-engine.md](knowledge-engine.md) |
-| 4 Challenge engine | next on the roadmap | as below |
+| 4 Challenge engine | done | `challenge.py` (types, public plans and their digest, budget, linkage, per-challenge results, evidence) and `challenge_plan.py` (the only module that reads the secret: keyed derivation, commitment, schedule without repeats); `fpsdet challenge keygen`, `plan`, `verify`, `types`; `fpsdet score --challenges`; event `challenge_id`, `challenge_track_ms`; the `challenge` family; the legacy private replay kept as `legacy_private_replay`; leak, false-positive and attacker tests in `tests/test_challenge.py`; [challenges.md](challenges.md) |
 
 ### P1
 
 | Step | Files |
 | --- | --- |
-| 4 Challenge engine | new `challenge.py` (spec, keyed derivation, commitment, schedule without repeats); `fpsdet challenge plan` writes a server-side plan, with the secret read from a file or the environment and never written out; optional `challenge_id` on shots links `private_track_ms` to a challenge; missing visibility or audio authority disables it; leak test; `docs/challenges.md` |
 | 5 Alternatives | `evidence.py` `Alternative`; the explanations already computed (audio, grace, emitter missing, thin cohort) become explicit `ruled_out` or `unknown` entries; nothing becomes stronger because an alternative was not checked |
 | 6 External evidence | new `external.py` (validation, size limits, attribution); `fpsdet score --external records.ndjson`; `docs/external-evidence.md` |
 | 7 Evidence graph | new `graph.py`; `docs/evidence-graph.md` |

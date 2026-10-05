@@ -93,7 +93,7 @@ Next week, score the new events against this week's baseline and pass `--history
 
 1. **Hidden mover.** Sustained aim on an enemy this client could neither see nor hear.
 2. **Quiet aim.** Aim noise that drops only while the target is unknowable to this client.
-3. **Private replay.** A body the server plays only where this client cannot perceive it. Aim that stays on it is a review.
+3. **Private replay, now an active challenge.** A body the server plays only where this client cannot perceive it. Aim that stays on it is a review. The server can plan each one with a secret, for one player, in one match, in one window, and fpsdet then binds the finding to that exact challenge ([docs/challenges.md](docs/challenges.md)).
 4. **Wire, not picture.** The client draws enemies one interpolation delay late. A person aims at the drawn picture; a packet aimbot aims at the newer snapshot.
 
 **Batch checks** look across players:
@@ -143,7 +143,7 @@ If the server never sends an enemy's position to a client that cannot see or hea
 
 ## Add one thing: decoys
 
-Statistics catch a cheater who is past every human. A careful one stays inside the human range: on the real TF2 matches, 131 of 189 banned cheaters still looked clean. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear, replaying another player's real movement; the game never draws it, and only software reading memory or packets can follow it. fpsdet scores the tracking from one field, `private_track_ms`. The [decoys page](https://nimdy.github.io/detect-FPS-hackers/decoys.html) explains it with diagrams, lists the rules that keep honest players safe, and answers whether it can be countered.
+Statistics catch a cheater who is past every human. A careful one stays inside the human range: on the real TF2 matches, 131 of 189 banned cheaters still looked clean. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear, replaying another player's real movement; the game never draws it, and only software reading memory or packets can follow it. fpsdet scores the tracking from one field, `private_track_ms`, or, for a planned challenge, from `challenge_id` and `challenge_track_ms`: `fpsdet challenge plan` derives each player's challenges from a server-held secret and writes only ids, windows and commitments, so the code can be public and the next challenge still cannot be predicted ([docs/challenges.md](docs/challenges.md)). Challenge-aware cheats can ignore probes, and pixel aimbots never see them; that page lists what gets through. The [decoys page](https://nimdy.github.io/detect-FPS-hackers/decoys.html) explains it with diagrams, lists the rules that keep honest players safe, and answers whether it can be countered.
 
 ## Wire it to your game
 
@@ -212,6 +212,7 @@ Every pair of accounts on a weapon is compared for shared leftovers. That is fin
 | wire / picture | The newest snapshot the server sent / where the client draws that enemy, one interpolation delay later |
 | unknowable | The server's visibility and audio checks both say this client could not perceive that enemy |
 | private replay | A body the server plays only where this client cannot see or hear it |
+| challenge | A private replay the server planned with a secret: one player, one match, one window, one id. See [docs/challenges.md](docs/challenges.md) |
 | `displacement_cause` | Why the body moved, when the player did not move it: `explosion`, `vehicle`, `ladder`, … |
 | seal | SHA-256 of the player, game, decision, and reasons. It identifies the packet a reviewer saw |
 | tape | A worked example on the review desk |
@@ -220,6 +221,7 @@ Every pair of accounts on a weapon is compared for shared leftovers. That is fin
 
 - [docs/scoring.md](docs/scoring.md): every bar, precisely enough to port
 - [docs/integration.md](docs/integration.md): the event fields and engine emitters
+- [docs/challenges.md](docs/challenges.md): active challenges, the server secret, and what they do not catch
 - [docs/culling.md](docs/culling.md): server-side culling, and how it fits
 - [docs/games.md](docs/games.md): mapping the fields onto well-known games
 - [docs/operations.md](docs/operations.md): lake, priority, AI, privacy, appeals

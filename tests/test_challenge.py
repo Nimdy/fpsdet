@@ -861,6 +861,232 @@ class ChallengeScoringTest(unittest.TestCase):
             self.assertEqual(code, 1, printed)
 
 
+class FalsePositiveControlsTest(unittest.TestCase):
+    """Honest players, accidents and bad telemetry. Incomplete or contradictory challenge information weakens
+    or disables challenge evidence. It never makes it stronger."""
+
+    def setUp(self):
+        self.planned = plan_for(count=4)
+        self.plans = list(self.planned.plans)
+        self.plan = self.plans[0]
+
+    def clean(self, events, profile=GAME, files="default") -> dict:
+        case = scored_with(events, [self.planned] if files == "default" else files, profile)
+        self.assertEqual(challenge_findings(case), [])
+        self.assertNotEqual(case["decision"], "review")
+        return case
+
+    def test_a_player_who_never_tracks_a_challenge(self):
+        case = self.clean([event for plan in self.plans for event in follow(plan, track=0.0)])
+        self.assertEqual({row["status"] for row in results_of(case).values()}, {"not_followed"})
+
+    def test_one_accidental_crossing(self):
+        self.clean(follow(self.plan, n=10, track=0.0) + follow(self.plan, n=1, every=150, offset=2000))
+
+    def test_brief_crossings_on_several_challenges_never_add_up(self):
+        crossings = [event for plan in self.plans for event in follow(plan, n=3, every=120)]  # 12 samples, 1440 ms in all
+        self.clean(crossings)
+        # The legacy field adds the same crossings up across matches, and reviews them.
+        legacy = [shot(i * 2000, match=f"m{i // 3}", private_track_ms=120.0) for i in range(12)]
+        self.assertEqual(case_of(legacy)["decision"], "review")
+
+    def test_a_visible_heard_or_recently_seen_enemy_on_the_same_event(self):
+        for fields in ({"enemy_id": "e1", "information_state": "visible"},
+                       {"enemy_id": "e1", "information_state": "audio"},
+                       {"enemy_id": "e1", "information_state": "unknowable", "since_perceived_ms": 400.0},
+                       {"enemy_id": "e1", "audio_state": "known"}):
+            with self.subTest(fields):
+                self.clean(follow(self.plan, n=30, **fields))
+
+    def test_a_declared_channel_the_challenge_does_not_defeat(self):
+        for channel in ("radar", "team_share", "ability", "objective", "spectator"):
+            with self.subTest(channel):
+                self.clean(follow(self.plan, n=30), dataclasses.replace(GAME, knowledge_channels=("vision", "audio", channel)))
+
+    def test_contradictory_emitter_state(self):
+        events = follow(self.plan, n=30)
+        self.clean(events + [dataclasses.replace(event, challenge_track_ms=5.0) for event in events])
+        self.clean(follow(self.plan, n=30, enemy_id="e1", information_state="visible", vision_state="absent"))
+
+    def test_outside_the_window_stale_unknown_or_foreign(self):
+        before = follow(self.plan, n=30, offset=-(3_000 + 3_100))
+        after = [dataclasses.replace(event, t_ms=self.plan.end_ms + 100 * (i + 1)) for i, event in enumerate(follow(self.plan, n=30))]
+        stale = [dataclasses.replace(event, match_id="m0") for event in follow(self.plan, n=30)]
+        unknown = [dataclasses.replace(event, challenge_id="ch-" + "0" * 24) for event in follow(self.plan, n=30)]
+        other = plan_for(subject="someone-else")
+        foreign = follow(other.plans[0], n=30, pid="x")
+        for name, events in (("before", before), ("after", after), ("stale", stale), ("unknown", unknown)):
+            with self.subTest(name):
+                self.clean(events)
+        self.clean(foreign, files=[self.planned, other])
+        self.clean(follow(self.plan, n=30), files=None)  # scored without the plans: nothing is planned
+
+    def test_duplicates_do_not_double(self):
+        below = follow(self.plan, n=6, every=150)  # 900 ms
+        self.clean(below + [dataclasses.replace(event) for event in below] + [dataclasses.replace(event, weapon_id="m4") for event in below])
+
+    def test_malformed_linkage(self):
+        events = follow(self.plan, n=30)
+        self.clean([dataclasses.replace(event, challenge_id=None) for event in events])
+        self.clean([dataclasses.replace(event, challenge_track_ms=None) for event in events])
+        self.clean([dataclasses.replace(event, challenge_track_ms=None, private_track_ms=100.0) for event in events])
+        base = {"game_id": "g", "match_id": "m1", "player_id": "x", "t_ms": 1, "challenge_track_ms": 100}
+        for bad in ("ch-<b>", "", "a b"):
+            with self.subTest(bad=bad), self.assertRaises(ParseError):
+                parse_event({**base, "challenge_id": bad})
+
+    def test_missing_or_bad_telemetry_never_strengthens(self):
+        full = results_of(scored_with(follow(self.plan, n=30), [self.planned]))[self.plan.challenge_id]
+        events = follow(self.plan, n=30)
+        degraded = {
+            "half unlinked": [dataclasses.replace(e, challenge_id=None) if i % 2 else e for i, e in enumerate(events)],
+            "half unmeasured": [dataclasses.replace(e, challenge_track_ms=None) if i % 2 else e for i, e in enumerate(events)],
+            "some seen": [dataclasses.replace(e, enemy_id="e1", information_state="visible") if i % 3 else e for i, e in enumerate(events)],
+            "some torn": events + [dataclasses.replace(e, challenge_track_ms=1.0) for e in events[::4]],
+            "longer claims": [dataclasses.replace(e, challenge_track_ms=900.0) for e in events],
+            "some outside": [dataclasses.replace(e, t_ms=self.plan.end_ms + 5 + i) if i % 2 else e for i, e in enumerate(events)],
+        }
+        for name, rows in degraded.items():
+            with self.subTest(name):
+                result = results_of(scored_with(rows, [self.planned]))[self.plan.challenge_id]
+                self.assertLessEqual(result["tracked_samples"], full["tracked_samples"])
+                self.assertLessEqual(result["total_ms"], full["total_ms"])
+
+
+class AttackerAwareTest(unittest.TestCase):
+    """Event-level stand-ins for cheats that know challenges exist, against four challenges in one match.
+    Not cheat software: what each behaviour looks like to the server, and whether the evidence holds."""
+
+    def setUp(self):
+        self.planned = plan_for(count=4)
+        self.plans = list(self.planned.plans)
+
+    def outcome(self, events) -> tuple[str, int]:
+        case = scored_with(events, [self.planned])
+        return case["decision"], len(challenge_findings(case))
+
+    def ignore(self, plan):
+        return follow(plan, track=0.0)
+
+    def test_1_a_naive_reader_follows_every_challenge(self):
+        self.assertEqual(self.outcome([e for plan in self.plans for e in follow(plan, n=40)]), ("review", 4))
+
+    def test_2_a_cheat_that_stops_after_its_first_probe_is_caught_by_that_probe(self):
+        # It cannot tell the first one is a probe until it has followed it.
+        events = follow(self.plans[0], n=40) + [e for plan in self.plans[1:] for e in self.ignore(plan)]
+        self.assertEqual(self.outcome(events), ("review", 1))
+
+    def test_3_a_cheat_that_reacts_only_briefly_gets_through(self):
+        # Three samples, 300 ms, on every probe: 1200 ms in all, but never 8 samples and 1200 ms on one.
+        events = [e for plan in self.plans for e in follow(plan, n=3) + follow(plan, n=10, track=0.0, offset=300)]
+        decision, findings = self.outcome(events)
+        self.assertEqual(findings, 0)
+        self.assertNotEqual(decision, "review")
+
+    def test_4_waiting_before_following(self):
+        plan = self.plans[0]
+        length = plan.end_ms - plan.start_ms
+        waits = follow(plan, n=10, track=0.0) + follow(plan, n=(length - 3_000) // 100 - 1, offset=3_000)
+        self.assertEqual(self.outcome(waits), ("review", 1))
+        late = follow(plan, n=(length - 900) // 100, track=0.0) + follow(plan, n=8, offset=length - 900)  # the last 0.9 s
+        self.assertEqual(self.outcome(late)[1], 0)
+
+    def test_5_a_cheat_that_follows_every_second_challenge(self):
+        events = [e for index, plan in enumerate(self.plans) for e in (follow(plan, n=40) if index % 2 == 0 else self.ignore(plan))]
+        self.assertEqual(self.outcome(events), ("review", 2))
+
+    def test_6_a_cheat_that_follows_only_near_real_enemies_gets_through(self):
+        # Aim on an enemy this client can see explains the sample, so the challenge cannot count it.
+        events = [e for plan in self.plans for e in follow(plan, n=40, enemy_id="e1", information_state="visible")]
+        decision, findings = self.outcome(events)
+        self.assertEqual(findings, 0)
+        self.assertNotEqual(decision, "review")
+
+    def test_the_spec_names_these_limits(self):
+        limits = " ".join(OCCLUDED_MOTION_REPLAY.capability["limits"])
+        for words in ("pixel-only", "never aims at hidden ones", "learned a fixed pattern", "never turns into measurable aim",
+                      "too briefly, or too rarely", "real enemy the client can see"):
+            self.assertIn(words, limits)
+
+
+class CapabilityEntryTest(unittest.TestCase):
+    def test_the_entry_is_machine_readable(self):
+        entry = OCCLUDED_MOTION_REPLAY.capability
+        self.assertEqual(set(entry), {"technique", "evidence", "strength", "needs", "limits"})
+        self.assertEqual(entry["evidence"], "challenge.occluded_motion_replay")
+        self.assertIn("packet or memory reader", entry["technique"])
+        self.assertIn("every knowledge channel the game declares", entry["strength"])
+        json.dumps(OCCLUDED_MOTION_REPLAY.to_dict())
+
+
+class SecretLeakTest(unittest.TestCase):
+    """10 to 15: a challenged run, end to end. Nothing it writes or prints carries the secret or a realization."""
+
+    def test_no_output_surface_carries_the_secret(self):
+        from fpsdet.ai_triage import triage_case
+        from fpsdet.board import write_board
+        from fpsdet.parse import load_profile
+        from fpsdet.persist import event_to_dict
+        from fpsdet.synthetic import build_demo
+
+        root = Path(__file__).resolve().parents[1]
+        profile_path = root / "profiles" / "example-loadout.json"
+        profile = load_profile(profile_path)
+        key, secret = fresh()
+        planned = plan_match(secret, profile, "m1", ["x", "y"], Budget(to_ms=1_500_000, count=2), nonce=os.urandom(16).hex())
+        materials = [realize(secret, plan, planned.budget).material for plan in planned.plans]
+        followed = [plan for plan in planned.plans if plan.subject_id == "x"]
+        events = [dataclasses.replace(e, game_id=profile.game_id) for plan in followed for e in follow(plan, n=30)]
+        events += [dataclasses.replace(e, game_id=profile.game_id) for plan in planned.plans if plan.subject_id == "y" for e in follow(plan, track=0.0)]
+        surfaces: dict[str, str] = {}
+        with tempfile.TemporaryDirectory() as folder:
+            folder = Path(folder)
+            (folder / "key.hex").write_text(key.hex())
+            (folder / "plan.json").write_text(json.dumps(planned.to_dict()))
+            (folder / "events.ndjson").write_text("".join(json.dumps(event_to_dict(e)) + "\n" for e in events))
+            code, surfaces["score output"] = run_cli("score", str(folder / "events.ndjson"), "--profile", str(profile_path),
+                                                     "--challenges", str(folder / "plan.json"), "--out", str(folder / "out"))
+            self.assertEqual(code, 0, surfaces["score output"])
+            for path in sorted((folder / "out").rglob("*")):
+                if path.is_file():
+                    surfaces[f"written {path.name}"] = path.read_text(encoding="utf-8")
+            index = json.loads((folder / "out" / "review-index.json").read_text())
+            case = next(row for row in index["cases"] if row["player_id"] == "x")
+            self.assertEqual(case["decision"], "review")
+            self.assertEqual(len(challenge_findings(case)), 2)
+            self.assertIn(followed[0].challenge_id, surfaces["written ops.json"] + surfaces["written review-index.json"])
+            surfaces["evidence"] = json.dumps(case["evidence"])
+            surfaces["packet"] = json.dumps(case["evidence"]["packet"])
+            sent: list[dict] = []
+            triage_case(case, lambda body: sent.append(body) or "brief", redact_ids=True, known_ids=["x", "y"])
+            surfaces["AI brief input"] = json.dumps(sent)
+            code, surfaces["verify --cases output"] = run_cli("challenge", "verify", str(folder / "plan.json"),
+                                                              "--cases", str(folder / "out" / "review-index.json"))
+            self.assertEqual(code, 0, surfaces["verify --cases output"])
+            code, surfaces["verify --secret-file output"] = run_cli("challenge", "verify", str(folder / "plan.json"),
+                                                                    "--secret-file", str(folder / "key.hex"))
+            self.assertEqual(code, 0, surfaces["verify --secret-file output"])
+            raw = planned.to_dict()
+            raw["challenges"][0]["end_ms"] += 1
+            (folder / "edited.json").write_text(json.dumps(raw))
+            code, surfaces["score error"] = run_cli("score", str(folder / "events.ndjson"), "--profile", str(profile_path),
+                                                    "--challenges", str(folder / "edited.json"))
+            self.assertNotEqual(code, 0)
+            surfaces["review desk"] = Path(write_board(build_demo(), folder / "board.html")).read_text(encoding="utf-8")
+        self.assertGreater(len(surfaces), 12)
+        for name, text in surfaces.items():
+            with self.subTest(name):
+                self.assertEqual(leaks(text, key, *materials), [])
+
+    def test_committed_golden_files_and_fixtures_hold_no_planned_challenge(self):
+        # Every secret in these tests is drawn when they run. Nothing committed was ever planned with one.
+        here = Path(__file__).resolve().parent
+        for path in sorted((here / "golden").glob("*.json")) + sorted((here / "fixtures").glob("*.json")):
+            with self.subTest(path.name):
+                self.assertNotIn('"origin": "planned"', path.read_text(encoding="utf-8"))
+                self.assertNotIn('"ch-', path.read_text(encoding="utf-8"))
+
+
 def evidence_seal_of(row: dict) -> str:
     from fpsdet.models import Case
 

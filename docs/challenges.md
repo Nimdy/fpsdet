@@ -30,7 +30,7 @@ A challenge never decides anything about an account. Its finding is a review, ev
 - **The secret is read from a file the operator names** (`--secret-file`; `/dev/fd/N` works for a descriptor), **or from `FPSDET_CHALLENGE_SECRET`**, as hex. It never goes in a game profile: profiles are public configuration. `fpsdet challenge keygen` writes a new one to a new owner-only file and never overwrites one.
 - **Only `fpsdet/challenge_plan.py` reads the secret.** Detection code never imports it; a provenance test fails if it does. Scoring, reviewing and verifying a case never need the secret.
 - **The secret object prints as `ServerSecret(<redacted>)`**, cannot be pickled, and no error message contains any of it.
-- **Where the secret and realizations never appear:** plan files, case JSON, evidence observations, evidence packets, `ops.json`, the dashboard, the review desk, the public pages, AI prompts, golden files, committed fixtures, and command output. Tests generate a fresh secret, write a plan and run the commands, and search what they wrote and printed for the secret and each realization, as hex in either case, either half of the hex, and base64.
+- **Where the secret and realizations never appear:** plan files, case JSON, evidence observations, evidence packets, `ops.json`, the dashboard, the review desk, the public pages, AI prompts, golden files, committed fixtures, and command output. `SecretLeakTest` draws a fresh secret, plans two players, scores their events with `fpsdet score --challenges --out`, and searches everything that run wrote and printed: each case file and its HTML page, both indexes, `features.csv`, `ops.json`, the dashboard, the evidence and its packet, the exact body an AI brief would send, `challenge verify` with and without the secret, the error a tampered plan raises, and the review desk. It looks for the secret and every realization, as hex in either case, either half of the hex, and base64. Other tests do the same for plan files, every command's output, and error text. The committed golden files and fixtures hold no planned challenge at all.
 
 What the model does not protect against:
 
@@ -268,6 +268,58 @@ For each planned challenge finding, this checks that the challenge is in the pla
 
 The legacy path is for compatibility and tests. It keeps the weaknesses the audit below lists: no target, no window, and crossings in unrelated matches add up. New integrations should send `challenge_id`.
 
+## False positives
+
+`FalsePositiveControlsTest` holds the honest cases. None is a review:
+
+- a player who never tracks a challenge;
+- one accidental crossing;
+- brief crossings on four challenges that would clear the bar if added together. They are not added together; the legacy field adds the same crossings up and reviews them;
+- the aim on an enemy the client sees, hears, or saw a moment ago, on the same events;
+- a profile that declares `radar`, `team_share`, `ability`, `objective` or `spectator`;
+- contradictory telemetry: events at one moment that disagree, or a shot whose labels contradict each other;
+- events before or after the window, a stale id from another match, an unknown id, another player's challenge, and a run scored without the plans;
+- duplicated events, which count once;
+- malformed linkage: time with no id, an id with no time, the legacy field on a linked event, and an id with characters an id cannot have, which is a parse error.
+
+`test_missing_or_bad_telemetry_never_strengthens` takes a followed challenge and damages its telemetry six ways: half the ids dropped, half the measurements dropped, a visible enemy on some events, disagreeing duplicates, claims longer than the time between events, some events moved outside the window. In every one, the counted samples and the total stay at or below the undamaged ones.
+
+## Cheats that know about challenges
+
+`AttackerAwareTest` gives one player four challenges in a match, and stands in for six behaviours at the event level. It is not cheat software. It is what each behaviour looks like to the server.
+
+| Behaviour | Result | Why |
+| --- | --- | --- |
+| A naive packet or memory reader follows every challenge | Review, 4 findings | Each challenge clears the bar alone |
+| Follows the first probe, then ignores every later one | Review, 1 finding | It cannot tell a probe from a player until it has followed it |
+| Reacts to every probe for about 300 ms, then lets go | **Not caught** | 1,200 ms across four challenges, but never the bar on one. Challenges are not added together |
+| Waits 3 s into each window before following | Review | Windows are at least 8 s, leaving time to clear the bar |
+| Waits until the last second of the window | **Not caught** | Too little window left to clear the bar |
+| Follows every second challenge | Review, 2 findings | Each followed challenge stands alone |
+| Follows probes only while a visible enemy is in the same aim cone | **Not caught** | Aim on an enemy the client can see explains every sample |
+
+The three that get through are real limits. Weighing many short, independent reactions together could catch the first two; it needs calibration on real data before it can be trusted with an honest player's crossings, and it is left for later.
+
+## Capability and limits
+
+The type carries a machine-readable entry for the capability matrix (`OCCLUDED_MOTION_REPLAY.capability`; `fpsdet challenge types` prints it):
+
+| | |
+| --- | --- |
+| Technique | A packet or memory reader that shows, or aims at, players the client was sent but does not draw |
+| Evidence | `challenge.occluded_motion_replay` |
+| Strength | Strong when every knowledge channel the game declares is one the challenge defeats, and the plan, window and linkage all check out |
+| Needs | `challenge_id` and `challenge_track_ms` on the player's events; the plan file at scoring time; `knowledge_channels` no wider than vision and audio |
+
+It is not unbeatable. Challenges do not catch:
+
+- **pixel-only aimbots**, which react to the rendered frame, where the body never appears;
+- **DMA or other software that deliberately ignores hidden players**, or drops any player it cannot verify;
+- **software that has learned a fixed pattern** in how a game places or routes its challenges. The plan varies when, where, which route and which heading, but the game's own placement rules can still have a shape;
+- **information use that never turns into measurable aim toward the probe**: callouts, map awareness, timing;
+- **reactions too brief, too late or too rare** to clear the bar on any one challenge;
+- **following a probe only when a real visible enemy is in the same aim cone**.
+
 ## Gameplay safety
 
 The game server must keep these true for `occluded_motion_replay`. They are in every plan file under `requirements`:
@@ -283,6 +335,38 @@ The game server must keep these true for `occluded_motion_replay`. They are in e
 - keep it away from any enemy this client can see or hear, so aim on a real enemy does not cross it.
 
 fpsdet cannot check any of these. It never runs inside a game.
+
+## What changed when the engine arrived
+
+Every case was compared from the knowledge engine (`eabd87c`) to the challenge engine with `tools/regress.py migrate`, which names this move `observation-migrated-to-challenge` and checks that the migrated finding kept its role, matches, sample count, total and reason line.
+
+| | Cases | Decisions | Reasons | Seals | Observations migrated | Other observations | Observation ids moved | Input digests | Packets |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Planted | 32 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 32 |
+| Synthetic weekly | 400 | 0 | 0 | 0 | 1 | 0 | 1 | 0 | 400 |
+| Synthetic nightly | 2,669 | 0 | 0 | 0 | 4 | 0 | 4 | 0 | 2,669 |
+| CS2 | 1,529 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1,529 |
+| TF2 | 2,764 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2,764 |
+
+- **The six migrated findings** are the planted `replay-lock` and the synthetic `p-0024` (weekly, and nights 2, 3, 5 and 6). Each moved from `information` / `private_replay`, key the aim key, to `challenge` / `occluded_motion_replay`, key `legacy_private_replay:rifle`, with the new evidence shape, so each id moved. Each kept its decision (review), reason, sample count, total, matches and seal. No id was aliased.
+- **Packets** all moved because the detector digest moved: the scorer now imports `fpsdet.challenge`, the 15th detector module. No profile or input digest moved. Every CS2 and TF2 packet verifies, and so do the packets written before: the retired kind is still readable.
+- **CS2 and TF2** carry no challenge or private replay fields, so nothing else could move.
+- **The golden lock** was re-recorded for exactly the six migrated findings.
+- **Python 3.11 and 3.12** give the same packet digests and the same plans.
+
+**Cost**, measured back to back against `eabd87c` on one machine:
+
+| | Before | After |
+| --- | --- | --- |
+| Planning 100 / 1,000 / 10,000 challenges | — | 2 ms / 22 ms / 0.22 s (writing the 5 MB file for 10,000: 0.08 s; checking it without the secret: 0.08 s; reproducing it with the secret: 0.23 s) |
+| Synthetic week, summarize (178,020 events) | 0.43 s | 0.435 s |
+| Synthetic week, full scoring | 1.23 to 1.24 s | 1.24 to 1.25 s |
+| CS2 scoring (4.07 M events) | 11.8 s | 12.2 s |
+| TF2 scoring (4.14 M events) | 13.3 s | 13.7 s |
+| Peak memory, CS2 / TF2 | 5.83 GB / 5.68 GB | +62 MB / +65 MB, the two new optional event fields |
+| 400,000 events, every one naming a challenge | 0.80 s without the fields | 1.56 s with them, about 1.9 µs per challenge event |
+
+Events without challenge fields pay one check each; nothing is built for them.
 
 ## Before the challenge engine: the private replay
 
