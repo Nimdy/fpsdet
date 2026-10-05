@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 
 KNOWN = "known"
 UNKNOWN = "unknown"
@@ -67,7 +68,10 @@ class KnowledgeState:
     conflict: str = ""  # set when the telemetry contradicts itself; the status is then unknown
 
     def channel(self, name: str) -> str:
-        return dict(self.channels).get(name, CHANNEL_UNCHECKED)
+        for channel, state in self.channels:
+            if channel == name:
+                return state
+        return CHANNEL_UNCHECKED
 
     @property
     def perceived_now(self) -> bool:
@@ -137,9 +141,36 @@ def recent_perception(event, grace_ms: float) -> str:
 
 def shot_knowledge(event, profile) -> KnowledgeState:
     """Could this client know the enemy this shot was about, at the time of the shot?"""
-    channels, conflict = shot_channels(event)
-    channels["recent_perception"] = recent_perception(event, profile.hidden_grace_ms)
-    return resolve(channels, profile.knowledge_channels, conflict)
+    recent = recent_perception(event, profile.hidden_grace_ms)
+    return _shot_state(event.information_state, event.vision_state, event.audio_state, recent, profile.knowledge_channels)
+
+
+class _Labels:
+    __slots__ = ("information_state", "vision_state", "audio_state")
+
+    def __init__(self, information_state, vision_state, audio_state):
+        self.information_state, self.vision_state, self.audio_state = information_state, vision_state, audio_state
+
+
+# A state depends only on these few labels and the declared channels, so each one is worked out once.
+@lru_cache(maxsize=4096)
+def _shot_state(information_state, vision_state, audio_state, recent: str, required: tuple[str, ...]) -> KnowledgeState:
+    channels, conflict = shot_channels(_Labels(information_state, vision_state, audio_state))
+    channels["recent_perception"] = recent
+    return resolve(channels, required, conflict)
+
+
+@lru_cache(maxsize=4096)
+def _tracked_state(information_state, vision_state, audio_state, recent: str, required: tuple[str, ...]) -> KnowledgeState:
+    channels, conflict = shot_channels(_Labels(information_state, vision_state, audio_state))
+    for name in ("vision", "audio"):
+        said = channels.get(name)
+        if said is None:
+            channels[name] = CHANNEL_ABSENT
+        elif said == CHANNEL_UNCHECKED and not conflict:
+            conflict = f"hidden_track_ms says {name} was checked, but {name}_state is unchecked"
+    channels["recent_perception"] = recent
+    return resolve(channels, required, conflict)
 
 
 def tracked_knowledge(event, profile) -> KnowledgeState:
@@ -150,15 +181,8 @@ def tracked_knowledge(event, profile) -> KnowledgeState:
     heard, the enemy was known. Where the shot says a channel was not checked, the field's claim that
     it was cannot both be true, and the answer is unknown.
     """
-    channels, conflict = shot_channels(event)
-    for name in ("vision", "audio"):
-        said = channels.get(name)
-        if said is None:
-            channels[name] = CHANNEL_ABSENT
-        elif said == CHANNEL_UNCHECKED and not conflict:
-            conflict = f"hidden_track_ms says {name} was checked, but {name}_state is unchecked"
-    channels["recent_perception"] = recent_perception(event, profile.hidden_grace_ms)
-    return resolve(channels, profile.knowledge_channels, conflict)
+    recent = recent_perception(event, profile.hidden_grace_ms)
+    return _tracked_state(event.information_state, event.vision_state, event.audio_state, recent, profile.knowledge_channels)
 
 
 def private_knowledge(profile) -> KnowledgeState:
