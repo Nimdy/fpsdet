@@ -15,7 +15,8 @@ significant digits so the last bit of a float sum cannot differ between Python v
 the fields the first snapshot has. A field only the second one has is listed and allowed: that is how new
 evidence is added without moving what consumers read. Any other change is printed by field and by player,
 and the exit code is 1. With labels, decisions are also counted per label, the way the README reports them.
-``verify`` checks that every case's structured evidence implies its decision and backs each check and reason.
+``verify`` checks that every case's structured evidence implies its decision and backs each check and reason,
+and that every case of the run carries the same provenance.
 """
 
 from __future__ import annotations
@@ -71,8 +72,30 @@ def read_snapshot(path: str | Path) -> dict[str, dict]:
     return rows
 
 
+def subsumes(old, new) -> bool:
+    """Is ``new`` the same as ``old``, give or take keys added inside objects?"""
+    if isinstance(old, dict):
+        return isinstance(new, dict) and all(key in new and subsumes(value, new[key]) for key, value in old.items())
+    if isinstance(old, list):
+        return isinstance(new, list) and len(old) == len(new) and all(subsumes(a, b) for a, b in zip(old, new))
+    return old == new
+
+
+def added_paths(old, new, prefix: str = "") -> set[str]:
+    """Where ``new`` has keys ``old`` does not, as dotted paths. List positions read as []."""
+    found: set[str] = set()
+    if isinstance(old, dict) and isinstance(new, dict):
+        for key, value in new.items():
+            path = f"{prefix}.{key}" if prefix else key
+            found |= {path} if key not in old else added_paths(old[key], value, path)
+    elif isinstance(old, list) and isinstance(new, list):
+        for a, b in zip(old, new):
+            found |= added_paths(a, b, f"{prefix}[]")
+    return found
+
+
 def compare(before: dict[str, dict], after: dict[str, dict]) -> dict:
-    """What moved between two snapshots, on the fields the first one has."""
+    """What moved between two snapshots, on the fields the first one has. Keys added at any depth are allowed."""
     gone = sorted(set(before) - set(after))
     new = sorted(set(after) - set(before))
     fields: Counter = Counter()
@@ -81,13 +104,13 @@ def compare(before: dict[str, dict], after: dict[str, dict]) -> dict:
     added: Counter = Counter()
     for pid in sorted(set(before) & set(after)):
         old, now = before[pid], after[pid]
-        changed = [key for key in old if now.get(key, "<missing>") != old[key]]
+        changed = [key for key in old if key not in now or not subsumes(old[key], now[key])]
         if changed:
             moved[pid] = changed
             fields.update(changed)
         if old.get("decision") != now.get("decision"):
             transitions[(old.get("decision"), now.get("decision"))] += 1
-        added.update(key for key in now if key not in old)
+        added.update(added_paths(old, now))
     return {"gone": gone, "new": new, "moved": moved, "fields": fields, "transitions": transitions, "added": added}
 
 
@@ -134,7 +157,7 @@ def verify(rows: dict[str, dict]) -> dict:
     """Does each case's structured evidence explain its decision, checks and reasons?"""
     from fpsdet.evidence import KINDS, implied_decision
 
-    result = {"cases": len(rows), "explained": 0, "problems": [], "quiet_watches": 0, "quiet_watches_explained": 0, "kinds": Counter()}
+    result = {"cases": len(rows), "explained": 0, "problems": [], "quiet_watches": 0, "quiet_watches_explained": 0, "kinds": Counter(), "provenance": Counter()}
     for pid, row in sorted(rows.items()):
         block = row.get("evidence")
         if block is None:
@@ -142,6 +165,8 @@ def verify(rows: dict[str, dict]) -> dict:
             continue
         observations = block["observations"]
         result["kinds"].update(obs["kind"] for obs in observations)
+        stamp = block.get("provenance")
+        result["provenance"][json.dumps(stamp, sort_keys=True) if stamp else "none"] += 1
         problems = []
         if implied_decision(block) != row["decision"]:
             problems.append(f"{pid}: decision {row['decision']}, evidence implies {implied_decision(block)}")
@@ -162,6 +187,14 @@ def cmd_verify(args: argparse.Namespace) -> int:
     print(f"{result['explained']} of {result['cases']} cases explained by their evidence")
     print(f"Watches with no reason line: {result['quiet_watches']}, explained by evidence: {result['quiet_watches_explained']}")
     print("Observations by kind: " + ", ".join(f"{kind} {n}" for kind, n in result["kinds"].most_common()))
+    for stamp, n in result["provenance"].most_common():
+        if stamp == "none":
+            print(f"Provenance: none on {n} cases")
+            continue
+        block = json.loads(stamp)
+        print(f"Provenance on {n} cases: profile {block['profile']['digest']}, detector {block['detector']['digest']} ({len(block['detector']['modules'])} modules)")
+    if len(result["provenance"]) != 1 or "none" in result["provenance"]:
+        result["problems"].append("the cases of one run do not share one provenance")
     for problem in result["problems"][: args.show]:
         print(f"  {problem}")
     return 0 if not result["problems"] else 1

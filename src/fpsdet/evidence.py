@@ -193,16 +193,23 @@ def observation_id(obs: Observation) -> str:
     return f"obs-{digest[:24]}"
 
 
-def evidence_block(observations: Iterable[Observation], compared: Iterable[tuple[str, str]]) -> dict:
+def evidence_block(
+    observations: Iterable[Observation],
+    compared: Iterable[tuple[str, str]],
+    provenance: Mapping | None = None,
+) -> dict:
     """``case["evidence"]``. ``compared`` lists each (metric, key) the scorer measured against a thick cohort.
 
     It is there because no observation, on its own, tells clean from insufficient data: a player
     nobody could compare and a player who was compared and passed both have no finding.
+    ``provenance`` (fpsdet.provenance) names the detector code and parsed profile that produced the
+    observations, or is null for a case scored outside a run. It is not part of any observation id.
     """
     return {
         "version": EVIDENCE_VERSION,
         "observations": [obs.to_dict() for obs in observations],
         "eligibility": {"compared": [{"metric": metric, "key": key} for metric, key in sorted(set(compared))]},
+        "provenance": None if provenance is None else json.loads(canonical_json(provenance)),
     }
 
 

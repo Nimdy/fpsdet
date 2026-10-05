@@ -183,6 +183,11 @@ class RegressToolTest(unittest.TestCase):
         result = self.tool.compare(before, moved)
         self.assertEqual(result["moved"], {"b": ["decision", "reasons"]})
         self.assertEqual(result["transitions"], Counter({("watch", "review"): 1}))
+        nested = {"a": {"player_id": "a", "evidence": {"version": 1, "observations": [{"kind": "x"}]}}}
+        deeper = {"a": {"player_id": "a", "evidence": {"version": 1, "observations": [{"kind": "x", "note": 1}], "provenance": {}}}}
+        result = self.tool.compare(nested, deeper)
+        self.assertEqual((result["moved"], sorted(result["added"])), ({}, ["evidence.observations[].note", "evidence.provenance"]))
+        self.assertEqual(self.tool.compare(deeper, nested)["moved"], {"a": ["evidence"]})
 
     def test_a_snapshot_of_the_same_run_diffs_clean(self):
         import contextlib

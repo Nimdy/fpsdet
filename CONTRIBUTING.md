@@ -20,11 +20,13 @@ fpsdet is under the [PolyForm Small Business License 1.0.0](LICENSE.md). It is s
 Python 3.11 or newer. Nothing to install.
 
 ```bash
-PYTHONPATH=src python3 -m unittest tests.test_fpsdet tests.test_golden tests.test_observations
+PYTHONPATH=src python3 -m unittest tests.test_fpsdet tests.test_golden tests.test_observations tests.test_provenance
 PYTHONPATH=src python3 -m fpsdet demo
 ```
 
 `tests.test_golden` is a behaviour lock on whole cases: every field of every planted case, and of all 400 players in the synthetic week, nightly and weekly, as recorded in `tests/golden/`. A change that moves a decision, a reason, a seal or a metric fails there and names the player. If the move is deliberate, re-record with `FPSDET_REGOLD=1` and say in the commit why each case moved. The real CS2 and TF2 runs are too large to commit; `tools/regress.py` snapshots a local rerun and diffs it case by case.
+
+Every module in `src/fpsdet/` is either detection code, listed in `DETECTOR_MODULES` in `src/fpsdet/provenance.py`, or listed in `NOT_DETECTOR` with a reason. The detector digest on every case covers the first list. `tests.test_provenance` fails when a new module is in neither list, or when detection code imports something that is not on the first. See [docs/provenance.md](docs/provenance.md).
 
 The demo scores thirty-two planted players. A planted player is a synthetic player whose correct decision is written down in advance, in `EXPECT` in `src/fpsdet/synthetic.py`. The last line should be `Planted cases matched profiles/example-loadout.json.` If a decision moves, it prints `DEMO FAILED` and exits with an error.
 

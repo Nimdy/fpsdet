@@ -12,7 +12,8 @@ The model is `fpsdet.evidence`. It is data only and standard library only.
 | The scorer recording every finding that feeds a decision | Implemented (`src/fpsdet/score.py`, `src/fpsdet/signals.py`) |
 | Case files (`cases/*.json`, `scan-index.json`, `review-index.json`) carry `evidence` | Implemented |
 | `ops.json`, the dashboard, the review desk and the AI brief read `evidence` | Not yet. They read what they read before, so none of them changed |
-| Provenance, knowledge state, challenges, external evidence, the evidence graph | Proposed in [architecture-v1.md](architecture-v1.md); none of them is here |
+| Provenance of the detector code and the parsed profile (`evidence.provenance`) | Implemented; see [provenance.md](provenance.md) |
+| Provenance of the events and the cohort; knowledge state, challenges, external evidence, the evidence graph | Proposed in [architecture-v1.md](architecture-v1.md); none of them is here |
 
 Decisions still come from `score.decide`. Nothing reads an observation back into a decision. The legacy fields stay authoritative.
 
@@ -66,13 +67,16 @@ A case carries one new key, `evidence`:
 "evidence": {
   "version": 1,
   "observations": [ ... ],
-  "eligibility": {"compared": [{"metric": "accuracy", "key": "rifle"}]}
+  "eligibility": {"compared": [{"metric": "accuracy", "key": "rifle"}]},
+  "provenance": {"version": 1, "profile": {...}, "detector": {...}}
 }
 ```
 
 `version` is the shape of this block. `observations` are in the order the scorer found them, which is the order of its sentences. `eligibility.compared` lists each metric and key the scorer actually measured against a thick cohort. It is there because no observation tells clean from insufficient data: a player nobody could compare and a player who was compared and passed both have no finding. With it, `implied_decision` gives back clean or `insufficient_data` exactly.
 
 `implied_decision(block)` is the decision the roles imply. It is how the tests prove the evidence explains every decision. The scorer does not call it.
+
+`provenance` says which detector code and which parsed game profile produced the observations ([provenance.md](provenance.md)). It is the same for every case of a run, and `null` on a case scored outside one.
 
 The case keys that were there before (`reasons`, the context lines in `observations`, `checks`, `metrics`, `seal` and the rest) do not change.
 
@@ -123,7 +127,7 @@ Not observations, because they never change a decision: the context lines for sh
 {"v": 1, "source", "family", "kind", "role", "subject_id", "key", "match_ids", "depends_on", "evidence"}
 ```
 
-Canonical JSON means sorted keys, no spaces, UTF-8, and no NaN. `context` is not material, so rewording an explanation does not move an id. Nothing random, counted, or timed goes in, so the same evidence scored twice has the same id and changed evidence has a different one. The id is not the case seal and does not change it.
+Canonical JSON means sorted keys, no spaces, UTF-8, and no NaN. `context` is not material, so rewording an explanation does not move an id. Nothing random, counted, or timed goes in, so the same evidence scored twice has the same id and changed evidence has a different one. The id is not the case seal and does not change it. It does not include provenance either: the id says which observation this is, provenance says what produced it, so the same evidence keeps its id under another profile or a later detector.
 
 ## What can go in
 

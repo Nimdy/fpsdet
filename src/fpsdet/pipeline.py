@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .baseline import CohortTable, build_cohorts
 from .models import Case, Event, GameProfile, HistoryWindow
+from .provenance import stamp
 from .score import annotate_batch, assess_player
 from .summarize import summarize
 
@@ -37,4 +38,5 @@ def run_score(
             case.observations.append(IN_FILE_NOTE)
         cases.append(case)
     annotate_batch(cases, records, profile)
+    stamp(cases, profile)
     return cases

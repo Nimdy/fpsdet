@@ -8,6 +8,12 @@
 
 ### Added
 
+- **Evidence provenance: which detector and which profile.** Each case's `evidence` now carries `provenance`, shared by every case of a run.
+  - **Profile:** a SHA-256 of the game profile as the scorer parsed it. Spacing, key order, notes and values the parser reads as the default do not change it.
+  - **Detector:** a SHA-256 of the source of the 11 modules that can change a finding, listed by name. Dashboards, the desk, the site, the command line and AI prose are outside it, and a test checks the list against the scorer's imports so a new detection module cannot be left out.
+  - **Identical everywhere:** both digests are the same on Python 3.11 and 3.12 and in any checkout folder.
+  - **Nothing else moves:** observation ids, the seal and every other field are unchanged.
+  - **Not yet bound:** the events scored and the cohort. [docs/provenance.md](docs/provenance.md) says what it proves and what it does not.
 - **Structured evidence on every case.** Case JSON has a new key, `evidence`. Every finding that feeds a decision is also kept as data there: the detector, its evidence family, the role the scorer gives it, the matches, and the numbers it compared (the bound and its method, the rank's line and the best human's, sample and cohort sizes, the thresholds). Nothing else changed:
   - The sentences, check ids, decisions and seals are unchanged.
   - The decision the evidence implies matches the scorer's on every planted case, on all 400 synthetic-week players (weekly and nightly), and on the real CS2 (1,529) and TF2 (2,764) reruns.
