@@ -48,8 +48,9 @@ from fpsdet.summarize import summarize
 from fpsdet.synthetic import PROFILE_PATH, ROOT, build_demo
 
 DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
-# profiles/example-loadout.json as the scorer sees it. CI checks this on Python 3.11 and 3.12.
-EXAMPLE_PROFILE_DIGEST = "sha256:a9cc799c5df2cae8cd7f82c75d33cea5ff0066310e8a9bb590a5585546a0929b"
+# profiles/example-loadout.json as the scorer sees it. CI checks this on Python 3.11 and 3.12. It moved
+# with the knowledge engine: the parsed GameProfile gained knowledge_channels (default vision, audio).
+EXAMPLE_PROFILE_DIGEST = "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb"
 
 
 def raw_profile() -> dict:

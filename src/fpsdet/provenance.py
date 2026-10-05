@@ -59,6 +59,7 @@ DETECTOR_MODULES = (
     "fpsdet",  # __init__.py runs on every import of the package, so it is part of what runs
     "fpsdet.baseline",
     "fpsdet.evidence",
+    "fpsdet.knowledge",
     "fpsdet.models",
     "fpsdet.parse",
     "fpsdet.persist",

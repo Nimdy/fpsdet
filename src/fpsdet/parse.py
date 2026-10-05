@@ -6,6 +6,7 @@ import json
 from collections.abc import Iterable
 from pathlib import Path
 
+from .knowledge import DEFAULT_CHANNELS, EVENT_CHANNEL_STATES, profile_channels
 from .models import (
     BANDS,
     INNOCENT_CAUSES,
@@ -62,6 +63,8 @@ _RESERVED = {
     "acquire_ms",
     "map_id",
     "party_id",
+    "vision_state",
+    "audio_state",
     "utc",
 }
 
@@ -77,6 +80,14 @@ def _information_state(obj: dict) -> str | None:
     if value not in _INFO_STATES:
         raise ParseError("information_state must be visible, audio, or unknowable")
     return value
+
+
+def _channel_state(obj: dict, key: str) -> str | None:
+    if obj.get(key) is None:
+        return None
+    if obj[key] not in EVENT_CHANNEL_STATES:
+        raise ParseError(f"{key} must be known, absent, or unchecked")
+    return obj[key]
 
 
 def _str(obj: dict, key: str, *, required: bool = False, default: str | None = None) -> str | None:
@@ -183,6 +194,8 @@ def parse_event(obj: dict) -> Event:
         acquire_ms=_num(obj, "acquire_ms"),
         map_id=_str(obj, "map_id"),
         party_id=_str(obj, "party_id"),
+        vision_state=_channel_state(obj, "vision_state"),
+        audio_state=_channel_state(obj, "audio_state"),
         extras=extras,
     )
 
@@ -267,6 +280,10 @@ def profile_from_dict(obj: dict) -> GameProfile:
     if pattern not in _RECOIL_PATTERNS:
         raise ParseError("recoil_pattern must be learnable or random")
     ref = obj.get("reference_lightest_speed_mps")
+    try:
+        channels = profile_channels(obj["knowledge_channels"] if obj.get("knowledge_channels") is not None else DEFAULT_CHANNELS)
+    except (TypeError, ValueError) as error:
+        raise ParseError(str(error)) from None
     return GameProfile(
         game_id=str(obj.get("game_id") or "unknown"),
         min_shots=int(obj.get("min_shots") or 40),
@@ -294,6 +311,7 @@ def profile_from_dict(obj: dict) -> GameProfile:
         hidden_track_min_samples=int(obj.get("hidden_track_min_samples") or 8),
         hidden_grace_ms=float(obj.get("hidden_grace_ms") if obj.get("hidden_grace_ms") is not None else 1000),
         poison_jump=float(obj.get("poison_jump") if obj.get("poison_jump") is not None else 0.08),
+        knowledge_channels=channels,
         match_outlier_sd=float(obj.get("match_outlier_sd") if obj.get("match_outlier_sd") is not None else 5.0),
         unknowable_min_samples=int(obj.get("unknowable_min_samples") or 12),
         unknowable_jitter_ratio=float(

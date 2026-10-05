@@ -9,7 +9,21 @@ from __future__ import annotations
 
 import unittest
 
-from fpsdet.models import Event
+import dataclasses
+import itertools
+
+from fpsdet.knowledge import (
+    LEGACY_STATES,
+    presentation,
+    private_knowledge,
+    resolve,
+    shot_channels,
+    shot_knowledge,
+    tracked_knowledge,
+)
+from fpsdet.models import Event, GameProfile
+from fpsdet.parse import ParseError, profile_from_dict
+from fpsdet.provenance import profile_digest
 from fpsdet.signals import wire_finding
 from fpsdet.summarize import summarize
 from fpsdet.synthetic import build_demo
@@ -94,6 +108,131 @@ class CurrentInformationSemanticsTest(unittest.TestCase):
         ]
         text, numbers = wire_finding(weapon(led + skipped), PROFILE)
         self.assertEqual((numbers["led_shots"], numbers["shots_with_both_errors"], numbers["led_delay_ms"]), (8, 8, 1600.0))
+
+
+GAME = GameProfile(game_id="g")  # vision and audio declared, grace 1000 ms
+WITH_TEAM = dataclasses.replace(GAME, knowledge_channels=("vision", "audio", "team_share"))
+
+
+class AbstentionMatrixTest(unittest.TestCase):
+    """Any known channel: known. Every declared channel checked and absent: unknowable. Otherwise unknown."""
+
+    def test_every_combination_of_vision_audio_and_recent_perception(self):
+        states = ("known", "absent", "unchecked")
+        for vision, audio, recent in itertools.product(states, states, states):
+            state = resolve({"vision": vision, "audio": audio, "recent_perception": recent}, ("vision", "audio"))
+            if "known" in (vision, audio, recent):
+                expected = "known"
+            elif vision == "absent" and audio == "absent":
+                expected = "unknowable"
+            else:
+                expected = "unknown"
+            self.assertEqual(state.status, expected, (vision, audio, recent))
+
+    def test_unchecked_is_never_absent(self):
+        for required in (("vision",), ("vision", "audio"), ("vision", "audio", "team_share"), ("vision", "audio", "recent_perception")):
+            for missing in required:
+                channels = {name: "absent" for name in required if name != missing}
+                self.assertEqual(resolve(channels, required).status, "unknown", (required, missing))
+                self.assertEqual(resolve({**channels, missing: "unchecked"}, required).status, "unknown")
+            self.assertEqual(resolve({name: "absent" for name in required}, required).status, "unknowable")
+
+    def test_a_conflict_is_unknown_and_no_declared_channel_is_never_unknowable(self):
+        self.assertEqual(resolve({"vision": "absent", "audio": "absent"}, ("vision", "audio"), "telemetry disagrees").status, "unknown")
+        self.assertEqual(resolve({"vision": "absent"}, ()).status, "unknown")
+        with self.assertRaises(ValueError):
+            resolve({"vision": "maybe"}, ("vision",))
+
+
+class LegacyAdapterTest(unittest.TestCase):
+    def test_information_state_maps_to_what_the_docs_promise(self):
+        self.assertEqual(LEGACY_STATES, {
+            "visible": {"vision": "known"},
+            "audio": {"audio": "known"},
+            "unknowable": {"vision": "absent", "audio": "absent"},
+        })
+        self.assertEqual(shot_channels(ev(0)), ({}, ""))
+        for label, status in (("visible", "known"), ("audio", "known"), ("unknowable", "unknowable"), (None, "unknown")):
+            self.assertEqual(shot_knowledge(ev(0, information_state=label), GAME).status, status, label)
+
+    def test_per_channel_fields_and_their_conflicts(self):
+        cases = [
+            (dict(vision_state="absent"), "unknown"),  # audio was not reported
+            (dict(audio_state="absent"), "unknown"),
+            (dict(vision_state="absent", audio_state="absent"), "unknowable"),
+            (dict(vision_state="known", audio_state="absent"), "known"),
+            (dict(vision_state="absent", audio_state="known"), "known"),
+            (dict(information_state="visible", audio_state="absent"), "known"),
+            (dict(information_state="unknowable", vision_state="absent"), "unknowable"),
+        ]
+        for fields, status in cases:
+            self.assertEqual(shot_knowledge(ev(0, **fields), GAME).status, status, fields)
+        torn = shot_knowledge(ev(0, information_state="unknowable", vision_state="known"), GAME)
+        self.assertEqual((torn.status, torn.cause), ("unknown", "conflict"))
+        self.assertIn("information_state unknowable has vision absent", torn.conflict)
+        self.assertEqual(shot_knowledge(ev(0, information_state="unknowable", audio_state="unchecked"), GAME).status, "unknown")
+
+
+class RecentPerceptionTest(unittest.TestCase):
+    def status(self, **fields) -> str:
+        return shot_knowledge(ev(0, **fields), GAME).status
+
+    def test_the_grace_window(self):
+        self.assertEqual(self.status(information_state="visible"), "known")
+        self.assertEqual(self.status(information_state="audio"), "known")
+        self.assertEqual(self.status(information_state="unknowable", since_perceived_ms=100.0), "known")
+        self.assertEqual(self.status(information_state="unknowable", since_perceived_ms=999.0), "known")
+        self.assertEqual(self.status(information_state="unknowable", since_perceived_ms=1000.0), "unknowable")
+        self.assertEqual(self.status(information_state="unknowable"), "unknowable")  # not sent: decides nothing by default
+        self.assertEqual(self.status(since_perceived_ms=5000.0), "unknown")  # no vision or audio verdict
+        recent = shot_knowledge(ev(0, information_state="unknowable", since_perceived_ms=100.0), GAME)
+        self.assertEqual((recent.cause, recent.perceived_now), ("recent", False))
+
+    def test_a_game_can_require_recent_perception(self):
+        strict = dataclasses.replace(GAME, knowledge_channels=("vision", "audio", "recent_perception"))
+        self.assertEqual(shot_knowledge(ev(0, information_state="unknowable"), strict).status, "unknown")
+        self.assertEqual(shot_knowledge(ev(0, information_state="unknowable", since_perceived_ms=2000.0), strict).status, "unknowable")
+
+    def test_a_declared_channel_without_telemetry_means_unknown(self):
+        state = shot_knowledge(ev(0, information_state="unknowable"), WITH_TEAM)
+        self.assertEqual((state.status, state.channel("team_share")), ("unknown", "unchecked"))
+
+
+class TargetsTest(unittest.TestCase):
+    """The hidden-track enemy, the private replay body and the wire each have their own knowledge."""
+
+    def test_the_tracked_enemy(self):
+        self.assertEqual(tracked_knowledge(ev(0, hidden_track_ms=200.0), GAME).status, "unknowable")
+        self.assertEqual(tracked_knowledge(ev(0, hidden_track_ms=200.0, information_state="audio"), GAME).status, "known")
+        self.assertEqual(tracked_knowledge(ev(0, hidden_track_ms=200.0, information_state="visible"), GAME).status, "known")
+        self.assertEqual(tracked_knowledge(ev(0, hidden_track_ms=200.0, since_perceived_ms=10.0), GAME).status, "known")
+        self.assertEqual(tracked_knowledge(ev(0, hidden_track_ms=200.0), WITH_TEAM).status, "unknown")
+        unchecked = tracked_knowledge(ev(0, hidden_track_ms=200.0, vision_state="unchecked"), GAME)
+        self.assertEqual((unchecked.status, unchecked.cause), ("unknown", "conflict"))
+
+    def test_the_private_replay_body(self):
+        state = private_knowledge(GAME)
+        self.assertEqual((state.status, state.channel("recent_perception")), ("unknowable", "not_applicable"))
+        self.assertEqual(private_knowledge(WITH_TEAM).status, "unknown")
+
+    def test_the_wire_is_data_and_the_picture_is_perception(self):
+        self.assertIsNone(presentation(ev(0, wire_error_deg=0.1, picture_error_deg=2.0)))
+        shown = presentation(ev(0, wire_error_deg=0.1, picture_error_deg=2.0, interp_delay_ms=100.0))
+        self.assertEqual((shown.wire_error_deg, shown.picture_error_deg, shown.interp_delay_ms), (0.1, 2.0, 100.0))
+        self.assertIn("client_data", shown.to_dict())
+
+
+class ProfileChannelsTest(unittest.TestCase):
+    def test_the_default_is_what_unknowable_has_always_meant(self):
+        self.assertEqual(profile_from_dict({"game_id": "g"}).knowledge_channels, ("vision", "audio"))
+        self.assertEqual(profile_from_dict({"game_id": "g", "knowledge_channels": ["vision", "audio", "team_share"]}).knowledge_channels,
+                         ("vision", "audio", "team_share"))
+        for bad in ([], ["sonar"], "vision"):
+            with self.assertRaises(ParseError):
+                profile_from_dict({"game_id": "g", "knowledge_channels": bad})
+
+    def test_the_declared_channels_are_part_of_the_profile_digest(self):
+        self.assertNotEqual(profile_digest(GAME), profile_digest(WITH_TEAM))
 
 
 if __name__ == "__main__":

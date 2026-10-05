@@ -48,6 +48,8 @@
     "aim_jitter_deg": { "type": "number", "minimum": 0 },
     "enemy_id": { "type": "string", "minLength": 1 },
     "view_delta_deg": { "type": "number", "minimum": 0 },
-    "acquire_ms": { "type": "number", "minimum": 0 }
+    "acquire_ms": { "type": "number", "minimum": 0 },
+    "vision_state": { "enum": ["known", "absent", "unchecked"] },
+    "audio_state": { "enum": ["known", "absent", "unchecked"] }
   }
 }

@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from .evidence import Observation
+from .knowledge import DEFAULT_CHANNELS
 from .provenance import CaseProvenance
 
 
@@ -116,6 +117,9 @@ class GameProfile:
     hidden_track_min_samples: int = 8
     hidden_grace_ms: float = 1000
     poison_jump: float = 0.08
+    # The legal channels through which a client can know an enemy in this game (fpsdet.knowledge). An
+    # enemy is unknowable only when every one was checked and failed; an unreported one means unknown.
+    knowledge_channels: tuple[str, ...] = DEFAULT_CHANNELS
     # A match whose whole lobby sits this many robust standard deviations past the window's median match.
     match_outlier_sd: float = 5.0
     unknowable_min_samples: int = 12
@@ -218,6 +222,9 @@ class Event:
     acquire_ms: float | None = None
     map_id: str | None = None
     party_id: str | None = None
+    # Per-channel knowledge of the shot's enemy, when the server reports channels one at a time.
+    vision_state: str | None = None
+    audio_state: str | None = None
     extras: dict[str, float] = field(default_factory=dict)
 
     @property
