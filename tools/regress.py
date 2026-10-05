@@ -240,6 +240,82 @@ def cmd_verify(args: argparse.Namespace) -> int:
     return 0 if not result["problems"] else 1
 
 
+def _same_items(a: list, b: list) -> bool:
+    return sorted(json.dumps(x, sort_keys=True) for x in a) == sorted(json.dumps(x, sort_keys=True) for x in b)
+
+
+def classify(old: dict, new: dict) -> list[str]:
+    """Why a case moved between two snapshots, by field. Floats are compared at 10 significant digits."""
+    old, new = canon(old), canon(new)
+    found: list[str] = []
+    if old.get("decision") != new.get("decision"):
+        found.append("decision-change")
+    before = old.get("evidence") or {}
+    after = new.get("evidence") or {}
+    old_obs, new_obs = before.get("observations") or [], after.get("observations") or []
+    kinds = lambda rows: sorted((obs["kind"], obs["key"]) for obs in rows)
+    old_kinds, new_kinds = kinds(old_obs), kinds(new_obs)
+    if [k for k in new_kinds if k not in old_kinds] or len(new_kinds) > len(old_kinds):
+        found.append("finding-added")
+    if [k for k in old_kinds if k not in new_kinds] or len(old_kinds) > len(new_kinds):
+        found.append("finding-removed")
+    for field, label in (("reasons", "reason"), ("metrics", "metric"), ("observations", "legacy-observation"),
+                         ("checks", "check"), ("untrained", "untrained")):
+        a, b = old.get(field) or [], new.get(field) or []
+        if a == b:
+            continue
+        found.append(f"{label}-order-only" if _same_items(a, b) else f"{label}-changed")
+    old_ids = [obs["observation_id"] for obs in old_obs]
+    new_ids = [obs["observation_id"] for obs in new_obs]
+    if old_ids != new_ids:
+        if sorted(old_ids) == sorted(new_ids):
+            found.append("observation-order-only")
+        else:
+            moved = {(o["kind"], o["key"]) for o in old_obs} ^ {(o["kind"], o["key"]) for o in new_obs}
+            changed = [o for o in new_obs if o["observation_id"] not in old_ids]
+            if any(o["kind"] in ("leftover", "voice") for o in changed):
+                found.append("relationship-changed")
+            if any(o["kind"] not in ("leftover", "voice") for o in changed) and not moved:
+                found.append("observation-values-changed")
+    if old.get("inherit_lags_ms") != new.get("inherit_lags_ms"):
+        same = sorted(old.get("inherit_lags_ms") or []) == sorted(new.get("inherit_lags_ms") or [])
+        found.append("voice-lags-order-only" if same else "voice-lags-changed")
+    if before.get("eligibility") != after.get("eligibility"):
+        found.append("eligibility-changed")
+    if old.get("seal") != new.get("seal"):
+        found.append("seal-from-reason-order" if _same_items(old.get("reasons") or [], new.get("reasons") or []) and "decision-change" not in found else "seal-changed")
+    for field in ("party_note", "vendor_twin", "vendor_r", "queue_rank", "speed", "recommended_action", "automated_action", "skill_band"):
+        if old.get(field) != new.get(field):
+            found.append(f"{field}-changed")
+    return found
+
+
+def cmd_migrate(args: argparse.Namespace) -> int:
+    before, after = read_snapshot(args.before), read_snapshot(args.after)
+    categories: Counter = Counter()
+    moved = 0
+    decisions: list[str] = []
+    for pid in sorted(set(before) | set(after)):
+        if pid not in before or pid not in after:
+            decisions.append(f"{pid}: only {'after' if pid in after else 'before'}")
+            continue
+        found = classify(before[pid], after[pid])
+        if found:
+            moved += 1
+            categories.update(found)
+        if "decision-change" in found:
+            decisions.append(f"{pid}: {before[pid]['decision']} -> {after[pid]['decision']} ({', '.join(found)})")
+    print(f"{len(before)} cases, {moved} moved")
+    for name, n in sorted(categories.items()):
+        print(f"  {name}: {n}")
+    old = Counter(row["decision"] for row in before.values())
+    new = Counter(row["decision"] for row in after.values())
+    print("Decisions: " + ", ".join(f"{d} {old[d]} -> {new[d]}" for d in ("review", "watch", "clean", "insufficient_data")))
+    for line in decisions:
+        print(f"  {line}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -258,6 +334,10 @@ def main(argv: list[str] | None = None) -> int:
     diff.add_argument("--show", type=int, default=20, help="How many moved players to list")
     diff.add_argument("--ignore", action="append", default=[], help="A dotted path to leave out of both, such as evidence.provenance.detector. Repeatable")
     diff.set_defaults(func=cmd_diff)
+    migrate = sub.add_parser("migrate", help="Say why each case moved between two snapshots, by kind of change")
+    migrate.add_argument("before")
+    migrate.add_argument("after")
+    migrate.set_defaults(func=cmd_migrate)
     check = sub.add_parser("verify", help="Check that each case's evidence explains its decision, checks and reasons. Needs PYTHONPATH=src")
     check.add_argument("snapshot")
     check.add_argument("--show", type=int, default=20)

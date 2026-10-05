@@ -63,6 +63,7 @@ DETECTOR_MODULES = (
     "fpsdet.signals",
     "fpsdet.statsutil",
     "fpsdet.summarize",
+    "fpsdet.timeline",
 )
 # Where detection starts: the package's own __init__ (it runs before any module), scoring a batch,
 # reading events and profiles, reading cohorts and history and writing the case and its evidence.

@@ -87,10 +87,11 @@ def make_dist(values: list[float]) -> Dist | None:
 
 
 def sample_std(values: list[float]) -> float:
+    """fsum is correctly rounded: the same spread in any order and on any Python version."""
     if len(values) < 2:
         return 0.0
-    mid = sum(values) / len(values)
-    return math.sqrt(sum((v - mid) ** 2 for v in values) / (len(values) - 1))
+    mid = math.fsum(values) / len(values)
+    return math.sqrt(math.fsum((v - mid) ** 2 for v in values) / (len(values) - 1))
 
 
 def _thick(dist: Dist | None, min_players: int) -> bool:

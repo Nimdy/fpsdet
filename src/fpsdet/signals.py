@@ -17,7 +17,7 @@ from collections import defaultdict
 
 from .baseline import CohortTable, sample_std
 from .models import Case, GameProfile, RecoilSummary, WeaponSummary
-from .statsutil import median
+from .statsutil import exact_sum, median
 
 
 def pearson(xs: list[float], ys: list[float]) -> float | None:
@@ -117,6 +117,12 @@ def mirror_check_finding(
 
     Returns ((sentence, numbers) or None, note). The note says why the test did not run.
     """
+    if recoil.unordered_moments:
+        # The lag test reads which kick came first. At these moments the server did not say.
+        return None, (
+            f"{recoil.build_key} has {recoil.unordered_moments} moments where the server sent different kicks "
+            "at one time and spray index. The mirror check does not run on a sequence the server did not order."
+        )
     count = min(len(recoil.applied), len(recoil.compensation))
     if count < profile.mirror_min_shots:
         return None, None
@@ -245,7 +251,7 @@ def hidden_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, di
     samples = [ms for ms in weapon.hidden_track_ms if ms > 0]
     if len(samples) < profile.hidden_track_min_samples:
         return None
-    total = sum(samples)
+    total = exact_sum(samples)
     if total < profile.hidden_track_min_ms:
         return None
     text = f"{weapon.weapon_key} aim stayed on a hidden mover for {total:.0f} ms across {len(samples)} shots"
@@ -276,7 +282,7 @@ def private_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, d
     samples = [ms for ms in weapon.private_track_ms if ms > 0]
     if len(samples) < profile.hidden_track_min_samples:
         return None
-    total = sum(samples)
+    total = exact_sum(samples)
     if total < profile.hidden_track_min_ms:
         return None
     text = f"{weapon.weapon_key} aim stayed on a private replay for {total:.0f} ms across {len(samples)} shots"
@@ -328,7 +334,7 @@ def wire_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict
         led_picture.append(picture)
     if len(led) < profile.hidden_track_min_samples:
         return None
-    total = sum(led)
+    total = exact_sum(led)
     if total < profile.hidden_track_min_ms:
         return None
     text = (
@@ -472,6 +478,8 @@ def leftover_signature(
     replay that starts at the same shot.
     Returns (points, leftover samples).
     """
+    if recoil.unordered_moments:
+        return None  # its kicks have no server order to line up
     residual = command_residual(recoil.applied, recoil.compensation, recoil.spray)
     if residual is None:
         return None
@@ -484,7 +492,7 @@ def leftover_signature(
         sums[recoil.spray[position]].append(value)  # type: ignore[index]
     spread = sample_std(residual)
     points = {
-        ("spray", index): (sum(rows) / len(rows)) * math.sqrt(len(rows)) / spread
+        ("spray", index): (math.fsum(rows) / len(rows)) * math.sqrt(len(rows)) / spread
         for index, rows in sums.items()
         if len(rows) >= PATTERN_MIN_SPRAYS
     }

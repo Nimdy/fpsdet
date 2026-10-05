@@ -4,6 +4,16 @@
 
 ### Fixed
 
+- **File order is no longer game state.** The same server events listed in a different order in a file could produce a different case. Same-time events could decide a hidden-mover, floor-run or speed review, and on Python 3.11 a float sum could cross a line in one order and not the other.
+  - **One order:** each player's events are now read in one canonical timeline: match, server time, kind, `spray_index`, then content for events those cannot tell apart. Players are read in id order, and weapons, builds and declared metrics are reported in key order.
+  - **Simultaneous events have explicit rules:**
+    - a movement moment extends a run only when every sample is over;
+    - shots at one moment add one hidden or private sample when they agree and none when they disagree;
+    - recoil moments are ordered by spray index;
+    - the mirror and leftover checks do not run on kicks the server did not order.
+  - **Exact sums:** material float sums use `math.fsum`.
+  - **What moved:** across the planted demo, the synthetic week and the CS2 and TF2 reruns, no decision and no observation changed. Lists were re-ordered, and two TF2 legacy seals moved with their reason order.
+  - **Docs:** see [docs/event-normalization.md](docs/event-normalization.md).
 - **An event could write outside the lake.** `fpsdet ingest` used `game_id` as a folder name, so a game id such as `x/../../elsewhere` appended `events.ndjson` outside `--lake`. A game id with a path separator, and a `utc` whose first ten characters are not a `YYYY-MM-DD` date, are now skipped and counted. `--dt` and `--game` must be safe too, or the command stops with a message.
 
 ### Added

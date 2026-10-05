@@ -15,6 +15,10 @@ The reference implementation is `src/fpsdet/`. A port in C#, C++, or Go is compa
 
 The labels and families are `fpsdet.models.CHECKS`.
 
+## Event order
+
+The order lines arrive in a file is not game state. Each player's events are read in one canonical timeline: match, server time, kind (movement before shot), `spray_index`, then the event's own content for events those cannot tell apart. Players are read in id order. Weapons, recoil builds and declared metrics are reported in key order. Events at the same match and time are simultaneous; each check below says what that means to it. [event-normalization.md](event-normalization.md) has the full rules.
+
 ## Cohort
 
 A cohort is one number per player, not one number per shot. The keys are rank band, weapon key, and metric.
@@ -84,6 +88,8 @@ A sample is over cap when speed > cap × (1 + `speed_over_fraction`). Default fr
 
 A run is consecutive over-cap samples in one match with gaps no larger than `speed_run_gap_ms` (default 400). The finding fires when the longest run is at least `speed_min_run` (default 25). Shorter runs are recorded as a possible glitch and do not change the decision.
 
+Samples at the same match and time are one moment. A moment extends a run by its number of samples only when every sample in it is an eligible ground sample over its cap. Any other sample at that moment breaks the run there, whichever order the file listed them in.
+
 Only `displacement_cause` of `none` is scored. Innocent causes, `unknown`, any cause the profile has not listed, missing `on_ground`, and airborne samples break a run and are counted in the case so a reviewer can see them. They are not violations. A new traversal gadget is safe until you decide it is a normal sprint.
 
 ## Recoil
@@ -92,13 +98,15 @@ Samples count when `spray_index` is at least `recoil_min_spray_index` (default 3
 
 Blatant: a run of at least `recoil_min_run` shots (default 10) whose pitch is under `recoil_floor_fraction` of the floor (default 25%). That is a review by itself. A compensated gun has a lower floor, so the same pitch can be legal.
 
+Shots on one build are ordered by match, time and `spray_index`. Shots that share all three are one moment: it extends a low run only when every shot in it is an eligible low one.
+
 No floor and no thick cohort: untrained, not flagged.
 
 No floor, thick cohort, and the upper bound of the player's median pitch is under the lowest measured human and under `recoil_floor_fraction` of that cohort's median: learned floor break, review. Sitting in the low tail (under p05) without clearing that gap is only a watch-grade flag. The steadiest legal player on a build is not a review.
 
 ## Fire interval
 
-Per match, per weapon id (or weapon class when the id is absent). Gaps under `min_shot_interval_ms - interval_slack_ms` are violations. A match counts when it has at least 5 gaps and at least `min_violation_rate` of them are violations. The finding fires when the matches that count hold at least `min_intervals` gaps and `min_violations` violations between them. One jittery timestamp in an honest match does not make the match count, even in a match where the gun fired only two or three times. A macro switched on in the middle of a week is not diluted by the honest matches before it. This is checked even when the aim sample is still too small to score.
+Per match, per weapon id (or weapon class when the id is absent). Gaps under `min_shot_interval_ms - interval_slack_ms` are violations. A match counts when it has at least 5 gaps and at least `min_violation_rate` of them are violations. The finding fires when the matches that count hold at least `min_intervals` gaps and `min_violations` violations between them. One jittery timestamp in an honest match does not make the match count, even in a match where the gun fired only two or three times. Two shots of one gun at the same time are a zero gap, whichever the file listed first. A macro switched on in the middle of a week is not diluted by the honest matches before it. This is checked even when the aim sample is still too small to score.
 
 Set the interval to the minimum legal gap between accepted shots. For a burst weapon that is the intra-burst gap, or leave the rule off for that weapon. Slack covers one tick of timestamp jitter. Timestamps are server time.
 
@@ -134,11 +142,13 @@ Three things are not a wallhack, and the scorer drops them:
 - **A body that just broke line of sight.** Send `since_perceived_ms`, the time since this client last saw or heard that enemy. Under `hidden_grace_ms` (default 1000) the shot does not count. Tracking where someone just went, or spraying the cover they ducked behind, is human. The same grace keeps those shots out of the unknowable smoothness sample and the teammate check.
 - **A running total.** Each value is cut to the time since the player's previous shot in that match. An emitter that sends a running total cannot count the same second once per shot in a spray.
 
+Shots at the same match and time are one aim, so a moment adds at most one sample: once when its shots that report a hidden time agree on it (and on `information_state` and `since_perceived_ms`), and nothing when they disagree. The sum is exact (`math.fsum`), so it does not depend on order or Python version.
+
 Review when at least `hidden_track_min_samples` (default 8) shots have time above 0 and the sum is at least `hidden_track_min_ms` (default 1200). One long sample is not enough. Corner pre-aim is `acquire_ms`, not this. A visibility query that marks a visible enemy as hidden manufactures the case. That is an emitter bug. This check runs even when the aim sample is still too small to score.
 
 ## Private replay
 
-`private_track_ms` is time, on that shot, that the aim cone contained a body the server built by replaying another player's motion on a different heading, in a volume this client could not see or hear. The official client is not given a decoy bit. Omit the field, or send 0, and nothing happens. The bar is the hidden-mover bar: at least `hidden_track_min_samples` (default 8) shots above 0, and a sum of at least `hidden_track_min_ms` (default 1200). One crossing is not a review. One long sample is not enough. A body this client could actually perceive, labeled private, manufactures the case. That is an emitter bug. The public speed, recoil, and aim charts are allowed to stay ordinary. This check runs even when the aim sample is still too small to score. The review desk draws that route from the planted case. The score still reads only `private_track_ms`.
+`private_track_ms` is time, on that shot, that the aim cone contained a body the server built by replaying another player's motion on a different heading, in a volume this client could not see or hear. The official client is not given a decoy bit. Omit the field, or send 0, and nothing happens. The bar is the hidden-mover bar: at least `hidden_track_min_samples` (default 8) shots above 0, and a sum of at least `hidden_track_min_ms` (default 1200), with the same rule for shots at one moment: they count once when they agree and not at all when they disagree. One crossing is not a review. One long sample is not enough. A body this client could actually perceive, labeled private, manufactures the case. That is an emitter bug. The public speed, recoil, and aim charts are allowed to stay ordinary. This check runs even when the aim sample is still too small to score. The review desk draws that route from the planted case. The score still reads only `private_track_ms`.
 
 ## Wire and picture
 
@@ -158,7 +168,7 @@ Review when both sides have at least `unknowable_min_samples` (default 12), the 
 
 ## Shared leftover
 
-After the case decisions exist, each player's command is fit to `1 + applied kick + previous kick`. With `spray_index`, the previous kick is the previous shot of the same spray, and 0 on a spray's first shot. A person reacts to the kick they just felt, not to the end of a spray seconds ago; lagging across that gap leaves the same spike at every spray's first shot, for every player. What remains is the leftover. A player needs at least `vendor_min_shots` (default 32) leftover samples on a weapon.
+After the case decisions exist, each player's command is fit to `1 + applied kick + previous kick`. That needs to know which kick came first. A build where the server sent different kicks at one time and spray index has no such order, so neither the leftover nor the same-tick mirror check runs on it, and the case says why. With `spray_index`, the previous kick is the previous shot of the same spray, and 0 on a spray's first shot. A person reacts to the kick they just felt, not to the end of a spray seconds ago; lagging across that gap leaves the same spike at every spray's first shot, for every player. What remains is the leftover. A player needs at least `vendor_min_shots` (default 32) leftover samples on a weapon.
 
 Accounts are compared per weapon key. A humanizer table belongs to the tool, so the same table on a stock and a modded rifle still lines up. With `spray_index`, each account's signature is its mean leftover at each spray index reached by at least 3 sprays, divided by that mean's standard error. Each point then carries equal weight, and a late index reached by two sprays cannot decide the correlation alone. Two accounts are compared on the spray indices both have, when there are at least `vendor_min_points` (default 12).
 

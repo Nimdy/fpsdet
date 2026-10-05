@@ -9,6 +9,18 @@ import math
 Z95 = 1.6448536269514722
 
 
+def exact_sum(values: list[float]) -> float:
+    """A sum that does not depend on order or Python version.
+
+    Integers add exactly, and stay integers. Anything else goes through math.fsum, which is correctly
+    rounded. A plain float sum() depends on the order of its terms, and Python 3.12 compensates where
+    3.11 does not, so at a threshold the same events could decide differently.
+    """
+    if all(isinstance(value, int) for value in values):
+        return sum(values)
+    return math.fsum(values)
+
+
 def median(values: list[float]) -> float:
     if not values:
         raise ValueError("median of empty")

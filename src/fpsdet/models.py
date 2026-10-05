@@ -293,6 +293,8 @@ class RecoilSummary:
     applied: list[float] = field(default_factory=list)
     compensation: list[float] = field(default_factory=list)
     spray: list[int | None] = field(default_factory=list)
+    # Moments (one match, time and spray index) where the server sent different kicks: no order between them.
+    unordered_moments: int = 0
 
 
 @dataclass

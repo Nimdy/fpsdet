@@ -455,17 +455,16 @@ class InputFingerprintTest(unittest.TestCase):
         events, _ = load_events(ROOT / "examples" / "shot.jsonl")
         self.assertEqual(player_inputs(events)["p-1044"].digest, SHOT_FILE_INPUT_DIGEST)
 
-    def test_order_counts_because_the_scorer_reads_it(self):
-        # The case lists findings in the order a player's weapons first appear, so reversing one
-        # player's events can change the case, and must change the digest.
+    def test_player_events_1_binds_arrival_order(self):
+        # Since event normalization the scorer reads each player's canonical timeline, so reversing one
+        # player's events no longer changes the case. player-events/1 still describes the arrival order.
         events = [shot("w", index * 300, weapon_class="rifle", hidden_track_ms=200.0) for index in range(10)]
         events += [shot("w", 5000 + index * 300, weapon_class="smg", hidden_track_ms=200.0) for index in range(10)]
         profile = build_demo().profile
         forward, backward = run_score(events, profile)[0], run_score(list(reversed(events)), profile)[0]
         self.assertEqual(len(forward.reasons), 2)
-        self.assertEqual(forward.reasons, list(reversed(backward.reasons)))
-        self.assertNotEqual(forward.seal, backward.seal)
-        self.assertNotEqual(forward.provenance.inputs.digest, backward.provenance.inputs.digest)
+        self.assertEqual((forward.reasons, forward.seal), (backward.reasons, backward.seal))
+        self.assertNotEqual(player_digest(events), player_digest(list(reversed(events))))
 
     def test_interleaving_players_moves_nothing(self):
         # Each player's own order kept, players interleaved differently: the same cases and the same digests.

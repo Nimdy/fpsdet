@@ -902,7 +902,7 @@ def _center(players: dict[str, dict[tuple[str, int], float]]) -> None:
     for points in players.values():
         for key, value in points.items():
             sums.setdefault(key, []).append(value)
-    means = {key: sum(values) / len(values) for key, values in sums.items()}
+    means = {key: math.fsum(values) / len(values) for key, values in sums.items()}
     for player_id, points in players.items():
         players[player_id] = {key: value - means[key] for key, value in points.items()}
 
@@ -955,7 +955,8 @@ def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: Ga
             builds.setdefault(recoil.weapon_key, {})[record.player_id] = points
     best: dict[tuple[str, str], float] = {}
     measured: dict[tuple[str, str], dict] = {}
-    for weapon_key, players in builds.items():
+    for weapon_key in sorted(builds):
+        players = builds[weapon_key]
         centered = len(players) >= profile.min_cohort_players
         if centered:
             _center(players)
@@ -1022,16 +1023,19 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
         found: list[tuple[str, int, str]] = []
         for weapon in record.weapons:
             found.extend(weapon.hidden_contacts)
+        # Contacts in match, time and enemy order, whichever weapon or file line they came from.
+        found.sort()
         if found:
             contacts[record.player_id] = found
         for party in record.party_ids:
             parties.setdefault(party, set()).add(record.player_id)
-    confirmed = [
+    confirmed = sorted(
         case.player_id
         for case in cases
         if case.decision == "review" and any("hidden mover" in reason for reason in case.reasons)
-    ]
-    for party, members in parties.items():
+    )
+    for party in sorted(parties):
+        members = parties[party]
         cheaters = [player_id for player_id in confirmed if player_id in members]
         for cheater in cheaters:
             cheater_hits = contacts.get(cheater, [])
