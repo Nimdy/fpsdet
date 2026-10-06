@@ -1,0 +1,76 @@
+{
+  "schema": "fpsdet.evaluation-dataset/1",
+  "dataset": "cs2cd-2026-10-04",
+  "title": "CS2 matchmaking (CS2CD) with the dataset authors' labels",
+  "source": "CS2CD: 795 CS2 matchmaking matches parsed from server-recorded demos, with the dataset authors' cheater labels, converted on 2026-10-04 by examples/cs2/cs2cd.py. Not affiliated with Valve.",
+  "unit": "one player in one match. Each match is pseudonymised on its own, so a player cannot be followed across matches.",
+  "match_level": "the same as the player level: every player is one match.",
+  "labels": [
+    {
+      "label": "cheater",
+      "role": "positive",
+      "name": "hand-labelled cheater",
+      "meaning": "A player the dataset authors labelled as cheating, after reviewing a match that contained a VAC-banned player.",
+      "not_meaning": "A ban. The labels are the authors' judgement."
+    },
+    {
+      "label": "clean, reviewed match",
+      "role": "comparison",
+      "name": "hand-reviewed, not labelled",
+      "meaning": "A player in a reviewed match whom the authors did not label as cheating. They shared a lobby with a cheater.",
+      "not_meaning": "Proven clean. It is a reviewer's call, but a direct one."
+    },
+    {
+      "label": "clean, unreviewed match",
+      "role": "comparison",
+      "name": "unreviewed match",
+      "meaning": "A player in a match with no VAC-banned player. Not reviewed: the authors' spot check of 50 such matches found 97.2% of players showing no cheating.",
+      "not_meaning": "That anyone looked at this player. A few cheaters are likely here."
+    }
+  ],
+  "not_scored": "Players of the 120 no-cheater matches that built the baseline are labelled but deliberately not scored, so nobody is judged against a baseline that includes them. A few more labelled players have no scored case. All are outside every denominator.",
+  "telemetry": [
+    "displacement_cause",
+    "distance_m",
+    "expected_max_ground_speed_mps",
+    "hit",
+    "hitbox",
+    "on_ground",
+    "speed_mps",
+    "spray_index",
+    "through_geometry",
+    "view_delta_deg"
+  ],
+  "server_shot_timing": true,
+  "caveats": [
+    "The labels are the CS2CD authors' judgement, not ground truth and not bans. Hand-labelled cheater is a reviewer's call on one match.",
+    "There are two comparison groups, and they differ by construction: hand-reviewed players shared a lobby with a cheater, and unreviewed players did not and were never looked at.",
+    "Every player is one match. fpsdet is built to judge an account over many matches, so most players here are held for too little data. That is the largest effect on every rate.",
+    "The data has server hits, hitgroups, penetration, distance, the view turn before a shot and movement speed. It has no recoil kick, player command, visibility, audio, wire timing, challenges or parties, so those detectors are not observable here.",
+    "The baseline is unreviewed play, screened for whole lobbies of outliers. One unlabelled cheater left in it raises the bar for everyone.",
+    "This is one public dataset of CS2 matchmaking. It says nothing direct about another game, mode or season."
+  ],
+  "published": {
+    "where": "examples/cs2/README.md",
+    "decisions": {
+      "cheater": {
+        "review": 0,
+        "watch": 14,
+        "clean": 92,
+        "insufficient_data": 398
+      },
+      "clean, reviewed match": {
+        "review": 0,
+        "watch": 0,
+        "clean": 302,
+        "insufficient_data": 273
+      },
+      "clean, unreviewed match": {
+        "review": 0,
+        "watch": 4,
+        "clean": 435,
+        "insufficient_data": 11
+      }
+    }
+  }
+}

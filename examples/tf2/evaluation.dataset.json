@@ -1,0 +1,77 @@
+{
+  "schema": "fpsdet.evaluation-dataset/1",
+  "dataset": "tf2-rgl-2026-10-04",
+  "title": "TF2 league matches with RGL ban labels",
+  "source": "Server-logged league matches kept by logs.tf, and RGL's public ban list, fetched on 2026-10-04 and converted by examples/tf2/tf2logs.py. Not affiliated with Valve, logs.tf or RGL.",
+  "unit": "an RGL account, over at most its 20 latest team matches (before the ban date, for a banned account). Rates are per account.",
+  "match_level": "not meaningful here: a finding rests on per-match totals added up over a player's matches, and a ban labels an account, not a match.",
+  "labels": [
+    {
+      "label": "cheater",
+      "role": "positive",
+      "name": "RGL cheating-ban labelled",
+      "meaning": "RGL banned the account, and the reason mentions cheating but not assisting, distributing or developing cheats. Each had at least 20 team matches on logs.tf before the ban, and its 20 latest were fetched.",
+      "not_meaning": "That the player cheated in every scored match, or in any particular one. A ban is a league decision, sometimes mirroring another league's."
+    },
+    {
+      "label": "not banned",
+      "role": "comparison",
+      "name": "never-banned comparison",
+      "meaning": "RGL never banned the account for anything. It played in the same lobbies as labelled accounts, with at least 8 matches in the fetched logs.",
+      "not_meaning": "That the player never cheated. A few unlabelled cheaters are likely among them."
+    },
+    {
+      "label": "other ban",
+      "role": "other",
+      "name": "banned for something else",
+      "meaning": "RGL banned the account for something other than cheating, such as an alt account. Seen in the fetched lobbies, with no minimum number of matches.",
+      "not_meaning": "Anything about cheating."
+    },
+    {
+      "label": "vac",
+      "role": "other",
+      "name": "VAC ban, mirrored by RGL",
+      "meaning": "RGL mirrored a Valve anti-cheat ban, possibly from another game. Seen in the fetched lobbies, with no minimum number of matches.",
+      "not_meaning": "That the player cheated in TF2."
+    }
+  ],
+  "not_scored": "A labelled player with no scored case had no aimed-weapon shot in the matches kept for them (a medic, soldier or demoman main, say). They are outside every denominator.",
+  "telemetry": [
+    "headshot_kills_per_min",
+    "hit",
+    "hitbox",
+    "kills_per_min"
+  ],
+  "server_shot_timing": false,
+  "caveats": [
+    "The labels are RGL's, not ground truth. RGL cheating-ban labelled means RGL banned the account and the reason mentions cheating. It does not mean the player cheated in any particular scored match.",
+    "The comparison is never-banned, not proven honest. A few unlabelled cheaters are likely in it.",
+    "The data is per-match totals: shots, hits, sniper headshots and kills per minute. There is no timing, position, view angle or movement, so most detectors are not observable here.",
+    "Shot times are spread evenly through each match by the converter, so no timing-based detector could mean anything on this data.",
+    "Exposure is unequal. Most never-banned players have a few matches and labelled accounts have up to 20, so compare at equal evidence (the evidence-amount table).",
+    "This is one season of competitive TF2. It says nothing direct about another game, league or season."
+  ],
+  "published": {
+    "where": "examples/tf2/README.md",
+    "decisions": {
+      "cheater": {
+        "review": 3,
+        "watch": 48,
+        "clean": 131,
+        "insufficient_data": 7
+      },
+      "not banned": {
+        "review": 0,
+        "watch": 30,
+        "clean": 1575,
+        "insufficient_data": 141
+      },
+      "other ban": {
+        "review": 0,
+        "watch": 16,
+        "clean": 729,
+        "insufficient_data": 76
+      }
+    }
+  }
+}

@@ -7,10 +7,20 @@ straight from those desks, so a published number that no longer follows from the
 
 from __future__ import annotations
 
+import copy
 import json
+import math
+import re
+import tempfile
 import unittest
 from collections import Counter
+from functools import lru_cache
 from pathlib import Path
+
+from fpsdet import calibration as cal
+from fpsdet.calibration import EvaluationError, PublishedMismatch
+from fpsdet.parse import load_profile
+from fpsdet.persist import case_to_dict, event_to_dict
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -61,6 +71,325 @@ class LabelAuditTest(unittest.TestCase):
         for claim in ("picked 18 of 1,529 players to watch, and 14 of them (78%) are labelled cheaters", "| Labelled cheaters (504) | 0 | 14 | 92 | 398 |",
                       "| Clean, reviewed matches (575) | 0 | 0 | 302 | 273 |", "| Clean, unreviewed matches (450) | 0 | 4 | 435 | 11 |"):
             self.assertIn(claim, cs2)
+
+
+
+def wilson(k: int, n: int, z: float = 1.959963984540054) -> tuple[float, float]:
+    """The two-sided Wilson interval, written out here independently of statsutil."""
+    p = k / n
+    centre = (p + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return max(0.0, centre - half), min(1.0, centre + half)
+
+
+@lru_cache(maxsize=1)
+def demo():
+    from fpsdet.synthetic import build_demo
+
+    return build_demo()
+
+
+def demo_cases() -> list[dict]:
+    return [case_to_dict(case) for case in demo().cases]
+
+
+def demo_telemetry() -> list[str]:
+    found = set()
+    for event in demo().events:
+        found |= {key for key, value in event_to_dict(event).items() if value is not None and key not in cal.IDENTITY_FIELDS}
+    return sorted(found)
+
+
+def demo_labels() -> dict[str, str]:
+    from fpsdet.synthetic import EXPECT
+
+    return {player: ("planted" if decision in ("review", "watch") else "honest") for player, decision in EXPECT.items()}
+
+
+def demo_dataset(**changes) -> dict:
+    """A dataset definition for testing the mechanics on the planted demo. Never a published rate."""
+    dataset = {
+        "schema": cal.DATASET_SCHEMA,
+        "dataset": "planted-demo-mechanics",
+        "title": "Planted demo, for testing the evaluation mechanics",
+        "source": "fpsdet.synthetic.build_demo",
+        "unit": "one planted player",
+        "match_level": "not meaningful: planted players",
+        "not_scored": "Every planted player is scored.",
+        "labels": [
+            {"label": "planted", "role": "positive", "name": "planted cheat", "meaning": "Built to cheat.", "not_meaning": "A real player."},
+            {"label": "honest", "role": "comparison", "name": "planted honest", "meaning": "Built not to.", "not_meaning": "A real player."},
+        ],
+        "telemetry": demo_telemetry(),
+        "server_shot_timing": True,
+        "caveats": ["Planted by construction."],
+    }
+    dataset.update(changes)
+    return dataset
+
+
+class RateTest(unittest.TestCase):
+    """C6, C7: counts, denominators, two-sided Wilson intervals, and ratios with no infinity."""
+
+    def test_wilson_two_sided(self):
+        for k, n in ((51, 182), (0, 1605), (30, 1605), (182, 182), (1, 20)):
+            cell = cal.rate(k, n)
+            lo, hi = wilson(k, n)
+            self.assertEqual((cell["count"], cell["denominator"]), (k, n))
+            self.assertAlmostEqual(cell["rate"], k / n, places=6)
+            self.assertAlmostEqual(cell["ci95"][0], lo, places=6)
+            self.assertAlmostEqual(cell["ci95"][1], hi, places=6)
+        # Two-sided, not the scorer's one-sided bound: the interval is wider than the one-sided 95% one.
+        from fpsdet.statsutil import wilson_bound
+
+        self.assertLess(cal.rate(51, 182)["ci95"][0], wilson_bound(51, 182, upper=False))
+
+    def test_too_small_a_denominator_shows_no_rate(self):
+        for k, n in ((0, 0), (3, 3), (5, 19)):
+            cell = cal.rate(k, n)
+            self.assertIsNone(cell["rate"])
+            self.assertIsNone(cell["ci95"])
+            self.assertTrue(cell["insufficient_sample"])
+        self.assertIsNotNone(cal.rate(0, 20)["rate"])
+
+    def test_enrichment_handles_zeros_without_infinity(self):
+        both = cal.enrichment(cal.rate(0, 100), cal.rate(0, 500))
+        self.assertEqual((both["ratio"], both["range"], both["note"]), (None, None, "no fires in either group"))
+        none_compared = cal.enrichment(cal.rate(11, 182), cal.rate(0, 1605))
+        self.assertIsNone(none_compared["ratio"])
+        self.assertEqual(none_compared["note"], "no comparison fires observed")
+        self.assertIsNone(none_compared["range"][1])
+        self.assertAlmostEqual(none_compared["range"][0], wilson(11, 182)[0] / wilson(0, 1605)[1], places=4)
+        normal = cal.enrichment(cal.rate(44, 182), cal.rate(28, 1605))
+        self.assertAlmostEqual(normal["ratio"], (44 / 182) / (28 / 1605), places=5)
+        self.assertAlmostEqual(normal["range"][0], wilson(44, 182)[0] / wilson(28, 1605)[1], places=4)
+        self.assertAlmostEqual(normal["range"][1], wilson(44, 182)[1] / wilson(28, 1605)[0], places=4)
+        zero = cal.enrichment(cal.rate(0, 182), cal.rate(28, 1605))
+        self.assertEqual(zero["ratio"], 0.0)
+        thin = cal.enrichment(cal.rate(3, 3), cal.rate(0, 1605))
+        self.assertEqual((thin["ratio"], thin["note"]), (None, "insufficient calibration sample"))
+        for cell in (both, none_compared, normal, zero, thin):
+            self.assertNotIn("Infinity", json.dumps(cell))
+
+    def test_statuses(self):
+        self.assertEqual(cal.status_of(19, 1000), "insufficient_sample")
+        self.assertEqual(cal.status_of(20, 99), "descriptive_only")
+        self.assertEqual(cal.status_of(100, 100), "measured")
+        self.assertNotIn("calibrated", cal.STATUSES)
+
+
+class ObservabilityTest(unittest.TestCase):
+    """C3, C16, C18: what a dataset cannot show is not observable, and says why."""
+
+    def tf2(self):
+        dataset = cal.load_dataset(ROOT / "examples" / "tf2" / "evaluation.dataset.json")
+        return cal.observability(load_profile(ROOT / "examples" / "tf2" / "tf2.json"), dataset["telemetry"], server_shot_timing=False, history=False)
+
+    def cs2(self):
+        dataset = cal.load_dataset(ROOT / "examples" / "cs2" / "evaluation.dataset.json")
+        return cal.observability(load_profile(ROOT / "examples" / "cs2" / "cs2.json"), dataset["telemetry"], server_shot_timing=True, history=False)
+
+    def test_the_detector_list_is_every_native_kind(self):
+        from fpsdet.evidence import KINDS
+
+        self.assertEqual(set(cal.NATIVE_KINDS), {kind for kind, (family, _c, _r) in KINDS.items() if family != "external"} - {"private_replay"})
+        self.assertEqual(set(cal.NEEDS), set(cal.NATIVE_KINDS))
+
+    def test_tf2_and_cs2(self):
+        tf2 = {kind for kind, row in self.tf2().items() if row["observable"]}
+        cs2 = {kind for kind, row in self.cs2().items() if row["observable"]}
+        self.assertEqual(tf2, {"accuracy", "headshot_rate", "extra", "rank_tail", "supporting_extra"})
+        self.assertEqual(cs2, {"speed", "accuracy", "headshot_rate", "median_distance", "geometry_rate", "rank_tail", "view_snaps"})
+
+    def test_information_detectors_are_not_observable_with_this_data(self):
+        for found in (self.tf2(), self.cs2()):
+            for kind in ("hidden", "quiet_aim", "wire", "voice", "occluded_motion_replay"):
+                self.assertFalse(found[kind]["observable"])
+                self.assertIn("missing_telemetry", found[kind]["reasons"])
+                self.assertEqual(found[kind]["text"], "not observable with this dataset")
+        self.assertIn("no_server_shot_timing", self.tf2()["fire_rate"]["reasons"])
+        self.assertIn("profile_declares_none", self.cs2()["fire_rate"]["reasons"])
+        self.assertEqual(self.cs2()["account_jump"]["reasons"], ["no_history_input"])
+
+    def test_telemetry_that_feeds_a_detector_whose_eligibility_cases_do_not_record(self):
+        found = cal.observability(demo().profile, demo_telemetry(), server_shot_timing=True, history=True)
+        self.assertEqual(found["hidden"]["reasons"], ["eligibility_not_recorded"])
+        self.assertTrue(found["accuracy"]["observable"])
+
+    def test_a_census_checks_the_declaration(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "events.ndjson"
+            path.write_text("".join(json.dumps(event_to_dict(event)) + "\n" for event in demo().events), encoding="utf-8")
+            found = cal.census(path)
+        self.assertEqual(found["events"], len(demo().events))
+        self.assertEqual(cal.check_census(demo_telemetry(), found), [])
+        problems = cal.check_census([*demo_telemetry(), "wire_error_deg_typo"], found)
+        self.assertEqual(problems, ["wire_error_deg_typo is declared but no event carries it"])
+        self.assertTrue(cal.check_census([name for name in demo_telemetry() if name != "hitbox"], found)[0].startswith("hitbox is on"))
+        with self.assertRaises(EvaluationError):
+            cal.evaluate(demo_cases(), demo_labels(), demo_dataset(telemetry=[*demo_telemetry(), "wire_error_deg_typo"]), demo().profile, telemetry_census=found)
+
+
+class HarnessTest(unittest.TestCase):
+    """C1, C4, C5, C23, C24: the harness on planted cases. These test mechanics, never a published rate."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cases = demo_cases()
+        cls.artifact = cal.evaluate(copy.deepcopy(cls.cases), demo_labels(), demo_dataset(), demo().profile)
+
+    def test_evaluation_changes_no_case_and_no_decision(self):
+        cases = demo_cases()
+        before = json.dumps(cases, sort_keys=True)
+        cal.evaluate(cases, demo_labels(), demo_dataset(), demo().profile)
+        self.assertEqual(json.dumps(cases, sort_keys=True), before)
+        from fpsdet.synthetic import build_demo
+
+        self.assertEqual([(case.player_id, case.decision, case.seal) for case in build_demo().cases], [(case.player_id, case.decision, case.seal) for case in demo().cases])
+
+    def test_fired_is_always_inside_evaluated(self):
+        for row in self.artifact["rows"]:
+            for kind, units in row["fired"].items():
+                if cal.NEEDS[kind].get("case"):
+                    self.assertLessEqual(set(units), set(row["evaluated"].get(kind, ())), (row["player"], kind))
+
+    def test_only_players_a_detector_could_run_on_are_in_its_denominator(self):
+        rows = self.artifact["rows"]
+        for entry in self.artifact["statistics"]["detectors"]:
+            if entry["status"] == "not_observable":
+                self.assertNotIn("rates", entry)
+                continue
+            for label, cell in entry["rates"].items():
+                self.assertEqual(cell["denominator"], sum(row["label"] == label and entry["kind"] in row["evaluated"] for row in rows))
+        small = next(row for row in rows if row["player"] == "small-sample")
+        self.assertEqual(small["decision"], "insufficient_data")
+        self.assertNotIn("accuracy", small["evaluated"])
+
+    def test_a_detector_the_cases_cannot_give_a_denominator_for_is_counted_not_rated(self):
+        hidden = next(entry for entry in self.artifact["statistics"]["detectors"] if entry["kind"] == "hidden")
+        self.assertEqual(hidden["status"], "not_observable")
+        self.assertEqual(hidden["fired_players"], {"planted": 1, "honest": 0})
+        self.assertNotIn("rates", hidden)
+
+    def test_a_finding_on_an_uncompared_weapon_is_refused(self):
+        cases = demo_cases()
+        rage = next(case for case in cases if case["player_id"] == "rage")
+        rage["evidence"]["eligibility"]["compared"] = []
+        with self.assertRaises(EvaluationError):
+            cal.player_row(rage, "planted", demo().profile, {})
+
+    def test_tampered_mixed_or_mislabelled_inputs_are_refused(self):
+        cases = demo_cases()
+        tampered = next(case for case in cases if case["player_id"] == "rank-outlier")
+        tampered["evidence"]["observations"][0]["evidence"]["observed"] = 0.99
+        with self.assertRaisesRegex(EvaluationError, "does not verify"):
+            cal.evaluate(cases, demo_labels(), demo_dataset(), demo().profile)
+        other = load_profile(ROOT / "examples" / "tf2" / "tf2.json")
+        with self.assertRaisesRegex(EvaluationError, "not the one these cases were scored with"):
+            cal.evaluate(demo_cases(), demo_labels(), demo_dataset(), other)
+        with self.assertRaisesRegex(EvaluationError, "does not explain"):
+            cal.evaluate(demo_cases(), {**demo_labels(), "rage": "suspicious"}, demo_dataset(), demo().profile)
+        mixed = demo_cases()
+        mixed[0]["evidence"]["provenance"]["detector"]["digest"] = "sha256:" + "0" * 64
+        with self.assertRaises(EvaluationError):
+            cal.evaluate(mixed, demo_labels(), demo_dataset(), demo().profile)
+        with self.assertRaisesRegex(EvaluationError, "what every label means|must be said"):
+            cal.evaluate(demo_cases(), demo_labels(), demo_dataset(labels=[{**demo_dataset()["labels"][0], "not_meaning": ""}, demo_dataset()["labels"][1]]), demo().profile)
+
+    def test_published_numbers_that_no_longer_reproduce_stop_the_evaluation(self):
+        published = {"where": "a README", "decisions": {"planted": {"review": 99, "watch": 0, "clean": 0, "insufficient_data": 0}}}
+        with self.assertRaises(PublishedMismatch):
+            cal.evaluate(demo_cases(), demo_labels(), demo_dataset(published=published), demo().profile)
+
+    def test_the_artifact_binds_its_inputs_and_verifies(self):
+        artifact = json.loads(cal.dumps(self.artifact))
+        self.assertEqual(artifact["schema"], "fpsdet.evaluation/1")
+        self.assertEqual(cal.verify_artifact(artifact), [])
+        inputs = artifact["inputs"]
+        for field in ("digest", "detector", "profile", "cohort"):
+            self.assertTrue(str(inputs[field]).startswith("sha256:"), field)
+        self.assertEqual(inputs["digest"], cal.inputs_digest(reversed(self.cases)))
+        self.assertTrue(artifact["labels"]["digest"].startswith("sha256:"))
+        self.assertEqual(artifact["evaluator"]["digest"], cal.evaluator_digest())
+        self.assertEqual(cal.evaluate(demo_cases(), demo_labels(), demo_dataset(), demo().profile)["digest"], artifact["digest"])
+        moved = copy.deepcopy(artifact)
+        moved["rows"][0]["decision"] = "review" if moved["rows"][0]["decision"] != "review" else "clean"
+        self.assertIn("the statistics do not follow from the rows", cal.verify_artifact(moved))
+        moved["digest"] = cal.artifact_digest(moved)
+        self.assertEqual(cal.verify_artifact(moved), ["the statistics do not follow from the rows"])
+        edited = copy.deepcopy(artifact)
+        edited["statistics"]["decisions"]["by_group"]["planted"]["counts"]["review"] += 1
+        self.assertIn("the artifact digest does not match its contents", cal.verify_artifact(edited))
+        relabelled = copy.deepcopy(artifact)
+        relabelled["labels"]["counts"]["planted"] += 1
+        self.assertTrue(cal.verify_artifact(relabelled))
+
+    def test_the_evaluation_is_not_written_into_a_packet(self):
+        cases = demo_cases()
+        packets = [case["evidence"]["packet"]["digest"] for case in cases]
+        cal.evaluate(cases, demo_labels(), demo_dataset(), demo().profile)
+        self.assertEqual([case["evidence"]["packet"]["digest"] for case in cases], packets)
+        self.assertNotIn("evaluation", json.dumps([case["evidence"].get("packet") for case in cases]))
+
+    def test_no_p_values_and_no_calibrated_status(self):
+        text = json.dumps(self.artifact)
+        self.assertNotIn("p_value", text)
+        self.assertNotIn("p-value", text)
+        self.assertNotIn('"calibrated"', text)
+        report = cal.render_markdown(self.artifact)
+        self.assertLess(report.index("## Read this first"), report.index("## Population"))
+        self.assertLess(report.index("## What the labels mean"), report.index("## Decisions"))
+
+    def test_the_challenge_detector_has_no_real_world_calibration(self):
+        entry = next(entry for entry in self.artifact["statistics"]["detectors"] if entry["kind"] == "occluded_motion_replay")
+        self.assertEqual(entry["real_world_calibration"], "unavailable")
+
+
+class SplitTest(unittest.TestCase):
+    """C13: a fixed split from the pseudonym alone, that the scorer never reads."""
+
+    def test_split_is_fixed_and_about_half(self):
+        ids = [f"player-{index}" for index in range(4000)]
+        halves = Counter(cal.split_of(player) for player in ids)
+        self.assertEqual([cal.split_of(player) for player in ids], [cal.split_of(player) for player in ids])
+        self.assertLess(abs(halves["dev"] - halves["eval"]), 200)
+
+    def test_detection_never_reads_the_evaluation(self):
+        from fpsdet.provenance import DETECTOR_MODULES, NOT_DETECTOR, PACKAGE_DIR
+
+        self.assertIn("fpsdet.calibration", NOT_DETECTOR)
+        for module in DETECTOR_MODULES:
+            path = PACKAGE_DIR / ("__init__.py" if module == "fpsdet" else module.split(".", 1)[1] + ".py")
+            source = path.read_text(encoding="utf-8")
+            self.assertIsNone(re.search(r"^\s*(from|import)\s[^\n]*calibration", source, re.M), module)
+            self.assertNotIn(cal.SPLIT_RECIPE, source, module)
+
+
+class FixtureTest(unittest.TestCase):
+    """C17, C28: synthetic players qualify code; they are never a rate."""
+
+    def test_every_planted_behaviour_trips_its_detector_and_no_twin_does(self):
+        result = cal.qualify_fixtures()
+        self.assertEqual(result["demo_failures"], [])
+        outcomes = {entry["kind"]: entry["outcome"] for entry in result["detectors"]}
+        self.assertEqual({kind for kind, outcome in outcomes.items() if outcome == "fails_controlled_fixture"}, set())
+        self.assertEqual(
+            {kind for kind, outcome in outcomes.items() if outcome == "no_controlled_fixture"},
+            {"recoil_learned", "geometry_rate", "extra", "view_snaps", "acquire_timing", "supporting_extra"},
+        )
+        self.assertTrue(all(result["honest_fixtures_clean"].values()))
+        self.assertEqual(outcomes["occluded_motion_replay"], "passes_controlled_fixture")
+        def keys(value):
+            if isinstance(value, dict):
+                for key, item in value.items():
+                    yield key
+                    yield from keys(item)
+            elif isinstance(value, list):
+                for item in value:
+                    yield from keys(item)
+
+        self.assertFalse({"rate", "rates", "ci95", "ratio"} & set(keys(result)))
+        self.assertIn("never a real-world rate", result["what"])
 
 
 if __name__ == "__main__":

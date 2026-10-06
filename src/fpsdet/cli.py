@@ -7,6 +7,7 @@ import csv
 import json
 import os
 import sys
+from collections import Counter
 from pathlib import Path
 
 from .ai_triage import openai_compatible_transport, triage_case
@@ -479,6 +480,73 @@ def cmd_challenge_types(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_evaluate_run(args: argparse.Namespace) -> int:
+    """Measure the detectors of one scored run against its labels. Reads cases; scores and changes nothing."""
+    import time
+
+    from .calibration import EvaluationError, census, dumps, evaluate, load_cases, load_dataset, render_markdown
+
+    start = time.perf_counter()
+    try:
+        dataset = load_dataset(args.dataset)
+        cases = load_cases(args.cases)
+        labels = json.loads(Path(args.labels).read_text(encoding="utf-8"))
+        found = census(args.events) if args.events else None
+        artifact = evaluate(cases, labels, dataset, load_profile(args.profile), telemetry_census=found)
+    except EvaluationError as error:
+        raise SystemExit(f"evaluate: {error}")
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out).write_text(dumps(artifact), encoding="utf-8")
+    if args.report:
+        Path(args.report).write_text(render_markdown(artifact), encoding="utf-8")
+    stats = artifact["statistics"]
+    statuses = Counter(entry["status"] for entry in stats["detectors"])
+    print(f"Evaluated {artifact['inputs']['cases']} cases against {len(labels)} labels in {time.perf_counter() - start:.2f}s")
+    print("Detectors: " + ", ".join(f"{status} {statuses[status]}" for status in ("measured", "descriptive_only", "insufficient_sample", "not_observable")))
+    if artifact["published"]:
+        print(f"The decisions published in {artifact['published']['where']} reproduce.")
+    print(f"Wrote {args.out}" + (f" and {args.report}" if args.report else "") + f": {artifact['digest']}")
+    return 0
+
+
+def cmd_evaluate_report(args: argparse.Namespace) -> int:
+    from .calibration import render_markdown
+
+    text = render_markdown(read_json(args.evaluation))
+    if args.out:
+        Path(args.out).write_text(text, encoding="utf-8")
+    else:
+        print(text)
+    return 0
+
+
+def cmd_evaluate_verify(args: argparse.Namespace) -> int:
+    from .calibration import evaluator_digest, verify_artifact
+
+    failed = 0
+    for path in args.evaluations:
+        artifact = read_json(path)
+        problems = verify_artifact(artifact)
+        same = artifact.get("evaluator", {}).get("digest") == evaluator_digest()
+        note = "" if same else " (written by another version of the evaluator; this one recomputes the same statistics)"
+        print(f"{path}: {'ok' if not problems else 'FAILED'}{note if not problems else ''}")
+        for problem in problems:
+            print(f"  {problem}")
+        failed += bool(problems)
+    return 1 if failed else 0
+
+
+def cmd_evaluate_fixtures(args: argparse.Namespace) -> int:
+    from .calibration import qualify_fixtures, render_fixtures
+
+    result = qualify_fixtures()
+    if args.out:
+        write_json(args.out, result)
+    print(render_fixtures(result))
+    failed = [entry["kind"] for entry in result["detectors"] if entry["outcome"] == "fails_controlled_fixture"]
+    return 1 if failed or result["demo_failures"] or not all(result["honest_fixtures_clean"].values()) else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="fpsdet", description="Human-play and gear-rule baselines for FPS servers.")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -583,6 +651,28 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--external-mapped", nargs=2, action="append", metavar=("ADAPTER", "RECORDS"), help="A provider's records and their adapter")
     check.add_argument("--external-registry", help="The provider-key registry to check signatures against")
     check.set_defaults(func=cmd_external_verify)
+
+    evaluate = sub.add_parser("evaluate", help="Measure detectors against labelled cases. Scores nothing and changes no threshold")
+    evaluate_actions = evaluate.add_subparsers(dest="action", required=True)
+    run = evaluate_actions.add_parser("run", help="Evaluate one scored run against its labels and write fpsdet.evaluation/1")
+    run.add_argument("cases", help="The run's cases: a snapshot (one per line), a JSON list, or the index fpsdet score --out writes")
+    run.add_argument("--labels", required=True, help="JSON map of player id to label")
+    run.add_argument("--dataset", required=True, help="The dataset definition (fpsdet.evaluation-dataset/1): what each label means")
+    run.add_argument("--profile", required=True, help="The profile the cases were scored with. Its digest must match theirs")
+    run.add_argument("--events", help="The scored events, to check the dataset's telemetry declaration against every line")
+    run.add_argument("--out", required=True, help="Where to write the evaluation JSON")
+    run.add_argument("--report", help="Also write the Markdown report here")
+    run.set_defaults(func=cmd_evaluate_run)
+    report = evaluate_actions.add_parser("report", help="Print or write the Markdown report of an evaluation")
+    report.add_argument("evaluation")
+    report.add_argument("--out")
+    report.set_defaults(func=cmd_evaluate_report)
+    check_evaluation = evaluate_actions.add_parser("verify", help="Recompute an evaluation's statistics from its rows and check its digest")
+    check_evaluation.add_argument("evaluations", nargs="+")
+    check_evaluation.set_defaults(func=cmd_evaluate_verify)
+    fixtures = evaluate_actions.add_parser("fixtures", help="Controlled-fixture qualification on the planted demo. Never a real-world rate")
+    fixtures.add_argument("--out", help="Also write the result as JSON")
+    fixtures.set_defaults(func=cmd_evaluate_fixtures)
     return parser
 
 
