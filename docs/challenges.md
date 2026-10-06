@@ -12,10 +12,11 @@ A challenge never decides anything about an account. Its finding is a review, ev
 
 | | Status |
 | --- | --- |
-| `occluded_motion_replay`, version 1: the private replay as a planned challenge | Implemented |
+| `occluded_motion_replay`, version 1: the private replay as a planned challenge | Implemented. Kept unchanged, so earlier plans and Benchmark v1 reproduce |
+| `occluded_motion_replay`, version 2: the same probe, with the server's own vision and audio verdict on the body at every counted moment | Implemented, and what `fpsdet challenge plan` writes |
 | Planning with the server secret, `fpsdet challenge keygen`, `plan`, `verify`, `types` | Implemented |
 | Other challenge types | Not built. The framework allows them; none is claimed |
-| Running a challenge inside a game | The game server's job. This repository plans, links and judges; it never touches a live server |
+| Running a challenge inside a game | The game server's job. A reference integration runs it in a Godot dedicated server with stock clients ([pilot.md](pilot.md)): a controlled pilot, not a deployment |
 
 ## Three things kept apart
 
@@ -206,6 +207,26 @@ A challenge counts only when the knowledge engine ([knowledge-engine.md](knowled
 | Type | Defeats | Not applicable | Everything else the profile declares |
 | --- | --- | --- | --- |
 | `occluded_motion_replay`/1 | `vision`, `audio`: placed where this client's line-of-sight and audio queries fail for the whole window, silent | `recent_perception`: the body was never perceivable | `unchecked`, so the target is `unknown` and the challenge abstains |
+| `occluded_motion_replay`/2 | The same, checked by the server at every moment and reported on each event (below) | The same | The same |
+
+### Version 2: the server's verdict at every moment
+
+Version 1 takes the body as hidden because the type requires it: the server promised to place it where both queries fail and to end it early otherwise. If the server got that wrong, a body the player could see would become evidence. Version 2 does not take the promise. On every event that names the challenge, the server sends its own verdict on the body over the time the event covers:
+
+| Field | Values | Meaning |
+| --- | --- | --- |
+| `challenge_vision_state` | `known`, `absent`, `unchecked` | This client's line-of-sight query against the body: known if it succeeded at any tick the event covers, unchecked if it did not run at every tick, absent otherwise |
+| `challenge_audio_state` | the same | The same, for the audio query |
+
+They describe the challenge's body and nothing else: never the event's `enemy_id`, which `vision_state` and `audio_state` describe. Then:
+
+- A moment counts only when its verdict makes the body `unknowable`: every declared channel absent (recent perception is not applicable).
+- A moment with a channel `unchecked`, or no verdict at all, does not count (`unchecked`). With no verified moment, the challenge abstains (`cause: unchecked`; eligibility `telemetry_unavailable`).
+- One moment where the body was `known` voids the whole challenge (`cause: seen` or `heard`): from then on the client could know it, and the server should have ended it.
+- Events at one moment that disagree about the body void it too (`cause: conflict`; eligibility `conflict`), with a note naming the moment.
+- The evidence says how the body was known: `knowledge.verification: per_sample` and `knowledge.verified_samples`.
+
+A version 1 challenge whose events carry a verdict is judged the same way, so a verdict is never ignored. A player timeline that sets either field is digested as `fpsdet.player-events/3` (otherwise `/2`, unchanged).
 
 A game that declares `radar`, `team_share`, `ability`, `objective` or `spectator` gets no challenge evidence from this type. `fpsdet challenge plan` refuses to plan it, and scoring abstains with `cause: unchecked` if a plan exists anyway. Only a future type, or version, that defeats or checks those channels can count there.
 

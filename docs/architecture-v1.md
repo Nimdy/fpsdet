@@ -362,6 +362,8 @@ The realisation (route source, heading, delay, speed, place, timing) is derived 
 
 *Implemented in P4, differently in the details; [challenges.md](challenges.md) is the reference.* The spec (`ChallengeSpec`), the public plan (`ChallengePlan`), the secret realization (`challenge_plan.Realization`) and each player's result (`ChallengeResult`) are separate types, and only `challenge_plan` sees the secret. The id is 96 bits (`ch-` and 24 hex digits); the HMAC message is framed and carries the game, a public nonce, the type and its version as well; the commitment is SHA-256 over the public plan fields and the 256-bit realization material, which needs no extra salt. Legal visibility and audio are not per-challenge fields: the type declares the channels it defeats, and the knowledge engine decides. Activation is the scheduled window. The result lives in `evidence.challenges`, not in the plan.
 
+*P12 closed the gap that left: version 1 of a type takes the defeated channels as absent because the type requires them. Version 2 of `occluded_motion_replay` takes them from the server instead, moment by moment: `challenge_vision_state` and `challenge_audio_state` on each event, the server's own verdict on the body, never on the event's enemy. A moment counts only when that verdict makes the body unknowable; a body seen or heard once, or contradicting itself, voids the challenge. A Godot dedicated server with stock clients runs the whole path live ([pilot.md](pilot.md)).*
+
 ### 10.5 ExternalObservation
 
 ```python
@@ -439,7 +441,8 @@ Each box is a module with one job and a test file of its own. The decision stays
 | Reports never change evidence | `RecordedFindingsTest.test_reports_change_no_evidence` (P1) |
 | Evidence identity ignores UI changes | `DetectorFingerprintTest` (P2.1): editing any presentation module, or a static page, leaves the detector digest unchanged |
 | An edited case is detectable from the case alone | `PacketTest` (P2.3): `verify_packet` catches edits to evidence, ids, roles, decision, eligibility and every provenance digest; wording, briefs, reports and queue state are ignored |
-| No secret challenge material in public artifacts | `SecretLeakTest` (P4) over every file a challenged `fpsdet score --out` writes and prints, the evidence and packet, the AI brief body, `challenge verify` output, error text and the desk; `PlanOutputLeakTest` over plan files and command output |
+| No secret challenge material in public artifacts | `SecretLeakTest` (P4) over every file a challenged `fpsdet score --out` writes and prints, the evidence and packet, the AI brief body, `challenge verify` output, error text and the desk; `PlanOutputLeakTest` over plan files and command output; the live pilot's leak scan over every public file of every run, screenshots included (`examples/pilot/result.json`) |
+| A challenge counts only where the server verified the body unknowable | `PerMomentVerdictTest` (P12); the live pilot's exposed, missing-channel and contradictory scenarios |
 | AI cannot change a decision | Phase 12 test: a hostile brief leaves decision, seal and evidence unchanged |
 | A new check has an honest control | `CONTRIBUTING.md` rule; review |
 

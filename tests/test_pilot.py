@@ -209,6 +209,8 @@ class AddendumTest(unittest.TestCase):
         self.assertTrue(rows["packet_reader"]["live_engine_pilot"].startswith("yes"))
         self.assertTrue(all(row["real_adversarial_population"] == "no" for row in rows.values()))
         self.assertTrue(all(claim["class"] == "live_controlled_pilot" for claim in found["claims"]))
+        doc = (ROOT / "docs" / "pilot.md").read_text(encoding="utf-8")
+        self.assertIn(bm.pilot_block(), doc)
 
 
 if __name__ == "__main__":

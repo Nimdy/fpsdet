@@ -19,6 +19,32 @@
 
 ### Added
 
+- **The live challenge pilot** ([docs/pilot.md](docs/pilot.md), [examples/pilot](examples/pilot/README.md)): fpsdet's active challenge run end to end in a real game for the first time. It runs in a Godot 4.7.2 dedicated server with stock clients, on one machine, over loopback only. A controlled integration qualification, not a deployment and not a detection rate.
+  - **The path:**
+    - `fpsdet challenge plan` writes the plan with a server secret.
+    - The server derives each realization with fpsdet's recipe in GDScript and refuses any record its secret did not make.
+    - It sends the probe to the subject's client only, with the same fields as a real player.
+    - It proves at every tick, with its own line-of-sight and audio queries, that this client could neither see nor hear it.
+    - fpsdet turns the server's NDJSON into verifiable evidence.
+  - **Scenarios:** eight, with their outcomes declared before any live run, and every one came out as declared.
+    - Only the server-side stand-in for a hidden-information reader produced evidence (review).
+    - Honest play, an accidental crossing and aim on a visible enemy in line with the probe did not.
+    - A body the server saw or heard, a missing audio verdict and contradictory verdicts each abstained, for their own cause.
+  - **The stock client** received the probe and drew no pixel of it while the server called it hidden. When it was placed in the open on purpose, the client drew it and the server called it seen. The enemy's client never received it.
+  - **Proven alongside:**
+    - Gameplay was identical, tick for tick, with and without the probe.
+    - The captured telemetry scores the same offline.
+    - The secret reproduces the plan and the realization the server ran.
+    - No secret or realization material appears in any public output.
+  - **Committed:** the result (`fpsdet.pilot/1`), the captured telemetry and the plans. It joins the benchmark as an addendum after Benchmark v1 (`fpsdet.benchmark-addendum/1`) with its own class, `live_controlled_pilot`; Benchmark v1 is unchanged.
+- **`occluded_motion_replay/2`: the server's verdict at every moment** ([docs/challenges.md](docs/challenges.md#version-2-the-servers-verdict-at-every-moment)). Version 1 took the body as hidden because the type requires it.
+  - **New fields:** version 2 reads `challenge_vision_state` and `challenge_audio_state`, the server's own verdict on the challenge's body over each event, never on the event's enemy.
+  - **What counts:**
+    - A moment counts only when that verdict makes the body unknowable.
+    - One moment seen or heard voids the challenge, and so does a contradiction, with a note.
+    - Missing verdicts abstain.
+  - **Defaults:** `fpsdet challenge plan` writes version 2 (`--version 1` reproduces old plans). Version 1 is judged exactly as before, so Benchmark v1 reproduces; its synthetic class reports PROVENANCE_ONLY.
+  - **Input recipe:** a timeline that sets the new fields is digested as `fpsdet.player-events/3`; `/2` keeps its meaning.
 - **FPSDET Benchmark v1** ([docs/benchmark.md](docs/benchmark.md), [benchmark/release.json](benchmark/release.json)): the benchmark rebuilt so a third party can reconstruct it from public definitions, with no private key, and so its TF2 result reports how much it depends on the baseline draw instead of quoting one draw. Benchmark v1 is a version of the benchmark, not of fpsdet.
   - **`tf2-rgl-v2`**, built by `examples/tf2/tf2bench.py` with no key: sources frozen at 2026-10-03, extra never-banned players taken in a public hash order, public benchmark ids, and nine baseline draws (`fpsdet.tf2-baseline-draw/1`, draws 0-8). The draws, the draw count and the headline rule were committed before any draw was run. A benchmark id is a public hash of a SteamID, not pseudonymization, so nothing per player is committed for it: per draw, a result, the aggregate statistics without rows, and the strength estimates.
   - **The TF2 result is the spread** (`fpsdet.benchmark-sensitivity/2`): every draw's inputs, cohort, decisions, eligibility, evaluation and strength by digest, its numbers, and the median, lowest and highest of each, per detector too. Nothing is averaged, and verify fails if a draw is dropped, added, reordered or edited. Over the nine draws, fpsdet flagged 28.0–29.1% of RGL cheating-ban labelled accounts (median 28.6%) and 2.8–3.7% of never-banned ones (median 3.2%): a ratio of 8.9x at the median, from 7.7x to 10.4x. The rank tail replicated on one split in 9 of 9 draws, accuracy in 5, headshot rate in 3. The draws vary only the baseline half, not which 300 extra never-banned players were chosen, and the report says so: tf2-rgl-v1, with another such set, ran from 9.9x to 15.0x.
