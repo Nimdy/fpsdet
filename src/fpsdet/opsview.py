@@ -110,7 +110,7 @@ OPS_CSS = r"""
 #ops th button:focus-visible { outline: 2px solid var(--signal); }
 #ops td { padding: 0.42rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
 #ops td.num, #ops th.num { text-align: right; font-variant-numeric: tabular-nums; }
-#ops .queue-wrap { overflow-x: auto; }
+#ops .queue-wrap, #ops .table-wrap { overflow-x: auto; }
 #ops tbody tr.pick { cursor: pointer; }
 #ops tbody tr.pick:hover { background: var(--panel-hover); }
 #ops tbody tr.pick:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }
@@ -324,7 +324,7 @@ function dataTable(head, body) {
   const table = el("table");
   table.append(el("thead", null, el("tr", null, head.map((h, i) => el("th", {class: i ? "num" : null}, h)))));
   table.append(el("tbody", null, body.map(r => el("tr", null, r.map((c, i) => el("td", {class: i ? "num" : null}, c))))));
-  return table;
+  return el("div", {class: "table-wrap"}, table);  // a narrow screen scrolls the table, not the page
 }
 
 // ---- filters -------------------------------------------------------------
