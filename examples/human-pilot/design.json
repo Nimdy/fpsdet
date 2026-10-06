@@ -1,0 +1,109 @@
+{
+  "format": "fpsdet.human-pilot-design/1",
+  "study": "p13-consented-honest-human-pilot",
+  "version": 1,
+  "declared": "2026-10-06, before any human session was run",
+  "question": "When honest humans play normally and aggressively in the repository's own Godot pilot, how often, and for how long, does their aim behave like challenge tracking, and how close do they come to producing challenge evidence?",
+  "kind": "consented honest-human pilot: a small behavioural baseline. Not a population, a calibration, a validation, or a false-positive rate.",
+  "participants": {
+    "target": 8,
+    "minimum_to_report": 4,
+    "maximum": 12,
+    "who": "adults who agree to the consent notice (CONSENT.md); no experience with this game needed",
+    "identity": "a random id (hp- and 8 hex digits) drawn by study.py enroll; no name, email, game account, device id or address is collected"
+  },
+  "sessions": {
+    "per_participant": 7,
+    "length_ms": 240000,
+    "modes": ["free", "combat", "angle_holding", "sweep_search", "tracking", "high_motion", "stress"],
+    "order": "free first, as familiarization; stress last; the five between in the order of SHA-256('fpsdet.human-pilot-order/1', NUL, participant id, NUL, mode)",
+    "instructions": {
+      "free": "Explore and play however you like. Shoot the bot if you see it.",
+      "combat": "Fight the bots. They do not shoot back.",
+      "angle_holding": "Pick doorways and corners and hold them; shoot the bot when it peeks.",
+      "sweep_search": "Bots are hiding. Clear every room and corner and find them.",
+      "tracking": "Follow the walking bot with your crosshair as closely as you can.",
+      "high_motion": "Keep moving: fast turns, flicks and strafing while you fight.",
+      "stress": "Clear every corner, pre-aim every doorway aggressively, flick between likely hiding spots, and spray where someone could hide."
+    }
+  },
+  "challenges": {
+    "type": "occluded_motion_replay",
+    "version": 2,
+    "planner": "fpsdet challenge plan, with a fresh secret per session",
+    "schedule": {"count": 4, "from_ms": 20000, "to_ms": 230000, "cooldown_ms": 30000, "min_duration_ms": 8000, "max_duration_ms": 16000},
+    "placement": "secret-derived: placement_pick picks one of the arena's four sealed probe rooms, route_pick the bot whose movement is replayed; nothing is placed by hand",
+    "rooms": {
+      "door_edge": "behind the wall beside the doorway's left frame",
+      "corner": "inside the block in the south room, at the corner players clear",
+      "chokepoint": "beside the narrow passage in the north room",
+      "long_wall": "along the east wall of the north room, where little aiming happens (the control)"
+    },
+    "runtime_proof": "every counted moment needs the server's own vision and audio verdict on the body; KnowledgeState must be unknowable (P12); unchanged for this study"
+  },
+  "frozen": {
+    "profile": "examples/human-pilot/profile.json",
+    "hidden_track_min_ms": 1200,
+    "hidden_track_min_samples": 8,
+    "cone": "2 degrees plus the body's own angular radius (0.4 m at its distance), around the body's chest",
+    "episode_gap_ms": 250,
+    "statement": "No threshold, cone, gap or scoring rule changes during or after collection. An honest participant crossing the bar is a finding, not a reason to move it."
+  },
+  "metrics": {
+    "per_challenge": {
+      "eligible_moments": "fpsdet: moments in the window with one agreed measurement",
+      "counted_moments": "fpsdet: tracked samples after every exclusion (the decision's own count)",
+      "counted_ms": "fpsdet: total_ms, what the bar is compared with",
+      "overlap_ticks": "server: ticks in the window whose aim cone held the body",
+      "overlap_ms": "overlap_ticks x 1000/60",
+      "explained_ms": "server: overlap time while a bot the participant could see was in the same cone",
+      "challenge_only_ms": "overlap_ms minus explained_ms",
+      "episodes": "runs of overlap ticks, joined across gaps of at most episode_gap_ms",
+      "longest_episode_ms": "the longest episode",
+      "time_to_first_overlap_ms": "from the window's start to the first overlap tick, or none",
+      "aim_error_deg": "server: the aim's angle to the body's chest, median and lowest over the window",
+      "turn_rate_dps": "server: the aim's angular speed during overlap ticks, median and 95th percentile",
+      "enemy_separation_deg": "server: the angle between the body and the nearest visible bot, as seen from the eye, during overlap ticks",
+      "ended_early": "whether the server ended the challenge because the body became perceivable",
+      "status": "fpsdet: followed, not_followed, no_samples or abstained, and the cause"
+    },
+    "per_participant": ["sessions", "challenges exposed", "challenges with any overlap", "counted ms: max, median, 95th percentile", "challenges reacquired (2 or more episodes)", "review-grade challenge findings", "every case decision"],
+    "not_inferred": "No metric reads intent. Every number is the server's or fpsdet's own."
+  },
+  "primary_outcome": "Review-grade challenge findings on honest participants: a case decided review with an occluded_motion_replay observation.",
+  "analysis": [
+    "Report counts at three levels, never as a rate of independent people: participants, sessions, challenges. A participant's challenges are not independent.",
+    "With zero findings, give the exact one-sided 95% upper bound (Clopper-Pearson, 1 - 0.05^(1/n)) at each level, the participant level first, and say it is not a false-positive rate.",
+    "With any finding, give the counts and two-sided 95% Clopper-Pearson intervals at each level, and stop for investigation (stop conditions).",
+    "Describe counted ms, overlap, challenge-only overlap and episodes with the median, 90th and 95th percentiles and the maximum, per challenge and per participant.",
+    "Report raw overlap, the part explained by a visible bot, and what remains, in total and by probe room.",
+    "Describe the strongest honest challenge in full and say why it did or did not reach the bar.",
+    "Put the same metrics beside a controlled follower (the P12 stand-in) run in the same arena, labelled as a stand-in. No classifier, no ROC, no training on it."
+  ],
+  "exclusions": [
+    "A session the participant stopped or withdrew from before 60 s of play: excluded, counted and reported.",
+    "A session where the server or a client failed before 120 s of play: excluded, counted and reported.",
+    "Nothing is excluded for what a challenge showed. A challenge the server ended early because the body became perceivable is kept, reported as abstained, and counted separately."
+  ],
+  "stop_conditions": [
+    "a challenge body visible or audible to a participant (a server verdict of known, or a participant reporting an unexplained avatar or sound)",
+    "a challenge affecting gameplay",
+    "a server secret or realization in any public output",
+    "personal data in telemetry (a name, address, account or hostname)",
+    "an honest participant with review-grade challenge evidence that the analysis cannot explain",
+    "offline replay differing from live scoring"
+  ],
+  "questionnaire": [
+    "Did you see any player or avatar you could not explain?",
+    "Did you hear any sound you could not explain?",
+    "Did you notice anything odd on the screen or in the interface?",
+    "Did the game stutter or freeze?"
+  ],
+  "data": {
+    "recorded": "per session: the server's fpsdet telemetry (positions are not in it), the server's per-tick study telemetry (aim angles to the body, private), the plan, the questionnaire answers (yes or no), timing and frame rates",
+    "never_recorded": "names, emails, game accounts, device ids, IP addresses, anything outside the game window, any process or memory of the participant's machine",
+    "committed": "this design, the consent notice, the aggregate artifact (fpsdet.human-pilot/1), and sample telemetry only from sessions whose participant separately agreed to publication. Never the per-tick study telemetry, a secret or a realization.",
+    "retention": "the operator keeps raw session folders on the study machine until the aggregate artifact is published, and deletes them then, at most 90 days after the last session; secrets are deleted after each session's post-match check"
+  },
+  "topology": "the repository's own Godot server and client only; the server binds 127.0.0.1, or an explicitly given private LAN address for a participant on another machine, never a public address; no persistent service"
+}
