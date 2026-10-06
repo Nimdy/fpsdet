@@ -1796,23 +1796,91 @@ class OpsTest(unittest.TestCase):
         self.assertIn(f"Only {past} of the {len(cheats)} banned cheaters are past that line", page)
         self.assertIn(f"best human measured {best:.0%}", page)
 
-    def test_the_home_page_numbers_come_from_the_tf2_run(self):
-        rows = json.loads((ROOT / "examples" / "tf2" / "desk.json").read_text(encoding="utf-8"))["rows"]
+    def test_the_home_page_numbers_come_from_the_benchmark(self):
+        """The home page's real-match numbers are FPSDET Benchmark v1's: TF2 over all nine predeclared baseline
+        draws, and CS2. The first TF2 run (one draw, chosen by a private key) is linked only as a historical record."""
         index = (ROOT / "site" / "index.html").read_text(encoding="utf-8")
-        cheats = [r for r in rows if r["truth"] == "banned for cheating"]
-        never = [r for r in rows if r["truth"] == "never banned"]
-        picked = [r for r in rows if r["decision"] in ("review", "watch")]
-        hits = sum(1 for r in picked if r["truth"] == "banned for cheating")
-        random_hold = len(picked) * len(cheats) / len(rows)
-        reviews = [r for r in rows if r["decision"] == "review"]
-        # If the run changes, the home page must change with it.
-        self.assertIn(f"{hits / random_hold:.1f}×", index)
-        self.assertIn(f"It picked {len(picked)} players for a person to look at, {hits} of them banned cheaters. {len(picked)} picked at random would hold about {round(random_hold)}.", index)
-        self.assertEqual({r["truth"] for r in reviews}, {"banned for cheating"})
-        self.assertIn(f"{len(reviews)} of {len(reviews)}</p>", index)
-        self.assertIn(f"{sum(r['decision'] == 'review' for r in never)} of {len(never):,}</p>", index)
-        self.assertIn(f"{sum(r['decision'] == 'watch' for r in never)} are on watch", index)
-        self.assertIn(f"{sum(r['decision'] == 'clean' for r in cheats)} of {len(cheats)}</p>", index)
+        tf2 = json.loads((ROOT / "benchmark" / "sensitivity" / "tf2-rgl-v2.json").read_text(encoding="utf-8"))
+        counts = json.loads((ROOT / "benchmark" / "datasets" / "tf2-rgl-v2.json").read_text(encoding="utf-8"))["expected_counts"]
+        across, draws = tf2["across"], tf2["draws"]
+        self.assertEqual(len(draws), 9)
+        self.assertIn(f"Tested on {counts['selected_logs']:,} real TF2 league matches, nine ways.", index)
+        self.assertIn(f"{counts['labelled_accounts']} accounts banned for cheating by RGL", index)
+        self.assertIn(f"{across['ratio']['median']:.1f}×</p>", index)
+        self.assertIn(f"A median {across['positive_rate']['median']:.1%} of the banned accounts it could compare were flagged for review or watch, "
+                      f"against {across['comparison_rate']['median']:.1%} of never-banned players. "
+                      f"{across['ratio']['min']:.1f}× to {across['ratio']['max']:.1f}× across the nine draws.", index)
+        # "0 never-banned players sent to review, in any draw"
+        self.assertEqual({draw["numbers"]["comparison"]["review"] for draw in draws}, {0})
+        self.assertIn("never-banned players sent to review, in any draw", index)
+        missed = sorted(draw["numbers"]["positive"]["eligible"] - draw["numbers"]["positive"]["flagged"] for draw in draws)
+        (eligible,) = {draw["numbers"]["positive"]["eligible"] for draw in draws}
+        self.assertIn(f"{missed[len(missed) // 2]} of {eligible}</p>", index)
+        self.assertIn(f"Between {missed[0]} and {missed[-1]} in each draw.", index)
+        cs2 = json.loads((ROOT / "benchmark" / "results" / "cs2cd-v2.json").read_text(encoding="utf-8"))["published"]["decisions"]
+        watched = sum(row.get("watch", 0) for row in cs2.values())
+        self.assertEqual(sum(row.get("review", 0) for row in cs2.values()), 0)  # "nobody went to review"
+        self.assertIn(f"{cs2['cheater']['watch']} of {watched}</p>", index)
+        self.assertIn(f"{sum(sum(row.values()) for row in cs2.values()):,} players in public CS2 matchmaking matches", index)
+        # The historical run's own numbers never come back as the headline.
+        for historical in ("10,218", "better than picking at random", "It picked 97 players"):
+            self.assertNotIn(historical, index)
+        self.assertIn("one baseline draw, kept as a historical record", index)
+
+    def test_the_evidence_page_is_linked_and_says_only_what_the_artifacts_hold(self):
+        import re
+        from fpsdet.pages import write_pages
+        from fpsdet.provenance import PACKET_RECIPE
+
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = write_pages(build_demo(), tmp)
+            page = (dest / "evidence.html").read_text(encoding="utf-8")
+            board = (dest / "board.html").read_text(encoding="utf-8")
+            others = {name: (dest / name).read_text(encoding="utf-8")
+                      for name in ("index.html", "scoring.html", "wire.html", "games.html", "source.html", "decoys.html")}
+        self.assertIn('href="evidence.html"', board)
+        for name, text in others.items():
+            self.assertIn('href="evidence.html"', text, name)
+        self.assertNotIn("../demo/board.html", page)
+        self.assertIn('href="board.html"', page)
+        for words in ("Automated action: none", "This does not end cheating", "No person has played yet"):
+            self.assertIn(words, page)
+        self.assertNotIn("<script", page)
+        self.assertNotRegex(page, r"sha256:[0-9a-f]{8}", "digests change with the code; the page elides them")
+        self.assertIn(f'"recipe": "{PACKET_RECIPE}"', page)
+        claims = json.loads((ROOT / "benchmark" / "claims.json").read_text(encoding="utf-8"))["claims"]
+        fixtures = next(claim["text"] for claim in claims if claim["class"] == "controlled_fixture" and "native detectors" in claim["text"])
+        detectors = int(re.search(r"All (\d+) of \1 native detectors", fixtures).group(1))
+        self.assertIn(f"Every one of the {detectors} checks", page)
+        self.assertIn(f"All {detectors} checks trip", others["index.html"])
+        # The benchmark's TF2 and CS2 numbers, as on the home page.
+        across = json.loads((ROOT / "benchmark" / "sensitivity" / "tf2-rgl-v2.json").read_text(encoding="utf-8"))["across"]
+        self.assertIn(f"a median {across['positive_rate']['median']:.1%} of the banned accounts it could compare, against {across['comparison_rate']['median']:.1%} of the never-banned. "
+                      f"{across['ratio']['median']:.1f}× at the median, {across['ratio']['min']:.1f}× to {across['ratio']['max']:.1f}× across the draws.", page)
+        historical = json.loads((ROOT / "benchmark" / "sensitivity" / "tf2-rgl-v1.json").read_text(encoding="utf-8"))
+        curator = next(row for row in historical["draws"] if row["draw"] == "curator")["summary"]["ratio"]
+        self.assertIn(f"{curator:.1f}×: the most favourable of its {len(historical['draws'])} draws", page)
+        # The live pilot: every declared scenario, every capture replayed identically.
+        pilot = json.loads((ROOT / "examples" / "pilot" / "result.json").read_text(encoding="utf-8"))["scenarios"]
+        self.assertTrue(all(row["as_expected"] for row in pilot))
+        self.assertEqual({row["live_vs_offline"] for row in pilot}, {"identical"})
+        self.assertIn(f"All {len(pilot)} declared scenarios came out as declared", page)
+        self.assertIn(f"All {len(pilot)} declared scenarios came out as declared", others["index.html"])
+        # The human pilot: no person yet, and the dry run's machine numbers as recorded.
+        self.assertFalse((ROOT / "examples" / "human-pilot" / "result.json").exists(), "a human result exists: this page must report it")
+        dry = json.loads((ROOT / "examples" / "human-pilot" / "dry-run" / "result.json").read_text(encoding="utf-8"))
+        worst, bar = dry["worst_case"], dry["review_grade"]["bar"]
+        self.assertIn(f"counted {worst['counted_ms']:,.0f} ms against a bar of {bar['min_total_ms']:,.0f} ms", page)
+        self.assertIn(f"The challenge bar counts time on the probe: {bar['min_samples']} moments and {bar['min_total_ms']:,.0f} ms.", page)
+        spells = ", ".join(f"{ms / 1000:.1f}" for ms in worst["episode_ms"][:-1]) + f" and {worst['episode_ms'][-1] / 1000:.1f} s"
+        self.assertIn(f"in three spells of {spells}, and fpsdet counted {worst['counted_ms']:,.0f} ms.", page)
+        self.assertEqual(worst["episodes"], 3)
+        self.assertIn(f"the probe's median distance from the crosshair was {worst['aim_error_deg']['median']:.1f}°", page)
+        self.assertEqual(worst["turn_rate_dps"]["median"], 0.0)  # "The aim never turned."
+        self.assertEqual(worst["explained_ms"], 0.0)  # "No visible bot explained it."
+        self.assertIn(f"counted a median {dry['controlled_follower']['counted_ms']['median']:,.0f} ms per challenge", page)
+        share = round(dry["explained"]["explained_by_visible_bot_ms"] / dry["explained"]["overlap_ms"] * 100)
+        self.assertIn(f"Visible bots explained {share}% of all honest-style overlap", page)
 
     def test_the_desk_links_the_real_tf2_matches(self):
         import re

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidence — fpsdet</title>
+<meta name="description" content="What a fpsdet case carries under its decision, how probes are planned with a server secret, how other systems' records are kept in their place, and what has been tested: fixtures, public real data, a live Godot pilot, and a human pilot not yet played.">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="fpsdet.css">
+</head>
+<body class="relative m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<div class="zb-backdrop" aria-hidden="true"></div>
+<a class="sr-only rounded-md bg-signal px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
+<header class="relative z-50 border-b border-line bg-bg/80 backdrop-blur-xl md:sticky md:top-0">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-center gap-x-5 gap-y-2 px-10 py-3 max-md:px-4">
+    <a class="zb-logo flex items-center gap-2.5 font-mono text-[1.05rem] font-semibold tracking-tight text-white no-underline" href="index.html"><span class="pulse-dot" aria-hidden="true"></span><span>fps<span class="text-signal">det</span></span></a>
+    <a class="font-mono text-[11px] text-muted no-underline hover:text-ink" href="https://zerobandwidth.com">by Zero<span class="text-signal">Bandwidth</span></a>
+    <nav class="flex flex-wrap items-center gap-x-0.5 gap-y-1 text-[0.9rem]" aria-label="Site">
+      <a class="nav-link" href="index.html"><span>01</span>What this is</a>
+      <a class="nav-link" href="scoring.html"><span>02</span>Scoring</a>
+      <a class="nav-link" href="wire.html"><span>03</span>Wire a game</a>
+      <a class="nav-link" href="games.html"><span>04</span>Games</a>
+      <a class="nav-link" href="source.html"><span>05</span>Source</a>
+      <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
+      <a class="nav-link" href="decoys.html"><span>07</span>Decoys</a>
+      <a class="nav-link" href="evidence.html" aria-current="page"><span>08</span>Evidence</a>
+    </nav>
+    <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
+  </div>
+</header>
+
+<main id="main">
+<section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
+  <div class="col-span-7 max-lg:col-span-1">
+    <p class="prompt m-0"><span class="text-signal-soft">zb@zerobandwidth</span><span class="text-faint">:</span><span class="text-prototype">~/fpsdet</span><span class="text-faint">$</span> <span class="text-ink">Evidence</span><span class="caret" aria-hidden="true"></span></p>
+    <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">Every case says <span class="text-gradient-brand">what made it.</span></h1>
+  </div>
+  <p class="col-span-5 m-0 text-lg max-lg:col-span-1"><strong class="font-medium">A decision is a sentence a person reads.</strong> Under it, each case carries the same findings as data, what this client could have known, which checks could run at all, and digests of the code, the game settings, the baseline and the events that produced it. Score the same events with the same code, settings and baseline, and you get the same packet. Nothing here acts on its own. This does not end cheating.</p>
+</section>
+
+<div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
+
+  <section aria-labelledby="carries-title">
+    <p class="zb-kicker">Under the decision</p>
+    <h2 id="carries-title" class="m-0 mt-4 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">What a case carries</h2>
+    <p class="m-0 mt-4 max-w-3xl">The reasons a reviewer reads stay exactly as they were. Beside them, under <code class="font-mono text-[0.92em]">evidence</code>, the case keeps the same facts in a form a dashboard, a downstream model or another integrity system can read without parsing English.</p>
+    <div class="mt-8 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
+      <article class="rounded-xl border border-line panel p-5">
+        <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">observations</p>
+        <h3 class="m-0 mt-2 text-base font-medium">One record per finding.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Which check fired, the role it played in the decision, and the numbers it compared, with the matches it was measured on. The decision the observations imply is the case's decision, on every planted and real case.</p>
+      </article>
+      <article class="rounded-xl border border-line panel p-5">
+        <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">knowledge</p>
+        <h3 class="m-0 mt-2 text-base font-medium">Known, unknowable, or unknown.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Every information check asks one question: could this client, with the official game, have seen or heard that enemy at that moment? Unchecked is not absent. A channel the server did not report makes the answer unknown, and the check abstains. Missing telemetry can only make fpsdet say less.</p>
+      </article>
+      <article class="rounded-xl border border-line panel p-5">
+        <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">detector_eligibility</p>
+        <h3 class="m-0 mt-2 text-base font-medium">Which checks could run.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">For every check: eligible, telemetry unavailable, disabled, or not applicable. A check your server gave no fields for is listed as unable to run. It is never a zero, and never a clean bill.</p>
+      </article>
+      <article class="rounded-xl border border-line panel p-5">
+        <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">provenance</p>
+        <h3 class="m-0 mt-2 text-base font-medium">What produced it.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Digests of the detector code, the game profile as parsed, the human baseline it was compared with, the player's own events in the order the scorer read them, and the account history it checked. Two cases scored differently can be told apart without trusting whoever handed them over.</p>
+      </article>
+      <article class="rounded-xl border border-line panel p-5">
+        <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">graph</p>
+        <h3 class="m-0 mt-2 text-base font-medium">What rests on what.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Typed nodes and edges: what supports the case and what is only context, what each finding was measured in, and which findings share a match, a challenge, a provider or a dependency. It records. It weighs nothing and decides nothing.</p>
+      </article>
+      <article class="rounded-xl border border-line panel p-5">
+        <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">packet</p>
+        <h3 class="m-0 mt-2 text-base font-medium">One digest over all of it.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The packet binds the findings, the decision and everything above. Store it, and an edited case no longer matches. A digest proves content, not origin: whoever edits a case can recompute it. The seal still identifies the sentences a reviewer saw.</p>
+      </article>
+    </div>
+    <p class="m-0 mt-8 text-sm text-muted">From <code class="font-mono text-[0.92em]">examples/shot.jsonl</code>, scored with <code class="font-mono text-[0.92em]">--out</code>. The player is <code class="font-mono text-[0.92em]">insufficient_data</code>, and the case still says exactly what produced that answer.</p>
+    <pre class="m-0 mt-3 overflow-x-auto border-l-[3px] border-signal bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>"evidence": {
+  "observations": [ ... ],
+  "detector_eligibility": { "recipe": "fpsdet.detector-eligibility/1", ... },
+  "provenance": {
+    "detector": { "recipe": "fpsdet.detector/1", "digest": "sha256:…" },
+    "profile":  { "recipe": "fpsdet.profile/1",  "digest": "sha256:…" },
+    "inputs":   { "recipe": "fpsdet.player-events/2", "events": 3, "matches": 1, "digest": "sha256:…" },
+    "cohort":   { ... }, "history": { "mode": "none" }, "external": { "mode": "none" }
+  },
+  "graph":  { "digest": "sha256:…", "nodes": [ ... ], "edges": [ ... ] },
+  "packet": { "recipe": "fpsdet.packet/5", "status": "complete", "digest": "sha256:…" }
+}</code></pre>
+  </section>
+
+  <section class="mt-16" aria-labelledby="challenge-title">
+    <p class="zb-kicker">Active challenges</p>
+    <h2 id="challenge-title" class="m-0 mt-4 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Probes planned with a secret.</h2>
+    <div class="mt-6 grid grid-cols-2 gap-8 max-lg:grid-cols-1">
+      <div>
+        <p class="m-0">A <a class="text-ink underline decoration-line underline-offset-4" href="decoys.html">decoy</a> becomes a challenge when the server plans it with a secret: at least 32 random bytes that never leave the game server. Each challenge is keyed to the game, the match, the player and its place in that player's match. The code is public, this recipe included. Without the secret, no one can compute when, where or how the next probe runs, even knowing every earlier one.</p>
+        <p class="m-0 mt-4">The plan holds ids, windows and commitments, and no realization. The game server derives where the body goes, keeps it while the challenge runs, and writes <code class="font-mono text-[0.92em]">challenge_id</code> and <code class="font-mono text-[0.92em]">challenge_track_ms</code> on the player's events. fpsdet binds a finding to that exact challenge. Scoring, reviewing and verifying a case never need the secret.</p>
+        <p class="m-0 mt-4">Version 2 of the challenge counts a moment only when the server's own verdict for that moment says the body was neither seen nor heard. One moment where it was seen or heard voids the challenge. So does a contradiction. A badly placed probe ends as an abstention, not as evidence.</p>
+      </div>
+      <div>
+        <pre class="m-0 overflow-x-auto border-l-[3px] border-signal bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>fpsdet challenge keygen --out secret.hex
+fpsdet challenge plan --profile game.json --match m-1 --player p-7 \
+  --count 4 --secret-file secret.hex --out plan.json
+fpsdet score events.ndjson --profile game.json --challenges plan.json
+fpsdet challenge verify plan.json --secret-file secret.hex</code></pre>
+        <p class="m-0 mt-4 text-sm text-muted">The secret never appears in plan files, cases, packets, dashboards, these pages, AI prompts or test fixtures. A test draws a fresh one, plans and scores two players, and searches everything the run wrote.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-16" aria-labelledby="external-title">
+    <p class="zb-kicker">Other systems</p>
+    <h2 id="external-title" class="m-0 mt-4 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Their records ride along. They never make a review.</h2>
+    <div class="mt-6 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Carried as given</span>Client anti-cheat, platform attestation, a league's records: each one keeps its provider, its class and its confidence exactly as sent, in <code class="font-mono text-[0.92em]">fpsdet.external/1</code> or through an adapter that is data, never code.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">A watch at most</span>An external record can move a clean case to watch. However many providers agree, it never makes a review. An account's ban history is context only.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Signed, not true</span>A provider can sign its records with Ed25519, checked against the operator's own registry of provider keys. Verified means the record came from that key. It does not mean the finding is right. No adapter or key for any commercial anti-cheat exists.</p>
+    </div>
+  </section>
+
+  <section class="mt-16" aria-labelledby="tested-title">
+    <p class="zb-kicker">Where it stands</p>
+    <h2 id="tested-title" class="m-0 mt-4 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">What has been tested, and how far it goes.</h2>
+    <p class="m-0 mt-4 max-w-3xl">Every published statement carries one class, and no sentence mixes two. A planted fixture qualifies code. It is never a rate. A real dataset is one population with someone else's labels, and labels are not ground truth.</p>
+    <div class="mt-6 overflow-x-auto">
+      <table class="w-full min-w-[56rem] border-collapse text-left">
+        <thead>
+          <tr>
+            <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">Class</th>
+            <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">What ran</th>
+            <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">What it showed</th>
+            <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">What it is not</th>
+          </tr>
+        </thead>
+        <tbody class="align-top text-sm">
+          <tr>
+            <td class="border-b border-line py-3 pr-6 font-mono">controlled fixture</td>
+            <td class="border-b border-line py-3 pr-6">Every one of the 22 checks against a behaviour planted for it and an honest twin; the challenge and signature protocols.</td>
+            <td class="border-b border-line py-3 pr-6">Each check trips on its plant and stays quiet on its twin.</td>
+            <td class="border-b border-line py-3 pr-6 text-muted">A detection rate. Plants are built to be caught.</td>
+          </tr>
+          <tr>
+            <td class="border-b border-line py-3 pr-6 font-mono">benchmark v1 real data</td>
+            <td class="border-b border-line py-3 pr-6">TF2 league matches: 10,149 server logs from logs.tf, 228 accounts RGL banned for cheating, never-banned players from the same lobbies, scored under 9 baseline draws fixed before any ran.</td>
+            <td class="border-b border-line py-3 pr-6">Flagged for review or watch: a median 28.6% of the banned accounts it could compare, against 3.2% of the never-banned. 8.9× at the median, 7.7× to 10.4× across the draws. No never-banned player went to review in any draw.</td>
+            <td class="border-b border-line py-3 pr-6 text-muted">How well fpsdet detects cheating in general. Bans are labels, and most checks cannot be observed on match totals at all.</td>
+          </tr>
+          <tr>
+            <td class="border-b border-line py-3 pr-6 font-mono">benchmark v1 real data</td>
+            <td class="border-b border-line py-3 pr-6">1,529 players in public CS2 matchmaking matches with hand-labelled cheaters (CS2CD), one match each.</td>
+            <td class="border-b border-line py-3 pr-6">18 sent to watch, 14 of them labelled cheaters. Nobody sent to review.</td>
+            <td class="border-b border-line py-3 pr-6 text-muted">Enough data per player to catch most cheaters. One match is too little.</td>
+          </tr>
+          <tr>
+            <td class="border-b border-line py-3 pr-6 font-mono">live controlled pilot</td>
+            <td class="border-b border-line py-3 pr-6">One challenge, run live in a Godot dedicated server with stock clients: planned with the secret, the probe moved by the server, its vision and audio checked every tick.</td>
+            <td class="border-b border-line py-3 pr-6">All 8 declared scenarios came out as declared: a scripted follower reached review; an honest stand-in, a crosshair crossing, an exposed probe and a broken emitter did not. Every capture scored identically offline.</td>
+            <td class="border-b border-line py-3 pr-6 text-muted">A deployment or a detection rate. One engine, one map, scripted players.</td>
+          </tr>
+          <tr>
+            <td class="border-b border-line py-3 pr-6 font-mono">consented human pilot</td>
+            <td class="border-b border-line py-3 pr-6">Pre-registered: a target of 8 consenting adults, seven 4-minute sessions each, playing that arena honestly with probes running. Designed and instrumented.</td>
+            <td class="border-b border-line py-3 pr-6"><strong class="font-medium">No person has played yet.</strong> A machine dry run did: a scripted stand-in holding a doorway's edge, still, while a probe stood behind it, counted 5,500 ms against a bar of 1,200 ms.</td>
+            <td class="border-b border-line py-3 pr-6 text-muted">Evidence about people. The stand-ins are scripts, and say so everywhere.</td>
+          </tr>
+          <tr>
+            <td class="border-b border-line py-3 pr-6 font-mono">historical real data</td>
+            <td class="border-b border-line py-3 pr-6">The first TF2 run: one baseline draw, chosen by a private key.</td>
+            <td class="border-b border-line py-3 pr-6">15.0×: the most favourable of its 6 draws, and higher than every draw of the benchmark.</td>
+            <td class="border-b border-line py-3 pr-6 text-muted">The result. It stays, verifiable, as a record.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mt-16 grid grid-cols-2 gap-8 max-lg:grid-cols-1" aria-labelledby="honest-title">
+    <div>
+      <p class="zb-kicker">Found before anyone played</p>
+      <h2 id="honest-title" class="m-0 mt-4 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Holding an angle can look like following.</h2>
+      <p class="m-0 mt-4">The challenge bar counts time on the probe: 8 moments and 1,200 ms. It does not know why the aim was there. In the machine dry run, a stand-in held the left frame of a doorway. That session, the secret put a probe in the sealed room behind it. The probe replays a bot's recorded route, but only inside its small room, so it stays near one spot. The aim never turned. Over the challenge, the probe's median distance from the crosshair was 2.6°, inside the cone. It was held there in three spells of 1.1, 2.6 and 1.8 s, and fpsdet counted 5,500 ms. No visible bot explained it.</p>
+      <p class="m-0 mt-4">A person holding a doorway for a few seconds would do the same. The bar stays as it is while the human pilot measures how often people actually do this. The study stops at the first such case among people. The dry-run session is kept as a permanent test: any future challenge rule has to show it is no longer a review, and why.</p>
+    </div>
+    <div class="self-start rounded-xl border border-line border-l-[3px] border-l-watch panel p-5">
+      <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Until then</p>
+      <ul class="m-0 mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted">
+        <li>A challenge review is a case to open, never a verdict. That was always true. It is now measured.</li>
+        <li>Read its episodes: aim that never turned, on a probe that barely moved, is the pattern above. Aim that moved with the probe as it moved is what the controlled follower does.</li>
+        <li>In the same dry run, that follower, the pilot's stand-in for a reader of hidden data, counted a median 13,258 ms per challenge.</li>
+        <li>Visible bots explained 55% of all honest-style overlap, and fpsdet left those moments out.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="mt-16" aria-labelledby="repro-title">
+    <h2 id="repro-title" class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Check it yourself</h2>
+    <div class="mt-6">
+      <pre class="m-0 overflow-x-auto border-l-[3px] border-signal bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>PYTHONPATH=src python3 -m fpsdet benchmark verify
+PYTHONPATH=src python3 -m fpsdet benchmark run --dataset synthetic
+python3 examples/pilot/pilot.py verify
+python3 examples/human-pilot/study.py verify --result examples/human-pilot/dry-run/result.json</code></pre>
+      <p class="m-0 mt-4 max-w-3xl">The first checks every committed result, from the public source to the published table, by digest, without scoring anything. The second reruns every fixture and scenario in seconds. The last two replay the live pilot's capture and the dry run's samples offline. Rebuilding the real datasets from their public sources is in <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/benchmark.md">docs/benchmark.md</a>. A run says MATCH, or exactly what moved and why.</p>
+    </div>
+  </section>
+
+  <section class="mt-16" aria-labelledby="not-title">
+    <h2 id="not-title" class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">What none of this proves</h2>
+    <div class="mt-6 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">That a case is correct. Provenance says what produced it. A wrong visibility query, or a server that labels a visible enemy hidden, still manufactures the case.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">How fpsdet does on your game. Each dataset here is one population. Your telemetry decides which checks can run at all.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">That challenges are safe as a review on their own. Honest angle holding reached the bar in the dry run, and no person has played the pilot yet.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">That fpsdet is better or worse than any other system. Nothing else was evaluated.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">Who made a packet. A signature over the packet needs a server-held signing key, and is not built.</p>
+      <p class="rounded-xl col-span-1 m-0 border border-line p-5 text-sm leading-relaxed text-ink">A person still opens the file. This does not end cheating.</p>
+    </div>
+    <p class="m-0 mt-8 text-sm text-muted">In depth: <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/observations.md">observations</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/knowledge-engine.md">knowledge</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/provenance.md">provenance</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/evidence-graph.md">the graph</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/challenges.md">challenges</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/external-evidence.md">external evidence</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/benchmark.md">the benchmark</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/pilot.md">the live pilot</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/human-pilot.md">the human pilot</a></p>
+  </section>
+</div>
+</main>
+
+<footer class="relative border-t border-line bg-bg/60">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-end justify-between gap-6 px-10 py-8 max-md:px-4">
+    <p class="m-0 basis-full font-mono text-sm"><a class="text-white no-underline" href="https://zerobandwidth.com">Zero<span class="text-signal">Bandwidth</span></a> <span class="text-muted">· the original signal · a ZeroBandwidth system</span></p>
+    <p class="m-0 text-sm text-muted">A person still reviews. This does not end cheating.</p>
+    <p class="m-0 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+      <a class="text-ink no-underline hover:underline" href="index.html">What this is</a>
+      <a class="text-ink no-underline hover:underline" href="scoring.html">Scoring</a>
+      <a class="text-ink no-underline hover:underline" href="wire.html">Wire a game</a>
+      <a class="text-ink no-underline hover:underline" href="games.html">Games</a>
+      <a class="text-ink no-underline hover:underline" href="source.html">Source</a>
+      <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
+      <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>

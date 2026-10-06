@@ -1,6 +1,7 @@
 """Writes site/decoys.html. Edit this file, not the page.
 
-The chart and its caption are drawn from examples/tf2/desk.json, so the numbers are the TF2 run's.
+The chart and its caption are drawn from examples/tf2/desk.json, so the numbers are the first TF2 run's
+(tf2-rgl-v1: one baseline draw, kept as a historical record; the benchmark's result is docs/benchmark.md).
 After rebuilding the TF2 desk data, run `python site/build_decoys.py` and then `npm run css`.
 A test fails if the page and the run disagree.
 """
@@ -79,6 +80,7 @@ HEAD_NAV = """<header class="relative z-50 border-b border-line bg-bg/80 backdro
       <a class="nav-link" href="source.html"><span>05</span>Source</a>
       <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
       <a class="nav-link" href="decoys.html" aria-current="page"><span>07</span>Decoys</a>
+      <a class="nav-link" href="evidence.html"><span>08</span>Evidence</a>
     </nav>
     <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
@@ -130,7 +132,7 @@ PAGE = f"""<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Decoys — fpsdet</title>
-<meta name="description" content="One server feature that skill cannot explain: a body the game never draws, that only software reading memory or packets can follow.">
+<meta name="description" content="One server feature that skill cannot explain: a body the game never draws, planned with a server secret. Software reading memory or packets can follow it. Honest aim can land on it too, so a person decides.">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="fpsdet.css">
 </head>
@@ -143,21 +145,21 @@ PAGE = f"""<!DOCTYPE html>
 <section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
   <div class="col-span-6 max-lg:col-span-1">
     <p class="prompt m-0"><span class="text-signal-soft">zb@zerobandwidth</span><span class="text-faint">:</span><span class="text-prototype">~/fpsdet</span><span class="text-faint">$</span> <span class="text-ink">Add one thing</span><span class="caret" aria-hidden="true"></span></p>
-    <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">A body no one can see. <span class="text-gradient-brand">Only a cheat follows it.</span></h1>
+    <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">A body no one can see. <span class="text-gradient-brand">Aim that follows it is a case to open.</span></h1>
   </div>
-  <p class="col-span-6 m-0 text-lg max-lg:col-span-1">Baselines catch players past every human measured. A careful cheat stays inside the human range, so skill alone cannot separate it from a very good player. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear. The game never draws it. Software that reads memory or packets does, and its aim follows. This does not end cheating.</p>
+  <p class="col-span-6 m-0 text-lg max-lg:col-span-1">Baselines catch players past every human measured. A careful cheat stays inside the human range, so skill alone cannot separate it from a very good player. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear. The game never draws it. Software that reads memory or packets does, and its aim can follow. Honest aim can land on it too, by holding an angle the body happens to sit behind, so a person still opens the case. This does not end cheating.</p>
 </section>
 
 <div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
   <section id="overlap" class="mb-16" aria-labelledby="overlap-title">
     <h2 id="overlap-title" {H2}>Why skill runs out</h2>
-    <p class="m-0 mt-4 max-w-3xl">From the <a class="text-ink underline decoration-line underline-offset-4" href="../demo/tf2.html">real TF2 test</a>: sniper rifle accuracy for {len(honest)} never-banned players and {len(cheats)} players banned for cheating, each over their matches. The median honest player hits {med(honest):.1%} of shots and the median banned cheater {med(cheats):.1%}. The best human measured hits {best:.0%}. Only {past} of the {len(cheats)} banned cheaters are past that line. The rest look like people, and fpsdet will not accuse a player for being good.</p>
+    <p class="m-0 mt-4 max-w-3xl">From the <a class="text-ink underline decoration-line underline-offset-4" href="../demo/tf2.html">first real TF2 run</a> (one baseline draw, kept as a historical record): sniper rifle accuracy for {len(honest)} never-banned players and {len(cheats)} players banned for cheating, each over their matches. The median honest player hits {med(honest):.1%} of shots and the median banned cheater {med(cheats):.1%}. The best human measured hits {best:.0%}. Only {past} of the {len(cheats)} banned cheaters are past that line. The rest look like people, and fpsdet will not accuse a player for being good.</p>
     <figure class="m-0 mt-6 rounded-xl border border-line panel p-5">
       <p class="m-0 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted"><span class="flex items-center gap-2"><span class="h-2.5 w-2.5 bg-clean" aria-hidden="true"></span>Never banned ({len(honest)})</span><span class="flex items-center gap-2"><span class="h-2.5 w-2.5 bg-review" aria-hidden="true"></span>Banned for cheating ({len(cheats)})</span><span>Share of each group per 5-point band.</span></p>
       <svg class="mt-3 block h-auto w-full" viewBox="0 0 {W} {H}" role="img" aria-label="Sniper rifle accuracy: honest players and banned cheaters overlap almost entirely, and nearly all cheaters sit inside the best human">
         {chart}
       </svg>
-      <figcaption class="m-0 mt-2 text-sm text-muted">Real data: logs.tf match logs and RGL bans, scored by fpsdet in <code class="font-mono text-[0.92em]">examples/tf2</code>.</figcaption>
+      <figcaption class="m-0 mt-2 text-sm text-muted">Real data: logs.tf match logs and RGL bans, scored by fpsdet in <code class="font-mono text-[0.92em]">examples/tf2</code> (tf2-rgl-v1, historical). The benchmark's nine draws are on <a class="text-ink underline decoration-line underline-offset-4" href="evidence.html">Evidence</a>.</figcaption>
     </figure>
   </section>
 
@@ -172,7 +174,7 @@ PAGE = f"""<!DOCTYPE html>
       <figure {CARD}>
         <p {LABEL}>What the game draws</p>
         <div class="mt-3">{GAME}</div>
-        <p class="m-0 mt-3 text-sm text-muted">An honest player sees a wall. There is nothing to aim at, so there is nothing to follow.</p>
+        <p class="m-0 mt-3 text-sm text-muted">An honest player sees a wall. There is nothing to aim at, so there is nothing to follow, though a crosshair held on that wall can rest on the body by chance.</p>
       </figure>
       <figure {CARD}>
         <p {LABEL}>What a wallhack draws</p>
@@ -185,15 +187,15 @@ PAGE = f"""<!DOCTYPE html>
   <section id="loop" class="mb-16" aria-labelledby="loop-title">
     <h2 id="loop-title" {H2}>The loop</h2>
     <div class="mt-8 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] max-lg:grid-cols-1">
-      <div {CARD}><p {LABEL}>1 · Pick a moment</p><p class="m-0 mt-2 text-sm">The server finds a space this client can neither see nor hear, from its own visibility and audio checks.</p></div>
+      <div {CARD}><p {LABEL}>1 · Plan it with a secret</p><p class="m-0 mt-2 text-sm">The server plans when, from a secret only it holds, and finds a space this client can neither see nor hear, from its own visibility and audio checks.</p></div>
       {ARROW}
       <div {CARD}><p {LABEL}>2 · Send a decoy</p><p class="m-0 mt-2 text-sm">A body there, replaying another player's real movement on a different heading. Same fields as any player.</p></div>
       {ARROW}
       <div {CARD}><p {LABEL}>3 · Nobody honest sees it</p><p class="m-0 mt-2 text-sm">The stock client never draws it: it is behind a wall. A wallhack, an ESP, or a packet reader shows it.</p></div>
       {ARROW}
-      <div {CARD}><p {LABEL}>4 · Log one number</p><p class="m-0 mt-2 text-sm">On each shot, <code class="font-mono text-[0.92em]">private_track_ms</code>: how long the aim stayed on the decoy since the last shot.</p></div>
+      <div {CARD}><p {LABEL}>4 · Log how long</p><p class="m-0 mt-2 text-sm">How long the aim stayed on the decoy, with the server's own verdict that it was unseen and unheard at that moment. A moment where it was seen or heard voids it.</p></div>
       {ARROW}
-      <div class="rounded-xl flex flex-col border border-line border-t-[3px] border-t-review panel p-5"><p {LABEL}>5 · A person decides</p><p class="m-0 mt-2 text-sm">fpsdet opens a review after at least 8 shots and 1,200 ms of tracking. One crossing is never a case.</p></div>
+      <div class="rounded-xl flex flex-col border border-line border-t-[3px] border-t-review panel p-5"><p {LABEL}>5 · A person decides</p><p class="m-0 mt-2 text-sm">fpsdet opens a review after at least 8 moments and 1,200 ms of tracking. One crossing is never a case. A held angle can be, so a person reads the episodes.</p></div>
     </div>
   </section>
 
@@ -204,7 +206,8 @@ PAGE = f"""<!DOCTYPE html>
       <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">No sound, no collision, no damage.</strong> It makes no footsteps, blocks nothing, and cannot be hit or hurt anyone. It changes no match.</span></li>
       <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">No decoy bit.</strong> Send it with the same fields as a real player. The safest form is a real enemy's own identity, sent to this one client at a replayed position while that enemy is hidden from it, then switched back with a snap when the enemy comes into view.</span></li>
       <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">Tracking, not crossing.</strong> A crosshair passing a common angle is not evidence. The check needs sustained following across many shots.</span></li>
-      <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">Rotate it.</strong> Change where, when and how often decoys appear, on the server, without a client patch.</span></li>
+      <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">Plan it with a secret.</strong> Derive where, when and how from a server-held secret, per player and per match. Past decoys do not predict the next, and the server changes them without a client patch.</span></li>
+      <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span><strong class="font-medium">Know where players hold.</strong> A decoy resting behind an angle people hold can collect honest aim for seconds. In a machine dry run, a stand-in holding a doorway's edge reached the bar that way: 5,500 ms against 1,200. A consented human pilot will measure how often people do it. <a class="text-ink underline decoration-line underline-offset-4" href="evidence.html#honest-title">What was found</a>.</span></li>
       <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">Tell players.</strong> Say in general terms that the server may send bodies a player cannot see, and what is logged. <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/players.md">docs/players.md</a> has the wording.</span></li>
     </ul>
   </section>
@@ -221,7 +224,7 @@ PAGE = f"""<!DOCTYPE html>
         <tr><td {TD}>Cross-check with footsteps and sounds</td><td {TD}>Decoys only go where this client hears no one, so there is nothing to cross-check.</td><td {TD}>Nothing new.</td></tr>
         <tr><td {TD}>Show hidden players, but never aim at them</td><td {TD}>The aim stops being assisted through walls. What is left is map awareness.</td><td {TD}><strong class="font-medium">Information-only cheating.</strong> fpsdet's other checks still apply, but a decoy does not catch it.</td></tr>
         <tr><td {TD}>Read the screen, not memory (a pixel aimbot)</td><td {TD}>It cannot see through walls at all.</td><td {TD}><strong class="font-medium">Pixel aimbots.</strong> Only aim statistics catch them, when they are past every human.</td></tr>
-        <tr><td {TD}>Learn the decoy pattern</td><td {TD}>An update every time the server changes the pattern. The server changes it without a patch.</td><td {TD}>A cheat that has learned today's pattern, until it changes.</td></tr>
+        <tr><td {TD}>Learn the decoy pattern</td><td {TD}>Planned decoys come from a secret the server never sends, so the pattern is not in the code or in past decoys. Rotating the secret needs no patch.</td><td {TD}>A compromised game server, or a plan leaked before its match: it gives the windows, though not where or what.</td></tr>
         <tr><td {TD}>Follow hidden targets only now and then</td><td {TD}>Most of the advantage. fpsdet adds tracking up across shots and matches.</td><td {TD}>Very sparse use, slowly.</td></tr>
       </tbody>
     </table>
@@ -231,16 +234,22 @@ PAGE = f"""<!DOCTYPE html>
 
   <section id="log" class="mb-16" aria-labelledby="log-title">
     <h2 id="log-title" {H2}>What the server writes</h2>
-    <p class="m-0 mt-4 max-w-3xl">One more field on the shot line fpsdet already reads. Leave it out, or send 0, and nothing happens. Its <a class="text-ink underline decoration-line underline-offset-4" href="../demo/board.html#tape-replay">planted case is in the desk</a>, and <a class="text-ink underline decoration-line underline-offset-4" href="scoring.html">Scoring</a> has the rule.</p>
+    <p class="m-0 mt-4 max-w-3xl">The simplest form is one more field on the shot line fpsdet already reads. Leave it out, or send 0, and nothing happens. Its <a class="text-ink underline decoration-line underline-offset-4" href="../demo/board.html#tape-replay">planted case is in the desk</a>, and <a class="text-ink underline decoration-line underline-offset-4" href="scoring.html">Scoring</a> has the rule.</p>
     <pre class="m-0 mt-6 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>{{"game_id": "your-game", "match_id": "m-1", "player_id": "p-7", "t_ms": 412300,
  "event_type": "shot", "weapon_id": "rifle", "hit": false,
  "private_track_ms": 140}}</code></pre>
+    <p class="m-0 mt-6 max-w-3xl">The planned form names the challenge and carries the server's verdict on the body for that moment. <code class="font-mono text-[0.92em]">fpsdet challenge plan</code> writes the plan from the secret, and <code class="font-mono text-[0.92em]">fpsdet score --challenges</code> binds each finding to it.</p>
+    <pre class="m-0 mt-4 overflow-x-auto whitespace-pre-wrap rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>{{"game_id": "your-game", "match_id": "m-1", "player_id": "p-7", "t_ms": 412300,
+ "event_type": "movement", "speed_mps": 2.0,
+ "challenge_id": "ch-4db205d36439393fabcb2258", "challenge_track_ms": 100.0,
+ "challenge_vision_state": "absent", "challenge_audio_state": "absent"}}</code></pre>
+    <p class="m-0 mt-4 max-w-3xl text-sm text-muted">A reference server does all of this live: a Godot dedicated server with stock clients plans, places, checks and logs one challenge, and fpsdet scores its capture the same offline. It is a controlled pilot, not a detection rate. <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/pilot.md">docs/pilot.md</a></p>
   </section>
 
   <section id="next" class="mb-4" aria-labelledby="next-title">
     <h2 id="next-title" {H2}>Next: one frequency per client</h2>
-    <p class="m-0 mt-4 max-w-3xl">Not built yet. Give every client its own decoys. Then a cheater's aim shows whose data it read, not only that it read hidden data. If a teammate who runs nothing starts following one client's private decoy, that client is calling out positions. fpsdet already flags a teammate who reacts faster than a voice can travel; a per-client decoy would name the source.</p>
-    <p class="m-0 mt-6 max-w-3xl">Running a dedicated server? Add the decoy, send <code class="font-mono text-[0.92em]">private_track_ms</code>, and <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">tell us what you find</a>.</p>
+    <p class="m-0 mt-4 max-w-3xl">Half built. Planned challenges already belong to one client: one player, one match, one window. Not built: reading what a teammate who runs nothing does with another client's decoy. If they start following it, that client is calling out positions. fpsdet already flags a teammate who reacts faster than a voice can travel; a per-client decoy would name the source.</p>
+    <p class="m-0 mt-6 max-w-3xl">Running a dedicated server? Add the decoy, send <code class="font-mono text-[0.92em]">private_track_ms</code> or plan challenges, and <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">tell us what you find</a>.</p>
   </section>
 </div>
 </main>
@@ -256,6 +265,7 @@ PAGE = f"""<!DOCTYPE html>
       <a class="text-ink no-underline hover:underline" href="source.html">Source</a>
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
       <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
+      <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
       <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
     </p>
   </div>

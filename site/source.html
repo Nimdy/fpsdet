@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The files — fpsdet</title>
-<meta name="description" content="fpsdet 0.3.0. Python 3.11 or newer. No runtime dependencies. The planted desk and the tests are the behavior lock.">
+<meta name="description" content="fpsdet 0.3.0. Python 3.11 or newer. No runtime dependencies. The planted desk, the tests and the benchmark are the behavior lock.">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="fpsdet.css">
 </head>
@@ -23,6 +23,7 @@
       <a class="nav-link" href="source.html" aria-current="page"><span>05</span>Source</a>
       <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
       <a class="nav-link" href="decoys.html"><span>07</span>Decoys</a>
+      <a class="nav-link" href="evidence.html"><span>08</span>Evidence</a>
     </nav>
     <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
@@ -34,17 +35,18 @@
     <p class="prompt m-0"><span class="text-signal-soft">zb@zerobandwidth</span><span class="text-faint">:</span><span class="text-prototype">~/fpsdet</span><span class="text-faint">$</span> <span class="text-ink">Source</span><span class="caret" aria-hidden="true"></span></p>
     <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">The reference is <span class="text-gradient-brand">the Python in this repo.</span></h1>
   </div>
-  <p class="col-span-5 m-0 text-lg max-lg:col-span-1"><strong class="font-medium">fpsdet 0.3.0.</strong> Python 3.11 or newer. No runtime dependencies. A solo dev and a studio run the same contract. A port in another language matches when it reproduces the planted demo and <code class="font-mono text-[0.92em]">tests/test_fpsdet.py</code>. This does not end cheating.</p>
+  <p class="col-span-5 m-0 text-lg max-lg:col-span-1"><strong class="font-medium">fpsdet 0.3.0.</strong> Python 3.11 or newer. No runtime dependencies; checking providers' signatures on external records is the one optional extra. A solo dev and a studio run the same contract. A port in another language matches when it reproduces the planted demo and <code class="font-mono text-[0.92em]">tests/test_fpsdet.py</code>. This does not end cheating.</p>
 </section>
 
 <div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
   <h2 class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Run the planted matches</h2>
   <pre class="m-0 mt-6 overflow-x-auto border-l-[3px] border-signal bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>PYTHONPATH=src python3 -m fpsdet demo
 PYTHONPATH=src python3 -m unittest tests.test_fpsdet
+PYTHONPATH=src python3 -m fpsdet benchmark verify
 PYTHONPATH=src python3 -m fpsdet pages</code></pre>
   <div class="mt-6 grid grid-cols-2 gap-8 max-lg:grid-cols-1">
-    <p class="m-0"><code class="font-mono text-[0.92em]">demo</code> writes <code class="font-mono text-[0.92em]">demo/board.html</code>. That page starts with a six-step walk-through, then the thirty-two planted players. The first tape is the 10 kg sprint beside the blast. <code class="font-mono text-[0.92em]">pages</code> writes a folder a static host can serve: these pages, and a fresh desk beside them. Nothing in that command publishes the repository.</p>
-    <p class="m-0">The repository is <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers">github.com/Nimdy/detect-FPS-hackers</a>. These HTML pages are the walk-through. The same contract, written for an implementer, is <code class="font-mono text-[0.92em]">docs/scoring.md</code>, <code class="font-mono text-[0.92em]">docs/integration.md</code>, <code class="font-mono text-[0.92em]">docs/games.md</code>, and <code class="font-mono text-[0.92em]">docs/operations.md</code>.</p>
+    <p class="m-0"><code class="font-mono text-[0.92em]">demo</code> writes <code class="font-mono text-[0.92em]">demo/board.html</code>. That page starts with a six-step walk-through, then the thirty-two planted players. The first tape is the 10 kg sprint beside the blast. <code class="font-mono text-[0.92em]">benchmark verify</code> checks every published result against its committed artifacts by digest, offline, without scoring. <code class="font-mono text-[0.92em]">pages</code> writes a folder a static host can serve: these pages, and a fresh desk beside them. Nothing in that command publishes the repository.</p>
+    <p class="m-0">The repository is <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers">github.com/Nimdy/detect-FPS-hackers</a>. These HTML pages are the walk-through. The same contract, written for an implementer, is <code class="font-mono text-[0.92em]">docs/scoring.md</code>, <code class="font-mono text-[0.92em]">docs/integration.md</code>, <code class="font-mono text-[0.92em]">docs/games.md</code>, and <code class="font-mono text-[0.92em]">docs/operations.md</code>. The evidence a case carries is <code class="font-mono text-[0.92em]">docs/observations.md</code>, <code class="font-mono text-[0.92em]">docs/provenance.md</code> and <code class="font-mono text-[0.92em]">docs/challenges.md</code>; what has been tested is <code class="font-mono text-[0.92em]">docs/benchmark.md</code>.</p>
   </div>
 
   <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">What is in the tree</h2>
@@ -57,14 +59,15 @@ PYTHONPATH=src python3 -m fpsdet pages</code></pre>
         </tr>
       </thead>
       <tbody>
-        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">src/fpsdet/</td><td class="border-b border-line py-3 pr-6">The reference scorer.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">src/fpsdet/</td><td class="border-b border-line py-3 pr-6">The reference scorer, and the evidence each case carries: observations, knowledge, provenance, the graph, challenges, external records.</td></tr>
         <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">profiles/</td><td class="border-b border-line py-3 pr-6">Curves for the synthetic loadout, and WARDOGS weight classes with no absolute sprint speed.</td></tr>
-        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">tests/</td><td class="border-b border-line py-3 pr-6">The behavior lock, including the planted demo.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">tests/</td><td class="border-b border-line py-3 pr-6">The behavior lock, including the planted demo and recorded whole cases.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">benchmark/</td><td class="border-b border-line py-3 pr-6">FPSDET Benchmark v1: datasets, pinned sources, every result and draw, the claims and the release manifest.</td></tr>
         <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">schema/</td><td class="border-b border-line py-3 pr-6">Event and profile shapes.</td></tr>
-        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">examples/</td><td class="border-b border-line py-3 pr-6">One shot, one movement sample, a Unity emitter.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">examples/</td><td class="border-b border-line py-3 pr-6">One shot, one movement sample, a Unity emitter, the real TF2 and CS2 runs, the live Godot pilot, and the consented human pilot.</td></tr>
         <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">site/</td><td class="border-b border-line py-3 pr-6">These pages.</td></tr>
         <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">demo/board.html</td><td class="border-b border-line py-3 pr-6">The generated desk. Regenerate it. Do not hand-edit it.</td></tr>
-        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">docs/</td><td class="border-b border-line py-3 pr-6">The bars, the wire-up, the games, the lake.</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6 font-mono text-sm">docs/</td><td class="border-b border-line py-3 pr-6">The bars, the wire-up, the games, the lake, the evidence, the benchmark and the pilots.</td></tr>
       </tbody>
     </table>
   </div>
@@ -102,6 +105,7 @@ PYTHONPATH=src python3 -m fpsdet pages</code></pre>
       <a class="text-ink no-underline hover:underline" href="games.html">Games</a>
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
       <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
+      <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
       <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
       <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
     </p>

@@ -28,6 +28,7 @@
       <a class="nav-link" href="source.html"><span>05</span>Source</a>
       <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
       <a class="nav-link" href="decoys.html"><span>07</span>Decoys</a>
+      <a class="nav-link" href="evidence.html"><span>08</span>Evidence</a>
     </nav>
     <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
@@ -64,32 +65,32 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
 </section>
 
 <section id="real" class="mx-auto w-full max-w-[1800px] px-10 pb-2 pt-16 max-md:px-4 max-md:pt-12" aria-labelledby="real-title">
-  <p class="zb-kicker">Real matches</p>
-  <h2 id="real-title" class="m-0 mt-4 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white text-balance max-md:text-[1.6rem]">Tested on 10,218 real TF2 league matches.</h2>
-  <p class="m-0 mt-4 max-w-3xl">228 players banned for cheating by RGL, a competitive TF2 league, each with up to 20 server-logged matches before the ban, beside never-banned players from the same lobbies. fpsdet scored everyone from the servers’ shot counts alone. It never saw who was banned.</p>
+  <p class="zb-kicker">Real matches · Benchmark v1</p>
+  <h2 id="real-title" class="m-0 mt-4 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white text-balance max-md:text-[1.6rem]">Tested on 10,149 real TF2 league matches, nine ways.</h2>
+  <p class="m-0 mt-4 max-w-3xl">228 accounts banned for cheating by RGL, a competitive TF2 league, each with up to 20 server-logged matches before the ban, beside never-banned players from the same lobbies. fpsdet scored everyone from the servers’ shot counts alone. It never saw who was banned. Which never-banned players build the human baseline moves the answer, so the benchmark fixed nine baseline draws before running any, and reports every one.</p>
   <div class="mt-8 grid grid-cols-4 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1">
     <div class="rounded-xl border border-line border-t-[3px] border-t-signal panel p-5">
-      <p class="m-0 font-mono text-[2.4rem] font-bold leading-none text-white">7.7×</p>
-      <p class="m-0 mt-3 font-medium">better than picking at random</p>
-      <p class="m-0 mt-2 text-sm text-muted">It picked 97 players for a person to look at, 51 of them banned cheaters. 97 picked at random would hold about 7.</p>
-    </div>
-    <div class="rounded-xl border border-line border-t-[3px] border-t-review panel p-5">
-      <p class="m-0 font-mono text-[2.4rem] font-bold leading-none text-white">3 of 3</p>
-      <p class="m-0 mt-3 font-medium">reviews were banned cheaters</p>
-      <p class="m-0 mt-2 text-sm text-muted">A review needs two kinds of evidence past every human measured.</p>
+      <p class="m-0 font-mono text-[2.4rem] font-bold leading-none text-white">8.9×</p>
+      <p class="m-0 mt-3 font-medium">as often on banned cheaters</p>
+      <p class="m-0 mt-2 text-sm text-muted">A median 28.6% of the banned accounts it could compare were flagged for review or watch, against 3.2% of never-banned players. 7.7× to 10.4× across the nine draws.</p>
     </div>
     <div class="rounded-xl border border-line border-t-[3px] border-t-clean panel p-5">
-      <p class="m-0 font-mono text-[2.4rem] font-bold leading-none text-white">0 of 1,746</p>
-      <p class="m-0 mt-3 font-medium">never-banned players sent to review</p>
-      <p class="m-0 mt-2 text-sm text-muted">30 are on watch: a monitor flag, not a case.</p>
+      <p class="m-0 font-mono text-[2.4rem] font-bold leading-none text-white">0</p>
+      <p class="m-0 mt-3 font-medium">never-banned players sent to review, in any draw</p>
+      <p class="m-0 mt-2 text-sm text-muted">The never-banned players it flagged went to watch: a monitor flag, not a case.</p>
     </div>
     <div class="rounded-xl border border-line border-t-[3px] border-t-muted panel p-5">
-      <p class="m-0 font-mono text-[2.4rem] font-bold leading-none text-white">131 of 189</p>
-      <p class="m-0 mt-3 font-medium">banned cheaters still looked clean</p>
-      <p class="m-0 mt-2 text-sm text-muted">It sees what the server counts. A wallhack, or a cheat tuned to stay inside human aim, leaves nothing to find.</p>
+      <p class="m-0 font-mono text-[2.4rem] font-bold leading-none text-white">130 of 182</p>
+      <p class="m-0 mt-3 font-medium">banned cheaters not flagged</p>
+      <p class="m-0 mt-2 text-sm text-muted">Between 129 and 131 in each draw. It sees what the server counts. A wallhack, or a cheat tuned to stay inside human aim, leaves nothing to find in match totals.</p>
+    </div>
+    <div class="rounded-xl border border-line border-t-[3px] border-t-watch panel p-5">
+      <p class="m-0 font-mono text-[2.4rem] font-bold leading-none text-white">14 of 18</p>
+      <p class="m-0 mt-3 font-medium">CS2 watches were labelled cheaters</p>
+      <p class="m-0 mt-2 text-sm text-muted">1,529 players in public CS2 matchmaking matches, one match each. Too little to catch most cheaters, and nobody went to review.</p>
     </div>
   </div>
-  <p class="m-0 mt-6 max-w-3xl text-sm text-muted"><a class="text-ink underline decoration-line underline-offset-4" href="../demo/tf2.html">Open every TF2 case</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/tree/main/examples/tf2">How the test was built</a> · <a class="text-ink underline decoration-line underline-offset-4" href="../demo/cs2.html">The CS2 test</a>, where one match per player was too little to catch anyone and no honest player went to review. Match logs from logs.tf, bans from RGL. Not affiliated with Valve, logs.tf or RGL.</p>
+  <p class="m-0 mt-6 max-w-3xl text-sm text-muted">Bans and hand labels are labels, not ground truth, and these are two populations, not a detection rate. <a class="text-ink underline decoration-line underline-offset-4" href="evidence.html">What has been tested, and how far it goes</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/benchmark.md">Every draw, and how to rebuild it</a> · <a class="text-ink underline decoration-line underline-offset-4" href="../demo/tf2.html">The first TF2 run, case by case</a> (one baseline draw, kept as a historical record) · <a class="text-ink underline decoration-line underline-offset-4" href="../demo/cs2.html">The CS2 cases</a>. Match logs from logs.tf, bans from RGL, CS2 matches from CS2CD. Not affiliated with Valve, logs.tf or RGL.</p>
 </section>
 
 <section class="mx-auto w-full max-w-[1800px] px-10 pb-6 pt-16 max-md:px-4 max-md:pt-12" aria-labelledby="left-pc">
@@ -274,6 +275,7 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
         <h3 class="m-0 text-base font-medium">A fact this client was not sent.</h3>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Sustained aim on an enemy this client could neither see nor hear (footsteps count as heard, and so does a body that broke line of sight a moment ago), or on a replay of someone else’s real movement, turned onto another heading, where this client has no sight and no audio. There is no invisible flag. The official client drops that body before draw because it is occluded. A snapshot parser that keeps every player still sees a person running. Sustained aim on it is a review. A four-shot clip of it stays clean.</p>
         <p class="m-0 mt-3 text-sm leading-relaxed text-muted">That third check can catch a cheat that aims at bodies in the server snapshot. It cannot catch a DMA read of the frame the game actually drew, or a capture card looking at pixels. Those never receive a body the official client did not draw. If the visibility query is wrong, the case is manufactured. Fix the query before you trust the case.</p>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The server can plan each replay with a secret, so no one can predict the next one, and count a moment only when its own checks say the body was unseen and unheard. One caution, measured: in a machine dry run, a stand-in holding a doorway's edge still, over a probe that barely moved behind it, reached the same bar. Until people have played the pilot, a replay review is a file to open, not a verdict. <a class="text-ink underline decoration-line underline-offset-4" href="evidence.html#honest-title">What was found</a>.</p>
       </article>
       <article class="rounded-xl border border-line panel p-5">
         <h3 class="m-0 text-base font-medium">The picture is late.</h3>
@@ -314,8 +316,8 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
       <li class="pr-4">
         <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal font-mono text-xs text-ink shadow-[0_0_14px_-4px_var(--color-signal)]">5</span><span class="ml-3 h-px flex-1 bg-line max-md:hidden"></span></div>
         <h3 class="m-0 mt-4 text-base font-medium">A case is written</h3>
-        <p class="m-0 mt-2 font-mono text-[12px] text-muted">case.json · case.html · seal</p>
-        <p class="m-0 mt-2 text-sm text-muted">Review, watch, clean, or held, with the reasons and the numbers behind them.</p>
+        <p class="m-0 mt-2 font-mono text-[12px] text-muted">case.json · case.html · packet</p>
+        <p class="m-0 mt-2 text-sm text-muted">Review, watch, clean, or held, with the reasons, the numbers behind them, and what produced them.</p>
       </li>
       <li class="border-l-[3px] border-signal pl-4">
         <div class="flex items-center" aria-hidden="true"><span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-signal font-mono text-xs text-bg">6</span></div>
@@ -329,6 +331,32 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
       <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">AI brief, optional</span>Any OpenAI-compatible endpoint writes a paragraph on a case. It cannot change the decision.</p>
       <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">features.csv</span>Train your own model on reviewer labels. Keep the gear rules beside it.</p>
       <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Dashboards</span>Grafana, Elastic, or Splunk read the case JSON. They are viewers, not the detector.</p>
+    </div>
+  </section>
+
+  <section id="evidence" class="mx-auto w-full max-w-[1800px] px-10 py-12 max-md:px-4" aria-labelledby="evidence-title">
+    <p class="zb-kicker">Under the decision</p>
+    <h2 id="evidence-title" class="m-0 mt-4 font-mono text-[2.05rem] font-semibold leading-[1.12] tracking-tight text-white text-balance max-md:text-[1.6rem]">Every case says what made it.</h2>
+    <p class="m-0 mt-4 max-w-3xl">The sentence a reviewer reads is the top of the case. Under it sits the same finding as data, and enough to check it without trusting whoever handed it over. <a class="text-ink underline decoration-line underline-offset-4" href="evidence.html">The evidence, in full</a>.</p>
+    <div class="mt-8 grid grid-cols-3 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
+      <article class="rounded-xl border border-line panel p-5">
+        <h3 class="m-0 text-base font-medium">Findings, knowledge, provenance.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Each finding as a record, what this client could have known (unchecked is never absent), which checks could run at all, and digests of the code, the game settings, the baseline and the events. One packet digest binds them. The same inputs give the same packet.</p>
+      </article>
+      <article class="rounded-xl border border-line panel p-5">
+        <h3 class="m-0 text-base font-medium">Challenges, planned with a secret.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The server plans each probe from a secret that never leaves it. The plan holds ids, windows and commitments. The code is public, and the next probe still cannot be predicted. A probe the client could see or hear voids itself.</p>
+      </article>
+      <article class="rounded-xl border border-line panel p-5">
+        <h3 class="m-0 text-base font-medium">Other systems, kept in their place.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Records from client anti-cheat, platforms or leagues ride along as given, signed or not. They can make a watch. However many agree, they never make a review. A verified signature says who sent a record, not that it is true.</p>
+      </article>
+    </div>
+    <div class="mt-4 grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
+      <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Controlled fixtures</span>All 22 checks trip on a planted behaviour and stay quiet on its honest twin. That qualifies code. It is never a rate.</p>
+      <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Public real data</span>TF2 and CS2, rebuilt from public sources by anyone, checked by digest from download to published table.</p>
+      <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Live pilot</span>One challenge, run in a Godot dedicated server with stock clients. All 8 declared scenarios came out as declared, and every capture scored the same offline.</p>
+      <p class="rounded-xl m-0 border border-dashed border-line p-4 text-sm text-muted"><span class="block font-mono text-xs uppercase tracking-[0.12em] text-ink">Human pilot</span>Designed and pre-registered: consenting adults, playing honestly with probes running. No person has played yet.</p>
     </div>
   </section>
 
@@ -377,7 +405,7 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
         <article class="corner-frame rounded-xl border border-signal/50 bg-plot p-6 shadow-[0_0_0_1px_rgb(56_200_255/0.15),0_0_40px_-8px_rgb(56_200_255/0.45),0_0_56px_-12px_rgb(168_85_247/0.35)] max-lg:col-span-2 max-lg:row-start-1 max-md:col-span-1">
           <p class="m-0 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.12em] text-muted"><span class="h-2.5 w-2.5 bg-signal" aria-hidden="true"></span>The core</p>
           <p class="m-0 mt-3 font-mono text-[1.45rem] font-bold leading-[1.15] tracking-tight text-white">One line in. A case out.</p>
-          <p class="m-0 mt-3 text-sm text-muted">Gear rules, the clock, the knowledge checks, the picture, human ceilings. Zero runtime dependencies. Thirty-two planted answers and the tests lock it.</p>
+          <p class="m-0 mt-3 text-sm text-muted">Gear rules, the clock, the knowledge checks, the picture, human ceilings, planned challenges, and an evidence packet on every case. Zero runtime dependencies. Thirty-two planted answers and the tests lock it.</p>
         </article>
         <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your checks</p><p class="m-0 mt-2 font-mono text-sm text-ink">src/fpsdet/signals.py</p><p class="m-0 mt-2 text-sm text-muted">Plant the cheater and the twin. Write the failing test. Then the rule.</p></article>
         <article class="rounded-xl border border-line panel p-5"><p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Your model</p><p class="m-0 mt-2 font-mono text-sm text-ink">features.csv</p><p class="m-0 mt-2 text-sm text-muted">Gradient boosting or whatever your team trains, once reviewers have labeled cases. Labels first.</p></article>
@@ -400,6 +428,9 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
       <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A server that scores aim against a position that client was not shown. That manufactures the case.</p>
       <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A humanizer with its own noise, when that noise also matches human lag and human variance. A callout slow enough to have been a voice. A speed pulse inside the glitch filter. A kick that barely changes from shot to shot. Stamps that all land on one tick. A gun the server itself fired.</p>
       <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A listen server, or a game that lets the client decide the hit, can forge every field. The contract is a dedicated server. A bad visibility query manufactures the case. Fix the query.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A reader that follows each challenge only briefly, only in the last second of its window, or only beside an enemy the client can see.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">Anything your telemetry cannot show. On TF2 and CS2 match totals most checks cannot run at all. That is a gap in the data, not a finding of nothing.</p>
+      <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">A record from another system that is wrong. Unsigned records are read by default, and a verified one is only known to come from its provider's key.</p>
       <p class="rounded-xl col-span-3 m-0 border border-line p-5 text-sm leading-relaxed text-ink max-xl:col-span-2 max-md:col-span-1">A person still opens the file. This does not end cheating.</p>
     </div>
   </section>
@@ -412,6 +443,7 @@ Planted cases matched profiles/example-loadout.json.</code></pre>
     <p class="m-0 flex flex-wrap gap-x-5 gap-y-2 text-sm">
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
       <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
+      <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
       <a class="text-ink no-underline hover:underline" href="scoring.html">Scoring</a>
       <a class="text-ink no-underline hover:underline" href="wire.html">Wire a game</a>
       <a class="text-ink no-underline hover:underline" href="games.html">Games</a>

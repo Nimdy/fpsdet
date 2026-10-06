@@ -10,7 +10,7 @@ from .synthetic import Demo
 ROOT = Path(__file__).resolve().parents[2]
 SITE = ROOT / "site"
 PAGE = SITE / "index.html"
-HTML = ("index.html", "scoring.html", "wire.html", "games.html", "source.html", "decoys.html")
+HTML = ("index.html", "scoring.html", "wire.html", "games.html", "source.html", "decoys.html", "evidence.html")
 # A prefix, so a deep link such as board.html#card-wire-lock is rewritten too.
 LOCAL_DESK = 'href="../demo/board.html'
 LOCAL_SITE = 'href="../site/'

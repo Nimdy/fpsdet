@@ -23,6 +23,7 @@
       <a class="nav-link" href="source.html"><span>05</span>Source</a>
       <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
       <a class="nav-link" href="decoys.html"><span>07</span>Decoys</a>
+      <a class="nav-link" href="evidence.html"><span>08</span>Evidence</a>
     </nav>
     <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
@@ -53,6 +54,7 @@
         <tr><td class="border-b border-line py-3 pr-6">Two or more kinds of number past every measured human</td><td class="border-b border-line py-3 pr-6 font-mono text-review">review</td></tr>
         <tr><td class="border-b border-line py-3 pr-6">One such rate, plus the account's own history or a supporting tell</td><td class="border-b border-line py-3 pr-6 font-mono text-review">review</td></tr>
         <tr><td class="border-b border-line py-3 pr-6">Past the rank only, a single ceiling hit, a history jump, or two supporting families</td><td class="border-b border-line py-3 pr-6 font-mono text-watch">watch</td></tr>
+        <tr><td class="border-b border-line py-3 pr-6">A record from another integrity system, however many agree</td><td class="border-b border-line py-3 pr-6 font-mono text-watch">watch, at most</td></tr>
         <tr><td class="border-b border-line py-3 pr-6">Something was compared, and nothing above fired</td><td class="border-b border-line py-3 pr-6 font-mono text-clean">clean</td></tr>
         <tr><td class="border-b border-line py-3 pr-6">Nothing was comparable</td><td class="border-b border-line py-3 pr-6 font-mono text-info">held</td></tr>
       </tbody>
@@ -207,6 +209,7 @@
     <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Private replay.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">private_track_ms</code> uses the same bar. The body is someone else's real movement, on another heading, where this client's sight and audio queries both fail. There is no invisible flag. A short crossing stays clean. A body this client could see, labeled private, manufactures the case. The desk draws that route. The score reads only <code class="font-mono text-[0.92em]">private_track_ms</code>.</p>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">A planned challenge sends <code class="font-mono text-[0.92em]">challenge_id</code> and <code class="font-mono text-[0.92em]">challenge_track_ms</code> instead, bound to a plan the server made from its secret, and the same bar holds per challenge: 8 moments and 1200 ms. Version 2 counts a moment only when <code class="font-mono text-[0.92em]">challenge_vision_state</code> and <code class="font-mono text-[0.92em]">challenge_audio_state</code> both say <code class="font-mono text-[0.92em]">absent</code>. One seen or heard moment voids the challenge, and so does a contradiction. An unchecked channel abstains. The bar counts time, not intent: aim held still on an angle, with the body resting behind it, can reach it. <a class="text-ink underline decoration-line underline-offset-4" href="evidence.html#honest-title">What the dry run found</a>.</p>
     </article>
     <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">The picture is late.</h3>
@@ -234,9 +237,13 @@
     </article>
     <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">The seal.</h3>
-      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">SHA-256 of the player, the game, the decision, and the reasons. Edit a reason and the hash changes. It identifies the packet a reviewer saw. It is not a ban.</p>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">SHA-256 of the player, the game, the decision, and the reasons. Edit a reason and the hash changes. It identifies what a reviewer saw. It is not a ban. Beside it, the evidence packet digest binds the findings, the decision, and digests of the code, the settings, the baseline and the events that produced them. <a class="text-ink underline decoration-line underline-offset-4" href="evidence.html">Evidence</a>.</p>
     </article>
-    <article class="rounded-xl border border-line p-5 max-xl:col-span-2 max-md:col-span-1">
+    <article class="rounded-xl border border-line p-5">
+      <h3 class="m-0 text-base font-medium">Other systems' records.</h3>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">fpsdet score --external</code> carries records from client anti-cheat, platforms or leagues as given: provider, class and confidence. One can move a clean case to watch. None, and no number of them together, makes a review. A record signed with a key the operator registered is verified: known to come from that key, not known to be true.</p>
+    </article>
+    <article class="rounded-xl border border-line p-5">
       <h3 class="m-0 text-base font-medium">Human ceilings.</h3>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">One number per player, leave-one-out, in that rank and on that weapon. The cohort is thick at 30 players after the subject is removed. The bound is a one-sided 95% Wilson lower bound, widened when the rate swings between matches more than chance. Past every measured human is review-grade; the same number on two guns counts once. Past the rank only is a watch. A hot ten-shot game has a wide bound and does not clear a maximum.</p>
     </article>
@@ -256,6 +263,7 @@
       <a class="text-ink no-underline hover:underline" href="source.html">Source</a>
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
       <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
+      <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
       <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
     </p>
   </div>
