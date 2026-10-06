@@ -166,6 +166,8 @@ A detector that is not observable is never reported as 0%. The dataset definitio
 
 ## Results
 
+> **The TF2 numbers on this page are historical real data:** the run published on 2026-10-04 (benchmark dataset `tf2-rgl-v1`), one baseline draw chosen by the curator's private key, which turned out to be the most favourable of six draws of its data. FPSDET Benchmark v1 replaces it with `tf2-rgl-v2`, rebuildable by anyone, and reports the median and range over nine fixed draws ([benchmark.md](benchmark.md)). The CS2 numbers are the benchmark's `cs2cd-v2`, unchanged.
+
 Both runs are from 2026-10-04, rebuilt and re-scored by the benchmark ([benchmark.md](benchmark.md)) with detector `sha256:a75b28fb…`; no decision and no number here moved. The CS2 baseline is the one `fpsdet benchmark prepare` rebuilds (`sha256:143ce6f0…`): the cohort the earlier runs used was screened with settings the README did not record, and cannot be rebuilt. The rebuild holds 14 more players from 3 more matches, gives the same 1,529 decisions and identical statistics, and moves 15 observations' cohort numbers. The full reports are [examples/tf2/evaluation.md](../examples/tf2/evaluation.md) and [examples/cs2/evaluation.md](../examples/cs2/evaluation.md), with every number in the JSON beside them.
 
 ### TF2: RGL cheating-ban labelled against the never-banned comparison
@@ -256,6 +258,8 @@ It is research only:
 There is no timestamp. It is unsigned, and it is in no case packet. `fpsdet evaluate strength-verify` recomputes it from its evaluation.
 
 ## Evidence strength results
+
+> **The TF2 numbers in this section are historical real data:** the run published on 2026-10-04 (benchmark dataset `tf2-rgl-v1`), one baseline draw chosen by the curator's private key, which turned out to be the most favourable of six draws of its data. FPSDET Benchmark v1 replaces it with `tf2-rgl-v2`, rebuildable by anyone, and reports the median and range over nine fixed draws ([benchmark.md](benchmark.md)). The CS2 numbers are the benchmark's `cs2cd-v2`, unchanged.
 
 These come from the published evaluations ([examples/tf2/strength.md](../examples/tf2/strength.md), [examples/cs2/strength.md](../examples/cs2/strength.md)). They are research, beside P8's measurement and never in place of it. Each row is "RGL cheating-ban labelled vs never-banned" (TF2) or "hand-labelled cheater vs hand-reviewed, not labelled" (CS2), among players the detector could run on. The ratio is the label-conditioned evidence ratio fitted on the development half.
 

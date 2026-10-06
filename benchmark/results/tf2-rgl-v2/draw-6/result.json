@@ -1,0 +1,183 @@
+{
+ "benchmark": "fpsdet.benchmark/1",
+ "chain": {
+  "cohort": "sha256:724bb0e1fcbbf09514230893231d09abcfdb8635be89ff0b0341b0b6fd9cea63",
+  "detector": "sha256:a75b28fb3b00fa5868444318d44c7c4d235e94a76a85a96fad4f1f040b80ad81",
+  "evaluation": {
+   "digest": "sha256:9dbedebebf474299ae82c1fd2142810fcb0f5748c8c5e0fed952c39f63cda118",
+   "schema": "fpsdet.evaluation/2",
+   "statistics": "sha256:a6dc5120cfcb2007188ed88694734bb3f48b0f96d427322c5dd69372782b3177"
+  },
+  "input_errors": 0,
+  "inputs": {
+   "baseline": {
+    "sha256": "sha256:ff9faf0b782cbc3bb848bef0fc7b066412aa17473a7063d86c3b2b964de201f9"
+   },
+   "cohort": {
+    "digest": "sha256:724bb0e1fcbbf09514230893231d09abcfdb8635be89ff0b0341b0b6fd9cea63",
+    "players": 1578
+   },
+   "events": {
+    "events": 3967595,
+    "sha256": "sha256:0209952bdbbc3bd9ae3d13fc4a2f6a97a09189f722a23c0c983b55c91f8e21c6"
+   },
+   "key": null,
+   "labels": {
+    "count": 3591,
+    "digest": "sha256:4a7eac11986c981a157674830ed0312cad09b8fccbf9a5763ded0e7e5671549c",
+    "sha256": "sha256:84e3190d954a870fcb55a61729d322210c87746e2aa12c9e7c4063e0b8a6e7d3"
+   },
+   "source": null
+  },
+  "label_definition": "sha256:4b671d8abfe874f0749ca2764a54bc61284257cc0fbe02ef78df12da6e6fbf0f",
+  "manifest": "sha256:40277b22048f175eab04e7a1a4bea9b2a6bb8fb8aeae4a700240d928f0fdd4ae",
+  "profile": "sha256:2f4232e7c3338fb7500e4a9b18173baf365022c9be2bdaf0ee17bf8126a4dd5e",
+  "reports": {
+   "evaluation": "sha256:df22e0f8fc077e8d3b78f35875d33f2dc67048f3d570a10c02f1629cd724e66b",
+   "strength": "sha256:fc4b25e8146fa7069f0bcac7ba218e522d0e1a30dc3dfce1f93e360dc6c40d55"
+  },
+  "scored": {
+   "graphs_checked": 2740,
+   "packets": "sha256:925cb21626fa0668183db62592412adcd6d79131a1b10af0fe3f50400685dd99",
+   "packets_verified": 2740,
+   "problems": []
+  },
+  "selection": {
+   "code": {
+    "examples/tf2/tf2bench.py": "sha256:e2cee0b3184aa80efc9e5242cd6c571ca3c4cb0e9487e76e72acf6457c1335bc",
+    "examples/tf2/tf2logs.py": "sha256:8c47359f6386d2eb4a2f3a720525c923304687b4cfcd2148db90c233acaf19aa"
+   },
+   "parameters": "sha256:08dfabb303a84c0f6b41c9d5ddf225c68e46fdad0baeda3e7781af6dfd8a0351"
+  },
+  "split": {
+   "digest": "sha256:3dc82937d23185db4f46c2d694e22dc0bb94c6ea9d79c54dc1038d0d609a2bd5"
+  },
+  "strength": {
+   "digest": "sha256:b7064f1bc53975008000612e6c0888af398d9146b61420734e03f4e32ab93f48",
+   "estimates": "sha256:b280364acadf1062bc476c3566a66c90ae0e33e24341defeb25387564c5ac2d9",
+   "schema": "fpsdet.strength/1"
+  }
+ },
+ "dataset": {
+  "class": "real",
+  "draw": 6,
+  "id": "tf2-rgl-v2",
+  "manifest": "sha256:40277b22048f175eab04e7a1a4bea9b2a6bb8fb8aeae4a700240d928f0fdd4ae"
+ },
+ "format": "fpsdet.benchmark-result/1",
+ "published": {
+  "decisions": {
+   "cheater": {
+    "clean": 131,
+    "insufficient_data": 7,
+    "review": 10,
+    "watch": 41
+   },
+   "not banned": {
+    "clean": 1511,
+    "insufficient_data": 122,
+    "review": 0,
+    "watch": 56
+   },
+   "other ban": {
+    "clean": 748,
+    "insufficient_data": 81,
+    "review": 0,
+    "watch": 23
+   },
+   "vac": {
+    "clean": 10,
+    "insufficient_data": 0,
+    "review": 0,
+    "watch": 0
+   }
+  },
+  "decisions_reproduce": false,
+  "where": null
+ },
+ "semantic": {
+  "cases": 2740,
+  "decisions": {
+   "clean": 2400,
+   "insufficient_data": 210,
+   "review": 10,
+   "watch": 120
+  },
+  "decisions_digest": "sha256:cb52e5469bd7aa919e69ef0a860e1f15d26a97cd53cd22a08da543ae3f5ae6de",
+  "detector_status": {
+   "account_jump": "not_observable",
+   "accuracy": "measured",
+   "acquire_timing": "not_observable",
+   "extra": "descriptive_only",
+   "fire_rate": "not_observable",
+   "geometry_rate": "not_observable",
+   "headshot_rate": "measured",
+   "hidden": "not_observable",
+   "leftover": "not_observable",
+   "median_distance": "not_observable",
+   "metronome": "not_observable",
+   "mirror": "not_observable",
+   "occluded_motion_replay": "not_observable",
+   "quiet_aim": "not_observable",
+   "rank_tail": "measured",
+   "recoil_floor": "not_observable",
+   "recoil_learned": "not_observable",
+   "speed": "not_observable",
+   "supporting_extra": "descriptive_only",
+   "view_snaps": "not_observable",
+   "voice": "not_observable",
+   "wire": "not_observable"
+  },
+  "eligibility_digest": "sha256:71fa6eb728b4434023f5bba73e681d9172120ac2e35209ba6783c3b55bad4b73",
+  "evaluation_statistics": "sha256:a6dc5120cfcb2007188ed88694734bb3f48b0f96d427322c5dd69372782b3177",
+  "observations_digest": "sha256:f165cfcb425491f7c7cc070ae536ad53d014ab4acbba5da636b5ddc546a45d40",
+  "seals_digest": "sha256:4ba58398944fd40e84f7c684de9304c728b6285ce736cc627f657610d8e4e2f7",
+  "split": {
+   "baseline_only": {
+    "unlabelled": 1578
+   },
+   "development": {
+    "cheater": 86,
+    "not banned": 873,
+    "other ban": 394,
+    "vac": 5
+   },
+   "evaluation": {
+    "cheater": 103,
+    "not banned": 816,
+    "other ban": 458,
+    "vac": 5
+   },
+   "not_scored": {
+    "cheater": 39,
+    "not banned": 425,
+    "other ban": 373,
+    "vac": 14
+   }
+  },
+  "stability": {
+   "accuracy": "replicated",
+   "extra": "unsupported",
+   "headshot_rate": "replicated",
+   "rank_tail": "replicated",
+   "supporting_extra": "unsupported"
+  },
+  "strength_estimates": "sha256:b280364acadf1062bc476c3566a66c90ae0e33e24341defeb25387564c5ac2d9"
+ },
+ "digest": "sha256:4b8cb104353a90a8cbc0fd775ea8b3cbf534727122adc7e6834fa4627c486270",
+ "environment": {
+  "python": "3.12.3",
+  "implementation": "CPython",
+  "platform": "Linux",
+  "machine": "x86_64",
+  "fpsdet": "0.3.0",
+  "cryptography": "41.0.7"
+ },
+ "timings_s": {
+  "verify_inputs": 0.72,
+  "score": 45.78,
+  "verify_packets": 0.29,
+  "evaluate": 8.68,
+  "strength": 0.19
+ }
+}

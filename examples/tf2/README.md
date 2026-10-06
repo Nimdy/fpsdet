@@ -1,5 +1,7 @@
 # fpsdet on real Team Fortress 2 matches
 
+> **Historical record.** This page documents the published run of 2026-10-04, benchmark dataset `tf2-rgl-v1`: one baseline draw, chosen by the curator's private pseudonym key, which only that key can rebuild. Its numbers are historical real data, not the benchmark's result. FPSDET Benchmark v1 measures the same kind of data as `tf2-rgl-v2`, selected by public rules with no key, over nine fixed baseline draws, and reports the median and the range: see [docs/benchmark.md](../../docs/benchmark.md). `examples/tf2/tf2bench.py` builds it.
+
 The CS2 example could not show detection: CS2CD has one match per player, and fpsdet judges an account over many. This one can try. It uses two public sources:
 
 - **[logs.tf](https://logs.tf)** keeps the match logs that TF2 community servers upload. With the server's supplemental stats plugin, each log has every player's shots and hits per weapon, and headshots on sniper rifles. These are counted by the server.
@@ -25,7 +27,7 @@ python examples/tf2/tf2logs.py fetch --out $DATA --per-account 20   # each cheat
 python examples/tf2/tf2logs.py honest --out $DATA          # 150 honest players per half, 20 matches each
 python examples/tf2/tf2logs.py convert $DATA               # baseline.ndjson, scored.ndjson, labels.json
 
-# The same steps, with every parameter pinned and every output checked: fpsdet benchmark fetch/prepare/run --dataset tf2
+# The same steps, with every parameter pinned and every output checked: fpsdet benchmark fetch/prepare/run --dataset tf2-v1
 # (docs/benchmark.md). The published run fetched 20 matches per account; the fetcher's default is 40.
 
 PYTHONPATH=src python -m fpsdet baseline $DATA/baseline.ndjson --profile examples/tf2/tf2.json --screen-matches --out $DATA/cohort.json
@@ -41,6 +43,21 @@ PYTHONPATH=src python -m fpsdet evaluate run $DATA/cases/review-index.json --lab
 python examples/tf2/tf2logs.py desk $DATA/cases --labels $DATA/labels.json
 PYTHONPATH=src python -m fpsdet demo
 ```
+
+## The benchmark's version: no key, nine draws
+
+`tf2logs.py` keys every id with a secret that never leaves your machine, and that key also decides which never-banned players are extra and which half builds the baseline. So nobody else can rebuild your run, and the published run is one draw nobody else can repeat. `tf2bench.py` builds the benchmark's dataset, `tf2-rgl-v2`, by public rules only:
+
+```bash
+DATA=~/tf2v2
+python examples/tf2/tf2logs.py cohort --out $DATA                       # RGL's ban list
+python examples/tf2/tf2bench.py select --out $DATA                      # frozen at 2026-10-03: labelled accounts, 300 extra never-banned players in a public hash order, and their matches
+python examples/tf2/tf2bench.py sources $DATA --out $DATA/sources.json  # the frozen sources as digests: compare with benchmark/datasets/tf2-rgl-v2.json
+python examples/tf2/tf2bench.py convert $DATA --draw 0 --out $DATA/draws/draw-0   # one of the nine baseline draws
+# Or every step, every draw, checked against the manifest: fpsdet benchmark fetch/prepare/run --dataset tf2
+```
+
+Its ids are `tfb-` and a public hash of the SteamID, the same for everyone, so two rebuilds agree on who is who. That is not pseudonymization: anyone holding a SteamID can compute its id. Never publish anything per player from it, and never use it to store or share real player ids; use a keyed hash with a secret key for that, as `tf2logs.py` does.
 
 ## Who is in it
 

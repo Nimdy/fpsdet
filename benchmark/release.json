@@ -1,0 +1,147 @@
+{
+ "benchmark": "fpsdet.benchmark/1",
+ "capabilities": {
+  "path": "benchmark/capabilities.json",
+  "sha256": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6"
+ },
+ "claims": {
+  "digest": "sha256:8ea58c6f3fd5e8c3578e98af66d69290942cefdee152a9709f9c877dab62ae41",
+  "path": "benchmark/claims.json"
+ },
+ "datasets": [
+  {
+   "archival": {
+    "class": "not applicable",
+    "why": "built at run time by the repository's own code; there is no source data to archive."
+   },
+   "class": "synthetic",
+   "id": "synthetic-v1",
+   "manifest": {
+    "digest": "sha256:6d091db274e57c14f15a0e74248260c2466c131b85497fee62d01d8094d565eb",
+    "path": "benchmark/datasets/synthetic-v1.json"
+   },
+   "result": {
+    "digest": "sha256:98b0d3bf54585f9a8ee3acd1c8bc72bd7ec326695b82b83a19f93b035c320414",
+    "path": "benchmark/results/synthetic-v1.json"
+   },
+   "role": "release"
+  },
+  {
+   "archival": {
+    "class": "manifest/digest only; must fetch from upstream",
+    "why": "neither logs.tf nor RGL grants redistribution, and the logs carry names and SteamIDs. The manifest pins the frozen source as digests, so a rebuild knows whether upstream still serves the same data."
+   },
+   "class": "real",
+   "draws": {
+    "ids": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8
+    ],
+    "results": {
+     "0": "sha256:43a1e53119301f7eea0b757bdad1d09bc7be43c0e8a610410569936f79a1eef3",
+     "1": "sha256:51eba4dc0621d33b479acfa519c6ef19002d53fced127f0d85ee5963493dc061",
+     "2": "sha256:dc711225171609a9f1c5e1ac45b6be06b5f819cfca951316f22ac273e498c9a9",
+     "3": "sha256:7ae3add0b7c36530706766f96e144fa5ca59c8237f8aa520f3237c1818f7d24b",
+     "4": "sha256:e3f239637fc38e930af2c40ad555ac521a407682e54081aae8bef041a141a114",
+     "5": "sha256:0051cfeaf0411f8a30192d5cfc8d4b247fc605524bf0d27477983ef356948250",
+     "6": "sha256:4b8cb104353a90a8cbc0fd775ea8b3cbf534727122adc7e6834fa4627c486270",
+     "7": "sha256:8ed175285d0538231c327ddf96f620dc74eec71c8b811e0af626cc75b11d43e5",
+     "8": "sha256:03ac5919a4c503f109d6155cdf3ed89f550a35aff9cb960b6a3491c5a8e31c9a"
+    },
+    "spread": {
+     "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2",
+     "path": "benchmark/sensitivity/tf2-rgl-v2.json"
+    }
+   },
+   "id": "tf2-rgl-v2",
+   "manifest": {
+    "digest": "sha256:40277b22048f175eab04e7a1a4bea9b2a6bb8fb8aeae4a700240d928f0fdd4ae",
+    "path": "benchmark/datasets/tf2-rgl-v2.json"
+   },
+   "role": "release"
+  },
+  {
+   "archival": {
+    "class": "raw source legally redistributable",
+    "why": "CC BY 4.0 allows copies and derivatives with attribution, so the prepared derivative is redistributable too. None is committed: the pinned revision on Hugging Face is the archive, and the source list's digests say whether a fetch got it."
+   },
+   "class": "real",
+   "id": "cs2cd-v2",
+   "manifest": {
+    "digest": "sha256:76af5b2e292921c5f44a0a224947605f623219b507b24a15a39e126fb9c8fb82",
+    "path": "benchmark/datasets/cs2cd-v2.json"
+   },
+   "result": {
+    "digest": "sha256:e840edb0b7c96b3fb463831914f5a07719e04e067ac0beb5ad46787985b3f913",
+    "path": "benchmark/results/cs2cd-v2.json"
+   },
+   "role": "release"
+  },
+  {
+   "archival": {
+    "class": "manifest/digest only; must fetch from upstream",
+    "why": "as tf2-rgl-v2, and its player ids and baseline draw also need the curator's private key, so only the committed artifacts and digests can be checked by anyone else."
+   },
+   "class": "real",
+   "id": "tf2-rgl-v1",
+   "manifest": {
+    "digest": "sha256:b7b094a2863b2033fe855cbd298cfcc3e1609b8259eb32140e7d66d4267c121b",
+    "path": "benchmark/datasets/tf2-rgl-v1.json"
+   },
+   "result": {
+    "digest": "sha256:bb41b1404bd4198d278e42d7d083a02e1ed6b8c6b4aa5f7ec4a0b0792744bd7b",
+    "path": "benchmark/results/tf2-rgl-v1.json"
+   },
+   "role": "historical",
+   "superseded_by": "tf2-rgl-v2"
+  },
+  {
+   "archival": {
+    "class": "raw source legally redistributable",
+    "why": "as cs2cd-v2; its fetcher did not pin a revision, which cs2cd-v2 fixes."
+   },
+   "class": "real",
+   "id": "cs2cd-v1",
+   "manifest": {
+    "digest": "sha256:1f093b1587215a0451198e0361c1c095f2ea2b038352be709785b77dd205b2db",
+    "path": "benchmark/datasets/cs2cd-v1.json"
+   },
+   "result": {
+    "digest": "sha256:88263520c366c1cc23c40e75cec1db3b47df7ab983b55fc03fa678739a85248e",
+    "path": "benchmark/results/cs2cd-v1.json"
+   },
+   "role": "historical",
+   "superseded_by": "cs2cd-v2"
+  }
+ ],
+ "expected": {
+  "path": "benchmark/expected.json",
+  "sha256": "sha256:35ce83f8ea61516fe5cd429cdb0d3d19a545f8f4523a6d589fef58f2ba55ec71"
+ },
+ "format": "fpsdet.benchmark-release/1",
+ "historical_sensitivity": {
+  "tf2-rgl-v1": {
+   "digest": "sha256:2a0680dc4136f3bd3cbd33ad58ab9a774d3c94ded3821bcee9e694bf2d0c8b40",
+   "path": "benchmark/sensitivity/tf2-rgl-v1.json"
+  }
+ },
+ "release": {
+  "cs2": "cs2cd-v2",
+  "synthetic": "synthetic-v1",
+  "tf2": "tf2-rgl-v2"
+ },
+ "report": {
+  "path": "docs/benchmark.md",
+  "sha256": "sha256:6cbe8d7471586c0ab4f50c25dd4b1329e4c96d74e23a888d8d5fbc0edbaeb7c4"
+ },
+ "title": "FPSDET Benchmark v1",
+ "version_note": "FPSDET Benchmark v1 is a version of the benchmark: its datasets, selections, draws and expectations. It is not a version of fpsdet, whose own version (0.3.0 at this release) changes independently; a later fpsdet is checked against the same benchmark and reported as MATCH, PROVENANCE_ONLY or DRIFT.",
+ "digest": "sha256:175ec12b3eafa4d83f0f4a0902e0ab67fc118e827a897522caab6198f3eefd4d"
+}

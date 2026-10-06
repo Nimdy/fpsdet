@@ -29,32 +29,64 @@ class ManifestTest(unittest.TestCase):
             found = bm.read_json(ROOT / entry["manifest"])
             self.assertEqual(bm.check_manifest(found), [], entry["id"])
             self.assertEqual(bm.manifest(entry["id"])["id"], entry["id"])
-        self.assertEqual([bm.manifest(name)["id"] for name in ("synthetic", "tf2", "cs2")], ["synthetic-v1", "tf2-rgl-v1", "cs2cd-v1"])
+        self.assertEqual([bm.manifest(name)["id"] for name in ("synthetic", "tf2", "cs2", "tf2-v1", "cs2-v1")],
+                         ["synthetic-v1", "tf2-rgl-v2", "cs2cd-v2", "tf2-rgl-v1", "cs2cd-v1"])
+        self.assertEqual(bm.current(), ["synthetic-v1", "tf2-rgl-v2", "cs2cd-v2"])
+        historical = {entry["id"]: entry["superseded_by"] for entry in bm.definition()["datasets"] if entry.get("historical")}
+        self.assertEqual(historical, {"tf2-rgl-v1": "tf2-rgl-v2", "cs2cd-v1": "cs2cd-v2"})
 
     def test_real_manifests_name_their_source_licence_labels_and_selection(self):
-        for name in ("tf2", "cs2"):
+        for name in ("tf2", "cs2", "tf2-v1", "cs2-v1"):
             found = bm.manifest(name)
             self.assertTrue(found["source"]["origins"] and found["source"]["fetched"] and found["source"]["mutable"])
             self.assertTrue(found["license"]["terms"] and found["license"]["committed"] and found["license"]["attribution"])
             self.assertTrue(found["pseudonymization"]["method"])
             self.assertIn("not ground truth", found["label_semantics"]["statement"])
             self.assertTrue(found["selection"]["rules"])
-            self.assertTrue(all(isinstance(step, dict) for step in found["acquisition"]["steps"] + found["prepare"]["steps"]))
-            for key in ("events", "labels", "cohort"):
-                self.assertTrue(found["inputs"][key], (name, key))
+            self.assertTrue(all(isinstance(step, dict) for step in found["acquisition"]["steps"] + found["prepare"]["steps"] + found["prepare"].get("draw_steps", [])))
+            pinned = [found["inputs"]["draws"][str(draw)] for draw in bm.draws_of(found)] if bm.draws_of(found) else [found["inputs"]]
+            for inputs in pinned:
+                for key in ("events", "labels", "cohort"):
+                    self.assertTrue(inputs[key], (name, key))
+        for name in ("tf2", "cs2"):
+            self.assertIn(bm.definition()["archival"][bm.dataset_id(name)]["class"].split(";")[0], (
+                "raw source legally redistributable", "prepared derivative redistributable", "manifest/digest only", "must fetch from upstream"))
 
     def test_the_tf2_fetch_pins_the_parameters_the_published_run_used(self):
-        steps = [step["run"] for step in bm.manifest("tf2")["acquisition"]["steps"]]
+        steps = [step["run"] for step in bm.manifest("tf2-v1")["acquisition"]["steps"]]
         fetch = next(step for step in steps if "fetch" in step)
         self.assertEqual(fetch[fetch.index("--per-account") + 1], "20")
         self.assertEqual(fetch[fetch.index("--min-logs") + 1], "20")
+        select = next(step["run"] for step in bm.manifest("tf2")["acquisition"]["steps"] if "select" in step["run"])
+        for option, value in (("--per-account", "20"), ("--min-logs", "20"), ("--players", "300"), ("--freeze", "2026-10-03")):
+            self.assertEqual(select[select.index(option) + 1], value)
 
     def test_no_raw_or_original_ids_are_committed(self):
-        found = bm.manifest("tf2")
-        self.assertIn("Nothing downloaded is committed", found["license"]["committed"])
+        for name in ("tf2", "tf2-v1"):
+            self.assertIn("Nothing downloaded is committed", bm.manifest(name)["license"]["committed"])
         for path in (ROOT / "benchmark").rglob("*.json"):
             text = path.read_text(encoding="utf-8")
             self.assertIsNone(re.search(r"\[U:1:\d+\]|7656119\d{10}", text), path)  # no SteamID3 or SteamID64
+            self.assertIsNone(re.search(r"tfb-[0-9a-f]{12}", text), path)  # and no public benchmark id: anyone can compute one from a SteamID
+        for path in [*(ROOT / "examples").rglob("*.json"), *(ROOT / "examples").rglob("*.md"), ROOT / "README.md", *(ROOT / "docs").rglob("*.md")]:
+            self.assertIsNone(re.search(r"tfb-[0-9a-f]{12}", path.read_text(encoding="utf-8")), path)
+
+    def test_the_cs2_fetch_reads_one_pinned_revision(self):
+        found = bm.manifest("cs2")
+        sources = bm.read_json(ROOT / found["source"]["identity"]["sources"])
+        self.assertRegex(sources["revision"], r"^[0-9a-f]{40}$")
+        self.assertEqual(found["source"]["revision"], sources["revision"])
+        self.assertEqual(found["source"]["identity"]["sources_digest"], bm.sources_digest(sources))
+        for step in found["acquisition"]["steps"]:
+            self.assertIn("examples/cs2/cs2fetch.py", step["run"])
+            self.assertIn("benchmark/sources/cs2cd-v2.json", step["run"])
+        for split, pick in sources["selection"].items():
+            files = sources["files"][split]
+            self.assertEqual(len([name for name in files if name.endswith(".json")]), pick["count"])
+            self.assertTrue(all(len(entry.get("git_blob_sha1") or entry.get("lfs_sha256")) in (40, 64) for entry in files.values()))
+        fetcher = (ROOT / "examples" / "cs2" / "cs2fetch.py").read_text(encoding="utf-8")
+        self.assertIn("RevisionNotFoundError", fetcher)
+        self.assertNotIn('"main"', fetcher)
 
 
 class CompareTest(unittest.TestCase):
@@ -122,14 +154,25 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(found["status"], "ENVIRONMENT_ONLY")
 
     def test_a_real_input_change_is_explained_exactly(self):
-        found = bm.manifest("tf2")
+        found = bm.manifest("tf2-v1")
         now = copy.deepcopy(found["inputs"])
         now["labels"]["digest"] = "sha256:" + "5" * 64
         now["key"] = "sha256:" + "6" * 64
         changes = {change["input"]: change for change in bm.input_changes(found, now)}
         self.assertEqual(changes["labels"]["category"], "label changed")
         self.assertIn("pseudonym key is not the curator's", changes["key"]["detail"])
+        self.assertEqual(changes["key"]["category"], "identity changed")
         self.assertEqual(bm.input_changes(found, found["inputs"]), [])
+
+    def test_code_source_selection_and_identity_drift_are_told_apart(self):
+        fields = {path: category for path, category, _kind in bm.FIELDS}
+        self.assertEqual(fields["chain.selection.code"], "code changed")
+        self.assertEqual(fields["chain.selection.parameters"], "selection changed")
+        self.assertEqual(fields["chain.inputs.key"], "identity changed")
+        parts = bm.manifest("tf2")["source"]["identity"]["parts"]
+        self.assertEqual({name: part["category"] for name, part in parts.items()},
+                         {"bans": "source changed", "logs": "source changed", "cheaters": "selection changed", "honest": "selection changed",
+                          "freeze": "selection changed", "format": "code changed"})
 
 
 class PreparedInputTest(unittest.TestCase):
@@ -167,6 +210,84 @@ class PreparedInputTest(unittest.TestCase):
             self.assertNotEqual(bm.key_commitment(one), bm.key_commitment(two))
             self.assertNotIn("00" * 32, bm.key_commitment(one))
             self.assertIsNone(bm.key_commitment(Path(folder) / "missing.key"))
+
+
+class SourceTest(unittest.TestCase):
+    """prepare checks a download against the frozen source part by part, and never builds on a changed one
+    as if it were the same."""
+
+    def test_a_changed_tf2_source_is_named_with_both_digests(self):
+        found = bm.manifest("tf2")
+        pinned = found["inputs"]["source"]
+        with tempfile.TemporaryDirectory() as folder:
+            data = Path(folder)
+            bm.write_json(data / "sources.json", pinned)
+            self.assertEqual(bm.source_changes(found, data), [])
+            moved = copy.deepcopy(pinned)
+            moved["bans"]["digest"] = "sha256:" + "9" * 64
+            moved["honest"]["digest"] = "sha256:" + "8" * 64
+            bm.write_json(data / "sources.json", moved)
+            changes = {change["input"]: change for change in bm.source_changes(found, data)}
+            self.assertEqual(set(changes), {"bans", "honest"})
+            self.assertEqual((changes["bans"]["category"], changes["bans"]["pinned"], changes["bans"]["found"]),
+                             ("source changed", pinned["bans"]["digest"], "sha256:" + "9" * 64))
+            self.assertEqual(changes["honest"]["category"], "selection changed")
+            self.assertTrue(all(change["upstream"] for change in changes.values()))
+            self.assertIn("still verify a cached copy of the frozen source", bm.frozen_source(list(changes.values())))
+            (data / "sources.json").unlink()
+            self.assertEqual(bm.source_changes(found, data)[0]["category"], "source changed")
+
+    def test_a_cs2_download_needs_the_pinned_fetchers_receipts(self):
+        found = bm.manifest("cs2")
+        sources = bm.read_json(ROOT / found["source"]["identity"]["sources"])
+        with tempfile.TemporaryDirectory() as folder:
+            data = Path(folder)
+            self.assertEqual({change["input"] for change in bm.source_changes(found, data)}, set(sources["selection"]))
+            for split in sources["selection"]:
+                rows = [{"file": name, "checked": "bytes", "expected": entry, "found": entry} for name, entry in sources["files"][split].items()]
+                bm.write_json(data / "receipts" / f"{split}.json", {"revision": sources["revision"], "status": "MATCH", "changed": [], "files": rows})
+            self.assertEqual(bm.source_changes(found, data), [])
+            receipt = bm.read_json(data / "receipts" / "with_cheater_present.json")
+            receipt["revision"] = "0" * 40
+            bm.write_json(data / "receipts" / "with_cheater_present.json", receipt)
+            changes = bm.source_changes(found, data)
+            self.assertEqual([(change["input"], change["category"]) for change in changes], [("with_cheater_present", "source changed")])
+
+
+class DrawsTest(unittest.TestCase):
+    """tf2-rgl-v2's result is every predeclared draw and the spread across them, never one draw."""
+
+    def test_the_draws_were_fixed_before_any_was_run(self):
+        draws = bm.manifest("tf2")["draws"]
+        self.assertEqual(draws["ids"], list(range(9)))
+        self.assertIn("before any draw", draws["fixed"])
+        for words in ("median", "lowest and highest", "every draw listed", "none is dropped"):
+            self.assertIn(words, draws["headline"])
+
+    def test_a_spread_is_the_median_and_range_and_never_a_mean(self):
+        found = bm.spread([3.0, 100.0, 1.0])
+        self.assertEqual((found["median"], found["min"], found["max"], found["values"]), (3.0, 1.0, 100.0, [3.0, 100.0, 1.0]))
+        self.assertEqual(bm.spread([None, 2.0, 4.0])["missing"], 1)
+        self.assertNotIn("mean", json.dumps(bm.spread([1.0, 2.0, 4.0])))
+
+    def test_the_committed_spread_cannot_drop_choose_or_alter_a_draw(self):
+        found = bm.manifest("tf2")
+        artifact = bm.read_json(ROOT / found["artifacts"]["sensitivity"])
+        self.assertEqual(bm.draws_problems(found, artifact, {}), [])
+
+        def redigest(edited):
+            body = {key: value for key, value in edited.items() if key != "digest"}
+            return {**body, "digest": bm.digest("draws", body)}
+
+        best = max(artifact["draws"], key=lambda row: row["numbers"]["ratio"])
+        chosen = redigest({**artifact, "draws": [best], "across": bm.across_draws([best])})
+        self.assertIn("none may be dropped or added", " ".join(bm.draws_problems(found, chosen, {})))
+        altered = copy.deepcopy(artifact)
+        altered["draws"][0]["numbers"]["ratio"] = 99.0
+        self.assertIn("does not recompute", " ".join(bm.draws_problems(found, redigest(altered), {})))
+        record = {row["draw"]: row for row in copy.deepcopy(artifact["draws"])}
+        record[0]["outputs"]["decisions"] = "sha256:" + "0" * 64
+        self.assertIn("draw 0 in the spread is not what", " ".join(bm.draws_problems(found, artifact, record)))
 
 
 class SyntheticTest(unittest.TestCase):
@@ -257,8 +378,10 @@ class PublishedBenchmarkTest(unittest.TestCase):
 
     def test_what_a_dataset_cannot_observe_is_never_a_zero(self):
         ctx = bm.context()
+        views = bm.real_views(ctx)
+        self.assertEqual(sorted(views), ["cs2cd-v2", "tf2-rgl-v2"])
         for row in bm.coverage_matrix(ctx):
-            for dataset in ctx["evaluations"]:
+            for dataset in views:
                 cell = row[dataset]
                 if not cell["observable"]:
                     self.assertEqual(cell["status"], "not_observable", (row["detector"], dataset))
@@ -289,6 +412,56 @@ class PublishedBenchmarkTest(unittest.TestCase):
         self.assertTrue(all(other["ratio"] < published["ratio"] for other in summaries.values()))
         self.assertIn("most favourable of the six draws", (ROOT / "examples" / "tf2" / "README.md").read_text(encoding="utf-8"))
         self.assertIn("ranks 1 of 6 draws", (ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8"))
+
+    def test_the_tf2_result_is_the_spread_and_15x_is_never_alone(self):
+        report = (ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        historical = bm.read_json(ROOT / "benchmark" / "sensitivity" / "tf2-rgl-v1.json")
+        published = f"{next(row for row in historical['draws'] if row['draw'] == 'curator')['summary']['ratio']:.1f}x"
+        self.assertEqual(published, "15.0x")
+        for name, text in (("docs/benchmark.md", report), ("README.md", readme)):
+            for line in text.splitlines():
+                if published in line:
+                    self.assertRegex(line, r"one (baseline )?draw|1 draw|from [0-9.]+x to 15\.0x", (name, line))
+        begin, end = bm._markers("tf2")
+        block = readme[readme.index(begin):readme.index(end)]
+        self.assertIn("predeclared baseline draws", block)
+        self.assertIn("at the median, from", block)
+        self.assertLess(block.index("[benchmark v1 real data]"), block.index("[historical real data]"))
+        order = ["**What the labels are.**", "**How much the result depends on the baseline draw.**", "**The result: the median and the range",
+                 "**The historical published draw: one draw, not the result.**", "**Each detector across the draws.**", "**What this data cannot show.**"]
+        self.assertEqual(sorted(order, key=report.index), order)
+
+    def test_every_statement_has_one_class(self):
+        claims = bm.read_json(ROOT / "benchmark" / "claims.json")
+        self.assertEqual(claims["format"], "fpsdet.benchmark-claims/1")
+        self.assertEqual(set(claims["classes"]), {"controlled_fixture", "historical_real_data", "benchmark_v1_real_data", "architecture_limit", "unmeasured"})
+        self.assertTrue(all(claim["class"] in claims["classes"] for claim in claims["claims"]))
+        self.assertEqual({claim["class"] for claim in claims["claims"]}, set(claims["classes"]))
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for name in ("tf2", "detectors", "limits"):
+            begin, end = bm._markers(name) if name != "limits" else (bm.README_BEGIN, bm.README_END)
+            lines = [line for line in readme[readme.index(begin) + len(begin):readme.index(end)].splitlines() if line.strip()]
+            self.assertTrue(lines, name)
+            for line in lines:
+                self.assertRegex(line, r"^- \*\*\[(controlled fixture|benchmark v1 real data|historical real data|architecture limit|unmeasured)\]\*\* ", line)
+                self.assertIn(line[line.index("** ") + 3:], [claim["text"] for claim in claims["claims"]])
+
+    def test_the_release_manifest_binds_every_part(self):
+        release = bm.read_json(ROOT / "benchmark" / "release.json")
+        self.assertEqual((release["format"], release["title"]), ("fpsdet.benchmark-release/1", "FPSDET Benchmark v1"))
+        self.assertEqual(release["release"], {"synthetic": "synthetic-v1", "tf2": "tf2-rgl-v2", "cs2": "cs2cd-v2"})
+        self.assertIn("not a version of fpsdet", release["version_note"])
+        self.assertEqual(release["digest"], bm.digest("release", {key: value for key, value in release.items() if key != "digest"}))
+        for part in ("expected", "capabilities"):
+            self.assertEqual(release[part]["sha256"], bm.sha256_file(ROOT / release[part]["path"]))
+        self.assertEqual(release["claims"]["digest"], bm.read_json(ROOT / release["claims"]["path"])["digest"])
+        self.assertEqual(release["report"]["sha256"], bm.sha256_file(ROOT / release["report"]["path"]))
+        roles = {item["id"]: item["role"] for item in release["datasets"]}
+        self.assertEqual(roles, {"synthetic-v1": "release", "tf2-rgl-v2": "release", "cs2cd-v2": "release", "tf2-rgl-v1": "historical", "cs2cd-v1": "historical"})
+        tf2 = next(item for item in release["datasets"] if item["id"] == "tf2-rgl-v2")
+        self.assertEqual(sorted(tf2["draws"]["results"]), [str(draw) for draw in range(9)])
+        self.assertTrue(all(item["archival"]["class"] for item in release["datasets"]))
 
     def test_capability_evidence_is_worked_out_not_declared(self):
         rows = {row["id"]: row for row in bm.capability_matrix(bm.context())[0]}

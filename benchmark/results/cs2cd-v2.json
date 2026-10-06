@@ -1,0 +1,173 @@
+{
+ "benchmark": "fpsdet.benchmark/1",
+ "chain": {
+  "cohort": "sha256:143ce6f0e26bd4df6bfcde2f3f7ea84d96245aea321e982d380e8b1d68108fa6",
+  "detector": "sha256:a75b28fb3b00fa5868444318d44c7c4d235e94a76a85a96fad4f1f040b80ad81",
+  "evaluation": {
+   "digest": "sha256:e83d92971ff3df8032ab788e69bc3bce42ebdb76b889cbb06e0a9923670aa291",
+   "schema": "fpsdet.evaluation/2",
+   "statistics": "sha256:f9b864470ea23834ac1f503a0b27a8e85f5a14c01b8f235eda20f968ae58e839"
+  },
+  "input_errors": 0,
+  "inputs": {
+   "baseline": {
+    "sha256": "sha256:03ec07e60157d1fa06ceb2f359fa5bbe0846ca0779040c0c5ec08190c182cdb3"
+   },
+   "cohort": {
+    "digest": "sha256:143ce6f0e26bd4df6bfcde2f3f7ea84d96245aea321e982d380e8b1d68108fa6",
+    "players": 887
+   },
+   "events": {
+    "events": 4071829,
+    "sha256": "sha256:3fc90f3708712dd7684cffc192358d82fa6d3da52934a799eed27af7f386e537"
+   },
+   "key": null,
+   "labels": {
+    "count": 2729,
+    "digest": "sha256:582220fa0489ba421a73f51b8347772a776f827fb3f2801fefa13f6a7c8a1930",
+    "sha256": "sha256:23ead1ad79072f301144ca5a5f9c61d1936cea46a21dc432f185214addc2727e"
+   },
+   "source": null
+  },
+  "label_definition": "sha256:7d0c4cfa19b01cd110930959b1325a7cf449f90e7ef8610c001e45e8e0b7d55c",
+  "manifest": "sha256:76af5b2e292921c5f44a0a224947605f623219b507b24a15a39e126fb9c8fb82",
+  "profile": "sha256:e580d90f46d8b9a37195e8f636747af409fd517b9b60cf80bea25fa86c228366",
+  "reports": {
+   "evaluation": "sha256:7cb780ddbef0d28afbcec8c0ed4579d638b91d1cd9fd6a703dad7c8695b934bb",
+   "strength": "sha256:1eec9e3483738768a99f0b22213279d2094dafaef4eaf4f249a3594f484b4c49"
+  },
+  "scored": {
+   "graphs_checked": 1529,
+   "packets": "sha256:1fddbfedecaf603807a67a681cb0d4f85a6c3f35abfe6a9ded6155e93a29fa44",
+   "packets_verified": 1529,
+   "problems": []
+  },
+  "selection": {
+   "code": {
+    "examples/cs2/cs2cd.py": "sha256:7b53e9e382fb6a79d45780183e9e16fb56753370c607beb9e872ca6e5b39013b",
+    "examples/cs2/cs2fetch.py": "sha256:f674908f390e693d07c59df600b206bff68efbea1c2f9265b4342a93fe015704"
+   },
+   "parameters": "sha256:1a246af5c8083a77210fa05995c53dbc35b1cada822b1661bf2afae95a3ca1a2"
+  },
+  "split": {
+   "digest": "sha256:ce198f24856b735c9b6196cc28c7417026922b3b71f1eab35b3a78b669422d2d"
+  },
+  "strength": {
+   "digest": "sha256:31c7a2c80465d37f5902c83184e980d0850c5fc5be91cc8b5150c4b07185ecf6",
+   "estimates": "sha256:d18365e4af87ab8973514203e89e8fb7f059804ece986a33fed9186335759b24",
+   "schema": "fpsdet.strength/1"
+  }
+ },
+ "dataset": {
+  "class": "real",
+  "id": "cs2cd-v2",
+  "manifest": "sha256:76af5b2e292921c5f44a0a224947605f623219b507b24a15a39e126fb9c8fb82"
+ },
+ "format": "fpsdet.benchmark-result/1",
+ "published": {
+  "decisions": {
+   "cheater": {
+    "clean": 92,
+    "insufficient_data": 398,
+    "review": 0,
+    "watch": 14
+   },
+   "clean, reviewed match": {
+    "clean": 302,
+    "insufficient_data": 273,
+    "review": 0,
+    "watch": 0
+   },
+   "clean, unreviewed match": {
+    "clean": 435,
+    "insufficient_data": 11,
+    "review": 0,
+    "watch": 4
+   }
+  },
+  "decisions_reproduce": true,
+  "where": "examples/cs2/README.md"
+ },
+ "semantic": {
+  "cases": 1529,
+  "decisions": {
+   "clean": 829,
+   "insufficient_data": 682,
+   "watch": 18
+  },
+  "decisions_digest": "sha256:653f26622ba1a7c77eac63dcb0c03a337a381f6fbd21ac99a3e258561f342435",
+  "detector_status": {
+   "account_jump": "not_observable",
+   "accuracy": "measured",
+   "acquire_timing": "not_observable",
+   "extra": "not_observable",
+   "fire_rate": "not_observable",
+   "geometry_rate": "insufficient_sample",
+   "headshot_rate": "descriptive_only",
+   "hidden": "not_observable",
+   "leftover": "not_observable",
+   "median_distance": "insufficient_sample",
+   "metronome": "not_observable",
+   "mirror": "not_observable",
+   "occluded_motion_replay": "not_observable",
+   "quiet_aim": "not_observable",
+   "rank_tail": "measured",
+   "recoil_floor": "not_observable",
+   "recoil_learned": "not_observable",
+   "speed": "measured",
+   "supporting_extra": "not_observable",
+   "view_snaps": "measured",
+   "voice": "not_observable",
+   "wire": "not_observable"
+  },
+  "eligibility_digest": "sha256:9af5a51ee54ae97f223fb63ca8c49833445a8207944a6a48aab12d08ea936cbc",
+  "evaluation_statistics": "sha256:f9b864470ea23834ac1f503a0b27a8e85f5a14c01b8f235eda20f968ae58e839",
+  "observations_digest": "sha256:c08d57db6652c0d6c413d2b937e91d75cf55883cc7ad11b9697e06cf5795fec6",
+  "seals_digest": "sha256:c6e376048e3679209cd57d32d5dd65aa93a3b2674fa2ca3ab5451165e3226cec",
+  "split": {
+   "baseline_only": {
+    "clean, unreviewed match": 887
+   },
+   "development": {
+    "cheater": 282,
+    "clean, reviewed match": 308,
+    "clean, unreviewed match": 240
+   },
+   "evaluation": {
+    "cheater": 222,
+    "clean, reviewed match": 267,
+    "clean, unreviewed match": 210
+   },
+   "not_scored": {
+    "clean, reviewed match": 1,
+    "clean, unreviewed match": 312
+   }
+  },
+  "stability": {
+   "accuracy": "unsupported",
+   "geometry_rate": "unsupported",
+   "headshot_rate": "unsupported",
+   "median_distance": "unsupported",
+   "rank_tail": "replicated",
+   "speed": "unsupported",
+   "view_snaps": "unsupported"
+  },
+  "strength_estimates": "sha256:d18365e4af87ab8973514203e89e8fb7f059804ece986a33fed9186335759b24"
+ },
+ "digest": "sha256:e840edb0b7c96b3fb463831914f5a07719e04e067ac0beb5ad46787985b3f913",
+ "environment": {
+  "python": "3.12.3",
+  "implementation": "CPython",
+  "platform": "Linux",
+  "machine": "x86_64",
+  "fpsdet": "0.3.0",
+  "cryptography": "41.0.7"
+ },
+ "timings_s": {
+  "verify_inputs": 0.47,
+  "score": 44.53,
+  "verify_packets": 0.14,
+  "evaluate": 10.2,
+  "strength": 0.15
+ }
+}

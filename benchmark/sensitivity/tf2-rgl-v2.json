@@ -1,0 +1,2224 @@
+{
+ "across": {
+  "comparison_eligible": {
+   "max": 1592,
+   "median": 1571,
+   "min": 1541,
+   "values": [
+    1584,
+    1575,
+    1571,
+    1566,
+    1580,
+    1592,
+    1567,
+    1545,
+    1541
+   ]
+  },
+  "comparison_flagged": {
+   "max": 59,
+   "median": 51,
+   "min": 44,
+   "values": [
+    51,
+    44,
+    45,
+    49,
+    48,
+    59,
+    56,
+    51,
+    52
+   ]
+  },
+  "comparison_rate": {
+   "max": 0.03706,
+   "median": 0.032197,
+   "min": 0.027937,
+   "values": [
+    0.032197,
+    0.027937,
+    0.028644,
+    0.03129,
+    0.03038,
+    0.03706,
+    0.035737,
+    0.03301,
+    0.033744
+   ]
+  },
+  "detectors": {
+   "accuracy": {
+    "comparison_eligible": {
+     "max": 1592,
+     "median": 1571,
+     "min": 1541,
+     "values": [
+      1584,
+      1575,
+      1571,
+      1566,
+      1580,
+      1592,
+      1567,
+      1545,
+      1541
+     ]
+    },
+    "comparison_rate": {
+     "max": 0.002553,
+     "median": 0.001942,
+     "min": 0.0,
+     "values": [
+      0.0,
+      0.0,
+      0.0,
+      0.001916,
+      0.002532,
+      0.002513,
+      0.002553,
+      0.001942,
+      0.001947
+     ]
+    },
+    "fired_on_positive_in": 9,
+    "positive_eligible": {
+     "max": 182,
+     "median": 182,
+     "min": 182,
+     "values": [
+      182,
+      182,
+      182,
+      182,
+      182,
+      182,
+      182,
+      182,
+      182
+     ]
+    },
+    "positive_rate": {
+     "max": 0.093407,
+     "median": 0.049451,
+     "min": 0.038462,
+     "values": [
+      0.043956,
+      0.06044,
+      0.038462,
+      0.043956,
+      0.076923,
+      0.071429,
+      0.093407,
+      0.043956,
+      0.049451
+     ]
+    },
+    "ratio": {
+     "max": 36.592033,
+     "median": 26.914835,
+     "min": 22.637363,
+     "missing": 3,
+     "values": [
+      null,
+      null,
+      null,
+      22.945055,
+      30.384615,
+      28.428571,
+      36.592033,
+      22.637363,
+      25.401099
+     ]
+    },
+    "status": {
+     "measured": 9
+    }
+   },
+   "extra": {
+    "comparison_eligible": {
+     "max": 366,
+     "median": 353,
+     "min": 345,
+     "values": [
+      366,
+      359,
+      353,
+      345,
+      359,
+      349,
+      364,
+      351,
+      350
+     ]
+    },
+    "comparison_rate": {
+     "max": 0.0,
+     "median": 0.0,
+     "min": 0.0,
+     "values": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "fired_on_positive_in": 9,
+    "positive_eligible": {
+     "max": 81,
+     "median": 81,
+     "min": 81,
+     "values": [
+      81,
+      81,
+      81,
+      81,
+      81,
+      81,
+      81,
+      81,
+      81
+     ]
+    },
+    "positive_rate": {
+     "max": 0.037037,
+     "median": 0.024691,
+     "min": 0.024691,
+     "values": [
+      0.037037,
+      0.037037,
+      0.024691,
+      0.037037,
+      0.024691,
+      0.037037,
+      0.024691,
+      0.024691,
+      0.024691
+     ]
+    },
+    "ratio": {
+     "max": null,
+     "median": null,
+     "min": null,
+     "missing": 9,
+     "values": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ]
+    },
+    "status": {
+     "descriptive_only": 9
+    }
+   },
+   "headshot_rate": {
+    "comparison_eligible": {
+     "max": 416,
+     "median": 398,
+     "min": 389,
+     "values": [
+      414,
+      416,
+      394,
+      392,
+      398,
+      409,
+      400,
+      398,
+      389
+     ]
+    },
+    "comparison_rate": {
+     "max": 0.007712,
+     "median": 0.0,
+     "min": 0.0,
+     "values": [
+      0.0,
+      0.0,
+      0.0,
+      0.005102,
+      0.0,
+      0.0,
+      0.005,
+      0.005025,
+      0.007712
+     ]
+    },
+    "fired_on_positive_in": 9,
+    "positive_eligible": {
+     "max": 101,
+     "median": 101,
+     "min": 101,
+     "values": [
+      101,
+      101,
+      101,
+      101,
+      101,
+      101,
+      101,
+      101,
+      101
+     ]
+    },
+    "positive_rate": {
+     "max": 0.108911,
+     "median": 0.049505,
+     "min": 0.049505,
+     "values": [
+      0.049505,
+      0.049505,
+      0.049505,
+      0.108911,
+      0.049505,
+      0.049505,
+      0.108911,
+      0.108911,
+      0.09901
+     ]
+    },
+    "ratio": {
+     "max": 21.782178,
+     "median": 21.509901,
+     "min": 12.838284,
+     "missing": 5,
+     "values": [
+      null,
+      null,
+      null,
+      21.346535,
+      null,
+      null,
+      21.782178,
+      21.673267,
+      12.838284
+     ]
+    },
+    "status": {
+     "measured": 9
+    }
+   },
+   "rank_tail": {
+    "comparison_eligible": {
+     "max": 1592,
+     "median": 1571,
+     "min": 1541,
+     "values": [
+      1584,
+      1575,
+      1571,
+      1566,
+      1580,
+      1592,
+      1567,
+      1545,
+      1541
+     ]
+    },
+    "comparison_rate": {
+     "max": 0.034548,
+     "median": 0.029773,
+     "min": 0.027848,
+     "values": [
+      0.032197,
+      0.027937,
+      0.028644,
+      0.028097,
+      0.027848,
+      0.034548,
+      0.031908,
+      0.029773,
+      0.029851
+     ]
+    },
+    "fired_on_positive_in": 9,
+    "positive_eligible": {
+     "max": 182,
+     "median": 182,
+     "min": 182,
+     "values": [
+      182,
+      182,
+      182,
+      182,
+      182,
+      182,
+      182,
+      182,
+      182
+     ]
+    },
+    "positive_rate": {
+     "max": 0.263736,
+     "median": 0.258242,
+     "min": 0.208791,
+     "values": [
+      0.263736,
+      0.258242,
+      0.263736,
+      0.247253,
+      0.247253,
+      0.252747,
+      0.208791,
+      0.258242,
+      0.258242
+     ]
+    },
+    "ratio": {
+     "max": 9.243881,
+     "median": 8.673555,
+     "min": 6.543516,
+     "values": [
+      8.191338,
+      9.243881,
+      9.207326,
+      8.79995,
+      8.878621,
+      7.315884,
+      6.543516,
+      8.673555,
+      8.651099
+     ]
+    },
+    "status": {
+     "measured": 9
+    }
+   },
+   "supporting_extra": {
+    "comparison_eligible": {
+     "max": 130,
+     "median": 119,
+     "min": 115,
+     "values": [
+      118,
+      130,
+      129,
+      117,
+      130,
+      116,
+      126,
+      115,
+      119
+     ]
+    },
+    "comparison_rate": {
+     "max": 0.007692,
+     "median": 0.0,
+     "min": 0.0,
+     "values": [
+      0.0,
+      0.007692,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "fired_on_positive_in": 9,
+    "positive_eligible": {
+     "max": 28,
+     "median": 28,
+     "min": 28,
+     "values": [
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28
+     ]
+    },
+    "positive_rate": {
+     "max": 0.142857,
+     "median": 0.071429,
+     "min": 0.035714,
+     "values": [
+      0.035714,
+      0.142857,
+      0.035714,
+      0.107143,
+      0.071429,
+      0.035714,
+      0.107143,
+      0.071429,
+      0.035714
+     ]
+    },
+    "ratio": {
+     "max": 18.571429,
+     "median": 18.571429,
+     "min": 18.571429,
+     "missing": 8,
+     "values": [
+      null,
+      18.571429,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ]
+    },
+    "status": {
+     "descriptive_only": 9
+    }
+   }
+  },
+  "draws": 9,
+  "equal_evidence_comparison_rate": {
+   "max": 0.060377,
+   "median": 0.04918,
+   "min": 0.03629,
+   "values": [
+    0.047431,
+    0.050781,
+    0.037344,
+    0.044,
+    0.03629,
+    0.060377,
+    0.057915,
+    0.04918,
+    0.057851
+   ]
+  },
+  "positive_eligible": {
+   "max": 182,
+   "median": 182,
+   "min": 182,
+   "values": [
+    182,
+    182,
+    182,
+    182,
+    182,
+    182,
+    182,
+    182,
+    182
+   ]
+  },
+  "positive_flagged": {
+   "max": 53,
+   "median": 52,
+   "min": 51,
+   "values": [
+    52,
+    53,
+    51,
+    51,
+    52,
+    52,
+    51,
+    52,
+    52
+   ]
+  },
+  "positive_rate": {
+   "max": 0.291209,
+   "median": 0.285714,
+   "min": 0.28022,
+   "values": [
+    0.285714,
+    0.291209,
+    0.28022,
+    0.28022,
+    0.285714,
+    0.285714,
+    0.28022,
+    0.285714,
+    0.285714
+   ]
+  },
+  "queue": {
+   "max": 130,
+   "median": 122,
+   "min": 114,
+   "values": [
+    125,
+    114,
+    116,
+    123,
+    119,
+    128,
+    130,
+    121,
+    122
+   ]
+  },
+  "queue_positive": {
+   "max": 53,
+   "median": 52,
+   "min": 51,
+   "values": [
+    52,
+    53,
+    51,
+    51,
+    52,
+    52,
+    51,
+    52,
+    52
+   ]
+  },
+  "ratio": {
+   "max": 10.423951,
+   "median": 8.87395,
+   "min": 7.709443,
+   "values": [
+    8.87395,
+    10.423951,
+    9.782784,
+    8.955595,
+    9.404762,
+    7.709443,
+    7.84115,
+    8.655462,
+    8.467033
+   ]
+  },
+  "review": {
+   "max": 10,
+   "median": 4,
+   "min": 1,
+   "values": [
+    1,
+    5,
+    1,
+    5,
+    4,
+    3,
+    10,
+    4,
+    4
+   ]
+  },
+  "strength": {
+   "accuracy": {
+    "ratio": {
+     "max": 143.4,
+     "median": 46.67,
+     "min": 20.86,
+     "values": [
+      87.31,
+      143.4,
+      103.0,
+      20.86,
+      46.67,
+      47.93,
+      28.07,
+      34.14,
+      24.57
+     ]
+    },
+    "replicated_in": 5,
+    "stability": {
+     "replicated": 5,
+     "tentative": 4
+    }
+   },
+   "extra": {
+    "ratio": {
+     "max": 15.0,
+     "median": 14.29,
+     "min": 13.97,
+     "values": [
+      15.0,
+      14.68,
+      14.29,
+      14.29,
+      13.97,
+      14.13,
+      14.68,
+      13.97,
+      14.53
+     ]
+    },
+    "replicated_in": 0,
+    "stability": {
+     "unsupported": 9
+    }
+   },
+   "headshot_rate": {
+    "ratio": {
+     "max": 30.56,
+     "median": 26.52,
+     "min": 8.673,
+     "values": [
+      30.56,
+      30.29,
+      26.52,
+      10.85,
+      28.0,
+      28.67,
+      10.95,
+      10.35,
+      8.673
+     ]
+    },
+    "replicated_in": 3,
+    "stability": {
+     "replicated": 3,
+     "unsupported": 6
+    }
+   },
+   "rank_tail": {
+    "ratio": {
+     "max": 12.73,
+     "median": 8.55,
+     "min": 5.954,
+     "values": [
+      7.728,
+      10.01,
+      8.985,
+      12.73,
+      8.235,
+      6.637,
+      5.954,
+      8.55,
+      9.448
+     ]
+    },
+    "replicated_in": 9,
+    "stability": {
+     "replicated": 9
+    }
+   }
+  },
+  "watch": {
+   "max": 125,
+   "median": 118,
+   "min": 109,
+   "values": [
+    124,
+    109,
+    115,
+    118,
+    115,
+    125,
+    120,
+    117,
+    118
+   ]
+  }
+ },
+ "dataset": "tf2-rgl-v2",
+ "draws": [
+  {
+   "draw": 0,
+   "inputs": {
+    "baseline": "sha256:95def89c21e1d9744dc3925516ee3a0e0178c502dfa807b44eb69734104efab8",
+    "cohort": "sha256:c2a7c0549aaa5a6bdea4eca26939e4fd114127a597b7182b4c10f81b1302f147",
+    "cohort_players": 1562,
+    "events": "sha256:81926ccd8b7ba1e59e875da33194d52fb69aedb8556f3e92f4aadb805fe4901d",
+    "events_count": 4027394,
+    "labelled": 3604,
+    "labels": "sha256:a8180ab52620ea1cd1ef3204c4bb33b7532896a9a36a962bdbe10828fd244094"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.024573,
+      0.042085
+     ],
+     "eligible": 1584,
+     "flagged": 51,
+     "labelled": 2127,
+     "rate": 0.032197,
+     "review": 0,
+     "scored": 1702,
+     "watch": 51
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1584,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 8
+      },
+      "ratio": null,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 366,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 3
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 414,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 5
+      },
+      "ratio": null,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1584,
+       "fired": 51
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 48
+      },
+      "ratio": 8.191338,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 118,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 1
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.047431,
+    "positive": {
+     "ci95": [
+      0.225043,
+      0.355245
+     ],
+     "eligible": 182,
+     "flagged": 52,
+     "labelled": 228,
+     "rate": 0.285714,
+     "review": 1,
+     "scored": 189,
+     "watch": 51
+    },
+    "queue": {
+     "positive": 52,
+     "size": 125
+    },
+    "ratio": 8.87395,
+    "ratio_range": [
+     5.347382,
+     14.456843
+    ],
+    "review": 1,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       3.57,
+       785000.0
+      ],
+      "held_out_ratio": 68.85,
+      "ratio": 87.31,
+      "stability": "replicated"
+     },
+     "extra": {
+      "credible95": [
+       0.1126,
+       206000.0
+      ],
+      "held_out_ratio": 19.78,
+      "ratio": 15.0,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       0.9807,
+       295300.0
+      ],
+      "held_out_ratio": 18.53,
+      "ratio": 30.56,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "credible95": [
+       3.404,
+       17.13
+      ],
+      "held_out_ratio": 8.669,
+      "ratio": 7.728,
+      "stability": "replicated"
+     }
+    },
+    "watch": 124
+   },
+   "outputs": {
+    "decisions": "sha256:38f27310525e65145b44aabe92db949df530736e6c0c03a2900e6158a4529647",
+    "eligibility": "sha256:f27c2de841829012c0eff01876560988b6aee9f169a2e65977f59b1aba26eb2c",
+    "estimates": "sha256:2010ca55e4d1327c4fd22679b38e8a9793ccf8a7f8a90d5d02db8c11f783734e",
+    "evaluation": "sha256:da6a8d0ff5570872ea3dce1daa3bf7fe0b7eea70d1ade0ef1251a58b3acd4017",
+    "observations": "sha256:70126393ab9616b1773062522577dc5af5596b61dcc4a396925d61e820fe40af",
+    "packets": "sha256:5fb0d9302f02230ab4f36369810a59c957cb8a109474fa520b12485f4c81955d",
+    "split": "sha256:cc1f3ca8dc88b65f36323290e83142cc554061b255b805567389f714d1ed73bf",
+    "statistics": "sha256:d70e7466f5102edaa2a3fffc230e54be9a6ff040f6d59a8281210755024f38e6",
+    "strength": "sha256:fbbf117f02d9090c8aa1a622ea3241856caccea1eb0cb89338ffcb65f2f6bacc"
+   },
+   "result": "sha256:43a1e53119301f7eea0b757bdad1d09bc7be43c0e8a610410569936f79a1eef3"
+  },
+  {
+   "draw": 1,
+   "inputs": {
+    "baseline": "sha256:0a08a8b1c315cc36890cf6badf48042525f6e921cb1b64366962787226781beb",
+    "cohort": "sha256:ce8efb689d699fc252254a384b8c25bcdc43deab976d08406fb87d91bbe3bab4",
+    "cohort_players": 1573,
+    "events": "sha256:c9d66bb6fbf32114922318d5d719045c4e6d48b8a9c859267fc27b0d02f60354",
+    "events_count": 4030158,
+    "labelled": 3602,
+    "labels": "sha256:b15d8c409c992da5ef56e1375392ac2667486003e8a6d2a26ffb1e786901fe99"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.020876,
+      0.037294
+     ],
+     "eligible": 1575,
+     "flagged": 44,
+     "labelled": 2125,
+     "rate": 0.027937,
+     "review": 0,
+     "scored": 1702,
+     "watch": 44
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1575,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 11
+      },
+      "ratio": null,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 359,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 3
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 416,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 5
+      },
+      "ratio": null,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1575,
+       "fired": 44
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 47
+      },
+      "ratio": 9.243881,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 130,
+       "fired": 1
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 4
+      },
+      "ratio": 18.571429,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.050781,
+    "positive": {
+     "ci95": [
+      0.230063,
+      0.360986
+     ],
+     "eligible": 182,
+     "flagged": 53,
+     "labelled": 228,
+     "rate": 0.291209,
+     "review": 5,
+     "scored": 189,
+     "watch": 48
+    },
+    "queue": {
+     "positive": 53,
+     "size": 114
+    },
+    "ratio": 10.423951,
+    "ratio_range": [
+     6.168853,
+     17.292073
+    ],
+    "review": 5,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       8.716,
+       1089000.0
+      ],
+      "held_out_ratio": 69.12,
+      "ratio": 143.4,
+      "stability": "replicated"
+     },
+     "extra": {
+      "credible95": [
+       0.1102,
+       201700.0
+      ],
+      "held_out_ratio": 19.44,
+      "ratio": 14.68,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       0.9721,
+       292700.0
+      ],
+      "held_out_ratio": 18.92,
+      "ratio": 30.29,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "credible95": [
+       4.096,
+       24.49
+      ],
+      "held_out_ratio": 8.334,
+      "ratio": 10.01,
+      "stability": "replicated"
+     }
+    },
+    "watch": 109
+   },
+   "outputs": {
+    "decisions": "sha256:2e88ff494186818408f3af73e0438ada300139f9cbc68fa292d89f1eb1bf7123",
+    "eligibility": "sha256:97381ac3fcd73f5a14da9d009db3d0e1785698db2d1502c46be07b5651c2e6c4",
+    "estimates": "sha256:15b40be177dbcc9f4c0f56c1caeb4644e00dea5ca958fd0ad2fc8501bb76febf",
+    "evaluation": "sha256:57068896f50c50042972cbcf72bd2f50e4533cafd636ba5ac16f40babd6d1671",
+    "observations": "sha256:32e6620f0ba3d0c8e38cc250e5febc4b94e9ed3f1d354be610aa100a9a8e959b",
+    "packets": "sha256:1c2c5c11cd1841444ea1dbd7100ffa2c18e35574e639421b3bf612bd22a7fdc5",
+    "split": "sha256:669e11982de8b99018dc3d9b045df2b427e8694d746120b3ee759ce18cbb6bea",
+    "statistics": "sha256:de2608f8c99b896cf6aec3a364598fa62e0c76dd945d2a3ee15b149d25860970",
+    "strength": "sha256:383c3256ecea7c8e241058f9f2d070db3076ba95c1300b43454ec545f08727d0"
+   },
+   "result": "sha256:51eba4dc0621d33b479acfa519c6ef19002d53fced127f0d85ee5963493dc061"
+  },
+  {
+   "draw": 2,
+   "inputs": {
+    "baseline": "sha256:e6cf3164e7d316f62f89a568600830d75a0cd4ea4dbfd3b611cf94144db30e4f",
+    "cohort": "sha256:6618eb1b6e51b57e365411161620e2ecac22372686210218053e6812e269d1af",
+    "cohort_players": 1577,
+    "events": "sha256:fc863b569de35c9c226a74d3c26fb9f687c081a139c85513f6ce3de1bddbc6f2",
+    "events_count": 3992563,
+    "labelled": 3577,
+    "labels": "sha256:163aaa69b78c2a8ea2c9cc94939e433d2dd3e96763726cf7605a90504d4d38f2"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.021476,
+      0.038112
+     ],
+     "eligible": 1571,
+     "flagged": 45,
+     "labelled": 2100,
+     "rate": 0.028644,
+     "review": 0,
+     "scored": 1671,
+     "watch": 45
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1571,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 7
+      },
+      "ratio": null,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 353,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 2
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 394,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 5
+      },
+      "ratio": null,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1571,
+       "fired": 45
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 48
+      },
+      "ratio": 9.207326,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 129,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 1
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.037344,
+    "positive": {
+     "ci95": [
+      0.220034,
+      0.349492
+     ],
+     "eligible": 182,
+     "flagged": 51,
+     "labelled": 228,
+     "rate": 0.28022,
+     "review": 1,
+     "scored": 189,
+     "watch": 50
+    },
+    "queue": {
+     "positive": 51,
+     "size": 116
+    },
+    "ratio": 9.782784,
+    "ratio_range": [
+     5.773337,
+     16.273742
+    ],
+    "review": 1,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       5.013,
+       864400.0
+      ],
+      "held_out_ratio": 39.07,
+      "ratio": 103.0,
+      "stability": "tentative"
+     },
+     "extra": {
+      "credible95": [
+       0.1073,
+       196200.0
+      ],
+      "held_out_ratio": 11.6,
+      "ratio": 14.29,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       0.8515,
+       256100.0
+      ],
+      "held_out_ratio": 19.51,
+      "ratio": 26.52,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "credible95": [
+       3.827,
+       20.94
+      ],
+      "held_out_ratio": 9.268,
+      "ratio": 8.985,
+      "stability": "replicated"
+     }
+    },
+    "watch": 115
+   },
+   "outputs": {
+    "decisions": "sha256:dfb35a6e7a80f75b099cfdfc3dd5fa0622bdf1aaf4a679db8e1b0846c70b6739",
+    "eligibility": "sha256:d442f528b0444b2269547787a860f4828b09bce62dbd49b20c19dc627469f720",
+    "estimates": "sha256:08f3d36bf537ff877d6b506a29a1f9de51f3927c1e184727e17782d358dda088",
+    "evaluation": "sha256:f16f0293a61e537c973b1d53ddda5271c10d8de694fe9a8e8d8e5b81281bb3b6",
+    "observations": "sha256:d20286037ca28ade2b6cb046eb0abe3654c1d32e48e7a57c572bd487b6bbf36c",
+    "packets": "sha256:d26483dcb8ae288c65dc9ce46d283c78be179aec3c00914ceb5ae6bf0ce09455",
+    "split": "sha256:2725c23ec96f0e077edb44d2e09e795911a966cb45c86a3f45e52e363dd65cac",
+    "statistics": "sha256:3a586aa9850b72041c7e3ee221267971545c3c64ee2d7a4e9866c1513ed628d4",
+    "strength": "sha256:c09af2ab9dcf13b79969cccb77edd7d522f9fd03aa0a21d10dbb82df93ad6001"
+   },
+   "result": "sha256:dc711225171609a9f1c5e1ac45b6be06b5f819cfca951316f22ac273e498c9a9"
+  },
+  {
+   "draw": 3,
+   "inputs": {
+    "baseline": "sha256:4dee04c03fcce5ed5fe611eef442272f376b31a97e074c9e13ee2efdee6db09e",
+    "cohort": "sha256:819a59230e78bf85d99fea34d0eacd40a0b15f4d57d5c30daf88a1c972f0b3c5",
+    "cohort_players": 1579,
+    "events": "sha256:79b01251f8a26d89a3fc69e15c82661705e6cc41785ba77af250d3d9e5d766fd",
+    "events_count": 3963011,
+    "labelled": 3583,
+    "labels": "sha256:974fd13d04946cead08d94a363cfb76addb09185d76a6f364d25a8db174cbb6a"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.023749,
+      0.041125
+     ],
+     "eligible": 1566,
+     "flagged": 49,
+     "labelled": 2106,
+     "rate": 0.03129,
+     "review": 0,
+     "scored": 1675,
+     "watch": 49
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1566,
+       "fired": 3
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 8
+      },
+      "ratio": 22.945055,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 345,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 3
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 392,
+       "fired": 2
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 11
+      },
+      "ratio": 21.346535,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1566,
+       "fired": 44
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 45
+      },
+      "ratio": 8.79995,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 117,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 3
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.044,
+    "positive": {
+     "ci95": [
+      0.220034,
+      0.349492
+     ],
+     "eligible": 182,
+     "flagged": 51,
+     "labelled": 228,
+     "rate": 0.28022,
+     "review": 5,
+     "scored": 189,
+     "watch": 46
+    },
+    "queue": {
+     "positive": 51,
+     "size": 123
+    },
+    "ratio": 8.955595,
+    "ratio_range": [
+     5.350341,
+     14.716356
+    ],
+    "review": 5,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       2.176,
+       358.3
+      ],
+      "held_out_ratio": 17.87,
+      "ratio": 20.86,
+      "stability": "tentative"
+     },
+     "extra": {
+      "credible95": [
+       0.1073,
+       196200.0
+      ],
+      "held_out_ratio": 18.44,
+      "ratio": 14.29,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       1.321,
+       171.2
+      ],
+      "held_out_ratio": 38.18,
+      "ratio": 10.85,
+      "stability": "replicated"
+     },
+     "rank_tail": {
+      "credible95": [
+       5.068,
+       33.02
+      ],
+      "held_out_ratio": 6.267,
+      "ratio": 12.73,
+      "stability": "replicated"
+     }
+    },
+    "watch": 118
+   },
+   "outputs": {
+    "decisions": "sha256:f3abdc7734a81a12b550534fce45119359262c6cf03e373c96bc3ef1ef873617",
+    "eligibility": "sha256:3b09eba6d4825c56ede7f376f682f9ca76f4619e2b614a620713284c746c9651",
+    "estimates": "sha256:64f20390ff1bb0cf09da3ba6c82f6083f8367e23efb20c1f3deddee93dfbe41e",
+    "evaluation": "sha256:aec926516b8c3ef3034a0e6eebdbc901c8c54c724bdd57599d75fb70c50ad4e2",
+    "observations": "sha256:5bd2e9e749ddb86efb75cd7f1d9c84610d91e96dcda4a5c7407fb0f47613f108",
+    "packets": "sha256:2d0cf231f3cc86e7fb9498691d016483c50d283c718f4e53eb39a27cd06644f1",
+    "split": "sha256:37e85e62dae4ec7fba54791d096163e80e17e395b7099f135469c11dd9ad1bfb",
+    "statistics": "sha256:f931e0512a62262ac35b2c16a4ff409648280e7ca9242d2e037a0a4f18f5c548",
+    "strength": "sha256:09a466ead6bd02e71aebe312952eb4271c812caa92429a791a56e9d390fe7e3b"
+   },
+   "result": "sha256:7ae3add0b7c36530706766f96e144fa5ca59c8237f8aa520f3237c1818f7d24b"
+  },
+  {
+   "draw": 4,
+   "inputs": {
+    "baseline": "sha256:dd914f33a3d25a5108d85be3082c4b6099a2b91d8791b184af4964ecede80b76",
+    "cohort": "sha256:cbd86abae25879e4634a098ffcf520116430bf6d31bcd578a68812bd80393a9e",
+    "cohort_players": 1566,
+    "events": "sha256:303285b7ed0abf3a6fc25adfc9639b4dddd3e3f925db2ccb861ec3ad4e80c248",
+    "events_count": 4062500,
+    "labelled": 3622,
+    "labels": "sha256:a6a7dbb253722f765e19c29ba8223b64292b60da42e399e69b12e2032c0acd4a"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.02299,
+      0.040048
+     ],
+     "eligible": 1580,
+     "flagged": 48,
+     "labelled": 2145,
+     "rate": 0.03038,
+     "review": 0,
+     "scored": 1707,
+     "watch": 48
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1580,
+       "fired": 4
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 14
+      },
+      "ratio": 30.384615,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 359,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 2
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 398,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 5
+      },
+      "ratio": null,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1580,
+       "fired": 44
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 45
+      },
+      "ratio": 8.878621,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 130,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 2
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.03629,
+    "positive": {
+     "ci95": [
+      0.225043,
+      0.355245
+     ],
+     "eligible": 182,
+     "flagged": 52,
+     "labelled": 228,
+     "rate": 0.285714,
+     "review": 4,
+     "scored": 189,
+     "watch": 48
+    },
+    "queue": {
+     "positive": 52,
+     "size": 119
+    },
+    "ratio": 9.404762,
+    "ratio_range": [
+     5.619376,
+     15.45222
+    ],
+    "review": 4,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       4.885,
+       1982.0
+      ],
+      "held_out_ratio": 17.01,
+      "ratio": 46.67,
+      "stability": "replicated"
+     },
+     "extra": {
+      "credible95": [
+       0.1049,
+       191900.0
+      ],
+      "held_out_ratio": 12.27,
+      "ratio": 13.97,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       0.8989,
+       270500.0
+      ],
+      "held_out_ratio": 18.82,
+      "ratio": 28.0,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "credible95": [
+       3.483,
+       19.16
+      ],
+      "held_out_ratio": 9.566,
+      "ratio": 8.235,
+      "stability": "replicated"
+     }
+    },
+    "watch": 115
+   },
+   "outputs": {
+    "decisions": "sha256:ad9ada2cf082526b2962f2a8f8823c1cd8f6eebaa9d11e91d8778479013bdc31",
+    "eligibility": "sha256:55f6773b0d9eca713f2687d9a0f3f090b2844db40b8782aa3f38d17fa27d1703",
+    "estimates": "sha256:3fed4358e6f390f097c85c7f423aef6d863948d3c944d969a8fb8b08d985fa26",
+    "evaluation": "sha256:d6c521c66bc0afd1792ad08cd23fe91d78d491c185cdbc7d12622c5985ac6322",
+    "observations": "sha256:d37597d98033a614373c04db5add1b51b0878ec1728b01b66e5167848cce432b",
+    "packets": "sha256:abbd80701069661033013a1f46f25b5070900e120a72c8ff1e0b13f6f04e3d64",
+    "split": "sha256:cd32662fab7218dccfd2610d82308138eb2c97b81fce3932de187c052a670b22",
+    "statistics": "sha256:9b5fb1b3291f5716e4436d692ca7132eb5981cf0f02286a2597ca44aff957735",
+    "strength": "sha256:035f5a72db19d99eaa546ea94e2f91d6b05816255196e59c59cbf6eb0dc5edb2"
+   },
+   "result": "sha256:e3f239637fc38e930af2c40ad555ac521a407682e54081aae8bef041a141a114"
+  },
+  {
+   "draw": 5,
+   "inputs": {
+    "baseline": "sha256:fbba72842d4b04dc02f861465fddcec448b48e61a0072fb0579cf30078deeadf",
+    "cohort": "sha256:76f377da1be88bbd444f91f095ba875af202dd563269dcb39cbe49d38bfebf8b",
+    "cohort_players": 1554,
+    "events": "sha256:8023b2bd3c9f1926a2291b6c3c7082496f2dec940bcbc5317dee1f28f1def28f",
+    "events_count": 4080355,
+    "labelled": 3631,
+    "labels": "sha256:802fbbc1b1b4f3077cc462855c8ccd9e6d88a7e985e3aaecf71ab923c8318631"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.028839,
+      0.04751
+     ],
+     "eligible": 1592,
+     "flagged": 59,
+     "labelled": 2154,
+     "rate": 0.03706,
+     "review": 0,
+     "scored": 1714,
+     "watch": 59
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1592,
+       "fired": 4
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 13
+      },
+      "ratio": 28.428571,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 349,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 3
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 409,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 5
+      },
+      "ratio": null,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1592,
+       "fired": 55
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 46
+      },
+      "ratio": 7.315884,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 116,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 1
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.060377,
+    "positive": {
+     "ci95": [
+      0.225043,
+      0.355245
+     ],
+     "eligible": 182,
+     "flagged": 52,
+     "labelled": 228,
+     "rate": 0.285714,
+     "review": 3,
+     "scored": 189,
+     "watch": 49
+    },
+    "queue": {
+     "positive": 52,
+     "size": 128
+    },
+    "ratio": 7.709443,
+    "ratio_range": [
+     4.73676,
+     12.317997
+    ],
+    "review": 3,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       5.017,
+       2036.0
+      ],
+      "held_out_ratio": 14.55,
+      "ratio": 47.93,
+      "stability": "replicated"
+     },
+     "extra": {
+      "credible95": [
+       0.1061,
+       194100.0
+      ],
+      "held_out_ratio": 19.11,
+      "ratio": 14.13,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       0.9204,
+       277000.0
+      ],
+      "held_out_ratio": 19.41,
+      "ratio": 28.67,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "credible95": [
+       2.93,
+       14.5
+      ],
+      "held_out_ratio": 8.168,
+      "ratio": 6.637,
+      "stability": "replicated"
+     }
+    },
+    "watch": 125
+   },
+   "outputs": {
+    "decisions": "sha256:c91e7273fbfe4fb4be277456e2ed8c6c6969982e87b2d96239958d0517092f19",
+    "eligibility": "sha256:6b784747c0b625dde36f41fe69fba03d1bb1153e33d30990c4e9b1c7d07ce3d7",
+    "estimates": "sha256:69d5c8c8bd286299e48ee0b6376dcee25acb03ae368d760cd3ff8e39ae2b2c53",
+    "evaluation": "sha256:6c89427f83cb953259068791a3eb6fa8ff0e7da5b5f86c3f75003d273d28b621",
+    "observations": "sha256:7643df49c528e9e30670cc2d65a7b36003774e6ef3e70fc7a24149746dcc10be",
+    "packets": "sha256:2f57ec9263035b3b05294c957986ff9930f3f007a42c53b5a61ba1ca0e3ddae6",
+    "split": "sha256:6f4f86da4f806b888c56d77530660b3b91c3cf521a0e3f25eabaac13452a84cc",
+    "statistics": "sha256:051645c2a69cebed49541c05826c9f229e5f7369be33c34763e2a8b8dc348720",
+    "strength": "sha256:33f9d3b8497a401fe81407cb157eb4ba1209c8473399453688b6599d83e2d3af"
+   },
+   "result": "sha256:0051cfeaf0411f8a30192d5cfc8d4b247fc605524bf0d27477983ef356948250"
+  },
+  {
+   "draw": 6,
+   "inputs": {
+    "baseline": "sha256:ff9faf0b782cbc3bb848bef0fc7b066412aa17473a7063d86c3b2b964de201f9",
+    "cohort": "sha256:724bb0e1fcbbf09514230893231d09abcfdb8635be89ff0b0341b0b6fd9cea63",
+    "cohort_players": 1578,
+    "events": "sha256:0209952bdbbc3bd9ae3d13fc4a2f6a97a09189f722a23c0c983b55c91f8e21c6",
+    "events_count": 3967595,
+    "labelled": 3591,
+    "labels": "sha256:4a7eac11986c981a157674830ed0312cad09b8fccbf9a5763ded0e7e5671549c"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.027623,
+      0.046122
+     ],
+     "eligible": 1567,
+     "flagged": 56,
+     "labelled": 2114,
+     "rate": 0.035737,
+     "review": 0,
+     "scored": 1689,
+     "watch": 56
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1567,
+       "fired": 4
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 17
+      },
+      "ratio": 36.592033,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 364,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 2
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 400,
+       "fired": 2
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 11
+      },
+      "ratio": 21.782178,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1567,
+       "fired": 50
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 38
+      },
+      "ratio": 6.543516,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 126,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 3
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.057915,
+    "positive": {
+     "ci95": [
+      0.220034,
+      0.349492
+     ],
+     "eligible": 182,
+     "flagged": 51,
+     "labelled": 228,
+     "rate": 0.28022,
+     "review": 10,
+     "scored": 189,
+     "watch": 41
+    },
+    "queue": {
+     "positive": 51,
+     "size": 130
+    },
+    "ratio": 7.84115,
+    "ratio_range": [
+     4.770662,
+     12.652403
+    ],
+    "review": 10,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       5.051,
+       253.5
+      ],
+      "held_out_ratio": 38.92,
+      "ratio": 28.07,
+      "stability": "replicated"
+     },
+     "extra": {
+      "credible95": [
+       0.1102,
+       201700.0
+      ],
+      "held_out_ratio": 12.0,
+      "ratio": 14.68,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       1.333,
+       172.8
+      ],
+      "held_out_ratio": 39.47,
+      "ratio": 10.95,
+      "stability": "replicated"
+     },
+     "rank_tail": {
+      "credible95": [
+       2.334,
+       14.4
+      ],
+      "held_out_ratio": 7.121,
+      "ratio": 5.954,
+      "stability": "replicated"
+     }
+    },
+    "watch": 120
+   },
+   "outputs": {
+    "decisions": "sha256:cb52e5469bd7aa919e69ef0a860e1f15d26a97cd53cd22a08da543ae3f5ae6de",
+    "eligibility": "sha256:71fa6eb728b4434023f5bba73e681d9172120ac2e35209ba6783c3b55bad4b73",
+    "estimates": "sha256:b280364acadf1062bc476c3566a66c90ae0e33e24341defeb25387564c5ac2d9",
+    "evaluation": "sha256:9dbedebebf474299ae82c1fd2142810fcb0f5748c8c5e0fed952c39f63cda118",
+    "observations": "sha256:f165cfcb425491f7c7cc070ae536ad53d014ab4acbba5da636b5ddc546a45d40",
+    "packets": "sha256:925cb21626fa0668183db62592412adcd6d79131a1b10af0fe3f50400685dd99",
+    "split": "sha256:3dc82937d23185db4f46c2d694e22dc0bb94c6ea9d79c54dc1038d0d609a2bd5",
+    "statistics": "sha256:a6dc5120cfcb2007188ed88694734bb3f48b0f96d427322c5dd69372782b3177",
+    "strength": "sha256:b7064f1bc53975008000612e6c0888af398d9146b61420734e03f4e32ab93f48"
+   },
+   "result": "sha256:4b8cb104353a90a8cbc0fd775ea8b3cbf534727122adc7e6834fa4627c486270"
+  },
+  {
+   "draw": 7,
+   "inputs": {
+    "baseline": "sha256:e7ceff761d1ce1dbafe9d46f27b744366b841811c199d8340cafabff90bdd5b7",
+    "cohort": "sha256:03f59b641c86fee4667fc1f9a5d7502e2883aef3709e8dda29787b0f6e7a1caa",
+    "cohort_players": 1602,
+    "events": "sha256:fc6a678a4d5b5ea98d261a210db02d20a3d3f90332496c7b3f6c641cfa66302c",
+    "events_count": 3973294,
+    "labelled": 3576,
+    "labels": "sha256:90a3fef2350adf4d2e1ee2b860688e7d23c61c27294abf7949af308b57d5d673"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.025195,
+      0.043141
+     ],
+     "eligible": 1545,
+     "flagged": 51,
+     "labelled": 2099,
+     "rate": 0.03301,
+     "review": 0,
+     "scored": 1659,
+     "watch": 51
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1545,
+       "fired": 3
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 8
+      },
+      "ratio": 22.637363,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 351,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 2
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 398,
+       "fired": 2
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 11
+      },
+      "ratio": 21.673267,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1545,
+       "fired": 46
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 47
+      },
+      "ratio": 8.673555,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 115,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 2
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.04918,
+    "positive": {
+     "ci95": [
+      0.225043,
+      0.355245
+     ],
+     "eligible": 182,
+     "flagged": 52,
+     "labelled": 228,
+     "rate": 0.285714,
+     "review": 3,
+     "scored": 189,
+     "watch": 49
+    },
+    "queue": {
+     "positive": 52,
+     "size": 121
+    },
+    "ratio": 8.655462,
+    "ratio_range": [
+     5.216489,
+     14.099689
+    ],
+    "review": 4,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       2.861,
+       1602.0
+      ],
+      "held_out_ratio": 10.64,
+      "ratio": 34.14,
+      "stability": "tentative"
+     },
+     "extra": {
+      "credible95": [
+       0.1049,
+       191900.0
+      ],
+      "held_out_ratio": 11.73,
+      "ratio": 13.97,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       1.26,
+       163.2
+      ],
+      "held_out_ratio": 41.63,
+      "ratio": 10.35,
+      "stability": "replicated"
+     },
+     "rank_tail": {
+      "credible95": [
+       3.59,
+       20.12
+      ],
+      "held_out_ratio": 8.611,
+      "ratio": 8.55,
+      "stability": "replicated"
+     }
+    },
+    "watch": 117
+   },
+   "outputs": {
+    "decisions": "sha256:32fb91f1db893679371591fd0329048b9812d64af71fa737238e84ebc45b01b7",
+    "eligibility": "sha256:3f4bcfdd86fa2427d8b6d9536f8fa84fc9962eee5a136e7b3e8faa8a979e6788",
+    "estimates": "sha256:d4311b1ae4333f1de5fe57cb970fad6f154424cc3d10b18fcf51981b3604958b",
+    "evaluation": "sha256:23cd95bf9bf1b7c6105f5ae6c4d4b7e3d6ca5a55567cb14b2e67e59808bfc4d5",
+    "observations": "sha256:04fcb475849e263ee74ef9f33c6424d5cd6d45c19efbb75ba54f5d15a448c529",
+    "packets": "sha256:c82c1d130bbacc856660fd818dfd4eeedda716a2ce2f9547999446d51a51f660",
+    "split": "sha256:c17009e3876f852e4956ac62e703b228528d6309c82d9bbc4231db2bf812b8f1",
+    "statistics": "sha256:338de993ff42e9f5f8f9c8edc096635b60f706b09aad53329c0ae6e1faac9b71",
+    "strength": "sha256:9fdc7818ad23637d31928aaa7f1615e59ae3c455bf197b873167d5ff584b5804"
+   },
+   "result": "sha256:8ed175285d0538231c327ddf96f620dc74eec71c8b811e0af626cc75b11d43e5"
+  },
+  {
+   "draw": 8,
+   "inputs": {
+    "baseline": "sha256:88ef8ff945805128074d375f46fbfa66c808ced128c311f50bb28b08f701dafd",
+    "cohort": "sha256:35f10624068f8dbd3c625fb231033a7dc1a351f57f7bd33dab043663f330d86a",
+    "cohort_players": 1608,
+    "events": "sha256:a6eb0998b9cf912127cba70d74a1149b3d817012893723b8ac69aec323fb3b9d",
+    "events_count": 4012673,
+    "labelled": 3551,
+    "labels": "sha256:821e97d814069c78a6059f924c9589ab54da759f927d6c1dd32fe8ccec346cec"
+   },
+   "numbers": {
+    "comparison": {
+     "ci95": [
+      0.025825,
+      0.043982
+     ],
+     "eligible": 1541,
+     "flagged": 52,
+     "labelled": 2074,
+     "rate": 0.033744,
+     "review": 0,
+     "scored": 1664,
+     "watch": 52
+    },
+    "detectors": {
+     "accuracy": {
+      "comparison": {
+       "eligible": 1541,
+       "fired": 3
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 9
+      },
+      "ratio": 25.401099,
+      "status": "measured"
+     },
+     "extra": {
+      "comparison": {
+       "eligible": 350,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 81,
+       "fired": 2
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     },
+     "headshot_rate": {
+      "comparison": {
+       "eligible": 389,
+       "fired": 3
+      },
+      "positive": {
+       "eligible": 101,
+       "fired": 10
+      },
+      "ratio": 12.838284,
+      "status": "measured"
+     },
+     "rank_tail": {
+      "comparison": {
+       "eligible": 1541,
+       "fired": 46
+      },
+      "positive": {
+       "eligible": 182,
+       "fired": 47
+      },
+      "ratio": 8.651099,
+      "status": "measured"
+     },
+     "supporting_extra": {
+      "comparison": {
+       "eligible": 119,
+       "fired": 0
+      },
+      "positive": {
+       "eligible": 28,
+       "fired": 1
+      },
+      "ratio": null,
+      "status": "descriptive_only"
+     }
+    },
+    "equal_evidence_comparison_rate": 0.057851,
+    "positive": {
+     "ci95": [
+      0.225043,
+      0.355245
+     ],
+     "eligible": 182,
+     "flagged": 52,
+     "labelled": 228,
+     "rate": 0.285714,
+     "review": 4,
+     "scored": 189,
+     "watch": 48
+    },
+    "queue": {
+     "positive": 52,
+     "size": 122
+    },
+    "ratio": 8.467033,
+    "ratio_range": [
+     5.116656,
+     13.755816
+    ],
+    "review": 4,
+    "strength": {
+     "accuracy": {
+      "credible95": [
+       2.906,
+       399.3
+      ],
+      "held_out_ratio": 17.34,
+      "ratio": 24.57,
+      "stability": "tentative"
+     },
+     "extra": {
+      "credible95": [
+       0.1091,
+       199500.0
+      ],
+      "held_out_ratio": 11.2,
+      "ratio": 14.53,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "credible95": [
+       0.9294,
+       144.8
+      ],
+      "held_out_ratio": 13.37,
+      "ratio": 8.673,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "credible95": [
+       3.902,
+       22.8
+      ],
+      "held_out_ratio": 7.736,
+      "ratio": 9.448,
+      "stability": "replicated"
+     }
+    },
+    "watch": 118
+   },
+   "outputs": {
+    "decisions": "sha256:5f2a7e5505438b41a4a734d01c0127f916099bae435a37d2d91738817e8d7d29",
+    "eligibility": "sha256:a7025138a22d5cab744149c79c83da235638efc16eed3b4cceaf294f3758c959",
+    "estimates": "sha256:2fd96ae37eba39bb94f6b99ba1721d03f96eaa3f04b98cc9521c170cc420a75a",
+    "evaluation": "sha256:0b30be7f3d19b6dc1c06dc053ce73eb0e44de7675db8b83adeba7021a9f0addb",
+    "observations": "sha256:110d02c177fe886528b55c307848361d904374a42e023cda3c1aa0a84d922f6c",
+    "packets": "sha256:e9409994f5a8e66860d3753f120b8d891b267b00b03683eb582a814739d1181c",
+    "split": "sha256:419327ac756cdc1c04d9e2a483ea515d45f0329be2d4dc3f84f5343c310e5e8a",
+    "statistics": "sha256:b7d5c8dfd0117f6e5ab9285ba2538c92d943fea14e40e0b5e0a8c619b7507bc7",
+    "strength": "sha256:32757cb7f469aa798d1c808ff52607647e3b190a849ceb975205e3901f8d53e6"
+   },
+   "result": "sha256:03ac5919a4c503f109d6155cdf3ed89f550a35aff9cb960b6a3491c5a8e31c9a"
+  }
+ ],
+ "fixed": "2026-10-06, before any draw of this dataset was run",
+ "format": "fpsdet.benchmark-sensitivity/2",
+ "headline": "The median over all nine draws with the lowest and highest, and every draw listed beside it. No draw is preferred, none is dropped, and none is chosen for its numbers.",
+ "ids": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8
+ ],
+ "manifest": "sha256:40277b22048f175eab04e7a1a4bea9b2a6bb8fb8aeae4a700240d928f0fdd4ae",
+ "question": "How much does the result depend on which never-banned players build the baseline?",
+ "recipe": "fpsdet.tf2-baseline-draw/1",
+ "rule": "In draw k, a never-banned player builds the baseline when the first byte of SHA-256(\"fpsdet.tf2-baseline-draw/1\", NUL, k, NUL, benchmark identity) is under 128, and is scored otherwise. A banned account is always scored. Each draw builds its own baseline cohort from its own baseline half.",
+ "why": "Nine draws, fixed before any was run. In expectation the range of n independent draws spans the middle (n-1)/(n+1) of the draw-to-draw distribution, 80% for nine, and an odd count makes the median one actual draw.",
+ "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2"
+}

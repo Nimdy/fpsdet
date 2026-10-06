@@ -1,0 +1,221 @@
+{
+ "claims": [
+  {
+   "class": "controlled_fixture",
+   "id": "synthetic.qualification",
+   "source": {
+    "digest": "sha256:98b0d3bf54585f9a8ee3acd1c8bc72bd7ec326695b82b83a19f93b035c320414",
+    "path": "benchmark/results/synthetic-v1.json"
+   },
+   "text": "All 22 of 22 native detectors trip on a player planted for them and stay quiet on every honest twin, and 10 of 10 challenge and 10 of 10 signature scenarios behave as documented. Controlled synthetic fixtures: they qualify code, never a rate."
+  },
+  {
+   "class": "benchmark_v1_real_data",
+   "id": "tf2-rgl-v2.headline",
+   "source": {
+    "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2",
+    "path": "benchmark/sensitivity/tf2-rgl-v2.json"
+   },
+   "text": "Across all 9 predeclared baseline draws of tf2-rgl-v2, fpsdet flagged (review or watch) a median 28.6% of the RGL cheating-ban labelled accounts it could compare (lowest 28.0%, highest 29.1%) and a median 3.2% of the never-banned comparison (lowest 2.8%, highest 3.7%). The ratio between them was 8.9x at the median, from 7.7x to 10.4x. Every draw is listed in docs/benchmark.md, and none is preferred."
+  },
+  {
+   "class": "benchmark_v1_real_data",
+   "id": "tf2-rgl-v2.rank_tail",
+   "source": {
+    "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2",
+    "path": "benchmark/sensitivity/tf2-rgl-v2.json"
+   },
+   "text": "rank_tail on tf2-rgl-v2: it fired on a median 25.8% of the RGL cheating-ban labelled accounts it could run on (lowest 20.9%, highest 26.4%) and 3.0% of the never-banned comparison (2.8% to 3.5%); its strength estimate replicated on the held-out split in 9 of 9 draws."
+  },
+  {
+   "class": "benchmark_v1_real_data",
+   "id": "tf2-rgl-v2.accuracy",
+   "source": {
+    "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2",
+    "path": "benchmark/sensitivity/tf2-rgl-v2.json"
+   },
+   "text": "accuracy on tf2-rgl-v2: it fired on a median 4.9% of the RGL cheating-ban labelled accounts it could run on (lowest 3.8%, highest 9.3%) and 0.2% of the never-banned comparison (0.0% to 0.3%); its strength estimate replicated on the held-out split in 5 of 9 draws."
+  },
+  {
+   "class": "benchmark_v1_real_data",
+   "id": "tf2-rgl-v2.headshot_rate",
+   "source": {
+    "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2",
+    "path": "benchmark/sensitivity/tf2-rgl-v2.json"
+   },
+   "text": "headshot_rate on tf2-rgl-v2: it fired on a median 5.0% of the RGL cheating-ban labelled accounts it could run on (lowest 5.0%, highest 10.9%) and 0.0% of the never-banned comparison (0.0% to 0.8%); its strength estimate replicated on the held-out split in 3 of 9 draws."
+  },
+  {
+   "class": "benchmark_v1_real_data",
+   "id": "tf2-rgl-v2.extra",
+   "source": {
+    "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2",
+    "path": "benchmark/sensitivity/tf2-rgl-v2.json"
+   },
+   "text": "extra on tf2-rgl-v2: it fired on a median 2.5% of the RGL cheating-ban labelled accounts it could run on (lowest 2.5%, highest 3.7%) and 0.0% of the never-banned comparison (0.0% to 0.0%); its strength estimate replicated on the held-out split in 0 of 9 draws."
+  },
+  {
+   "class": "unmeasured",
+   "id": "tf2-rgl-v2.population",
+   "source": {
+    "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2",
+    "path": "benchmark/sensitivity/tf2-rgl-v2.json"
+   },
+   "text": "Which 300 extra never-banned players join the comparison is fixed by a public order, not drawn: the 9 draws vary only which half of the never-banned players builds the baseline, so they do not show how much another set of extra players would move the result."
+  },
+  {
+   "class": "unmeasured",
+   "id": "tf2-rgl-v2.unobservable",
+   "source": {
+    "digest": "sha256:485d2720a2dc1be3a25101fe01b5027949715ed72993b22a2a60687f9d7710b2",
+    "path": "benchmark/sensitivity/tf2-rgl-v2.json"
+   },
+   "text": "17 of 22 detectors cannot be observed on tf2-rgl-v2's per-match totals at all, and are reported that way, never as 0%."
+  },
+  {
+   "class": "historical_real_data",
+   "id": "tf2-rgl-v1.published_draw",
+   "source": {
+    "digest": "sha256:2a0680dc4136f3bd3cbd33ad58ab9a774d3c94ded3821bcee9e694bf2d0c8b40",
+    "path": "benchmark/sensitivity/tf2-rgl-v1.json"
+   },
+   "text": "The historical published TF2 result (tf2-rgl-v1) was one baseline draw, chosen by the curator's private key: its ratio, 15.0x, was the most favourable of 6 draws of that data and higher than every draw of this release. It is not the benchmark result."
+  },
+  {
+   "class": "historical_real_data",
+   "id": "tf2-rgl-v1.draws",
+   "source": {
+    "digest": "sha256:2a0680dc4136f3bd3cbd33ad58ab9a774d3c94ded3821bcee9e694bf2d0c8b40",
+    "path": "benchmark/sensitivity/tf2-rgl-v1.json"
+   },
+   "text": "tf2-rgl-v1's own 6 draws ran from 9.9x to 15.0x. Its extra never-banned players were chosen by the curator's private key, not by this release's public order, so its population differs from this release's, not only its baseline draw."
+  },
+  {
+   "class": "benchmark_v1_real_data",
+   "id": "cs2cd-v2.headline",
+   "source": {
+    "digest": "sha256:e83d92971ff3df8032ab788e69bc3bce42ebdb76b889cbb06e0a9923670aa291",
+    "path": "examples/cs2/evaluation.json"
+   },
+   "text": "On cs2cd-v2, fpsdet picked 18 of 1,529 scored players for review or watch, and 14 of them are hand-labelled cheaters. Each player is one match here, so there is no equal-evidence comparison to make."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.11",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "An assist that copies human timing, human noise and human lag."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.12",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "An aim assist tuned to stay inside the best humans measured: past every human is a finding, better than average is not."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.13",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "A reader that follows each challenge only briefly, only in the last second of its window, or only beside an enemy the client can see."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.14",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "A cheat that waits out the interpolation delay."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.15",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "A capture-card aimbot looking at pixels."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.16",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "A DMA read of the frame the game actually drew."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.17",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "A wallhack that never aims at a hidden enemy."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.18",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "Shared positions acted on no faster than a voice could carry them, or shared by a player who is not in review."
+  },
+  {
+   "class": "unmeasured",
+   "id": "limit.19",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "Anything a game's telemetry cannot show. In the benchmark's real data, 17 of 22 detectors on TF2 and 15 of 22 detectors on CS2 are not observable at all, which is not the same as finding nothing."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.20",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "A number with too few humans behind it: a detector waits for a thick enough baseline, and says so, before it compares."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.21",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "A server that labels a visible enemy as hidden manufactures cases. That is an emitter bug, and the docs call it out field by field."
+  },
+  {
+   "class": "architecture_limit",
+   "id": "limit.22",
+   "source": {
+    "digest": "sha256:c7909e3416cffec5a658de705300cbe28eb3b84e44bab63832f8b649247853e6",
+    "path": "benchmark/capabilities.json"
+   },
+   "text": "External records are read unsigned by default, and a verified signature proves who signed a record, not that its finding is true."
+  }
+ ],
+ "classes": {
+  "architecture_limit": "architecture limit: what no fpsdet check can see, by design or by a controlled scenario that gets through",
+  "benchmark_v1_real_data": "benchmark v1 real data: measured on a current dataset of this release, rebuildable from public sources without any private key",
+  "controlled_fixture": "controlled fixture: planted by construction in synthetic fixtures and scenarios; it qualifies code, never a rate",
+  "historical_real_data": "historical real data: a run published before this release, still verifiable, superseded, and never the benchmark result",
+  "unmeasured": "unmeasured: what the benchmark's data cannot show at all, which is not the same as finding nothing"
+ },
+ "format": "fpsdet.benchmark-claims/1",
+ "release": "FPSDET Benchmark v1",
+ "digest": "sha256:8ea58c6f3fd5e8c3578e98af66d69290942cefdee152a9709f9c877dab62ae41"
+}

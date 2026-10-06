@@ -1,0 +1,1156 @@
+{
+ "co_occurrence": {
+  "half": "development",
+  "pairs": {
+   "accuracy + extra": {
+    "co_occurring_no_explicit_dependency": 1,
+    "players": 1,
+    "shared_cohort": 1,
+    "shared_domain": 1
+   },
+   "accuracy + headshot_rate": {
+    "co_occurring_no_explicit_dependency": 1,
+    "players": 1,
+    "shared_cohort": 1,
+    "shared_domain": 1
+   },
+   "accuracy + rank_tail": {
+    "co_occurring_no_explicit_dependency": 4,
+    "players": 4,
+    "shared_cohort": 4,
+    "shared_domain": 4
+   },
+   "extra + rank_tail": {
+    "co_occurring_no_explicit_dependency": 1,
+    "players": 1,
+    "shared_cohort": 1,
+    "shared_domain": 1
+   },
+   "headshot_rate + extra": {
+    "co_occurring_no_explicit_dependency": 1,
+    "players": 1,
+    "shared_cohort": 1,
+    "shared_domain": 1
+   },
+   "headshot_rate + rank_tail": {
+    "co_occurring_no_explicit_dependency": 6,
+    "players": 6,
+    "shared_cohort": 6,
+    "shared_domain": 6
+   },
+   "headshot_rate + supporting_extra": {
+    "co_occurring_no_explicit_dependency": 2,
+    "players": 2,
+    "shared_cohort": 2,
+    "shared_domain": 2
+   },
+   "rank_tail + supporting_extra": {
+    "co_occurring_no_explicit_dependency": 2,
+    "players": 2,
+    "shared_cohort": 2,
+    "shared_domain": 2
+   }
+  }
+ },
+ "code": {
+  "digest": "sha256:04a0dc675ef79abff7f640b5fc6ad2980b7b95e769fa510cd2cc523c7ff4b0ed",
+  "recipe": "fpsdet.strength-code/1"
+ },
+ "dataset": {
+  "caveats": [
+   "The labels are RGL's, not ground truth. RGL cheating-ban labelled means RGL banned the account and the reason mentions cheating. It does not mean the player cheated in any particular scored match.",
+   "The comparison is never-banned, not proven honest. A few unlabelled cheaters are likely in it.",
+   "The data is per-match totals: shots, hits, sniper headshots and kills per minute. There is no timing, position, view angle or movement, so most detectors are not observable here.",
+   "Shot times are spread evenly through each match by the converter, so no timing-based detector could mean anything on this data.",
+   "Exposure is unequal. Most never-banned players have a few matches and labelled accounts have up to 20, so compare at equal evidence (the evidence-amount table).",
+   "This is one season of competitive TF2. It says nothing direct about another game, league or season.",
+   "Which never-banned players build the baseline is a random draw. This dataset is run under nine fixed public draws, and its result is the spread across them, not any one draw."
+  ],
+  "comparison": "not banned",
+  "dataset": "tf2-rgl-v2",
+  "digest": "sha256:1de75a224b8bdfcaa4af26c279bb3fc8f2895fc2029efbb642a442cb1df4337c",
+  "labels": [
+   {
+    "label": "cheater",
+    "meaning": "RGL banned the account on or before 2026-10-03, and the reason mentions cheating but not assisting, distributing or developing cheats. Each had at least 20 team matches on logs.tf before the ban, and its 20 latest were fetched.",
+    "name": "RGL cheating-ban labelled",
+    "not_meaning": "That the player cheated in every scored match, or in any particular one. A ban is a league decision, sometimes mirroring another league's.",
+    "role": "positive"
+   },
+   {
+    "label": "not banned",
+    "meaning": "RGL had not banned the account by 2026-10-03. It played in the same lobbies as labelled accounts, with at least 8 matches in the selected logs; 300 of them, taken in a public hash order, also have their own 20 latest team matches. In each baseline draw, a public hash sends about half of them to build the baseline instead of being scored.",
+    "name": "never-banned comparison",
+    "not_meaning": "That the player never cheated. A few unlabelled cheaters are likely among them.",
+    "role": "comparison"
+   },
+   {
+    "label": "other ban",
+    "meaning": "RGL banned the account on or before 2026-10-03 for something other than cheating, such as an alt account. Seen in the selected lobbies, with no minimum number of matches.",
+    "name": "banned for something else",
+    "not_meaning": "Anything about cheating.",
+    "role": "other"
+   },
+   {
+    "label": "vac",
+    "meaning": "RGL mirrored a Valve anti-cheat ban, possibly from another game, on or before 2026-10-03. Seen in the selected lobbies, with no minimum number of matches.",
+    "name": "VAC ban, mirrored by RGL",
+    "not_meaning": "That the player cheated in TF2.",
+    "role": "other"
+   }
+  ],
+  "positive": "cheater"
+ },
+ "detectors": [
+  {
+   "family": "physics",
+   "kind": "speed",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry, profile_declares_none"
+  },
+  {
+   "family": "weapon_rules",
+   "kind": "fire_rate",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: no_server_shot_timing, profile_declares_none"
+  },
+  {
+   "family": "weapon_rules",
+   "kind": "metronome",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: no_server_shot_timing, profile_declares_none"
+  },
+  {
+   "family": "weapon_rules",
+   "kind": "recoil_floor",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry, profile_declares_none"
+  },
+  {
+   "family": "weapon_rules",
+   "kind": "mirror",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "family": "human_baseline",
+   "kind": "recoil_learned",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "development": {
+    "comparison": {
+     "ci95": [
+      0.000504708,
+      0.00776352
+     ],
+     "eligible": 824,
+     "fires": 2,
+     "for_ratio": [
+      0.000373018,
+      0.00877559
+     ],
+     "mean": 0.0030303
+    },
+    "evidence_ratio": {
+     "credible95": [
+      2.17617,
+      358.275
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 20.8621
+    },
+    "positive": {
+     "ci95": [
+      0.0225281,
+      0.122718
+     ],
+     "eligible": 86,
+     "fires": 5,
+     "for_ratio": [
+      0.0190972,
+      0.133643
+     ],
+     "mean": 0.0632184
+    },
+    "sample": "descriptive_only"
+   },
+   "evaluation": {
+    "comparison": {
+     "eligible": 742,
+     "fires": 1,
+     "predicted95": [
+      0,
+      7
+     ],
+     "rate": 0.00134771,
+     "within_prediction": true
+    },
+    "evidence_ratio": {
+     "credible95": [
+      0.968437,
+      988.648
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 17.8729
+    },
+    "positive": {
+     "eligible": 96,
+     "fires": 3,
+     "predicted95": [
+      1,
+      14
+     ],
+     "rate": 0.03125,
+     "within_prediction": true
+    },
+    "sample": "descriptive_only",
+    "stability": "tentative",
+    "why": "consistent, but the held-out half's own set does not exclude 1"
+   },
+   "family": "human_baseline",
+   "kind": "accuracy",
+   "sensitivity": {
+    "reverse_split": {
+     "check": {
+      "comparison": {
+       "eligible": 824,
+       "fires": 2,
+       "rate": 0.00242718
+      },
+      "evidence_ratio": {
+       "credible95": [
+        2.17617,
+        358.275
+       ],
+       "no_fires": null,
+       "prior_dominated": false,
+       "ratio": 20.8621
+      },
+      "positive": {
+       "eligible": 86,
+       "fires": 5,
+       "rate": 0.0581395
+      },
+      "sample": "descriptive_only",
+      "stability": "unsupported",
+      "why": "the fitted half's credible set does not exclude 1"
+     },
+     "fitted": {
+      "comparison": {
+       "ci95": [
+        0.000145453,
+        0.00628177
+       ],
+       "eligible": 742,
+       "fires": 1,
+       "for_ratio": [
+        9.09459e-05,
+        0.00727616
+       ],
+       "mean": 0.00201884
+      },
+      "evidence_ratio": {
+       "credible95": [
+        0.968437,
+        988.648
+       ],
+       "no_fires": null,
+       "prior_dominated": false,
+       "ratio": 17.8729
+      },
+      "positive": {
+       "ci95": [
+        0.00887842,
+        0.0810397
+       ],
+       "eligible": 96,
+       "fires": 3,
+       "for_ratio": [
+        0.0070465,
+        0.0899135
+       ],
+       "mean": 0.0360825
+      },
+      "sample": "descriptive_only"
+     }
+    },
+    "uniform_prior": {
+     "credible95": [
+      2.25016,
+      242.374
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 18.7727
+    }
+   },
+   "status": "descriptive_only"
+  },
+  {
+   "development": {
+    "comparison": {
+     "ci95": [
+      0.00192895,
+      0.0293689
+     ],
+     "eligible": 216,
+     "fires": 2,
+     "for_ratio": [
+      0.00142591,
+      0.03315
+     ],
+     "mean": 0.0115207
+    },
+    "evidence_ratio": {
+     "credible95": [
+      1.32074,
+      171.163
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 10.85
+    },
+    "positive": {
+     "ci95": [
+      0.0506288,
+      0.226501
+     ],
+     "eligible": 51,
+     "fires": 6,
+     "for_ratio": [
+      0.0437824,
+      0.244063
+     ],
+     "mean": 0.125
+    },
+    "sample": "descriptive_only"
+   },
+   "evaluation": {
+    "comparison": {
+     "eligible": 176,
+     "fires": 0,
+     "predicted95": [
+      0,
+      7
+     ],
+     "rate": 0.0,
+     "within_prediction": true
+    },
+    "evidence_ratio": {
+     "credible95": [
+      1.9033,
+      311711.0
+     ],
+     "no_fires": "comparison",
+     "prior_dominated": true,
+     "ratio": 38.1764
+    },
+    "positive": {
+     "eligible": 50,
+     "fires": 5,
+     "predicted95": [
+      1,
+      14
+     ],
+     "rate": 0.1,
+     "within_prediction": true
+    },
+    "sample": "descriptive_only",
+    "stability": "replicated",
+    "why": "consistent, and the held-out half's own set excludes 1"
+   },
+   "family": "human_baseline",
+   "kind": "headshot_rate",
+   "sensitivity": {
+    "reverse_split": {
+     "check": {
+      "comparison": {
+       "eligible": 216,
+       "fires": 2,
+       "predicted95": [
+        0,
+        4
+       ],
+       "rate": 0.00925926,
+       "within_prediction": true
+      },
+      "evidence_ratio": {
+       "credible95": [
+        1.32074,
+        171.163
+       ],
+       "no_fires": null,
+       "prior_dominated": false,
+       "ratio": 10.85
+      },
+      "positive": {
+       "eligible": 51,
+       "fires": 6,
+       "predicted95": [
+        1,
+        13
+       ],
+       "rate": 0.117647,
+       "within_prediction": true
+      },
+      "sample": "descriptive_only",
+      "stability": "replicated",
+      "why": "consistent, and the held-out half's own set excludes 1"
+     },
+     "fitted": {
+      "comparison": {
+       "ci95": [
+        2.786e-06,
+        0.014151
+       ],
+       "eligible": 176,
+       "fires": 0,
+       "for_ratio": [
+        7.14305e-07,
+        0.0174793
+       ],
+       "mean": 0.00282486
+      },
+      "evidence_ratio": {
+       "credible95": [
+        1.9033,
+        311711.0
+       ],
+       "no_fires": "comparison",
+       "prior_dominated": true,
+       "ratio": 38.1764
+      },
+      "positive": {
+       "ci95": [
+        0.0391944,
+        0.205355
+       ],
+       "eligible": 50,
+       "fires": 5,
+       "for_ratio": [
+        0.0332684,
+        0.222657
+       ],
+       "mean": 0.107843
+      },
+      "sample": "descriptive_only"
+     }
+    },
+    "uniform_prior": {
+     "credible95": [
+      1.32175,
+      114.358
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 9.59743
+    }
+   },
+   "status": "descriptive_only"
+  },
+  {
+   "family": "human_baseline",
+   "kind": "median_distance",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "family": "human_baseline",
+   "kind": "geometry_rate",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "development": {
+    "comparison": {
+     "ci95": [
+      2.72418e-06,
+      0.0138392
+     ],
+     "eligible": 180,
+     "fires": 0,
+     "for_ratio": [
+      6.98453e-07,
+      0.0170948
+     ],
+     "mean": 0.00276243
+    },
+    "evidence_ratio": {
+     "credible95": [
+      0.107289,
+      196239.0
+     ],
+     "no_fires": "comparison",
+     "prior_dominated": true,
+     "ratio": 14.2895
+    },
+    "positive": {
+     "ci95": [
+      0.0029318,
+      0.119445
+     ],
+     "eligible": 37,
+     "fires": 1,
+     "for_ratio": [
+      0.00183409,
+      0.137064
+     ],
+     "mean": 0.0394737
+    },
+    "sample": "descriptive_only"
+   },
+   "evaluation": {
+    "comparison": {
+     "eligible": 165,
+     "fires": 0,
+     "rate": 0.0
+    },
+    "evidence_ratio": {
+     "credible95": [
+      0.379849,
+      202807.0
+     ],
+     "no_fires": "comparison",
+     "prior_dominated": true,
+     "ratio": 18.4444
+    },
+    "positive": {
+     "eligible": 44,
+     "fires": 2,
+     "rate": 0.0454545
+    },
+    "sample": "descriptive_only",
+    "stability": "unsupported",
+    "why": "the fitted half's credible set does not exclude 1"
+   },
+   "family": "human_baseline",
+   "kind": "extra",
+   "sensitivity": {
+    "reverse_split": {
+     "check": {
+      "comparison": {
+       "eligible": 180,
+       "fires": 0,
+       "rate": 0.0
+      },
+      "evidence_ratio": {
+       "credible95": [
+        0.107289,
+        196239.0
+       ],
+       "no_fires": "comparison",
+       "prior_dominated": true,
+       "ratio": 14.2895
+      },
+      "positive": {
+       "eligible": 37,
+       "fires": 1,
+       "rate": 0.027027
+      },
+      "sample": "descriptive_only",
+      "stability": "unsupported",
+      "why": "the fitted half's credible set does not exclude 1"
+     },
+     "fitted": {
+      "comparison": {
+       "ci95": [
+        2.97146e-06,
+        0.0150859
+       ],
+       "eligible": 165,
+       "fires": 0,
+       "for_ratio": [
+        7.61853e-07,
+        0.018632
+       ],
+       "mean": 0.00301205
+      },
+      "evidence_ratio": {
+       "credible95": [
+        0.379849,
+        202807.0
+       ],
+       "no_fires": "comparison",
+       "prior_dominated": true,
+       "ratio": 18.4444
+      },
+      "positive": {
+       "ci95": [
+        0.00956461,
+        0.137915
+       ],
+       "eligible": 44,
+       "fires": 2,
+       "for_ratio": [
+        0.00707734,
+        0.154509
+       ],
+       "mean": 0.0555556
+      },
+      "sample": "descriptive_only"
+     }
+    },
+    "uniform_prior": {
+     "credible95": [
+      0.187696,
+      2218.73
+     ],
+     "no_fires": "comparison",
+     "prior_dominated": true,
+     "ratio": 9.33333
+    }
+   },
+   "status": "descriptive_only"
+  },
+  {
+   "development": {
+    "comparison": {
+     "ci95": [
+      0.0125289,
+      0.0320856
+     ],
+     "eligible": 824,
+     "fires": 17,
+     "for_ratio": [
+      0.0115787,
+      0.0339261
+     ],
+     "mean": 0.0212121
+    },
+    "evidence_ratio": {
+     "credible95": [
+      5.06837,
+      33.018
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 12.734
+    },
+    "positive": {
+     "ci95": [
+      0.182676,
+      0.367561
+     ],
+     "eligible": 86,
+     "fires": 23,
+     "for_ratio": [
+      0.17195,
+      0.382305
+     ],
+     "mean": 0.270115
+    },
+    "sample": "descriptive_only"
+   },
+   "evaluation": {
+    "comparison": {
+     "eligible": 742,
+     "fires": 27,
+     "predicted95": [
+      6,
+      28
+     ],
+     "rate": 0.0363881,
+     "within_prediction": true
+    },
+    "evidence_ratio": {
+     "credible95": [
+      2.6707,
+      14.3829
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 6.26711
+    },
+    "positive": {
+     "eligible": 96,
+     "fires": 22,
+     "predicted95": [
+      14,
+      39
+     ],
+     "rate": 0.229167,
+     "within_prediction": true
+    },
+    "sample": "descriptive_only",
+    "stability": "replicated",
+    "why": "consistent, and the held-out half's own set excludes 1"
+   },
+   "family": "human_baseline",
+   "kind": "rank_tail",
+   "sensitivity": {
+    "reverse_split": {
+     "check": {
+      "comparison": {
+       "eligible": 824,
+       "fires": 17,
+       "predicted95": [
+        17,
+        47
+       ],
+       "rate": 0.0206311,
+       "within_prediction": true
+      },
+      "evidence_ratio": {
+       "credible95": [
+        5.06837,
+        33.018
+       ],
+       "no_fires": null,
+       "prior_dominated": false,
+       "ratio": 12.734
+      },
+      "positive": {
+       "eligible": 86,
+       "fires": 23,
+       "predicted95": [
+        10,
+        31
+       ],
+       "rate": 0.267442,
+       "within_prediction": true
+      },
+      "sample": "descriptive_only",
+      "stability": "replicated",
+      "why": "consistent, and the held-out half's own set excludes 1"
+     },
+     "fitted": {
+      "comparison": {
+       "ci95": [
+        0.0246661,
+        0.0517135
+       ],
+       "eligible": 742,
+       "fires": 27,
+       "for_ratio": [
+        0.023227,
+        0.054111
+       ],
+       "mean": 0.0370121
+      },
+      "evidence_ratio": {
+       "credible95": [
+        2.6707,
+        14.3829
+       ],
+       "no_fires": null,
+       "prior_dominated": false,
+       "ratio": 6.26711
+      },
+      "positive": {
+       "ci95": [
+        0.153927,
+        0.320452
+       ],
+       "eligible": 96,
+       "fires": 22,
+       "for_ratio": [
+        0.144514,
+        0.334071
+       ],
+       "mean": 0.231959
+      },
+      "sample": "descriptive_only"
+     }
+    },
+    "uniform_prior": {
+     "credible95": [
+      5.0418,
+      32.0079
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 12.5151
+    }
+   },
+   "status": "descriptive_only"
+  },
+  {
+   "family": "human_baseline",
+   "kind": "view_snaps",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "family": "human_baseline",
+   "kind": "acquire_timing",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "development": {
+    "comparison": {
+     "eligible": 58,
+     "fires": 0
+    },
+    "positive": {
+     "eligible": 13,
+     "fires": 2
+    },
+    "sample": "insufficient_sample"
+   },
+   "evaluation": {
+    "comparison": {
+     "eligible": 59,
+     "fires": 0,
+     "rate": 0.0
+    },
+    "positive": {
+     "eligible": 15,
+     "fires": 1,
+     "rate": 0.0666667
+    },
+    "sample": "insufficient_sample",
+    "stability": "unsupported",
+    "why": "no estimate on the fitted half"
+   },
+   "family": "human_baseline",
+   "kind": "supporting_extra",
+   "sensitivity": {
+    "reverse_split": {
+     "check": {
+      "comparison": {
+       "eligible": 58,
+       "fires": 0,
+       "rate": 0.0
+      },
+      "positive": {
+       "eligible": 13,
+       "fires": 2,
+       "rate": 0.153846
+      },
+      "sample": "insufficient_sample",
+      "stability": "unsupported",
+      "why": "no estimate on the fitted half"
+     },
+     "fitted": {
+      "comparison": {
+       "eligible": 59,
+       "fires": 0
+      },
+      "positive": {
+       "eligible": 15,
+       "fires": 1
+      },
+      "sample": "insufficient_sample"
+     }
+    },
+    "uniform_prior": null
+   },
+   "status": "insufficient_sample"
+  },
+  {
+   "family": "account_history",
+   "kind": "account_jump",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: no_history_input"
+  },
+  {
+   "family": "information",
+   "kind": "hidden",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "family": "information",
+   "kind": "quiet_aim",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "family": "information",
+   "kind": "wire",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "family": "challenge",
+   "kind": "occluded_motion_replay",
+   "status": "not_calibrated",
+   "why": "challenges are planned by a server; no public dataset carries them, so they are qualified on controlled fixtures only"
+  },
+  {
+   "family": "relationship",
+   "kind": "leftover",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  },
+  {
+   "family": "relationship",
+   "kind": "voice",
+   "status": "not_calibrated",
+   "why": "not observable with this dataset: missing_telemetry"
+  }
+ ],
+ "estimator": {
+  "credible": {
+   "level": 0.95,
+   "method": "product of the two central per-rate intervals",
+   "per_rate": 0.974679
+  },
+  "event": "the detector fired at least once on the player, among players it could run on",
+  "gates": {
+   "applied_to": "the development half",
+   "min_descriptive": 20,
+   "min_measured": 100
+  },
+  "predictive": "beta-binomial, central 95%",
+  "prior": {
+   "alpha": 0.5,
+   "beta": 0.5,
+   "name": "jeffreys"
+  },
+  "rate": "posterior mean of Beta(fires + alpha, eligible - fires + beta)",
+  "ratio": "positive posterior mean / comparison posterior mean (label-conditioned evidence ratio)",
+  "recipe": "fpsdet.strength-estimator/1",
+  "sensitivity_prior": {
+   "alpha": 1.0,
+   "beta": 1.0,
+   "name": "uniform"
+  },
+  "stability": [
+   "unsupported",
+   "unstable",
+   "tentative",
+   "replicated"
+  ]
+ },
+ "evaluation": {
+  "digest": "sha256:aec926516b8c3ef3034a0e6eebdbc901c8c54c724bdd57599d75fb70c50ad4e2",
+  "schema": "fpsdet.evaluation/2"
+ },
+ "families": [
+  {
+   "detectors": [
+    "accuracy",
+    "headshot_rate",
+    "extra",
+    "rank_tail",
+    "supporting_extra"
+   ],
+   "development": {
+    "comparison": {
+     "ci95": [
+      0.016324,
+      0.0379669
+     ],
+     "eligible": 824,
+     "fires": 21,
+     "for_ratio": [
+      0.0152255,
+      0.039948
+     ],
+     "mean": 0.0260606
+    },
+    "evidence_ratio": {
+     "credible95": [
+      4.79568,
+      26.7482
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 11.247
+    },
+    "positive": {
+     "ci95": [
+      0.202818,
+      0.392398
+     ],
+     "eligible": 86,
+     "fires": 25,
+     "for_ratio": [
+      0.191578,
+      0.407254
+     ],
+     "mean": 0.293103
+    },
+    "sample": "descriptive_only"
+   },
+   "evaluation": {
+    "comparison": {
+     "eligible": 742,
+     "fires": 28,
+     "predicted95": [
+      9,
+      32
+     ],
+     "rate": 0.0377358,
+     "within_prediction": true
+    },
+    "evidence_ratio": {
+     "credible95": [
+      3.21809,
+      15.6171
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 7.12227
+    },
+    "positive": {
+     "eligible": 96,
+     "fires": 26,
+     "predicted95": [
+      16,
+      41
+     ],
+     "rate": 0.270833,
+     "within_prediction": true
+    },
+    "sample": "descriptive_only",
+    "stability": "replicated",
+    "why": "consistent, and the held-out half's own set excludes 1"
+   },
+   "family": "human_baseline",
+   "sensitivity": {
+    "reverse_split": {
+     "check": {
+      "comparison": {
+       "eligible": 824,
+       "fires": 21,
+       "predicted95": [
+        17,
+        49
+       ],
+       "rate": 0.0254854,
+       "within_prediction": true
+      },
+      "evidence_ratio": {
+       "credible95": [
+        4.79568,
+        26.7482
+       ],
+       "no_fires": null,
+       "prior_dominated": false,
+       "ratio": 11.247
+      },
+      "positive": {
+       "eligible": 86,
+       "fires": 25,
+       "predicted95": [
+        13,
+        35
+       ],
+       "rate": 0.290698,
+       "within_prediction": true
+      },
+      "sample": "descriptive_only",
+      "stability": "replicated",
+      "why": "consistent, and the held-out half's own set excludes 1"
+     },
+     "fitted": {
+      "comparison": {
+       "ci95": [
+        0.0257731,
+        0.0532917
+       ],
+       "eligible": 742,
+       "fires": 28,
+       "for_ratio": [
+        0.0242999,
+        0.0557206
+       ],
+       "mean": 0.038358
+      },
+      "evidence_ratio": {
+       "credible95": [
+        3.21809,
+        15.6171
+       ],
+       "no_fires": null,
+       "prior_dominated": false,
+       "ratio": 7.12227
+      },
+      "positive": {
+       "ci95": [
+        0.189678,
+        0.36557
+       ],
+       "eligible": 96,
+       "fires": 26,
+       "for_ratio": [
+        0.179314,
+        0.379495
+       ],
+       "mean": 0.273196
+      },
+      "sample": "descriptive_only"
+     }
+    },
+    "uniform_prior": {
+     "credible95": [
+      4.77659,
+      26.1067
+     ],
+     "no_fires": null,
+     "prior_dominated": false,
+     "ratio": 11.093
+    }
+   },
+   "status": "descriptive_only"
+  },
+  {
+   "detectors": [],
+   "family": "physics",
+   "status": "not_calibrated",
+   "why": "no detector of this family is observable with this dataset"
+  },
+  {
+   "detectors": [],
+   "family": "weapon_rules",
+   "status": "not_calibrated",
+   "why": "no detector of this family is observable with this dataset"
+  },
+  {
+   "detectors": [],
+   "family": "relationship",
+   "status": "not_calibrated",
+   "why": "no detector of this family is observable with this dataset"
+  }
+ ],
+ "inputs": {
+  "cohort": "sha256:819a59230e78bf85d99fea34d0eacd40a0b15f4d57d5c30daf88a1c972f0b3c5",
+  "cohort_mode": "external",
+  "detector": "sha256:a75b28fb3b00fa5868444318d44c7c4d235e94a76a85a96fad4f1f040b80ad81",
+  "digest": "sha256:2d0cf231f3cc86e7fb9498691d016483c50d283c718f4e53eb39a27cd06644f1",
+  "profile": "sha256:2f4232e7c3338fb7500e4a9b18173baf365022c9be2bdaf0ee17bf8126a4dd5e"
+ },
+ "labels": {
+  "counts": {
+   "cheater": 228,
+   "not banned": 2106,
+   "other ban": 1225,
+   "vac": 24
+  },
+  "digest": "sha256:974fd13d04946cead08d94a363cfb76addb09185d76a6f364d25a8db174cbb6a",
+  "recipe": "fpsdet.evaluation-labels/1"
+ },
+ "not_calibrated": {
+  "challenge": "challenges are planned by a server; no public dataset carries them, so they are qualified on controlled fixtures only",
+  "external": "provider-specific rates are unavailable; external records keep the fusion rules and never borrow native strength",
+  "human_review": "a person's ruling is the person's, not a detector's, and is never given a strength"
+ },
+ "research_only": "Offline research. The scorer never reads it, and nothing here is a threshold, a weight or a probability that anyone cheated.",
+ "schema": "fpsdet.strength/1",
+ "split": {
+  "composition": {
+   "development": {
+    "cheater": 86,
+    "not banned": 875,
+    "other ban": 394,
+    "vac": 5
+   },
+   "evaluation": {
+    "cheater": 103,
+    "not banned": 800,
+    "other ban": 458,
+    "vac": 5
+   }
+  },
+  "recipe": "fpsdet.calibration-split/1",
+  "unit": "player"
+ },
+ "digest": "sha256:09a466ead6bd02e71aebe312952eb4271c812caa92429a791a56e9d390fe7e3b"
+}

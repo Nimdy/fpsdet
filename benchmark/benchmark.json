@@ -1,19 +1,31 @@
 {
   "format": "fpsdet.benchmark/1",
   "version": 1,
-  "title": "fpsdet benchmark v1",
+  "title": "FPSDET Benchmark v1",
   "datasets": [
     {
       "id": "synthetic-v1",
       "manifest": "benchmark/datasets/synthetic-v1.json"
     },
     {
+      "id": "tf2-rgl-v2",
+      "manifest": "benchmark/datasets/tf2-rgl-v2.json"
+    },
+    {
+      "id": "cs2cd-v2",
+      "manifest": "benchmark/datasets/cs2cd-v2.json"
+    },
+    {
       "id": "tf2-rgl-v1",
-      "manifest": "benchmark/datasets/tf2-rgl-v1.json"
+      "manifest": "benchmark/datasets/tf2-rgl-v1.json",
+      "historical": true,
+      "superseded_by": "tf2-rgl-v2"
     },
     {
       "id": "cs2cd-v1",
-      "manifest": "benchmark/datasets/cs2cd-v1.json"
+      "manifest": "benchmark/datasets/cs2cd-v1.json",
+      "historical": true,
+      "superseded_by": "cs2cd-v2"
     }
   ],
   "capabilities": "benchmark/capabilities.json",
@@ -23,45 +35,75 @@
   },
   "report": "docs/benchmark.md",
   "can_prove": [
-    "That the committed numbers follow from the committed artifacts: every evaluation, strength estimate, split and result verifies by digest, and its statistics recompute, without re-scoring anything.",
-    "That fpsdet's decisions on the published TF2 and CS2 runs follow from the prepared inputs: the same events, labels, cohort and profile give the same cases, packets, eligibility, evaluation and strength, on Python 3.11 and 3.12.",
-    "That the prepared inputs follow from the downloaded sources by the frozen selection: the converters rebuild them byte for byte from the same downloads.",
-    "That every native detector trips on a behaviour planted for it and stays quiet on an honest twin, and that the challenge and external-signature protocols behave as documented, in controlled synthetic fixtures.",
-    "Exactly what changed when anything moves: inputs, labels, selection code, profile, cohort, detector code, decisions, findings, eligibility, statistics, strength or only presentation."
+    "That the committed numbers follow from the committed artifacts: every result, evaluation or per-draw statistics file, strength estimate, split and spread verifies by digest, and its numbers recompute, without re-scoring anything.",
+    "That fpsdet's decisions on the TF2 and CS2 datasets follow from the prepared inputs: the same events, labels, cohort and profile give the same cases, packets, eligibility, evaluation and strength, on Python 3.11 and 3.12.",
+    "That the prepared inputs follow from the frozen sources by public rules, with no private key: anyone holding the same downloads rebuilds tf2-rgl-v2's data and all nine baseline draws, and cs2cd-v2's data from its one pinned revision, byte for byte. A download that differs from the frozen source is reported as SOURCE_CHANGED, part by part, never used as if it were the same.",
+    "Exactly what changed when anything moves: the upstream source (SOURCE_CHANGED, with the digest pinned and found), the selection, the code, the ids, the inputs, labels, profile or cohort, the detector code, decisions, findings, eligibility, statistics, strength, or only presentation.",
+    "How much a TF2 number depends on which never-banned players build the baseline: nine draws fixed before any was run, all reported, none preferred.",
+    "That every native detector trips on a behaviour planted for it and stays quiet on an honest twin, and that the challenge and external-signature protocols behave as documented, in controlled synthetic fixtures."
   ],
   "cannot_prove": [
     "How well fpsdet detects cheating in general. Each real dataset is one population with someone else's labels: RGL's bans and the CS2CD authors' judgement, neither of them ground truth.",
     "Anything about a detector a dataset cannot observe. On TF2 and CS2 most detectors are not observable at all; that is a gap in the data, not a zero.",
-    "That a real-data number is a fixed property of fpsdet. TF2's baseline is one random draw of never-banned players; the sensitivity table shows how far other draws of the same data move it.",
+    "That a TF2 number is a fixed property of fpsdet. It moves with the baseline draw; the benchmark reports the median and the range over nine draws, and nine draws show the spread, not its limits.",
+    "That upstream will keep serving the frozen sources. logs.tf and RGL can edit or remove what was fetched; the digests detect it (SOURCE_CHANGED) but cannot restore it, and nothing downloaded is committed.",
     "That synthetic fixtures resemble real cheats. They are planted by construction and qualify code, never a rate.",
-    "That fpsdet is better or worse than any other system. Nothing else is evaluated here.",
-    "That TF2 can be rebuilt by a third party with the same player ids: its pseudonym key never leaves the curator's machine, and the RGL ban list and logs.tf match lists change over time. A third party gets an exact report of what differs."
+    "That fpsdet is better or worse than any other system. Nothing else is evaluated here."
   ],
   "reproduce": [
-    "Everything below runs from a clone of the repository with standard-library Python 3.11 or 3.12. The CS2 converter also needs `pip install -r examples/cs2/requirements.txt`; the external-signature scenarios need `pip install 'fpsdet[auth]'`.",
+    "Everything below runs from a clone of the repository with standard-library Python 3.11 or 3.12. The CS2 fetcher and converter also need `pip install -r examples/cs2/requirements.txt`; the external-signature scenarios need `pip install 'fpsdet[auth]'`. No step needs a key, an account or anything private.",
     "",
     "```bash",
     "# Check every committed artifact, offline, without scoring (what CI runs):",
     "PYTHONPATH=src python -m fpsdet benchmark verify",
     "# Rebuild and qualify every controlled fixture and scenario (seconds, no data):",
     "PYTHONPATH=src python -m fpsdet benchmark run --dataset synthetic",
-    "# Real data: download the public sources (network, rate-limited), rebuild the inputs (offline), run (offline):",
+    "# CS2: fetch the one pinned revision (network, about 4.3 GB), rebuild the inputs and run (offline):",
     "PYTHONPATH=src python -m fpsdet benchmark fetch --dataset cs2 --data ~/fpsdet-data/cs2 --python <a Python with the CS2 requirements>",
     "PYTHONPATH=src python -m fpsdet benchmark prepare --dataset cs2 --data ~/fpsdet-data/cs2 --python <the same>",
     "PYTHONPATH=src python -m fpsdet benchmark run --dataset cs2 --data cs2=~/fpsdet-data/cs2",
-    "# Or every dataset whose prepared data is on this machine:",
-    "PYTHONPATH=src python -m fpsdet benchmark run --all --data tf2=~/fpsdet-data/tf2 --data cs2=~/fpsdet-data/cs2",
+    "# TF2: fetch the frozen sources (network, rate-limited, hours), rebuild all nine draws and run them (offline):",
+    "PYTHONPATH=src python -m fpsdet benchmark fetch --dataset tf2 --data ~/fpsdet-data/tf2",
+    "PYTHONPATH=src python -m fpsdet benchmark prepare --dataset tf2 --data ~/fpsdet-data/tf2",
+    "PYTHONPATH=src python -m fpsdet benchmark run --dataset tf2 --data tf2=~/fpsdet-data/tf2",
     "```",
     "",
-    "Each run prints MATCH, ENVIRONMENT_ONLY, PROVENANCE_ONLY, PRESENTATION_ONLY, DRIFT, INPUT_CHANGED or NOT_RUN per dataset, with the categories that explain it, and writes `result.json` with every artifact beside it. After `prepare`, everything runs offline. A full real-data run reads millions of events and is not part of ordinary CI; `benchmark verify` and the synthetic run are."
+    "prepare checks the download against the frozen source first and says SOURCE_CHANGED, with the digest it expected and the one it found, if upstream moved; it never builds on a changed download as if it were the same. Each run prints MATCH, ENVIRONMENT_ONLY, PROVENANCE_ONLY, PRESENTATION_ONLY, DRIFT, INPUT_CHANGED or NOT_RUN per dataset (per draw, for TF2), with the categories that explain it, and writes every artifact beside the data.",
+    "",
+    "Ordinary CI runs `benchmark verify`, the synthetic class and the report check on every change. A manual workflow (`.github/workflows/benchmark-cs2.yml`) rebuilds CS2 from an empty cache at the pinned revision. TF2 is not rebuilt in hosted CI: it takes about 11,000 requests to logs.tf, whose robots.txt asks crawlers to stay off its API, so it is fetched rarely, slowly and by a person."
   ],
   "third_party": [
     "Nothing but fpsdet is evaluated here. A future version can evaluate another system on the same frozen populations without forcing it into fpsdet's schema. It would take one neutral record per subject:",
     "",
     "```json",
-    "{\"format\": \"fpsdet.benchmark-submission/1\", \"dataset\": \"tf2-rgl-v1\", \"subject\": \"tf-0a1b2c3d4e\", \"decision\": \"flag | no_flag | abstain\", \"observation_kinds\": [\"optional, the system's own names\"], \"confidence\": null}",
+    "{\"format\": \"fpsdet.benchmark-submission/1\", \"dataset\": \"tf2-rgl-v2\", \"subject\": \"an id from your own rebuild\", \"decision\": \"flag | no_flag | abstain\", \"observation_kinds\": [\"optional, the system's own names\"], \"confidence\": null}",
     "```",
     "",
     "It would be scored with the same label semantics, splits, eligibility rules (abstain is not a miss) and intervals, and never folded into one number. Not implemented: the immediate goal is that fpsdet itself can be reproduced and checked."
-  ]
+  ],
+  "release": "benchmark/release.json",
+  "claims": "benchmark/claims.json",
+  "version_note": "FPSDET Benchmark v1 is a version of the benchmark: its datasets, selections, draws and expectations. It is not a version of fpsdet, whose own version (0.3.0 at this release) changes independently; a later fpsdet is checked against the same benchmark and reported as MATCH, PROVENANCE_ONLY or DRIFT.",
+  "archival": {
+    "synthetic-v1": {
+      "class": "not applicable",
+      "why": "built at run time by the repository's own code; there is no source data to archive."
+    },
+    "tf2-rgl-v2": {
+      "class": "manifest/digest only; must fetch from upstream",
+      "why": "neither logs.tf nor RGL grants redistribution, and the logs carry names and SteamIDs. The manifest pins the frozen source as digests, so a rebuild knows whether upstream still serves the same data."
+    },
+    "cs2cd-v2": {
+      "class": "raw source legally redistributable",
+      "why": "CC BY 4.0 allows copies and derivatives with attribution, so the prepared derivative is redistributable too. None is committed: the pinned revision on Hugging Face is the archive, and the source list's digests say whether a fetch got it."
+    },
+    "tf2-rgl-v1": {
+      "class": "manifest/digest only; must fetch from upstream",
+      "why": "as tf2-rgl-v2, and its player ids and baseline draw also need the curator's private key, so only the committed artifacts and digests can be checked by anyone else."
+    },
+    "cs2cd-v1": {
+      "class": "raw source legally redistributable",
+      "why": "as cs2cd-v2; its fetcher did not pin a revision, which cs2cd-v2 fixes."
+    }
+  }
 }

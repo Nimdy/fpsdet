@@ -1,0 +1,240 @@
+{
+ "format": "fpsdet.benchmark-dataset/1",
+ "id": "cs2cd-v2",
+ "class": "real",
+ "title": "CS2 matchmaking (CS2CD) with the dataset authors' labels",
+ "question": "Among CS2 players fpsdet could compare in one match, how often did each detector fire on hand-labelled cheaters against hand-reviewed players?",
+ "source": {
+  "origins": [
+   {
+    "name": "CS2CD on Hugging Face",
+    "url": "https://huggingface.co/datasets/CS2CD/CS2CD.Counter-Strike_2_Cheat_Detection",
+    "content": "795 CS2 matchmaking matches parsed from server-recorded demos, with the authors' cheater labels"
+   }
+  ],
+  "fetched": "2026-10-06",
+  "mutable": "Pinned: every fetch reads revision 44e5129654508b22802a050a45bcdbb44b103d87 (2025-05-19) and nothing else; if the hub no longer has it, the fetch stops with SOURCE_CHANGED instead of taking the latest. Each event file is checked byte for byte against its git blob id, and each tick table's size and LFS SHA-256 as the hub reports them at that revision (byte for byte with cs2fetch.py --full). The cached tick tables are rewritten by pyarrow, so only the event files, which the fetcher writes deterministically, are part of the prepared source identity.",
+  "identity": {
+   "files": [
+    "raw/*/*.json"
+   ],
+   "what": "the event file of every fetched match, as the fetcher keeps it, and the pinned fetcher's receipt for each split",
+   "receipts": "receipts/{split}.json",
+   "sources": "benchmark/sources/cs2cd-v2.json",
+   "sources_digest": "sha256:a4a47147b1b96201d5742dcd162aa93244d097ed9201265ec714c896e5b6b2a8"
+  },
+  "revision": "44e5129654508b22802a050a45bcdbb44b103d87"
+ },
+ "license": {
+  "terms": "CS2CD is published under CC BY 4.0.",
+  "committed": "Nothing downloaded is committed. Per-player evaluation rows with the converter's match-local ids, and aggregate numbers, are.",
+  "attribution": "Data: CS2CD by its authors, CC BY 4.0. Not affiliated with Valve or with the dataset's authors.",
+  "archival": "raw source legally redistributable: CC BY 4.0 allows copies with attribution. None is kept here; the pinned revision on the hub is the archive, and the source list's digests say whether a fetch got it."
+ },
+ "pseudonymization": {
+  "method": "CS2CD names players Player_N within each match; the converter writes them as <match>-p<N> (nc047-p9). There is no key, so a rebuild gets the same ids. A player cannot be followed across matches.",
+  "key_file": null,
+  "original_ids": "the dataset carries none"
+ },
+ "label_semantics": {
+  "definition": "examples/cs2/evaluation.dataset.json",
+  "positive": "hand-labelled cheater",
+  "comparison": "hand-reviewed, not labelled",
+  "statement": "The labels are the CS2CD authors' judgement after reviewing matches that contained a VAC-banned player, and unreviewed matches were never looked at. These labels are not ground truth.",
+  "digest": "sha256:7d0c4cfa19b01cd110930959b1325a7cf449f90e7ef8610c001e45e8e0b7d55c"
+ },
+ "acquisition": {
+  "script": "examples/cs2/cs2fetch.py",
+  "network": true,
+  "rate_limit": "Hugging Face's own limits; about 12 MB a match, only the columns the converter reads",
+  "steps": [
+   {
+    "run": [
+     "{python}",
+     "examples/cs2/cs2fetch.py",
+     "--sources",
+     "benchmark/sources/cs2cd-v2.json",
+     "--split",
+     "no_cheater_present",
+     "--out",
+     "{data}/raw"
+    ]
+   },
+   {
+    "run": [
+     "{python}",
+     "examples/cs2/cs2fetch.py",
+     "--sources",
+     "benchmark/sources/cs2cd-v2.json",
+     "--split",
+     "with_cheater_present",
+     "--out",
+     "{data}/raw"
+    ]
+   }
+  ],
+  "note": "Needs examples/cs2/requirements.txt in the Python given with --python. About 650 MB of event files and 3.6 GB of tick-table columns."
+ },
+ "selection": {
+  "recipe": "fpsdet.benchmark-selection/cs2cd/2",
+  "code": {
+   "examples/cs2/cs2cd.py": "sha256:7b53e9e382fb6a79d45780183e9e16fb56753370c607beb9e872ca6e5b39013b",
+   "examples/cs2/cs2fetch.py": "sha256:f674908f390e693d07c59df600b206bff68efbea1c2f9265b4342a93fe015704"
+  },
+  "parameters": {
+   "revision": "44e5129654508b22802a050a45bcdbb44b103d87",
+   "no_cheater_matches_fetched": 180,
+   "with_cheater_matches_fetched": 120,
+   "min_rounds": 13,
+   "baseline_matches": 120,
+   "baseline_movement_hz": 0,
+   "scored_movement_hz": 4.0,
+   "screen_matches": true
+  },
+  "rules": [
+   "Revision: 44e5129654508b22802a050a45bcdbb44b103d87 of CS2CD, and no other.",
+   "Matches: the first 180 no-cheater and the first 120 with-cheater matches by number, keeping complete ones (13 rounds or more).",
+   "Baseline: the first 120 complete no-cheater matches, screened for whole lobbies of outliers by fpsdet baseline --screen-matches. Their players are never scored.",
+   "Scored: the other 45 complete no-cheater matches (unreviewed) and the 108 complete with-cheater matches (hand-labelled cheaters and hand-reviewed players).",
+   "Every player is one match."
+  ]
+ },
+ "prepare": {
+  "steps": [
+   {
+    "run": [
+     "{python}",
+     "examples/cs2/cs2cd.py",
+     "convert",
+     "{data}/raw/no_cheater_present",
+     "--count",
+     "120",
+     "--movement-hz",
+     "0",
+     "--out",
+     "{data}/baseline.ndjson"
+    ]
+   },
+   {
+    "run": [
+     "{python}",
+     "examples/cs2/cs2cd.py",
+     "convert",
+     "{data}/raw/no_cheater_present",
+     "--skip-first",
+     "120",
+     "--out",
+     "{data}/holdout.ndjson"
+    ]
+   },
+   {
+    "run": [
+     "{python}",
+     "examples/cs2/cs2cd.py",
+     "convert",
+     "{data}/raw/with_cheater_present",
+     "--out",
+     "{data}/cheaters.ndjson"
+    ]
+   },
+   {
+    "concat": [
+     "holdout.ndjson",
+     "cheaters.ndjson"
+    ],
+    "out": "scored.ndjson"
+   },
+   {
+    "run": [
+     "{python}",
+     "examples/cs2/cs2cd.py",
+     "labels",
+     "{data}/raw",
+     "--out",
+     "{data}/labels.json"
+    ]
+   },
+   {
+    "run": [
+     "{fpsdet}",
+     "baseline",
+     "{data}/baseline.ndjson",
+     "--profile",
+     "examples/cs2/cs2.json",
+     "--screen-matches",
+     "--out",
+     "{data}/cohort.json"
+    ]
+   }
+  ],
+  "outputs": {
+   "events": "scored.ndjson",
+   "baseline": "baseline.ndjson",
+   "labels": "labels.json",
+   "cohort": "cohort.json"
+  }
+ },
+ "profile": {
+  "path": "examples/cs2/cs2.json",
+  "digest": "sha256:e580d90f46d8b9a37195e8f636747af409fd517b9b60cf80bea25fa86c228366"
+ },
+ "inputs": {
+  "events": {
+   "sha256": "sha256:3fc90f3708712dd7684cffc192358d82fa6d3da52934a799eed27af7f386e537",
+   "events": 4071829
+  },
+  "baseline": {
+   "sha256": "sha256:03ec07e60157d1fa06ceb2f359fa5bbe0846ca0779040c0c5ec08190c182cdb3"
+  },
+  "labels": {
+   "sha256": "sha256:23ead1ad79072f301144ca5a5f9c61d1936cea46a21dc432f185214addc2727e",
+   "digest": "sha256:582220fa0489ba421a73f51b8347772a776f827fb3f2801fefa13f6a7c8a1930",
+   "count": 2729
+  },
+  "cohort": {
+   "digest": "sha256:143ce6f0e26bd4df6bfcde2f3f7ea84d96245aea321e982d380e8b1d68108fa6",
+   "players": 887
+  },
+  "key": null,
+  "source": {
+   "files": 300,
+   "digest": "sha256:da1a4e513eb8479e45ab57f7e18ac6707fa7400bdc71b2b89f5cea55470b695f"
+  }
+ },
+ "split": {
+  "recipe": "fpsdet.calibration-split/1",
+  "unit": "match",
+  "memberships": [
+   "development",
+   "evaluation",
+   "baseline_only",
+   "not_scored"
+  ]
+ },
+ "artifacts": {
+  "evaluation": "examples/cs2/evaluation.json",
+  "strength": "examples/cs2/strength.json",
+  "split": "benchmark/splits/cs2cd-v2.json",
+  "result": "benchmark/results/cs2cd-v2.json",
+  "reports": [
+   "examples/cs2/evaluation.md",
+   "examples/cs2/strength.md"
+  ]
+ },
+ "expected_counts": {
+  "matches_fetched": 300,
+  "complete_matches": 273,
+  "events": 4071829,
+  "scored_players": 1529,
+  "baseline_players": 887,
+  "labelled": {
+   "cheater": 504,
+   "clean, reviewed match": 576,
+   "clean, unreviewed match": 1649
+  }
+ },
+ "supersedes": {
+  "id": "cs2cd-v1",
+  "why": "cs2cd-v1's fetcher read whatever the dataset's main branch held. cs2cd-v2 fetches one pinned revision, checks every file against a committed source list, and stops rather than fall back. The selection, conversion and labels are cs2cd-v1's. cs2cd-v1 stays as a historical, verifiable record."
+ }
+}

@@ -23,10 +23,13 @@ with the pinned expectation (``fpsdet.benchmark-expected/1``):
     PRESENTATION_ONLY  the same numbers; only a generated report's text moved
     DRIFT              a decision, finding, eligibility, evaluation or strength number moved
     INPUT_CHANGED      the prepared inputs, labels, cohort, selection code, profile or pseudonym key differ
+    SOURCE_CHANGED     the upstream download is not the frozen source the manifest pins (prepare)
     NOT_RUN            the prepared data is not on this machine
 
-with the categories that explain it. It is a non-detection module: the scorer never imports it, and nothing
-it pins is ever read as configuration.
+with the categories that explain it: code changed, source changed, selection changed, identity changed,
+and what moved downstream. A dataset with baseline draws (``tf2-rgl-v2``) runs every predeclared draw, and
+its result is the spread across them (``fpsdet.benchmark-sensitivity/2``), never one draw. It is a
+non-detection module: the scorer never imports it, and nothing it pins is ever read as configuration.
 """
 
 from __future__ import annotations
@@ -35,6 +38,7 @@ import hashlib
 import json
 import math
 import platform
+import re
 import time
 from collections import Counter
 from collections.abc import Iterable, Mapping
@@ -49,6 +53,11 @@ RESULT = "fpsdet.benchmark-result/1"
 EXPECTED = "fpsdet.benchmark-expected/1"
 SPLIT = "fpsdet.benchmark-split/1"
 SENSITIVITY = "fpsdet.benchmark-sensitivity/1"
+DRAWS = "fpsdet.benchmark-sensitivity/2"
+STATISTICS = "fpsdet.benchmark-statistics/1"
+RELEASE = "fpsdet.benchmark-release/1"
+CLAIMS = "fpsdet.benchmark-claims/1"
+SOURCES = "fpsdet.benchmark-sources/1"
 # Alternative pseudonym keys for the baseline-draw check: public on purpose, so anyone with the same downloads
 # rebuilds the same draws. Only aggregate numbers from them are ever published.
 ALTERNATIVE_KEY = "fpsdet.benchmark-alternative-pseudonym-key/{n}"
@@ -56,8 +65,9 @@ CAPABILITIES = "fpsdet.benchmark-capabilities/1"
 KEY_COMMITMENT = "fpsdet.pseudonym-key-commitment/1"
 ROOT = Path(__file__).resolve().parents[2]
 DEFINITION = ROOT / "benchmark" / "benchmark.json"
-ALIASES = {"synthetic": "synthetic-v1", "tf2": "tf2-rgl-v1", "cs2": "cs2cd-v1"}
-STATUSES = ("MATCH", "ENVIRONMENT_ONLY", "PROVENANCE_ONLY", "PRESENTATION_ONLY", "DRIFT", "INPUT_CHANGED", "NOT_RUN")
+# The short names are the current release's datasets; the historical ones keep a -v1 name.
+ALIASES = {"synthetic": "synthetic-v1", "tf2": "tf2-rgl-v2", "cs2": "cs2cd-v2", "tf2-v1": "tf2-rgl-v1", "cs2-v1": "cs2cd-v1"}
+STATUSES = ("MATCH", "ENVIRONMENT_ONLY", "PROVENANCE_ONLY", "PRESENTATION_ONLY", "DRIFT", "INPUT_CHANGED", "SOURCE_CHANGED", "NOT_RUN")
 # The fields a result's identity and digest cover. Environment, timings and the comparison never do.
 IDENTITY = ("format", "benchmark", "dataset", "chain", "semantic", "published")
 # Strength numbers come from gamma functions, whose last digit can differ between C libraries. They are
@@ -157,6 +167,28 @@ def manifest(name: str, root: Path = ROOT) -> dict:
                 raise BenchmarkError(f"{entry['manifest']}: " + "; ".join(problems))
             return found
     raise BenchmarkError(f"no benchmark dataset {name!r}; the datasets are {', '.join(ALIASES)}")
+
+
+def current(root: Path = ROOT) -> list[str]:
+    """The datasets of the current release, without the historical ones."""
+    return [entry["id"] for entry in definition(root)["datasets"] if not entry.get("historical")]
+
+
+def draws_of(found: Mapping) -> list[int]:
+    """A dataset's predeclared baseline draws, or none: most datasets have one fixed population."""
+    return list(found["draws"]["ids"]) if "draws" in found else []
+
+
+def draw_folder(found: Mapping, data: Path, draw: int) -> Path:
+    return data / found["draws"]["folder"].format(draw=draw)
+
+
+def expected_key(dataset: str, draw: int | None = None) -> str:
+    return dataset if draw is None else f"{dataset}/draw-{draw}"
+
+
+def draw_artifact(found: Mapping, draw: int, name: str, root: Path = ROOT) -> Path:
+    return root / found["artifacts"]["draw"].format(draw=draw) / name
 
 
 REQUIRED = {
@@ -366,9 +398,9 @@ def source_identity(found: Mapping, data: Path) -> dict | None:
     return {"files": len(files), "digest": digest("source", [[path.relative_to(data).as_posix(), sha256_file(path)] for path in files])}
 
 
-def run_steps(steps: list, data: Path, python: str) -> list[str]:
-    """Run a manifest's commands in order. Each is an argv with {data}, {python} and {fpsdet} filled in, or a
-    concatenation of prepared files. Stops at the first that fails."""
+def run_steps(steps: list, data: Path, python: str, fill: Mapping[str, str] | None = None) -> list[str]:
+    """Run a manifest's commands in order. Each is an argv with {data}, {python} and {fpsdet} filled in (and
+    {draw} and {prepared}, for a draw), or a concatenation of prepared files. Stops at the first that fails."""
     import os
     import subprocess
     import sys
@@ -388,9 +420,11 @@ def run_steps(steps: list, data: Path, python: str) -> list[str]:
             if part == "{fpsdet}":
                 argv += [sys.executable, "-m", "fpsdet"]
             else:
-                argv.append(part.replace("{data}", str(data)).replace("{python}", python))
+                for name, value in {"data": str(data), "python": python, **(fill or {})}.items():
+                    part = part.replace("{" + name + "}", value)
+                argv.append(part)
         completed = subprocess.run(argv, cwd=ROOT, env=env, capture_output=True, text=True)
-        log.append(" ".join(step["run"]) + f"  (exit {completed.returncode})")
+        log.append(" ".join(step["run"]) + (f"  [draw {fill['draw']}]" if fill and "draw" in fill else "") + f"  (exit {completed.returncode})")
         if completed.returncode != 0:
             raise BenchmarkError(f"{' '.join(argv)} failed:\n{completed.stderr[-2000:]}")
     return log
@@ -406,30 +440,104 @@ def fetch(found: Mapping, data: Path, python: str) -> list[str]:
 
 def prepare(found: Mapping, data: Path, python: str) -> dict:
     """Rebuild the scorer-ready inputs from the downloaded sources, offline, and say how they compare with
-    the manifest. A difference is reported, never accepted silently."""
+    the manifest: the sources first, then every draw's prepared inputs. A difference is reported, never
+    accepted silently: SOURCE_CHANGED when the download is not the frozen source, INPUT_CHANGED when the
+    sources match and the prepared inputs do not."""
     if found["class"] != "real":
         raise BenchmarkError(f"{found['id']} is built by fpsdet's own code; there is nothing to prepare")
     log = run_steps(found["prepare"]["steps"], data, python)
-    now = prepared_identity(found, data)
-    now["source"] = source_identity(found, data)
-    changes = input_changes(found, now) + selection_changes(found)
-    return {"dataset": found["id"], "inputs": now, "changes": changes, "status": "INPUT_CHANGED" if changes else "MATCH", "log": log}
+    changes = source_changes(found, data)
+    if draws_of(found):
+        identity = found["source"]["identity"]
+        now: dict = {"source": read_json(data / identity["file"]) if (data / identity["file"]).exists() else None, "draws": {}}
+        for draw in draws_of(found):
+            place = draw_folder(found, data, draw)
+            place.mkdir(parents=True, exist_ok=True)
+            log += run_steps(found["prepare"]["draw_steps"], data, python, {"draw": str(draw), "prepared": str(place)})
+            now["draws"][str(draw)] = prepared_identity(found, place)
+            pinned = ((found.get("inputs") or {}).get("draws") or {}).get(str(draw))
+            changes += [{**change, "draw": draw} for change in input_changes(found, now["draws"][str(draw)], pinned)]
+    else:
+        now = prepared_identity(found, data)
+        now["source"] = source_identity(found, data)
+        changes += input_changes(found, now)
+    changes += selection_changes(found)
+    status = "SOURCE_CHANGED" if any(change.get("upstream") for change in changes) else ("INPUT_CHANGED" if changes else "MATCH")
+    pinned = (found.get("inputs") or {}).get("source")
+    return {"dataset": found["id"], "inputs": now, "changes": changes, "status": status, "log": log,
+            "frozen_source": frozen_source(changes) if pinned else "the manifest pins no source yet"}
 
 
-def input_changes(found: Mapping, now: Mapping) -> list[dict]:
+def frozen_source(changes: list[dict]) -> str:
+    moved = sorted({change["input"] for change in changes if change.get("upstream")})
+    if not moved:
+        return "this download is the frozen source the manifest pins"
+    reached = any(not change.get("upstream") and change["category"] not in ("code changed",) for change in changes)
+    return (f"this download is not the frozen source ({', '.join(moved)} differ), and is reported as changed, never as the frozen source. "
+            + ("Its prepared inputs differ too: see each change above. " if reached else
+               "Every prepared input it gives still matches its pinned digest: the change does not reach this dataset's data. ")
+            + "The pinned digests still verify a cached copy of the frozen source, and the committed results verify without any download.")
+
+
+def source_changes(found: Mapping, data: Path) -> list[dict]:
+    """The download against the frozen source the manifest pins, part by part: what was pinned, what was
+    found, and what each part feeds. A source file a prepare step writes (fpsdet.tf2-sources/1), or the
+    pinned fetcher's receipts (fpsdet.cs2cd-fetch-receipt/1). Older manifests compare a digest of the files
+    in input_changes instead."""
+    identity = found["source"]["identity"]
+    pinned = (found.get("inputs") or {}).get("source")
+    changes: list[dict] = []
+    if "file" in identity:
+        path = data / identity["file"]
+        got = read_json(path) if path.exists() else None
+        if got is None:
+            return [{"category": "source changed", "input": identity["file"], "detail": "the source digests were not written: the download is incomplete", "upstream": True, "pinned": None, "found": None}]
+        if pinned is None:
+            return []
+        for part, meaning in identity["parts"].items():
+            want, have = pinned.get(part), got.get(part)
+            if want != have:
+                changes.append({"category": meaning["category"], "input": part, "detail": meaning["detail"], "upstream": meaning["upstream"],
+                                "pinned": (want or {}).get("digest", want), "found": (have or {}).get("digest", have),
+                                "counts": {"pinned": {key: value for key, value in (want or {}).items() if key != "digest"}, "found": {key: value for key, value in (have or {}).items() if key != "digest"}}})
+    if "receipts" in identity:
+        sources = read_json(ROOT / identity["sources"])
+        if pinned is not None and sources_digest(sources) != identity.get("sources_digest"):
+            changes.append({"category": "code changed", "input": identity["sources"], "detail": "the committed source list is not the one the manifest pins", "pinned": identity.get("sources_digest"), "found": sources_digest(sources)})
+        for split in sources["selection"]:
+            path = data / identity["receipts"].format(split=split)
+            receipt = read_json(path) if path.exists() else None
+            if receipt is None:
+                changes.append({"category": "source changed", "input": split, "detail": "no receipt from the pinned fetcher: fetch with fpsdet benchmark fetch, which never falls back to the latest revision", "upstream": True, "pinned": sources["revision"], "found": None})
+                continue
+            listed = {row["file"] for row in receipt["files"] if row["found"] == row["expected"]}
+            wanted = {name for name in sources["files"][split] if name.endswith(".json")}
+            if receipt["revision"] != sources["revision"] or receipt["status"] != "MATCH" or not wanted <= listed:
+                changes.append({"category": "source changed", "input": split, "detail": f"the fetch receipt says {receipt['status']} at revision {receipt['revision']}", "upstream": True,
+                                "pinned": sources["revision"], "found": receipt["revision"], "files": receipt.get("changed", [])[:10]})
+    return changes
+
+
+def sources_digest(sources: Mapping) -> str:
+    return digest("sources", sources)
+
+
+def input_changes(found: Mapping, now: Mapping, pinned: Mapping | None = None) -> list[dict]:
     """How the prepared inputs differ from the manifest, with the category and what it means."""
-    pinned = found["inputs"]
+    pinned = pinned if pinned is not None else found.get("inputs")
+    if not pinned:
+        return [{"category": "input changed", "input": "manifest", "detail": "the manifest pins no inputs yet", "pinned": None, "found": None}]
     changes = []
     meaning = {
         "events": ("input changed", "the scored events differ"),
         "baseline": ("input changed", "the baseline events differ"),
         "labels": ("label changed", "the labels differ"),
         "cohort": ("cohort changed", "the baseline cohort differs"),
-        "key": ("input changed", "the pseudonym key is not the curator's: every player id, and any split by pseudonym, differs"),
+        "key": ("identity changed", "the pseudonym key is not the curator's: every player id, and any split by pseudonym, differs"),
     }
     want, got = pinned.get("source"), now.get("source")
-    if want and got and want != got:
-        changes.append({"category": "input changed", "input": "source", "detail": "the downloaded source data differs from what was pinned: the upstream data changed, or a different selection was fetched", "pinned": want["digest"], "found": got["digest"]})
+    if want and got and want != got and "digest" in want:
+        changes.append({"category": "source changed", "input": "source", "detail": "the downloaded source data differs from what was pinned: the upstream data changed, or a different selection was fetched", "upstream": True, "pinned": want["digest"], "found": got["digest"]})
     for name, (category, text) in meaning.items():
         want, got = pinned.get(name), now.get(name)
         if name == "key":
@@ -448,7 +556,7 @@ def selection_changes(found: Mapping, root: Path = ROOT) -> list[dict]:
     for path, want in found["selection"]["code"].items():
         got = code_digest(root / path) if (root / path).exists() else None
         if got != want:
-            changes.append({"category": "selection changed", "input": path, "detail": "the converter that selects and builds the data changed", "pinned": want, "found": got})
+            changes.append({"category": "code changed", "input": path, "detail": "the converter that selects and builds the data changed", "pinned": want, "found": got})
     got = profile_identity(found["profile"]["path"], root)
     if got != found["profile"]["digest"]:
         changes.append({"category": "profile changed", "input": found["profile"]["path"], "detail": "the profile the cases are scored with changed", "pinned": found["profile"]["digest"], "found": got})
@@ -495,9 +603,9 @@ def _strength_estimates(artifact: Mapping) -> dict:
     return _rounded({key: artifact[key] for key in ("detectors", "families", "co_occurrence", "split")})
 
 
-def run_real(found: Mapping, data: Path, out: Path) -> tuple[dict, dict]:
-    """Score one real dataset's prepared inputs offline, and evaluate, estimate and bind every step. Returns
-    the result and the artifacts it wrote to ``out``."""
+def run_real(found: Mapping, data: Path, out: Path, draw: int | None = None) -> tuple[dict, dict]:
+    """Score one real dataset's prepared inputs offline (one draw's, for a dataset with draws), and evaluate,
+    estimate and bind every step. Returns the result and the artifacts it wrote to ``out``."""
     from .calibration import EvaluationError, PublishedMismatch, census, dumps, evaluate, load_dataset, render_markdown
     from .parse import load_events, load_profile
     from .persist import case_to_dict, cohort_from_dict
@@ -585,7 +693,7 @@ def run_real(found: Mapping, data: Path, out: Path) -> tuple[dict, dict]:
         **({"mismatch": mismatch} if mismatch else {}),
         "decisions": {label: cell["counts"] for label, cell in evaluation["statistics"]["decisions"]["by_group"].items()},
     }
-    result = assemble(found, chain, semantic, published, timings)
+    result = assemble(found, chain, semantic, published, timings, draw=draw)
     write_json(out / "result.json", result)
     return result, {"evaluation": evaluation, "strength": estimated, "split": split, "reports": reports}
 
@@ -655,14 +763,190 @@ def sensitivity(found: Mapping, data: Path, draws: int, python: str, curator: Ma
     return out
 
 
+# Every predeclared baseline draw. A dataset with draws has no one result: its result is their spread.
+
+
+def _group(statistics: Mapping, label: str) -> dict:
+    population = next(group for group in statistics["population"]["groups"] if group["label"] == label)
+    cell = statistics["decisions"]["by_group"][label]
+    flagged = cell["of_evaluated"]["review_or_watch"]
+    return {"labelled": population["labelled"], "scored": population["scored"], "eligible": cell["evaluated"],
+            "review": cell["counts"]["review"], "watch": cell["counts"]["watch"], "flagged": flagged["count"],
+            "rate": flagged["rate"], "ci95": flagged["ci95"]}
+
+
+def draw_numbers(statistics: Mapping, estimated: Mapping) -> dict:
+    """What one draw says, from its aggregate statistics and strength alone, so anyone can recompute it from
+    the committed files. Each main group: labelled, scored, eligible (fpsdet could run on them), flagged
+    (review or watch), review, watch. The queue, the enrichment, equal evidence. Per observable detector, its
+    fires among eligible players in each group; per strength estimate, its ratio and stability."""
+    positive, comparison = statistics["population"]["positive"], statistics["population"]["primary_comparison"]
+    queues = statistics["decisions"]["queues"]
+    enrichment = statistics["decisions"]["enrichment"][comparison]["review_or_watch"]
+    equal = next((cell for cell in statistics["evidence_amount"] if cell["matches"] == "15-20"), None)
+    detectors = {}
+    for entry in statistics["detectors"]:
+        if entry["status"] == "not_observable":
+            continue
+        rates = entry.get("rates") or {}
+        side = lambda label: {"fired": (rates.get(label) or {}).get("count"), "eligible": (rates.get(label) or {}).get("denominator")}
+        detectors[entry["kind"]] = {"status": entry["status"], "positive": side(positive), "comparison": side(comparison),
+                                    "ratio": ((entry.get("enrichment") or {}).get(comparison) or {}).get("ratio")}
+    estimates = {}
+    for entry in estimated["detectors"]:
+        if "evidence_ratio" in entry.get("development", {}):
+            estimates[entry["kind"]] = _rounded({
+                "ratio": entry["development"]["evidence_ratio"]["ratio"],
+                "credible95": entry["development"]["evidence_ratio"]["credible95"],
+                "held_out_ratio": entry["evaluation"]["evidence_ratio"]["ratio"],
+                "stability": entry["evaluation"]["stability"],
+            })
+    return {
+        "positive": _group(statistics, positive),
+        "comparison": _group(statistics, comparison),
+        "review": queues["review"]["size"],
+        "watch": queues["watch"]["size"],
+        "queue": {"size": queues["review_or_watch"]["size"], "positive": queues["review_or_watch"]["by_label"].get(positive, 0)},
+        "ratio": enrichment["ratio"],
+        "ratio_range": enrichment["range"],
+        "equal_evidence_comparison_rate": None if equal is None else equal["groups"][comparison]["review_or_watch"]["rate"],
+        "detectors": detectors,
+        "strength": estimates,
+    }
+
+
+def spread(values: list) -> dict:
+    """One number over the draws: the median, the lowest and the highest, and every value in draw order.
+    Nothing is averaged, so a ratio is never a mean of ratios."""
+    known = sorted(value for value in values if value is not None)
+    if not known:
+        return {"median": None, "min": None, "max": None, "values": values, "missing": len(values)}
+    middle = len(known) // 2
+    median = known[middle] if len(known) % 2 else round((known[middle - 1] + known[middle]) / 2, 6)
+    return {"median": median, "min": known[0], "max": known[-1], "values": values, **({"missing": len(values) - len(known)} if len(known) < len(values) else {})}
+
+
+def _path(node, path: str):
+    for key in path.split("."):
+        node = None if node is None else node.get(key)
+    return node
+
+
+def across_draws(records: list[Mapping]) -> dict:
+    """The spread of every number across the draws, and per detector how its fires and its strength move."""
+    numbers = [record["numbers"] for record in records]
+    pick = lambda path: [_path(entry, path) for entry in numbers]
+    out: dict = {name: spread(pick(path)) for name, path in (
+        ("ratio", "ratio"), ("positive_rate", "positive.rate"), ("comparison_rate", "comparison.rate"),
+        ("positive_flagged", "positive.flagged"), ("positive_eligible", "positive.eligible"),
+        ("comparison_flagged", "comparison.flagged"), ("comparison_eligible", "comparison.eligible"),
+        ("review", "review"), ("watch", "watch"), ("queue", "queue.size"), ("queue_positive", "queue.positive"),
+        ("equal_evidence_comparison_rate", "equal_evidence_comparison_rate"))}
+    rate = lambda cell, side: None if not cell or not cell[side]["eligible"] else round(cell[side]["fired"] / cell[side]["eligible"], 6)
+    out["detectors"] = {}
+    for kind in sorted({kind for entry in numbers for kind in entry["detectors"]}, key=NATIVE_KINDS.index):
+        cells = [entry["detectors"].get(kind) for entry in numbers]
+        out["detectors"][kind] = {
+            "status": dict(sorted(Counter(cell["status"] if cell else "not_observable" for cell in cells).items())),
+            "positive_rate": spread([rate(cell, "positive") for cell in cells]),
+            "comparison_rate": spread([rate(cell, "comparison") for cell in cells]),
+            "positive_eligible": spread([cell["positive"]["eligible"] if cell else None for cell in cells]),
+            "comparison_eligible": spread([cell["comparison"]["eligible"] if cell else None for cell in cells]),
+            "ratio": spread([cell["ratio"] if cell else None for cell in cells]),
+            "fired_on_positive_in": sum(bool(cell and cell["positive"]["fired"]) for cell in cells),
+        }
+    out["strength"] = {}
+    for kind in sorted({kind for entry in numbers for kind in entry["strength"]}, key=NATIVE_KINDS.index):
+        cells = [entry["strength"].get(kind) for entry in numbers]
+        out["strength"][kind] = {
+            "ratio": spread([cell["ratio"] if cell else None for cell in cells]),
+            "stability": dict(sorted(Counter(cell["stability"] if cell else "no estimate" for cell in cells).items())),
+            "replicated_in": sum(bool(cell and cell["stability"] == "replicated") for cell in cells),
+        }
+    out["draws"] = len(records)
+    return out
+
+
+def statistics_file(found: Mapping, draw: int, evaluation: Mapping) -> dict:
+    """One draw's evaluation without its rows: the aggregate statistics, bound to the evaluation by digest."""
+    return {
+        "format": STATISTICS,
+        "dataset": found["id"],
+        "draw": draw,
+        "evaluation": {"schema": evaluation["schema"], "digest": evaluation["digest"]},
+        "withheld": "the per-player rows: " + found["publish"]["why"],
+        "statistics": evaluation["statistics"],
+    }
+
+
+def draw_record(result: Mapping, statistics: Mapping, estimated: Mapping) -> dict:
+    """One draw in the spread: its own inputs and cohort, every output identity, and its numbers."""
+    chain, semantic, inputs = result["chain"], result["semantic"], result["chain"]["inputs"]
+    return json.loads(canonical_json({
+        "draw": result["dataset"]["draw"],
+        "result": result["digest"],
+        "inputs": {"events": inputs["events"]["sha256"], "events_count": inputs["events"].get("events"), "baseline": inputs["baseline"]["sha256"],
+                   "labels": inputs["labels"]["digest"], "labelled": inputs["labels"]["count"], "cohort": inputs["cohort"]["digest"],
+                   "cohort_players": inputs["cohort"]["players"]},
+        "outputs": {"decisions": semantic["decisions_digest"], "observations": semantic["observations_digest"], "eligibility": semantic["eligibility_digest"],
+                    "packets": chain["scored"]["packets"], "evaluation": chain["evaluation"]["digest"], "statistics": chain["evaluation"]["statistics"],
+                    "strength": chain["strength"]["digest"], "estimates": chain["strength"]["estimates"], "split": chain["split"]["digest"]},
+        "numbers": draw_numbers(statistics, estimated),
+    }))
+
+
+def draws_artifact(found: Mapping, records: list[Mapping]) -> dict:
+    """fpsdet.benchmark-sensitivity/2: every predeclared draw, in order, and the spread across them."""
+    spec = found["draws"]
+    body = {
+        "format": DRAWS,
+        "dataset": found["id"],
+        "manifest": manifest_digest(found),
+        "question": "How much does the result depend on which never-banned players build the baseline?",
+        **{key: spec[key] for key in ("recipe", "rule", "ids", "why", "headline", "fixed")},
+        "draws": list(records),
+        "across": across_draws(records),
+    }
+    body = json.loads(canonical_json(body))
+    body["digest"] = digest("draws", body)
+    return body
+
+
+def run_draws(found: Mapping, data: Path, out: Path) -> tuple[list[dict], list[dict], dict]:
+    """Run every predeclared draw from its own prepared inputs and cohort, in order. Returns each draw's result,
+    the aggregate files a pin commits for it (statistics and strength, no rows), and the spread."""
+    results, files, records = [], [], []
+    for draw in draws_of(found):
+        place = draw_folder(found, data, draw)
+        result, made = run_real(found, place, out / f"draw-{draw}", draw=draw)
+        statistics = statistics_file(found, draw, made["evaluation"])
+        results.append(result)
+        files.append({"statistics": statistics, "strength": made["strength"]})
+        records.append(draw_record(result, statistics["statistics"], made["strength"]))
+        print(f"{found['id']} draw {draw}: ratio {records[-1]['numbers']['ratio']}, result {result['digest']}", flush=True)
+    return results, files, draws_artifact(found, records)
+
+
+def publish_draws(found: Mapping, results: list[Mapping], files: list[Mapping], artifact: Mapping, root: Path = ROOT) -> None:
+    """Write what a pin commits for a dataset with draws: per draw its result, aggregate statistics and
+    strength, and the spread. Never a row, a case or a split list."""
+    for result, made in zip(results, files):
+        draw = result["dataset"]["draw"]
+        write_json(draw_artifact(found, draw, "result.json", root), result)
+        target = draw_artifact(found, draw, "statistics.json", root)
+        target.write_text(json.dumps(made["statistics"], ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+        write_json(draw_artifact(found, draw, "strength.json", root), made["strength"])
+    write_json(root / found["artifacts"]["sensitivity"], artifact)
+
+
 # The result, and its comparison with what was pinned.
 
 
-def assemble(found: Mapping, chain: Mapping, semantic: Mapping, published: Mapping, timings: Mapping) -> dict:
+def assemble(found: Mapping, chain: Mapping, semantic: Mapping, published: Mapping, timings: Mapping, draw: int | None = None) -> dict:
     artifact = {
         "format": RESULT,
         "benchmark": BENCHMARK,
-        "dataset": {"id": found["id"], "class": found["class"], "manifest": manifest_digest(found)},
+        "dataset": {"id": found["id"], "class": found["class"], "manifest": manifest_digest(found), **({"draw": draw} if draw is not None else {})},
         "chain": chain,
         "semantic": semantic,
         "published": published,
@@ -686,8 +970,9 @@ FIELDS = (
     ("chain.inputs.baseline.sha256", "input changed", "input"),
     ("chain.inputs.labels.digest", "label changed", "input"),
     ("chain.inputs.cohort.digest", "cohort changed", "input"),
-    ("chain.inputs.key", "input changed", "input"),
-    ("chain.selection", "selection changed", "input"),
+    ("chain.inputs.key", "identity changed", "input"),
+    ("chain.selection.code", "code changed", "input"),
+    ("chain.selection.parameters", "selection changed", "input"),
     ("chain.code", "input changed", "input"),
     ("chain.profile", "profile changed", "input"),
     ("chain.profiles", "profile changed", "input"),
@@ -786,7 +1071,7 @@ def pin(results: Iterable[Mapping], root: Path = ROOT) -> dict:
     """Write each result's identity as the expectation for its dataset. A curator's act, never automatic."""
     expected = load_expected(root)
     for result in results:
-        expected["datasets"][result["dataset"]["id"]] = expected_entry(result)
+        expected["datasets"][expected_key(result["dataset"]["id"], result["dataset"].get("draw"))] = expected_entry(result)
     expected["datasets"] = dict(sorted(expected["datasets"].items()))
     write_json(root / definition(root)["expected"], expected)
     return expected
@@ -811,6 +1096,13 @@ def verify(root: Path = ROOT, data: Mapping[str, Path] | None = None) -> list[di
     for entry in found_definition["datasets"]:
         found = read_json(root / entry["manifest"])
         check(f"{entry['id']}: manifest", check_manifest(found))
+        if "draws" in found:
+            verify_draws(found, expected, root, check)
+            continue
+        if "receipts" in found.get("source", {}).get("identity", {}):
+            identity = found["source"]["identity"]
+            check(f"{entry['id']}: source list", [] if sources_digest(read_json(root / identity["sources"])) == identity["sources_digest"]
+                  else [f"{identity['sources']} is not the source list the manifest pins"])
         result_path = root / found["artifacts"]["result"]
         if not result_path.exists():
             check(f"{entry['id']}: result", [f"{found['artifacts']['result']} is missing"])
@@ -891,30 +1183,167 @@ def verify(root: Path = ROOT, data: Mapping[str, Path] | None = None) -> list[di
     return checks
 
 
-# The report.
+def draws_problems(found: Mapping, artifact: Mapping, records: Mapping[int, Mapping]) -> list[str]:
+    """What is wrong with a committed spread, given each draw's record as its committed files say: it must
+    be exactly the predeclared draws in order, each as its files say, and the spread must recompute."""
+    problems = []
+    if artifact.get("format") != DRAWS or artifact.get("digest") != digest("draws", {key: value for key, value in artifact.items() if key != "digest"}):
+        problems.append("the spread's digest does not match its contents")
+    if artifact.get("manifest") != manifest_digest(found) or any(artifact.get(key) != found["draws"][key] for key in ("recipe", "rule", "ids", "headline")):
+        problems.append("the spread is not of this manifest's predeclared draws")
+    if [row["draw"] for row in artifact["draws"]] != draws_of(found):
+        problems.append("the spread does not hold exactly the predeclared draws, in order: none may be dropped or added")
+    for row in artifact["draws"]:
+        if row["draw"] in records and canonical_json(row) != canonical_json(records[row["draw"]]):
+            problems.append(f"draw {row['draw']} in the spread is not what its committed result, statistics and strength say")
+    if canonical_json(artifact["across"]) != canonical_json(json.loads(canonical_json(across_draws(artifact["draws"])))):
+        problems.append("the spread across draws does not recompute from the draws")
+    return problems
+
+
+def verify_draws(found: Mapping, expected: Mapping, root: Path, check) -> None:
+    """A dataset with draws: every predeclared draw's committed result, statistics and strength bind each
+    other and the manifest, the spread is exactly those draws (none dropped, none added) recomputed from
+    them, and nothing per player is committed."""
+    from .strength import strength_digest
+
+    name = found["id"]
+    inputs = found.get("inputs") or {}
+    if not inputs.get("draws"):
+        check(f"{name}: inputs", ["the manifest pins no inputs"])
+        return
+    check(f"{name}: selection", [f"{change['input']}: {change['detail']}" for change in selection_changes(found, root)])
+    source, counts = inputs.get("source") or {}, found.get("expected_counts") or {}
+    found_counts = {"bans": (source.get("bans") or {}).get("count"), "labelled_accounts": (source.get("cheaters") or {}).get("accounts"),
+                    "extra_never_banned": (source.get("honest") or {}).get("accounts"), "selected_logs": (source.get("logs") or {}).get("count")}
+    check(f"{name}: counts", [] if counts == found_counts else [f"the pinned source holds {found_counts}, the manifest expects {counts}"])
+    records: dict[int, dict] = {}
+    for draw in draws_of(found):
+        paths = {key: draw_artifact(found, draw, f"{key}.json", root) for key in ("result", "statistics", "strength")}
+        missing = [str(path.relative_to(root)) for path in paths.values() if not path.exists()]
+        if missing:
+            check(f"{name}: draw {draw}", [f"{path} is missing" for path in missing])
+            continue
+        result, statistics, estimated = (read_json(paths[key]) for key in ("result", "statistics", "strength"))
+        problems = []
+        if result.get("digest") != result_digest(result):
+            problems.append("the result digest does not match its contents")
+        if result["dataset"].get("draw") != draw or result["dataset"]["manifest"] != manifest_digest(found):
+            problems.append("the result is not this draw of this manifest")
+        comparison = compare(result, expected["datasets"].get(expected_key(name, draw)))
+        if comparison["status"] not in ("MATCH", "ENVIRONMENT_ONLY"):
+            problems.append(f"{comparison['status']}: {', '.join(comparison['categories'])}")
+        problems += [f"{change['input']}: {change['detail']}" for change in input_changes(found, result["chain"]["inputs"], inputs["draws"].get(str(draw)))]
+        if (statistics.get("format") != STATISTICS or statistics.get("draw") != draw or "rows" in statistics
+                or digest("statistics", statistics["statistics"]) != result["chain"]["evaluation"]["statistics"]
+                or statistics["evaluation"]["digest"] != result["chain"]["evaluation"]["digest"]):
+            problems.append("the committed statistics are not the ones the result binds")
+        if (estimated.get("digest") != strength_digest(estimated) or estimated["digest"] != result["chain"]["strength"]["digest"]
+                or digest("estimates", _strength_estimates(estimated)) != result["chain"]["strength"]["estimates"]
+                or estimated["evaluation"]["digest"] != statistics["evaluation"]["digest"]):
+            problems.append("the committed strength file is not the one the result binds")
+        check(f"{name}: draw {draw}", problems)
+        records[draw] = draw_record(result, statistics["statistics"], estimated)
+    path = root / found["artifacts"]["sensitivity"]
+    problems = draws_problems(found, read_json(path), records) if path.exists() else [f"{found['artifacts']['sensitivity']} is missing"]
+    check(f"{name}: draws", problems)
+    leaks = []
+    for item in [root / found["artifacts"]["sensitivity"], *(draw_artifact(found, draw, "", root) for draw in draws_of(found))]:
+        for target in ([item] if item.is_file() else sorted(item.glob("*.json")) if item.exists() else []):
+            text = target.read_text(encoding="utf-8")
+            if re.search(r"tfb-[0-9a-f]{12}|\[U:1:\d+\]|7656119\d{10}", text):
+                leaks.append(f"{target.relative_to(root)} names a player")
+    check(f"{name}: nothing per player", leaks)
+
+
+# The report: docs/benchmark.md, the README's generated blocks, the claims and the release manifest, all
+# generated from the committed artifacts alone.
+
+# Every statement the report and the README make belongs to exactly one class, and says which.
+CLASSES = {
+    "controlled_fixture": "controlled fixture: planted by construction in synthetic fixtures and scenarios; it qualifies code, never a rate",
+    "benchmark_v1_real_data": "benchmark v1 real data: measured on a current dataset of this release, rebuildable from public sources without any private key",
+    "historical_real_data": "historical real data: a run published before this release, still verifiable, superseded, and never the benchmark result",
+    "architecture_limit": "architecture limit: what no fpsdet check can see, by design or by a controlled scenario that gets through",
+    "unmeasured": "unmeasured: what the benchmark's data cannot show at all, which is not the same as finding nothing",
+}
+TAGS = {name: text.split(":")[0] for name, text in CLASSES.items()}
 
 
 def context(root: Path = ROOT) -> dict:
     """Everything the report is generated from, read from committed artifacts only."""
     found_definition = definition(root)
-    out: dict = {"definition": found_definition, "manifests": {}, "results": {}, "evaluations": {}, "strengths": {}, "splits": {}}
+    out: dict = {"definition": found_definition, "manifests": {}, "current": [], "historical": [], "results": {}, "evaluations": {},
+                 "strengths": {}, "splits": {}, "draws": {}, "draw_statistics": {}, "draw_strengths": {}, "draw_results": {}, "sensitivity_v1": {}}
     for entry in found_definition["datasets"]:
         found = read_json(root / entry["manifest"])
         out["manifests"][found["id"]] = found
+        out["historical" if entry.get("historical") else "current"].append(found["id"])
         artifacts = found["artifacts"]
+        if "draws" in found:
+            if (root / artifacts["sensitivity"]).exists():
+                out["draws"][found["id"]] = read_json(root / artifacts["sensitivity"])
+            for name, store in (("statistics", "draw_statistics"), ("strength", "draw_strengths"), ("result", "draw_results")):
+                out[store][found["id"]] = {draw: read_json(path) for draw in draws_of(found) if (path := draw_artifact(found, draw, f"{name}.json", root)).exists()}
+            out["draw_statistics"][found["id"]] = {draw: file_["statistics"] for draw, file_ in out["draw_statistics"][found["id"]].items()}
+            continue
         if (root / artifacts["result"]).exists():
             out["results"][found["id"]] = read_json(root / artifacts["result"])
         for name, store in (("evaluation", "evaluations"), ("strength", "strengths"), ("split", "splits")):
             if name in artifacts and (root / artifacts[name]).exists():
                 out[store][found["id"]] = read_json(root / artifacts[name])
+    for name, path in found_definition.get("sensitivity", {}).items():
+        if (root / path).exists():
+            out["sensitivity_v1"][name] = read_json(root / path)
     out["capabilities"] = read_json(root / found_definition["capabilities"])
     return out
 
 
+def _counted(counter: Counter, total: int) -> str:
+    if len(counter) == 1:
+        return next(iter(counter))
+    return "; ".join(f"{name} in {count} of {total} draws" for name, count in counter.most_common())
+
+
+def real_views(ctx: Mapping) -> dict[str, dict]:
+    """Each current real dataset, per native detector: observable, status, why, and strength stability, over
+    every draw for a dataset with draws. A detector a dataset cannot observe is "not observable", never a zero."""
+    views: dict[str, dict] = {}
+    for dataset in ctx["current"]:
+        found = ctx["manifests"][dataset]
+        if found["class"] != "real":
+            continue
+        if "draws" in found:
+            statistics = list(ctx["draw_statistics"].get(dataset, {}).values())
+            strengths = list(ctx["draw_strengths"].get(dataset, {}).values())
+        else:
+            statistics = [ctx["evaluations"][dataset]["statistics"]] if dataset in ctx["evaluations"] else []
+            strengths = [ctx["strengths"][dataset]] if dataset in ctx["strengths"] else []
+        if not statistics:
+            continue
+        kinds = {}
+        for kind in NATIVE_KINDS:
+            entries = [next(item for item in stats["detectors"] if item["kind"] == kind) for stats in statistics]
+            estimates = [next((item for item in found_strength["detectors"] if item["kind"] == kind), {}) for found_strength in strengths]
+            stabilities = Counter(item.get("evaluation", {}).get("stability") or item.get("status") for item in estimates)
+            kinds[kind] = {
+                "observable": entries[0]["observability"]["observable"],
+                "status": _counted(Counter(item["status"] for item in entries), len(entries)),
+                "why": ", ".join(entries[0]["observability"]["reasons"]),
+                "strength": _counted(stabilities, len(estimates)),
+                "measured": any(item["status"] in ("measured", "descriptive_only") for item in entries),
+                "replicated_in": stabilities.get("replicated", 0),
+            }
+        views[dataset] = {"title": found["title"], "short": found["title"].split(" ")[0], "draws": len(statistics) if "draws" in found else None,
+                          "kinds": kinds, "not_observable": sum(not cell["observable"] for cell in kinds.values())}
+    return views
+
+
 def coverage_matrix(ctx: Mapping) -> list[dict]:
-    """For every native detector: its controlled proof, and what each real dataset can and did show.
-    A detector a dataset cannot observe is "not observable", never a zero."""
+    """For every native detector: its controlled proof, and what each current real dataset can and did show."""
     synthetic = ctx["results"].get("synthetic-v1", {}).get("semantic", {})
+    views = real_views(ctx)
+    telemetry = {field for dataset in views for field in read_json(ROOT / ctx["manifests"][dataset]["label_semantics"]["definition"])["telemetry"]}
     rows = []
     for kind in NATIVE_KINDS:
         qualification = synthetic.get("qualification", {}).get(kind, {})
@@ -927,17 +1356,9 @@ def coverage_matrix(ctx: Mapping) -> list[dict]:
             "twins_quiet": qualification.get("twins_quiet"),
             "states": synthetic.get("eligibility_states", {}).get(kind, []),
         }
-        for dataset, evaluation in ctx["evaluations"].items():
-            entry = next(item for item in evaluation["statistics"]["detectors"] if item["kind"] == kind)
-            strength_entry = next((item for item in ctx["strengths"].get(dataset, {}).get("detectors", []) if item["kind"] == kind), {})
-            row[dataset] = {
-                "observable": entry["observability"]["observable"],
-                "status": entry["status"],
-                "why": ", ".join(entry["observability"]["reasons"]),
-                "strength": strength_entry.get("evaluation", {}).get("stability") or strength_entry.get("status"),
-            }
-        telemetry = {field for found in ctx["manifests"].values() if found["class"] == "real"
-                     for field in read_json(ROOT / found["label_semantics"]["definition"])["telemetry"]}
+        for dataset, view in views.items():
+            cell = view["kinds"][kind]
+            row[dataset] = {key: cell[key] for key in ("observable", "status", "why", "strength")}
         row["real_challenge_telemetry"] = bool({"challenge_track_ms", "private_track_ms"} & telemetry) if kind == "occluded_motion_replay" else None
         rows.append(row)
     return rows
@@ -945,13 +1366,15 @@ def coverage_matrix(ctx: Mapping) -> list[dict]:
 
 def capability_matrix(ctx: Mapping, root: Path = ROOT) -> tuple[list[dict], list[str]]:
     """Each technique with its claim, the evidence that stands behind it (worked out, not declared), and
-    every reference checked. Returns the rows and the problems found."""
+    every reference checked. Real-data evidence comes from the current datasets, with how many baseline
+    draws it held in. Returns the rows and the problems found."""
     import ast
 
     synthetic = ctx["results"].get("synthetic-v1", {}).get("semantic", {})
     qualification = synthetic.get("qualification", {})
     challenge = {row["scenario"]: row for row in synthetic.get("challenge", [])}
     capabilities = ctx["capabilities"]
+    views = real_views(ctx)
     problems: list[str] = []
     if capabilities.get("format") != CAPABILITIES:
         problems.append(f"benchmark/capabilities.json is not {CAPABILITIES}")
@@ -959,21 +1382,16 @@ def capability_matrix(ctx: Mapping, root: Path = ROOT) -> tuple[list[dict], list
     for technique in capabilities["techniques"]:
         name = technique["id"]
         detectors = technique["detectors"]
-        unknown = [kind for kind in detectors if kind not in NATIVE_KINDS]
-        problems += [f"{name}: {kind} is not a native detector" for kind in unknown]
+        problems += [f"{name}: {kind} is not a native detector" for kind in detectors if kind not in NATIVE_KINDS]
         caught_ok, through_ok = [], []
         for ref in technique.get("caught", []):
             world, _, item = ref.partition(":")
-            if world == "challenge":
-                ok = challenge.get(item, {}).get("observed") == "caught"
-            else:
-                ok = _fired_in(ref, detectors, qualification)
+            ok = challenge.get(item, {}).get("observed") == "caught" if world == "challenge" else _fired_in(ref, detectors, qualification)
             caught_ok.append(ok)
             if not ok:
                 problems.append(f"{name}: {ref} is claimed caught, and is not")
         for ref in technique.get("through", []):
-            item = ref.partition(":")[2]
-            ok = challenge.get(item, {}).get("observed") == "not_caught"
+            ok = challenge.get(ref.partition(":")[2], {}).get("observed") == "not_caught"
             through_ok.append(ok)
             if not ok:
                 problems.append(f"{name}: {ref} is claimed to get through, and does not")
@@ -996,24 +1414,33 @@ def capability_matrix(ctx: Mapping, root: Path = ROOT) -> tuple[list[dict], list
         if claim == "not_detectable" and not (technique.get("architecture") or through_ok):
             problems.append(f"{name}: not detectable needs an architecture statement or a scenario that gets through")
         real = {}
-        for dataset, evaluation in ctx["evaluations"].items():
-            statuses = {entry["kind"]: entry["status"] for entry in evaluation["statistics"]["detectors"] if entry["kind"] in detectors}
-            measured = sorted(kind for kind, status in statuses.items() if status in ("measured", "descriptive_only"))
-            stable = sorted(entry["kind"] for entry in ctx["strengths"].get(dataset, {}).get("detectors", [])
-                            if entry["kind"] in detectors and entry.get("evaluation", {}).get("stability") == "replicated")
-            real[dataset] = {"measured": measured, "replicated": stable}
-        short = {dataset: ctx["manifests"][dataset]["title"].split(" ")[0] for dataset in real}
+        for dataset, view in views.items():
+            cells = {kind: view["kinds"][kind] for kind in detectors if kind in view["kinds"]}
+            real[dataset] = {
+                "measured": sorted((kind for kind, cell in cells.items() if cell["measured"]), key=NATIVE_KINDS.index),
+                "replicated": sorted((kind for kind, cell in cells.items() if cell["replicated_in"]), key=NATIVE_KINDS.index),
+                "replicated_in": {kind: cell["replicated_in"] for kind, cell in cells.items() if cell["replicated_in"]},
+                "draws": view["draws"],
+            }
         controlled = "controlled" if caught_ok and all(caught_ok) else ("architecture statement" if technique.get("architecture") else "no proof")
         if claim == "not_detectable":
             evidence = "architecture statement" + (", and controlled scenarios that get through" if through_ok else "")
         elif any(item["replicated"] for item in real.values()):
             # Labels say who was banned or judged a cheater, not which cheat they used: this is the detectors, not the technique.
-            evidence = f"{controlled}; real data: " + "; ".join(
-                f"{short[dataset]} labelled cheaters fire {', '.join(item['replicated'])} more, replicated on one split" for dataset, item in real.items() if item["replicated"]
-            ) + " (which cheat they used is unknown)"
+            parts = []
+            for dataset, item in real.items():
+                if not item["replicated"]:
+                    continue
+                if item["draws"]:
+                    ranked = sorted(item["replicated"], key=lambda kind: (-item["replicated_in"][kind], NATIVE_KINDS.index(kind)))
+                    held = ", ".join(f"{kind} in {item['replicated_in'][kind]} of {item['draws']}" for kind in ranked)
+                    parts.append(f"{views[dataset]['short']} labelled cheaters fire {', '.join(ranked)} more, replicated on one split per baseline draw: {held}")
+                else:
+                    parts.append(f"{views[dataset]['short']} labelled cheaters fire {', '.join(item['replicated'])} more, replicated on one split")
+            evidence = f"{controlled}; real data: " + "; ".join(parts) + " (which cheat they used is unknown)"
         elif any(item["measured"] for item in real.values()):
             evidence = f"{controlled}; real data observes " + "; ".join(
-                f"{', '.join(item['measured'])} on {short[dataset]}" for dataset, item in real.items() if item["measured"]
+                f"{', '.join(item['measured'])} on {views[dataset]['short']}" for dataset, item in real.items() if item["measured"]
             ) + ", with no separation shown"
         else:
             evidence = f"{controlled} only" if controlled == "controlled" else controlled
@@ -1038,28 +1465,179 @@ def _twin_fired(ref: str, detectors: list[str], qualification: Mapping) -> bool:
     return any(ref in qualification.get(kind, {}).get("twins", []) and not qualification[kind].get("twins_quiet") for kind in detectors)
 
 
-def limitations(ctx: Mapping) -> list[str]:
-    """What still gets through, generated: every technique not or only partly detectable says what gets
-    through, then the limits of data and trust the benchmark shows."""
+def limitations(ctx: Mapping) -> list[tuple[str, str]]:
+    """What still gets through, generated, each with its class: every technique not or only partly
+    detectable says what gets through, then the limits of data and trust the benchmark shows."""
     rows, _problems = capability_matrix(ctx)
-    out = [row["gets_through"] for row in rows if row["claim"] in ("not_detectable", "partially_detectable") and row["gets_through"]]
-    unseen = [
-        f"{sum(entry['status'] == 'not_observable' for entry in evaluation['statistics']['detectors'])} of {len(NATIVE_KINDS)} detectors on {ctx['manifests'][dataset]['title'].split(' ')[0]}"
-        for dataset, evaluation in ctx["evaluations"].items()
-    ]
+    out = [("architecture_limit", row["gets_through"]) for row in rows if row["claim"] in ("not_detectable", "partially_detectable") and row["gets_through"]]
+    views = real_views(ctx)
+    unseen = [f"{view['not_observable']} of {len(NATIVE_KINDS)} detectors on {view['short']}" for view in views.values()]
     if unseen:
-        out.append(f"Anything a game's telemetry cannot show. In the benchmark's real data, {' and '.join(unseen)} are not observable at all, which is not the same as finding nothing.")
-    out.append("A number with too few humans behind it: a detector waits for a thick enough baseline, and says so, before it compares.")
-    out += [limit["text"] for limit in ctx["capabilities"].get("limits", [])]
+        out.append(("unmeasured", f"Anything a game's telemetry cannot show. In the benchmark's real data, {' and '.join(unseen)} are not observable at all, which is not the same as finding nothing."))
+    out.append(("architecture_limit", "A number with too few humans behind it: a detector waits for a thick enough baseline, and says so, before it compares."))
+    out += [("architecture_limit", limit["text"]) for limit in ctx["capabilities"].get("limits", [])]
     return out
 
 
+def _pc(value) -> str:
+    return "-" if value is None else f"{value:.1%}"
+
+
+def _x(value) -> str:
+    return "-" if value is None else f"{value:.1f}x"
+
+
+def _span(found: Mapping, show=_pc) -> str:
+    """A spread as the report writes it: the median, then the lowest and highest. Never the median alone."""
+    return f"{show(found['median'])} (lowest {show(found['min'])}, highest {show(found['max'])})"
+
+
+def _v1_published(ctx: Mapping, dataset: str) -> dict | None:
+    """The historical published draw of a dataset with draws: its ratio and where it ranked among its own draws."""
+    found = ctx["manifests"][dataset]
+    old = (found.get("supersedes") or {}).get("id")
+    draws = ctx["sensitivity_v1"].get(old)
+    if not draws:
+        return None
+    ratios = [row["summary"]["ratio"] for row in draws["draws"]]
+    published = next(row for row in draws["draws"] if row["draw"] == "curator")["summary"]
+    return {"id": old, "ratio": published["ratio"], "rank": sorted(ratios, reverse=True).index(published["ratio"]) + 1, "of": len(ratios), "min": min(ratios), "max": max(ratios),
+            "comparison_rate": published["comparison"]["rate"], "positive_rate": published["positive"]["rate"], "digest": draws["digest"],
+            "path": ctx["definition"]["sensitivity"][old]}
+
+
+def claims(ctx: Mapping) -> dict:
+    """fpsdet.benchmark-claims/1: every public statement of this release, with its class and the artifact
+    it is generated from. The README and the report print these, never anything looser."""
+    out: list[dict] = []
+    add = lambda claim_id, cls, text, path, bound: out.append({"id": claim_id, "class": cls, "text": text, "source": {"path": path, "digest": bound}})
+    synthetic = ctx["results"].get("synthetic-v1", {})
+    if synthetic:
+        published = synthetic["published"]
+        add("synthetic.qualification", "controlled_fixture",
+            f"All {published['qualification_passes']} of {published['detectors']} native detectors trip on a player planted for them and stay quiet on every honest twin, "
+            f"and {published['challenge_as_expected']} of {published['challenge_scenarios']} challenge and {published['auth_as_expected']} of {published['auth_scenarios']} signature scenarios behave as documented. "
+            "Controlled synthetic fixtures: they qualify code, never a rate.",
+            ctx["manifests"]["synthetic-v1"]["artifacts"]["result"], synthetic["digest"])
+    for dataset in ctx["current"]:
+        found = ctx["manifests"][dataset]
+        if dataset in ctx["draws"]:
+            draws = ctx["draws"][dataset]
+            across = draws["across"]
+            path = found["artifacts"]["sensitivity"]
+            names = {group["label"]: group["name"] for group in next(iter(ctx["draw_statistics"][dataset].values()))["population"]["groups"]}
+            add(f"{dataset}.headline", "benchmark_v1_real_data",
+                f"Across all {across['draws']} predeclared baseline draws of {dataset}, fpsdet flagged (review or watch) a median {_pc(across['positive_rate']['median'])} of the "
+                f"{names['cheater']} accounts it could compare (lowest {_pc(across['positive_rate']['min'])}, highest {_pc(across['positive_rate']['max'])}) and a median "
+                f"{_pc(across['comparison_rate']['median'])} of the {names['not banned']} (lowest {_pc(across['comparison_rate']['min'])}, highest {_pc(across['comparison_rate']['max'])}). "
+                f"The ratio between them was {_x(across['ratio']['median'])} at the median, from {_x(across['ratio']['min'])} to {_x(across['ratio']['max'])}. "
+                "Every draw is listed in docs/benchmark.md, and none is preferred.",
+                path, draws["digest"])
+            for kind, cell in sorted(across["strength"].items(), key=lambda item: (-item[1]["replicated_in"], NATIVE_KINDS.index(item[0]))):
+                rates = across["detectors"].get(kind, {})
+                add(f"{dataset}.{kind}", "benchmark_v1_real_data",
+                    f"{kind} on {dataset}: it fired on a median {_pc(rates['positive_rate']['median'])} of the {names['cheater']} accounts it could run on "
+                    f"(lowest {_pc(rates['positive_rate']['min'])}, highest {_pc(rates['positive_rate']['max'])}) and {_pc(rates['comparison_rate']['median'])} of the {names['not banned']} "
+                    f"({_pc(rates['comparison_rate']['min'])} to {_pc(rates['comparison_rate']['max'])}); its strength estimate replicated on the held-out split in "
+                    f"{cell['replicated_in']} of {across['draws']} draws.",
+                    path, draws["digest"])
+            add(f"{dataset}.population", "unmeasured",
+                f"Which {found['selection']['parameters']['extra_never_banned']} extra never-banned players join the comparison is fixed by a public order, not drawn: "
+                f"the {across['draws']} draws vary only which half of the never-banned players builds the baseline, so they do not show how much another set of extra players would move the result.",
+                path, draws["digest"])
+            unseen = sum(1 for kind in NATIVE_KINDS if kind not in across["detectors"])
+            add(f"{dataset}.unobservable", "unmeasured",
+                f"{unseen} of {len(NATIVE_KINDS)} detectors cannot be observed on {dataset}'s per-match totals at all, and are reported that way, never as 0%.",
+                path, draws["digest"])
+            old = _v1_published(ctx, dataset)
+            if old:
+                place = "the most favourable" if old["rank"] == 1 else f"ranked {old['rank']}"
+                beyond = " and higher than every draw of this release" if old["ratio"] > across["ratio"]["max"] else ""
+                add(f"{old['id']}.published_draw", "historical_real_data",
+                    f"The historical published TF2 result ({old['id']}) was one baseline draw, chosen by the curator's private key: its ratio, {_x(old['ratio'])}, was {place} of "
+                    f"{old['of']} draws of that data{beyond}. It is not the benchmark result.",
+                    old["path"], old["digest"])
+                add(f"{old['id']}.draws", "historical_real_data",
+                    f"{old['id']}'s own {old['of']} draws ran from {_x(old['min'])} to {_x(old['max'])}. Its extra never-banned players were chosen by the curator's private key, not by this release's public order, "
+                    "so its population differs from this release's, not only its baseline draw.",
+                    old["path"], old["digest"])
+        elif dataset in ctx["evaluations"] and found["class"] == "real":
+            evaluation = ctx["evaluations"][dataset]
+            stats = evaluation["statistics"]
+            queue = stats["decisions"]["queues"]["review_or_watch"]
+            positive = stats["population"]["positive"]
+            names = {group["label"]: group["name"] for group in evaluation["dataset"]["labels"]}
+            add(f"{dataset}.headline", "benchmark_v1_real_data",
+                f"On {dataset}, fpsdet picked {queue['size']} of {queue['scored_pool']:,} scored players for review or watch, and {queue['by_label'].get(positive, 0)} of them are {names[positive]}s. "
+                "Each player is one match here, so there is no equal-evidence comparison to make.",
+                found["artifacts"]["evaluation"], evaluation["digest"])
+    for cls, text in limitations(ctx):
+        add(f"limit.{len(out)}", cls, text, ctx["definition"]["capabilities"], sha256_file(ROOT / ctx["definition"]["capabilities"]))
+    body = {"format": CLAIMS, "release": RELEASE_TITLE, "classes": CLASSES, "claims": out}
+    body = json.loads(canonical_json(body))
+    body["digest"] = digest("claims", body)
+    return body
+
+
+RELEASE_TITLE = "FPSDET Benchmark v1"
+# Every format the benchmark writes or reads, for anyone checking it without this code.
+FORMATS = {
+    BENCHMARK: "the definition: datasets, which are historical, archival classes, what the benchmark can and cannot prove",
+    DATASET: "one dataset's manifest: source, licence, ids, labels, fetch and prepare commands, frozen selection, pinned inputs, and draws where it has them",
+    SOURCES: "a pinned upstream source list: repository, revision, selection and each file's digest (cs2cd-v2)",
+    "fpsdet.tf2-sources/1": "tf2-rgl-v2's frozen sources as digests and counts: bans, both selections, every selected log; names nobody",
+    "fpsdet.cs2cd-fetch-receipt/1": "what the pinned CS2 fetcher checked, file by file, at which revision",
+    RESULT: "one run (one draw, for a dataset with draws), every step bound by digest",
+    STATISTICS: "one draw's evaluation statistics without its rows, bound to the evaluation by digest",
+    DRAWS: "every predeclared draw of a dataset, in order, with its own inputs, outputs and numbers, and the median and range across them",
+    SENSITIVITY: "historical: tf2-rgl-v1's published draw beside five public alternative-key draws",
+    EXPECTED: "the pinned identity of every result, per draw for a dataset with draws",
+    SPLIT: "every subject's development, evaluation or baseline membership (never committed for a dataset with public ids)",
+    CAPABILITIES: "each technique's claim and the references its evidence is worked out from",
+    CLAIMS: "every public statement of the release, with its class and the artifact it comes from",
+    RELEASE: "the release itself: every dataset version, the expectations, spreads, capabilities, claims and report, by digest",
+}
 README_BEGIN = "<!-- benchmark:limits:begin (generated by fpsdet benchmark report; do not edit) -->"
 README_END = "<!-- benchmark:limits:end -->"
 
 
-def readme_block(ctx: Mapping) -> str:
-    return "\n".join([README_BEGIN, "", *[f"- {line}" for line in limitations(ctx)], "", README_END])
+def _markers(name: str) -> tuple[str, str]:
+    return f"<!-- benchmark:{name}:begin (generated by fpsdet benchmark report; do not edit) -->", f"<!-- benchmark:{name}:end -->"
+
+
+def _tagged(claim: Mapping) -> str:
+    return f"- **[{TAGS[claim['class']]}]** {claim['text']}"
+
+
+def readme_block(ctx: Mapping, found_claims: Mapping | None = None) -> str:
+    found_claims = found_claims or claims(ctx)
+    lines = [_tagged(claim) for claim in found_claims["claims"] if claim["id"].startswith("limit.")]
+    return "\n".join([README_BEGIN, "", *lines, "", README_END])
+
+
+def readme_blocks(ctx: Mapping) -> dict[str, str]:
+    """Every generated README block: the TF2 result, the detectors' real-data numbers and the limits."""
+    found_claims = claims(ctx)
+    by_id = {claim["id"]: claim for claim in found_claims["claims"]}
+    blocks = {"limits": readme_block(ctx, found_claims)}
+    tf2 = [claim for claim in found_claims["claims"] if claim["id"].startswith("tf2") and claim["id"].endswith((".headline", ".population"))]
+    tf2 += [claim for claim in found_claims["claims"] if claim["class"] == "historical_real_data"]
+    detectors = [claim for claim in found_claims["claims"] if claim["class"] == "benchmark_v1_real_data" and not claim["id"].endswith(".headline")]
+    detectors += [claim for claim in found_claims["claims"] if claim["id"].endswith(".unobservable")]
+    for name, chosen in (("tf2", tf2), ("detectors", detectors)):
+        begin, end = _markers(name)
+        blocks[name] = "\n".join([begin, "", *[_tagged(claim) for claim in chosen], "", end])
+    return blocks
+
+
+def apply_readme(readme: str, blocks: Mapping[str, str]) -> str:
+    for name, block in blocks.items():
+        begin, end = _markers(name) if name != "limits" else (README_BEGIN, README_END)
+        if begin not in readme or end not in readme:
+            raise BenchmarkError(f"the README has no generated {name} block ({begin})")
+        start, stop = readme.index(begin), readme.index(end) + len(end)
+        readme = readme[:start] + block + readme[stop:]
+    return readme
 
 
 def _md(text) -> str:
@@ -1070,17 +1648,122 @@ def _yes(value) -> str:
     return {True: "yes", False: "**no**", None: "-"}.get(value, str(value))
 
 
+def _status(ctx: Mapping, dataset: str, expected: Mapping) -> tuple[str, str]:
+    """A dataset's result identity and its status against the pin, as the dataset table shows them."""
+    if dataset in ctx["draw_results"]:
+        results = ctx["draw_results"][dataset]
+        statuses = Counter(compare(result, expected["datasets"].get(expected_key(dataset, draw)))["status"] for draw, result in results.items())
+        spread_digest = ctx["draws"].get(dataset, {}).get("digest", "-")
+        return f"`{spread_digest[:23]}…` (spread of {len(results)} draws)", _counted(statuses, len(results)) if statuses else "NOT_RUN"
+    result = ctx["results"].get(dataset)
+    if not result:
+        return "-", "NOT_RUN"
+    return f"`{result['digest'][:23]}…`", compare(result, expected["datasets"].get(dataset))["status"]
+
+
+def _dataset_paragraph(add, found: Mapping) -> None:
+    add(f"**{found['title']}** (`{found['id']}`).")
+    add("- Source: " + "; ".join(f"[{origin['name']}]({origin['url']}): {_md(origin['content'])}" for origin in found["source"]["origins"])
+        + f". Fetched {found['source']['fetched']}" + (f", frozen at {found['source']['freeze']}" if found["source"].get("freeze") else "")
+        + (f", revision `{found['source']['revision']}`" if found["source"].get("revision") else "") + f". {found['source']['mutable']}")
+    add(f"- Licence and use: {found['license']['terms']} {found['license']['committed']} {found['license']['attribution']}")
+    if found["license"].get("archival"):
+        add(f"- Archive: {found['license']['archival']}")
+    add(f"- Ids: {found['pseudonymization']['method']}" + (f" {found['pseudonymization']['not_for_production']}" if found["pseudonymization"].get("not_for_production") else ""))
+    add("- Selection, frozen (`" + found["selection"]["recipe"] + "`): " + " ".join(found["selection"]["rules"]))
+    counts = found.get("expected_counts") or {}
+    if counts:
+        add("- Counts: " + ", ".join(f"{key.replace('_', ' ')} {value:,}" for key, value in counts.items() if isinstance(value, int))
+            + ("; labelled " + ", ".join(f"{label} {n:,}" for label, n in counts["labelled"].items()) if "labelled" in counts else "") + ".")
+    add("")
+
+
+def _tf2_section(add, ctx: Mapping, dataset: str, found_claims: Mapping) -> None:
+    """A dataset with draws, in the order that keeps one draw from being quoted alone: what the labels are,
+    every draw, the median and range, the historical published draw, each detector across draws, then what
+    the data cannot show."""
+    found = ctx["manifests"][dataset]
+    draws = ctx["draws"][dataset]
+    across = draws["across"]
+    first = next(iter(ctx["draw_statistics"][dataset].values()))
+    names = {group["label"]: group["name"] for group in first["population"]["groups"]}
+    positive, comparison = first["population"]["positive"], first["population"]["primary_comparison"]
+    by_id = {claim["id"]: claim for claim in found_claims["claims"]}
+    definition_ = read_json(ROOT / found["label_semantics"]["definition"])
+    add(f"### {found['title']} (`{dataset}`)")
+    add("")
+    add(f"**[{TAGS['benchmark_v1_real_data']}]** {len(draws['draws'])} predeclared baseline draws, fixed {draws['fixed']}.")
+    add("")
+    not_meaning = next(group["not_meaning"] for group in definition_["labels"] if group["role"] == "positive")
+    add(f"**What the labels are.** {found['label_semantics']['statement']} The positive label ({names[positive]}) does not mean {not_meaning[0].lower() + not_meaning[1:]}")
+    add("")
+    add("**How much the result depends on the baseline draw.** " + draws["question"] + " " + draws["rule"] + " " + draws["why"])
+    add("")
+    add(f"| Draw | {_md(names[positive])} flagged | {_md(names[comparison])} flagged | Review | Watch | Queue ({_md(names[positive])}) | Ratio (95% range) | Equal evidence, {_md(names[comparison])} | Baseline cohort |")
+    add("| ---: | --- | --- | ---: | ---: | --- | --- | ---: | ---: |")
+    for row in draws["draws"]:
+        numbers = row["numbers"]
+        lo, hi = numbers["ratio_range"]
+        add(f"| {row['draw']} | {numbers['positive']['flagged']}/{numbers['positive']['eligible']} = {_pc(numbers['positive']['rate'])} | "
+            f"{numbers['comparison']['flagged']}/{numbers['comparison']['eligible']:,} = {_pc(numbers['comparison']['rate'])} | {numbers['review']} | {numbers['watch']} | "
+            f"{numbers['queue']['size']} ({numbers['queue']['positive']}) | {_x(numbers['ratio'])} ({lo:.1f}–{hi:.1f}) | {_pc(numbers['equal_evidence_comparison_rate'])} | "
+            f"{row['inputs']['cohort_players']:,} players, `{row['inputs']['cohort'][7:19]}` |")
+    add("")
+    add(f"**The result: the median and the range over all {across['draws']} draws.** " + by_id[f"{dataset}.headline"]["text"])
+    add("")
+    add("| Across the draws | Median | Lowest | Highest |")
+    add("| --- | ---: | ---: | ---: |")
+    for label, key, show in ((f"{names[positive]} flagged", "positive_rate", _pc), (f"{names[comparison]} flagged", "comparison_rate", _pc), ("Ratio", "ratio", _x),
+                             ("Review decisions", "review", str), ("Watch decisions", "watch", str), ("Queue", "queue", str),
+                             (f"Equal evidence, {names[comparison]}", "equal_evidence_comparison_rate", _pc), (f"{names[comparison]} compared", "comparison_eligible", lambda value: f"{value:,}")):
+        cell = across[key]
+        add(f"| {_md(label)} | {show(cell['median'])} | {show(cell['min'])} | {show(cell['max'])} |")
+    add("")
+    add(f"**What the draws do not vary.** **[{TAGS['unmeasured']}]** " + by_id[f"{dataset}.population"]["text"])
+    add("")
+    old = _v1_published(ctx, dataset)
+    if old:
+        add(f"**The historical published draw: one draw, not the result.** **[{TAGS['historical_real_data']}]** " + by_id[f"{old['id']}.published_draw"]["text"]
+            + " " + by_id[f"{old['id']}.draws"]["text"])
+        add("")
+        add("| Run | What it is | Ratio |")
+        add("| --- | --- | ---: |")
+        place = "the most favourable" if old["rank"] == 1 else f"number {old['rank']}"
+        add(f"| `{old['id']}`, published | historical: 1 draw, chosen by a private key, {place} of {old['of']} | {_x(old['ratio'])} (one draw) |")
+        add(f"| `{dataset}` | this release: median of {across['draws']} public draws | {_x(across['ratio']['median'])} (range {_x(across['ratio']['min'])}–{_x(across['ratio']['max'])}) |")
+        add("")
+    add("**Each detector across the draws.** Fires among the players each detector could run on, per draw; a detector's strength estimate (fitted on the development half, checked on the held-out half) can replicate in some draws and not others. Stable decisions do not make a detector robust: this table is per detector.")
+    add("")
+    add(f"| Detector | Status | {_md(names[positive])} fired (median, range) | {_md(names[comparison])} fired (median, range) | Eligible {_md(names[comparison])} | Strength ratio (median, range) | Replicated in |")
+    add("| --- | --- | --- | --- | --- | --- | --- |")
+    for kind, cell in sorted(across["detectors"].items(), key=lambda item: NATIVE_KINDS.index(item[0])):
+        estimate = across["strength"].get(kind)
+        add(f"| {kind} | {_counted(Counter(cell['status']), across['draws']) if len(cell['status']) > 1 else next(iter(cell['status']))} | {_span(cell['positive_rate'])} | {_span(cell['comparison_rate'])} | "
+            f"{cell['comparison_eligible']['min']:,}–{cell['comparison_eligible']['max']:,} | "
+            + (f"{_span(estimate['ratio'], lambda v: '-' if v is None else f'{v:.3g}')} | {estimate['replicated_in']} of {across['draws']} draws" if estimate else "no estimate | -") + " |")
+    add("")
+    unseen = [kind for kind in NATIVE_KINDS if kind not in across["detectors"]]
+    add(f"**What this data cannot show.** **[{TAGS['unmeasured']}]** {len(unseen)} of {len(NATIVE_KINDS)} detectors are not observable on it at all: {', '.join(unseen)}. "
+        + " ".join(definition_["caveats"][2:4]))
+    add("")
+
+
 def render_report(ctx: Mapping) -> str:
     """docs/benchmark.md, from the committed artifacts alone."""
     from .calibration import _pct, _ratio
+    from .strength import _ratio as strength_ratio
 
     found_definition = ctx["definition"]
-    manifests, results = ctx["manifests"], ctx["results"]
+    manifests = ctx["manifests"]
+    found_claims = claims(ctx)
+    expected = load_expected()
     out: list[str] = []
     add = out.append
-    add("# The fpsdet benchmark")
+    add(f"# {RELEASE_TITLE}")
     add("")
-    add(f"Generated by `fpsdet benchmark report` from the committed artifacts ({found_definition['format']}). Do not edit by hand: change the artifacts, then regenerate.")
+    add(f"Generated by `fpsdet benchmark report` from the committed artifacts ({found_definition['format']}; release manifest `{found_definition['release']}`, {RELEASE}). Do not edit by hand: change the artifacts, then regenerate.")
+    add("")
+    add(found_definition["version_note"])
     add("")
     add("## What this benchmark can prove")
     add("")
@@ -1094,43 +1777,43 @@ def render_report(ctx: Mapping) -> str:
     add("")
     add("There is no overall score. Each section answers its own question, and a detector a dataset cannot observe is shown as not observable, never as zero.")
     add("")
+    add("Every statement below carries its class, and no sentence mixes two:")
+    add("")
+    for name, text in CLASSES.items():
+        add(f"- **[{TAGS[name]}]** {text.split(': ', 1)[1]}.")
+    add("")
     add("## 1. Benchmark datasets")
     add("")
-    add("| Dataset | Class | Question | Result | Status against the pin |")
-    add("| --- | --- | --- | --- | --- |")
-    expected = load_expected()
-    for dataset_id_, found in manifests.items():
-        result = results.get(dataset_id_)
-        status = compare(result, expected["datasets"].get(dataset_id_))["status"] if result else "NOT_RUN"
-        add(f"| `{dataset_id_}` | {found['class']} | {_md(found['question'])} | `{(result or {}).get('digest', '-')[:23]}…` | {status} |")
+    add("| Dataset | Role | Class | Question | Result | Status against the pin |")
+    add("| --- | --- | --- | --- | --- | --- |")
+    for dataset in [*ctx["current"], *ctx["historical"]]:
+        found = manifests[dataset]
+        identity, status = _status(ctx, dataset, expected)
+        role = "this release" if dataset in ctx["current"] else f"historical, superseded by `{next(entry['superseded_by'] for entry in found_definition['datasets'] if entry['id'] == dataset)}`"
+        add(f"| `{dataset}` | {role} | {found['class']} | {_md(found['question'])} | {identity} | {status} |")
     add("")
-    for dataset_id_, found in manifests.items():
-        if found["class"] != "real":
-            continue
-        add(f"**{found['title']}** (`{dataset_id_}`).")
-        add(f"- Source: " + "; ".join(f"[{origin['name']}]({origin['url']}): {_md(origin['content'])}" for origin in found["source"]["origins"]) + f". Fetched {found['source']['fetched']}. {found['source']['mutable']}")
-        add(f"- Licence and use: {found['license']['terms']} {found['license']['committed']} {found['license']['attribution']}")
-        add(f"- Pseudonyms: {found['pseudonymization']['method']}")
-        add("- Selection, frozen (`" + found["selection"]["recipe"] + "`): " + " ".join(found["selection"]["rules"]))
-        counts = found["expected_counts"]
-        add("- Counts: " + ", ".join(f"{key.replace('_', ' ')} {value:,}" for key, value in counts.items() if isinstance(value, int))
-            + "; labelled " + ", ".join(f"{label} {n:,}" for label, n in counts["labelled"].items()) + ".")
-        add("")
+    for dataset in ctx["current"]:
+        if manifests[dataset]["class"] == "real":
+            _dataset_paragraph(add, manifests[dataset])
     add("## 2. Label semantics")
     add("")
-    for dataset_id_, evaluation in ctx["evaluations"].items():
-        add(f"**{evaluation['dataset']['title']}.**")
+    for dataset in ctx["current"]:
+        found = manifests[dataset]
+        if found["class"] != "real":
+            continue
+        labels = read_json(ROOT / found["label_semantics"]["definition"])
+        add(f"**{labels['title']}** (`{dataset}`).")
         add("")
         add("| Label | Role | Who | What it does not mean |")
         add("| --- | --- | --- | --- |")
-        for group in evaluation["dataset"]["labels"]:
+        for group in labels["labels"]:
             add(f"| {_md(group['name'])} | {group['role']} | {_md(group['meaning'])} | {_md(group['not_meaning'])} |")
         add("")
-    synthetic = results.get("synthetic-v1", {})
+    synthetic = ctx["results"].get("synthetic-v1", {})
     semantic = synthetic.get("semantic", {})
     add("## 3. Controlled detector qualification")
     add("")
-    add("Controlled synthetic qualification: planted by construction, never a real-world rate. Each detector must trip on its planted player and stay quiet on every honest twin; the states are every eligibility status its fixtures show.")
+    add(f"**[{TAGS['controlled_fixture']}]** Controlled synthetic qualification: planted by construction, never a real-world rate. Each detector must trip on its planted player and stay quiet on every honest twin; the states are every eligibility status its fixtures show.")
     add("")
     add("| Detector | Planted (fires) | Honest twins (quiet) | Eligibility states shown |")
     add("| --- | --- | --- | --- |")
@@ -1143,14 +1826,22 @@ def render_report(ctx: Mapping) -> str:
     add("")
     add("## 4. Real-data results")
     add("")
-    add("Measured directly, from the committed evaluations. Every rate is among players fpsdet could run on, with a two-sided 95% Wilson interval; under 20 players a rate is not shown.")
+    add("Measured directly, from the committed artifacts. Every rate is among players fpsdet could run on, with a two-sided 95% Wilson interval; under 20 players a rate is not shown.")
     add("")
-    for dataset_id_, evaluation in ctx["evaluations"].items():
+    for dataset in ctx["current"]:
+        if dataset in ctx["draws"]:
+            _tf2_section(add, ctx, dataset, found_claims)
+    for dataset in ctx["current"]:
+        if dataset not in ctx["evaluations"] or manifests[dataset]["class"] != "real":
+            continue
+        evaluation = ctx["evaluations"][dataset]
         stats = evaluation["statistics"]
         groups = evaluation["dataset"]["labels"]
         names = {group["label"]: group["name"] for group in groups}
         positive = stats["population"]["positive"]
-        add(f"**{evaluation['dataset']['title']}.**")
+        add(f"### {evaluation['dataset']['title']} (`{dataset}`)")
+        add("")
+        add(f"**[{TAGS['benchmark_v1_real_data']}]** One population: the selection has no random draw, and the ids are the dataset's own, so a rebuild gets these exact rows.")
         add("")
         add("| Group | Scored | Review | Watch | Review or watch, of compared | Of all scored |")
         add("| --- | ---: | ---: | ---: | --- | --- |")
@@ -1162,67 +1853,42 @@ def render_report(ctx: Mapping) -> str:
         add(f"Queue: {queue['size']} players, {queue['by_label'].get(positive, 0)} of them {names[positive]} ({_pct(queue['positive_share'])}); the chance level among compared players is {queue['prevalence']:.1%}.")
         for comparison, cell in stats["decisions"]["enrichment"].items():
             add(f"Ratio against {names[comparison]}: {_ratio(cell['review_or_watch'])}.")
-        if evaluation["dataset"].get("split_unit") != "match":
-            equal = next(cell for cell in stats["evidence_amount"] if cell["matches"] == "15-20")["groups"]
-            add("At equal evidence (15–20 matches): " + "; ".join(f"{names[label]} {_pct(cell['review_or_watch'])}" for label, cell in equal.items() if cell["scored"]) + ".")
-        else:
-            add("Every player is one match, so there is no equal-evidence comparison to make here.")
-        add("")
-    for dataset_id_, found in manifests.items():
-        path = found_definition.get("sensitivity", {}).get(dataset_id_)
-        if not path or not (ROOT / path).exists():
-            continue
-        draws = read_json(ROOT / path)
-        evaluation = ctx["evaluations"][dataset_id_]
-        names = {group["label"]: group["name"] for group in evaluation["dataset"]["labels"]}
-        positive, comparison = evaluation["statistics"]["population"]["positive"], evaluation["statistics"]["population"]["primary_comparison"]
-        add(f"**How much {evaluation['dataset']['title']} depends on its baseline draw.** {draws['question']} The curator's draw is the published one; each other draw uses a public alternative key ({draws['key_recipe']}), so anyone with the same downloads rebuilds it. Only the draw changes.")
-        add("")
-        kinds = sorted({kind for row in draws["draws"] for kind in row["summary"]["strength"]}, key=NATIVE_KINDS.index)
-        add(f"| Draw | {_md(names[positive])} flagged | {_md(names[comparison])} flagged | Queue ({_md(names[positive])}) | Ratio | Equal evidence, {_md(names[comparison])} | " + " | ".join(f"{kind} strength" for kind in kinds) + " |")
-        add("| --- | --- | --- | --- | ---: | ---: |" + " --- |" * len(kinds))
-        for row in draws["draws"]:
-            summary = row["summary"]
-            strength_cells = [f"{summary['strength'][kind]['ratio']:.3g} ({summary['strength'][kind]['stability']})" if kind in summary["strength"] else "-" for kind in kinds]
-            equal = summary["equal_evidence_comparison_rate"]
-            add(f"| {row['draw']} | {summary['positive']['flagged']}/{summary['positive']['compared']} = {summary['positive']['rate']:.1%} | {summary['comparison']['flagged']}/{summary['comparison']['compared']:,} = {summary['comparison']['rate']:.1%} | {summary['queue']['size']} ({summary['queue']['positive']}) | {summary['ratio']:.1f}x | {'-' if equal is None else f'{equal:.1%}'} | " + " | ".join(strength_cells) + " |")
-        ratios = [row["summary"]["ratio"] for row in draws["draws"]]
-        published = next(row for row in draws["draws"] if row["draw"] == "curator")["summary"]["ratio"]
-        rank = sorted(ratios, reverse=True).index(published) + 1
-        add("")
-        add(f"The published draw's ratio, {published:.1f}x, ranks {rank} of {len(ratios)} draws (from {min(ratios):.1f}x to {max(ratios):.1f}x). Its numbers are reproducible exactly; they are one draw of a random split, not a fixed property of fpsdet.")
+        add("Every player is one match, so there is no equal-evidence comparison to make here." if evaluation["dataset"].get("split_unit") == "match" else "")
         add("")
     add("## 5. Eligibility and coverage")
     add("")
-    add("For every native detector: whether a controlled fixture proves it, and what each real dataset can show. Not observable is not the same as not working.")
+    add("For every native detector: whether a controlled fixture proves it, and what each dataset of this release can show (over every draw, for a dataset with draws). Not observable is not the same as not working.")
     add("")
-    real_ids = list(ctx["evaluations"])
-    add("| Detector | Family | Fixture | Honest twin | " + " | ".join(f"{dataset} observable | {dataset} status" for dataset in real_ids) + " | Real challenge telemetry | Strength |")
-    add("| --- | --- | --- | --- |" + " --- | --- |" * len(real_ids) + " --- | --- |")
+    views = real_views(ctx)
+    add("| Detector | Family | Fixture | Honest twin | " + " | ".join(f"{dataset} observable | {dataset} status" for dataset in views) + " | Real challenge telemetry | Strength |")
+    add("| --- | --- | --- | --- |" + " --- | --- |" * len(views) + " --- | --- |")
     for row in coverage_matrix(ctx):
-        cells = [f"{_yes(row[dataset]['observable'])} | {row[dataset]['status']}" for dataset in real_ids]
-        strength_cells = "; ".join(f"{dataset}: {row[dataset]['strength']}" for dataset in real_ids)
+        cells = [f"{_yes(row[dataset]['observable'])} | {row[dataset]['status']}" for dataset in views]
+        strength_cells = "; ".join(f"{dataset}: {row[dataset]['strength']}" for dataset in views)
         challenge_cell = {True: "yes", False: "**none**", None: "-"}[row["real_challenge_telemetry"]]
         add(f"| {row['detector']} | {row['family']} | {_yes(bool(row['fixture']) and row['fixture_fires'])} | {_yes(bool(row['twins']) and row['twins_quiet'])} | " + " | ".join(cells) + f" | {challenge_cell} | {strength_cells} |")
     add("")
-    add("No real dataset here carries external provider records either, so external evidence has no real-world measurement.")
+    add(f"**[{TAGS['unmeasured']}]** No real dataset here carries external provider records either, so external evidence has no real-world measurement.")
     add("")
     add("## 6. Strength and stability")
     add("")
-    add("Offline research, never used by the scorer: the label-conditioned evidence ratio fitted on the development half, checked on the untouched evaluation half. Only detectors with an estimate are listed.")
+    add("Offline research, never used by the scorer: the label-conditioned evidence ratio fitted on the development half, checked on the untouched evaluation half. For a dataset with draws, see each detector across the draws in section 4; a single draw's estimate is never quoted alone.")
     add("")
     add("| Dataset | Detector | Ratio (95% credible) | Stability |")
     add("| --- | --- | --- | --- |")
-    from .strength import _ratio as strength_ratio
-
-    for dataset_id_, estimated in ctx["strengths"].items():
-        for entry in estimated["detectors"]:
+    for dataset in ctx["current"]:
+        for entry in ctx["strengths"].get(dataset, {}).get("detectors", []):
             if "evidence_ratio" in entry.get("development", {}):
-                add(f"| {dataset_id_} | {entry['kind']} | {strength_ratio(entry['development']['evidence_ratio'])} | {entry['evaluation']['stability']} |")
+                add(f"| {dataset} | {entry['kind']} | {strength_ratio(entry['development']['evidence_ratio'])} | {entry['evaluation']['stability']} |")
+        if dataset in ctx["draws"]:
+            across = ctx["draws"][dataset]["across"]
+            for kind, cell in sorted(across["strength"].items(), key=lambda item: NATIVE_KINDS.index(item[0])):
+                stability = ", ".join(f"{name} in {count}" for name, count in cell["stability"].items())
+                add(f"| {dataset} | {kind} | median {cell['ratio']['median']:.3g}, from {cell['ratio']['min']:.3g} to {cell['ratio']['max']:.3g} over {across['draws']} draws | {stability} of {across['draws']} |")
     add("")
     add("## 7. Challenge qualification")
     add("")
-    add("Controlled synthetic challenge qualification, not real-world calibration: event-level stand-ins for cheats that know challenges exist, against four challenges in one match.")
+    add(f"**[{TAGS['controlled_fixture']}]** Controlled synthetic challenge qualification, not real-world calibration: event-level stand-ins for cheats that know challenges exist, against four challenges in one match.")
     add("")
     add("| Scenario | Expected | Observed | Findings | Decision |")
     add("| --- | --- | --- | ---: | --- |")
@@ -1232,7 +1898,7 @@ def render_report(ctx: Mapping) -> str:
     auth = semantic.get("auth", {})
     add("## 8. External-authentication protocol qualification")
     add("")
-    add("This proves what fpsdet does with a provider's record under each signature state. It says nothing about any vendor detector's accuracy.")
+    add(f"**[{TAGS['controlled_fixture']}]** This proves what fpsdet does with a provider's record under each signature state. It says nothing about any vendor detector's accuracy.")
     add("")
     if auth.get("status") != "run":
         add("Not run here: the optional cryptography package was not installed.")
@@ -1244,7 +1910,7 @@ def render_report(ctx: Mapping) -> str:
     add("")
     add("## 9. Capability matrix")
     add("")
-    add("What each technique looks like to the server, what fpsdet claims about it, and the evidence behind the claim, worked out from the fixtures, scenarios and real datasets, not declared. Controlled-only means no public dataset here can show it.")
+    add("What each technique looks like to the server, what fpsdet claims about it, and the evidence behind the claim, worked out from the fixtures, scenarios and this release's datasets, not declared. Real-data evidence says in how many baseline draws it held. Controlled-only means no public dataset here can show it.")
     add("")
     add("| Technique | Claim | Evidence | Detectors | Needs |")
     add("| --- | --- | --- | --- | --- |")
@@ -1254,14 +1920,51 @@ def render_report(ctx: Mapping) -> str:
     add("")
     add("## 10. Known blind spots")
     add("")
-    for line in limitations(ctx):
-        add(f"- {line}")
+    for claim in found_claims["claims"]:
+        if claim["id"].startswith("limit."):
+            add(_tagged(claim))
     add("")
     add("## 11. Reproduce it")
     add("")
     for line in found_definition["reproduce"]:
         add(line)
     add("")
+    add("**Formats.** Everything above is plain JSON with a declared format:")
+    add("")
+    for name, text in FORMATS.items():
+        add(f"- `{name}`: {text}.")
+    add("")
+    add("## 12. The historical record")
+    add("")
+    add(f"**[{TAGS['historical_real_data']}]** Superseded runs, kept so that what was published can still be checked. Their artifacts verify by digest; none of their numbers is this release's result.")
+    add("")
+    for dataset in ctx["historical"]:
+        found = manifests[dataset]
+        successor = next(entry["superseded_by"] for entry in found_definition["datasets"] if entry["id"] == dataset)
+        why = manifests[successor].get("supersedes", {}).get("why", "")
+        add(f"- `{dataset}`, superseded by `{successor}`: {why}")
+    add("")
+    for dataset, draws in ctx["sensitivity_v1"].items():
+        evaluation = ctx["evaluations"][dataset]
+        names = {group["label"]: group["name"] for group in evaluation["dataset"]["labels"]}
+        positive, comparison = evaluation["statistics"]["population"]["positive"], evaluation["statistics"]["population"]["primary_comparison"]
+        add(f"**How much `{dataset}` depended on its baseline draw.** {draws['question']} The curator's draw is the published one; each other draw uses a public alternative key ({draws['key_recipe']}). Only the draw changes.")
+        add("")
+        kinds = sorted({kind for row in draws["draws"] for kind in row["summary"]["strength"]}, key=NATIVE_KINDS.index)
+        add(f"| Draw | {_md(names[positive])} flagged | {_md(names[comparison])} flagged | Queue ({_md(names[positive])}) | Ratio | Equal evidence, {_md(names[comparison])} | " + " | ".join(f"{kind} strength" for kind in kinds) + " |")
+        add("| --- | --- | --- | --- | ---: | ---: |" + " --- |" * len(kinds))
+        for row in draws["draws"]:
+            summary = row["summary"]
+            strength_cells = [f"{summary['strength'][kind]['ratio']:.3g} ({summary['strength'][kind]['stability']})" if kind in summary["strength"] else "-" for kind in kinds]
+            equal = summary["equal_evidence_comparison_rate"]
+            label = "curator (published, one draw)" if row["draw"] == "curator" else row["draw"]
+            add(f"| {label} | {summary['positive']['flagged']}/{summary['positive']['compared']} = {summary['positive']['rate']:.1%} | {summary['comparison']['flagged']}/{summary['comparison']['compared']:,} = {summary['comparison']['rate']:.1%} | {summary['queue']['size']} ({summary['queue']['positive']}) | {summary['ratio']:.1f}x | {'-' if equal is None else f'{equal:.1%}'} | " + " | ".join(strength_cells) + " |")
+        ratios = [row["summary"]["ratio"] for row in draws["draws"]]
+        published_ratio = next(row for row in draws["draws"] if row["draw"] == "curator")["summary"]["ratio"]
+        rank = sorted(ratios, reverse=True).index(published_ratio) + 1
+        add("")
+        add(f"The published draw's ratio, {published_ratio:.1f}x, ranks {rank} of {len(ratios)} draws (from {min(ratios):.1f}x to {max(ratios):.1f}x): one draw of a random split, not a fixed property of fpsdet, and not this release's result.")
+        add("")
     add("## Third-party systems")
     add("")
     for line in found_definition["third_party"]:
@@ -1269,9 +1972,19 @@ def render_report(ctx: Mapping) -> str:
     add("")
     add("## Provenance")
     add("")
-    for dataset_id_, result in results.items():
+    for dataset in [*ctx["current"], *ctx["historical"]]:
+        if dataset in ctx["draw_results"]:
+            draws = ctx["draws"].get(dataset, {})
+            add(f"- `{dataset}`: spread `{draws.get('digest')}` over {len(ctx['draw_results'][dataset])} draws, manifest `{draws.get('manifest')}`")
+            for draw, result in ctx["draw_results"][dataset].items():
+                chain = result["chain"]
+                add(f"  - draw {draw}: result `{result['digest']}`; inputs: events `{chain['inputs']['events']['sha256']}`, labels `{chain['inputs']['labels']['digest']}`, cohort `{chain['inputs']['cohort']['digest']}`; evaluation `{chain['evaluation']['digest']}`; strength `{chain['strength']['digest']}`")
+            continue
+        result = ctx["results"].get(dataset)
+        if not result:
+            continue
         chain = result["chain"]
-        add(f"- `{dataset_id_}`: result `{result['digest']}`, manifest `{chain['manifest']}`, detector `{chain.get('detector')}`")
+        add(f"- `{dataset}`: result `{result['digest']}`, manifest `{chain['manifest']}`, detector `{chain.get('detector')}`")
         if "evaluation" in chain:
             add(f"  - inputs: events `{chain['inputs']['events']['sha256']}`, labels `{chain['inputs']['labels']['digest']}`, cohort `{chain['inputs']['cohort']['digest']}`; packets `{chain['scored']['packets']}`; evaluation `{chain['evaluation']['digest']}`; strength `{chain['strength']['digest']}`; split `{chain['split']['digest']}`")
         environment_ = result.get("environment", {})
@@ -1279,3 +1992,57 @@ def render_report(ctx: Mapping) -> str:
         add(f"  - pinned on Python {environment_.get('python')} ({environment_.get('platform')}, {environment_.get('machine')}); timings, not part of the identity: {timing}")
     add("")
     return "\n".join(out)
+
+
+def release(ctx: Mapping, report: str, found_claims: Mapping, root: Path = ROOT) -> dict:
+    """fpsdet.benchmark-release/1: FPSDET Benchmark v1 as one record. It names every dataset version, the
+    pinned expectations, each spread, the capability matrix, the claims and the report, by digest."""
+    found_definition = ctx["definition"]
+    datasets = []
+    for entry in found_definition["datasets"]:
+        found = ctx["manifests"][entry["id"]]
+        item = {"id": found["id"], "role": "historical" if entry.get("historical") else "release", "class": found["class"],
+                "manifest": {"path": entry["manifest"], "digest": manifest_digest(found)},
+                "archival": found_definition["archival"][found["id"]]}
+        if entry.get("historical"):
+            item["superseded_by"] = entry["superseded_by"]
+        if "draws" in found:
+            item["draws"] = {"ids": found["draws"]["ids"], "spread": {"path": found["artifacts"]["sensitivity"], "digest": ctx["draws"].get(found["id"], {}).get("digest")},
+                             "results": {str(draw): result["digest"] for draw, result in ctx["draw_results"][found["id"]].items()}}
+        elif found["id"] in ctx["results"]:
+            item["result"] = {"path": found["artifacts"]["result"], "digest": ctx["results"][found["id"]]["digest"]}
+        datasets.append(item)
+    file_ = lambda path: {"path": path, "sha256": sha256_file(root / path)}
+    body = {
+        "format": RELEASE,
+        "title": RELEASE_TITLE,
+        "benchmark": found_definition["format"],
+        "version_note": found_definition["version_note"],
+        "release": {"synthetic": "synthetic-v1", "tf2": ALIASES["tf2"], "cs2": ALIASES["cs2"]},
+        "datasets": datasets,
+        "expected": file_(found_definition["expected"]),
+        "capabilities": file_(found_definition["capabilities"]),
+        "claims": {"path": found_definition["claims"], "digest": found_claims["digest"]},
+        "report": {"path": found_definition["report"], "sha256": "sha256:" + hashlib.sha256(report.encode("utf-8")).hexdigest()},
+        "historical_sensitivity": {name: {"path": path, "digest": ctx["sensitivity_v1"][name]["digest"]} for name, path in found_definition.get("sensitivity", {}).items() if name in ctx["sensitivity_v1"]},
+    }
+    body = json.loads(canonical_json(body))
+    body["digest"] = digest("release", body)
+    return body
+
+
+def generated(root: Path = ROOT) -> dict[Path, str]:
+    """Every file the report command writes, with its content: the report, the claims, the release manifest
+    and the README with its generated blocks."""
+    ctx = context(root)
+    found_definition = ctx["definition"]
+    report = render_report(ctx)
+    found_claims = claims(ctx)
+    readme = apply_readme((root / "README.md").read_text(encoding="utf-8"), readme_blocks(ctx))
+    out = {
+        root / found_definition["report"]: report,
+        root / found_definition["claims"]: json.dumps(found_claims, indent=1, ensure_ascii=False) + "\n",
+        root / "README.md": readme,
+    }
+    out[root / found_definition["release"]] = json.dumps(release(ctx, report, found_claims, root), indent=1, ensure_ascii=False) + "\n"
+    return out

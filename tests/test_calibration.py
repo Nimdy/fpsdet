@@ -59,7 +59,7 @@ class LabelAuditTest(unittest.TestCase):
                       "| Banned for cheating (189 with aimed shots) | 3 | 48 | 131 | 7 | 27% |", "| Never banned (1,746) | 0 | 30 | 1,575 | 141 | 1.7% |",
                       "| Banned for something else (821) | 0 | 16 | 729 | 76 | 1.9% |"):
             self.assertIn(claim, tf2)
-        self.assertIn("131 of 189 banned cheaters still looked clean", (ROOT / "README.md").read_text(encoding="utf-8"))
+        self.assertIn("in the historical published TF2 run (one baseline draw), 131 of 189 banned cheaters still looked clean", (ROOT / "README.md").read_text(encoding="utf-8"))
 
     def test_the_cs2_labels_and_results(self):
         rows = desk("cs2")
@@ -504,14 +504,17 @@ class PublishedEvaluationTest(unittest.TestCase):
             self.assertEqual(cell["scored"], cell["evaluated"])
             self.assertIn(f"| {title} | {cell['scored']} | {cell['review_or_watch']['rate']:.1%} | {cell['review']} |", tf2)
         self.assertEqual(round(equal["cheater"]["review_or_watch"]["rate"] / equal["not banned"]["review_or_watch"]["rate"]), 14)  # "about 14 times"
+        # These are the historical published run's (tf2-rgl-v1, one baseline draw). The top-level README quotes
+        # TF2 only from the benchmark's nine draws, and this run's numbers only where it says they are historical.
         readme = text("README.md")
-        self.assertIn("With the same evidence per player, it flagged 37.5% of banned cheaters and 2.6% of never-banned players.", readme)
+        for number in ("37.5%", "44 of 182", "97 of 2,764"):
+            self.assertNotIn(number, readme)
+        self.assertIn("in the historical published TF2 run (one baseline draw), 131 of 189 banned cheaters still looked clean", readme)
         rank = detector(evaluation("tf2"), "rank_tail")["rates"]
-        self.assertIn(f"it fired on 44 of 182 RGL cheating-ban labelled accounts ({rank['cheater']['rate']:.1%}, 18.5–30.9%) and 28 of 1,605 never-banned ones ({rank['not banned']['rate']:.1%}, 1.2–2.5%)", readme)
         self.assertEqual(plain(rank["cheater"]), "44 of 182 (24.2%, 18.5–30.9%)")
         self.assertEqual(plain(rank["not banned"]), "28 of 1,605 (1.7%, 1.2–2.5%)")
+        self.assertIn("> **Historical record.**", tf2)
         unseen = [entry for entry in stats["detectors"] if entry["status"] == "not_observable"]
-        self.assertIn(f"{len(unseen)} of {len(stats['detectors'])} detectors cannot be observed", readme)
         for kind, name, ci in (("rank_tail", "rank tail (above the rank's range)", True), ("accuracy", "accuracy past every human", False), ("headshot_rate", "headshot rate past every human", False)):
             rates = detector(evaluation("tf2"), kind)["rates"]
             first = plain(rates["cheater"], ci)
