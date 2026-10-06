@@ -1,5 +1,78 @@
 # Authenticated external evidence
 
+## What a signature means, and what it does not
+
+An external record says it comes from a provider. A signature lets fpsdet check that. The provider signs the exact claim with its private key, and fpsdet verifies it with the public key the operator registered for that provider.
+
+`verified` means one thing: the registered, unrevoked key signed this exact claim. It does not mean the claim is true. It does not mean the provider is right, calibrated or independent of anyone else. A verified signature makes no record count for more than it did before: every external record is still a watch at most ([external-evidence.md](external-evidence.md)). What it changes is that fpsdet can now tell "a record that says it is from provider X" from "provider X's key signed this". Any later rule that wants to count sources needs that distinction first.
+
+## Algorithm and dependency
+
+Ed25519 (RFC 8032): a modern, standard signature scheme with small keys and deterministic signatures. Python's standard library has no Ed25519, and fpsdet does not implement cryptography itself, so verification uses the `cryptography` package (PyCA), version 42 or later.
+
+- **Optional.** It is the `auth` extra: `pip install 'fpsdet[auth]'`. Everything else in fpsdet stays standard library only, and runs without it. Only checking signatures needs it.
+- **Why this package.** It is the most widely deployed Python cryptography library, maintained by the Python Cryptographic Authority, with prebuilt wheels for every supported Python and platform. It is often already installed, and often available as a system package. The floor is a currently supported release line.
+- **What it costs.** A compiled wheel of a few megabytes. Its security fixes become fpsdet's to pick up; keep it updated like any other dependency of the scoring host.
+- **Without it.** A signed record read without a registry is reported as `not_checked`. Asking fpsdet to check signatures, by giving it a registry, without the package installed is an error that says how to install it. fpsdet never treats an unchecked signature as verified.
+- **Not HMAC.** A shared-secret MAC would mean the operator holds the provider's signing secret, and could then forge the provider's records. With Ed25519 the operator holds only the public key.
+
+## The registry: `fpsdet.provider-registry/1`
+
+The operator's trust configuration: which providers it trusts, by which keys. Public keys only.
+
+```json
+{"format": "fpsdet.provider-registry/1",
+ "providers": {
+   "example-integrity": {"keys": [
+     {"key_id": "2026-01", "algorithm": "ed25519", "public_key": "<base64, 32 bytes>", "status": "active"},
+     {"key_id": "2025-07", "algorithm": "ed25519", "public_key": "<base64, 32 bytes>", "status": "retired"},
+     {"key_id": "2024-11", "algorithm": "ed25519", "public_key": "<base64, 32 bytes>", "status": "revoked"}]}}}
+```
+
+It is read strictly: only these fields, a known algorithm and status, a provider id in the external format's charset, a key id of letters, digits, `.`, `_` and `-`, and a public key that decodes to a valid 32-byte Ed25519 key. A key listed twice is refused, and so is any field that looks like private material (`private_key`, `seed`, `secret`), loudly. The file is at most 256 KB.
+
+Its identity is SHA-256 over `fpsdet.provider-registry/1`, a zero byte, and the canonical JSON of every key (provider, key id, algorithm, public key, status), sorted by provider and key id. Order in the file does not show. Adding, removing or changing a key, or changing its status, moves it. `examples/external/registry.json` is the fictional `example-integrity` provider's registry; its private seeds are committed only in `tests/fixtures/auth-test-keys.json`, marked as public test keys.
+
+**A record never brings its own key.** The registry comes only from a file the operator names. A signed record that carries a key, a certificate, or any field beyond the signature's four is refused.
+
+## What is signed: `fpsdet.external-signature/1`
+
+```text
+signed bytes = "fpsdet.external-signature/1" || 0x00 || canonical JSON of the claim
+```
+
+Canonical JSON is sorted keys, no spaces, UTF-8, with no NaN or Infinity: the same canonical form fpsdet uses for every identity. The prefix is used for nothing else, so a signature made for this cannot be valid for anything else, and a provider's signature over the bare JSON does not verify. A signed record is an envelope:
+
+```json
+{"format": "fpsdet.external-signed/1",
+ "claim": {"format": "fpsdet.external/1", "provider": "example-integrity", "source_class": "client_integrity", "...": "..."},
+ "signature": {"algorithm": "ed25519", "provider": "example-integrity", "key_id": "2026-01", "value": "<base64, 64 bytes>"}}
+```
+
+`tests/test_auth.py` pins a test vector: the signed bytes' SHA-256, and the exact signature the public test key makes over a fixed claim.
+
+## Authentication states
+
+| State | Meaning | What happens to the record |
+| --- | --- | --- |
+| `unsigned` | No signature | Read as an unauthenticated claim, as before |
+| `not_checked` | Signed, and the run was given no registry | Read as an unauthenticated claim |
+| `unknown_key` | Signed with a key the registry does not have | Read as an unauthenticated claim; never authenticated |
+| `verified` | The registered, unrevoked key signed this exact claim | Read, and marked verified, with the key |
+| `invalid` | The signature does not verify, or names another provider than the record is read as | Refused, never evidence |
+| `revoked_key` | Signed with a key the operator revoked, valid or not | Refused, never evidence |
+| `unsupported_algorithm` | Signed with an algorithm fpsdet does not verify | Refused, never evidence |
+
+A malformed envelope or signature is refused like any malformed line.
+
+## Rotation and revocation
+
+- **`active`**: the provider signs with it now. Its signatures verify.
+- **`retired`**: the provider no longer signs with it. What it signed before still verifies, and says `key_status: retired`. A provider rotates by adding a new key as `active` and moving the old one to `retired`; its identity does not change.
+- **`revoked`**: the operator no longer trusts anything it signed, for example after a compromise. A record signed with it is refused, even if the signature is mathematically valid. Without a signed time there is no way to tell what it signed before the compromise from what was signed after.
+- **No validity windows.** A record's own `observed_at` is optional, and nothing says it was signed at that time, so fpsdet does not pretend to check key expiry against it. Revocation is the operator's lever.
+- **No PKI.** No certificates, chains or online checks. The registry is the trust anchor, and changing trust means changing the registry, which moves its digest.
+
 ## Before authentication: what fpsdet trusted
 
 This is the external trust model at `58f1f50`, before signatures. `tests/test_auth.py` (`CurrentTrustModelTest`) pins it.

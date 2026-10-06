@@ -1,0 +1,24 @@
+{
+ "warning": "PUBLIC TEST KEYS. These private seeds are committed on purpose so tests can sign records. They are not secret, belong to a fictional provider, and must never be trusted outside fpsdet's tests and examples.",
+ "provider": "example-integrity",
+ "keys": [
+  {
+   "key_id": "2026-01",
+   "status": "active",
+   "private_seed": "4c1fa6d821907ba0c7a9ee20facb8e742c325f29fc6a6c8755709d46569ff295",
+   "public_key": "Pr43ETqtrWbP6lTG1pYuoiOiHQISa2UI+a+1lwzBt0c="
+  },
+  {
+   "key_id": "2025-07",
+   "status": "retired",
+   "private_seed": "854ddc04914756297a6ef492c6a9e4a396dcc6a3dae91b6af63889ecb73f8c05",
+   "public_key": "vu+60fxKz8CapmWSo3bzeF0r8CIeuvxI7zxwMUFq4X0="
+  },
+  {
+   "key_id": "2024-11",
+   "status": "revoked",
+   "private_seed": "dcf08abcae6abd7ad7f1b9fe032e61b869e9e3415a724ca7499b409cd5fc077c",
+   "public_key": "/iZsLbwAxfeyFsBZ58przu3S/xfSWlok6iD/WYdXj5k="
+  }
+ ]
+}

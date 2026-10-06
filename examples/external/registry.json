@@ -1,0 +1,27 @@
+{
+  "format": "fpsdet.provider-registry/1",
+  "providers": {
+    "example-integrity": {
+      "keys": [
+        {
+          "key_id": "2026-01",
+          "algorithm": "ed25519",
+          "public_key": "Pr43ETqtrWbP6lTG1pYuoiOiHQISa2UI+a+1lwzBt0c=",
+          "status": "active"
+        },
+        {
+          "key_id": "2025-07",
+          "algorithm": "ed25519",
+          "public_key": "vu+60fxKz8CapmWSo3bzeF0r8CIeuvxI7zxwMUFq4X0=",
+          "status": "retired"
+        },
+        {
+          "key_id": "2024-11",
+          "algorithm": "ed25519",
+          "public_key": "/iZsLbwAxfeyFsBZ58przu3S/xfSWlok6iD/WYdXj5k=",
+          "status": "revoked"
+        }
+      ]
+    }
+  }
+}

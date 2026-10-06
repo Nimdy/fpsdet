@@ -8,6 +8,10 @@ requires-python = ">=3.11"
 authors = [{ name = "ZeroBandwidth" }]
 dependencies = []
 
+[project.optional-dependencies]
+# Only checking external records' Ed25519 signatures needs it. Everything else is standard library.
+auth = ["cryptography>=42"]
+
 [project.scripts]
 fpsdet = "fpsdet.cli:main"
 
