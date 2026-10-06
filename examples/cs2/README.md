@@ -137,6 +137,8 @@ On real CS2 play, fpsdet framed no one, said "not enough data" when one match wa
 - **Too few to measure:** distance and shots through walls could run on only 11 hand-labelled cheaters each.
 - **Not observable here:** 15 detectors, reported that way, never as 0%.
 
+An offline research layer, [strength.md](strength.md), fits label-conditioned evidence ratios on a frozen half of these matches and checks them on the other half. It changes nothing here, and the measurement above stays the result ([docs/calibration.md](../../docs/calibration.md#evidence-strength-results)).
+
 ## Limits
 
 - **One match per player.** CS2CD pseudonymises each match separately, so nobody can be followed across matches. A player fires around 70 shots a match, and fpsdet waits for 40 shots on a weapon class (and 25 hits for headshot rate) before it scores aim. Many players are held for too little data. A studio scores a week.

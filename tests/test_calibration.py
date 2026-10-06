@@ -462,6 +462,13 @@ class PublishedEvaluationTest(unittest.TestCase):
             self.assertTrue(artifact["published"]["reproduced"])
             self.assertEqual(cal.check_census(artifact["dataset"]["telemetry"], artifact["telemetry"]["census"]), [])
             self.assertEqual(artifact["inputs"]["packets_verified"], artifact["inputs"]["cases"])
+            # P9: every denominator comes from the case's own detector eligibility, none inferred.
+            self.assertEqual(artifact["schema"], "fpsdet.evaluation/2")
+            self.assertEqual(artifact["inputs"]["eligibility"], {"recorded": artifact["inputs"]["cases"], "inferred": 0})
+            for entry in artifact["statistics"]["detectors"]:
+                for cell in (entry.get("coverage") or {}).values():
+                    self.assertNotIn("not_recorded", cell["by_status"])
+                    self.assertEqual(cell["players"], cell["evaluated"] + sum(cell["by_status"].values()))
             self.assertEqual(artifact["inputs"]["profile"], profile_digest(load_profile(ROOT / "examples" / name / f"{name}.json")))
 
     def test_rows_match_the_desk_player_for_player(self):

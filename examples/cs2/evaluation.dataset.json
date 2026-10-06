@@ -5,6 +5,7 @@
   "source": "CS2CD: 795 CS2 matchmaking matches parsed from server-recorded demos, with the dataset authors' cheater labels, converted on 2026-10-04 by examples/cs2/cs2cd.py. Not affiliated with Valve.",
   "unit": "one player in one match. Each match is pseudonymised on its own, so a player cannot be followed across matches.",
   "match_level": "the same as the player level: every player is one match.",
+  "split_unit": "match",
   "labels": [
     {
       "label": "cheater",

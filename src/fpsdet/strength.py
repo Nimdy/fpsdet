@@ -157,10 +157,13 @@ def evidence_ratio(positive: Mapping, comparison: Mapping) -> dict:
     credible set of at least 95%. Finite whenever the prior is proper, fires or not."""
     p_lo, p_hi = positive["for_ratio"]
     c_lo, c_hi = comparison["for_ratio"]
+    empty = [name for name, group in (("positive", positive), ("comparison", comparison)) if group["fires"] == 0]
     return {
         "ratio": _g(positive["mean"] / comparison["mean"]),
         "credible95": [_g(p_lo / c_hi), _g(p_hi / c_lo)],
-        "prior_dominated": positive["fires"] == 0 or comparison["fires"] == 0,
+        "prior_dominated": bool(empty),
+        # Which groups had no fires. With none in either, the ratio is the prior alone: (n_comparison + 1) / (n_positive + 1).
+        "no_fires": "both" if len(empty) == 2 else (empty[0] if empty else None),
     }
 
 
@@ -409,7 +412,11 @@ def _ratio(cell: Mapping | None) -> str:
     if not cell:
         return "-"
     low, high = cell["credible95"]
-    flag = " (a group had no fires: the prior sets the far end)" if cell["prior_dominated"] else ""
+    flag = {
+        "both": " (no fires in either group: the prior alone, not evidence)",
+        "positive": " (no positive fires: the prior sets the low end)",
+        "comparison": " (no comparison fires: the prior sets the far end)",
+    }.get(cell.get("no_fires") or "", "")
     return f"{cell['ratio']:.3g} ({low:.3g}–{high:.3g}){flag}"
 
 

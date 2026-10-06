@@ -5,6 +5,7 @@
   "source": "Server-logged league matches kept by logs.tf, and RGL's public ban list, fetched on 2026-10-04 and converted by examples/tf2/tf2logs.py. Not affiliated with Valve, logs.tf or RGL.",
   "unit": "an RGL account, over at most its 20 latest team matches (before the ban date, for a banned account). Rates are per account.",
   "match_level": "not meaningful here: a finding rests on per-match totals added up over a player's matches, and a ban labels an account, not a match.",
+  "split_unit": "player",
   "labels": [
     {
       "label": "cheater",

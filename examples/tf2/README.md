@@ -101,6 +101,8 @@ Most never-banned players appear in only a few of these matches, and fewer match
 
 Kills per minute and headshot kills per minute fired too rarely to measure, so they are descriptive only. The other 17 detectors are not observable on per-match totals: no timing, positions, view angles, movement or visibility. They are reported that way, never as 0%.
 
+An offline research layer, [strength.md](strength.md), fits label-conditioned evidence ratios on a frozen half of these accounts and checks them on the other half. It changes nothing here, and the measurement above stays the result ([docs/calibration.md](../../docs/calibration.md#evidence-strength-results)).
+
 ## Limits
 
 - **Per-match totals, not single shots.** The log has each weapon's shots and hits for the match, so fpsdet sees the right counts per match but no timing, positions or view angles. There are no gear rules, distance or information checks here.

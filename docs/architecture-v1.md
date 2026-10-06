@@ -49,6 +49,8 @@ These hold before, during and after the work below. A change that breaks one sto
 | AI | `ai_triage.py` | 135 | Redaction and one chat call per case a person might open. |
 | View | `ops.py` | 423 | The operations payload (`ops.json`) and merging nightly runs. |
 | View | `opsview.py`, `board.py`, `pages.py` | 992, 2,024, 53 | The dashboard, the review desk (Python, HTML, CSS and JS in one file), the public site. |
+| Measure | `strength.py` | — | *Added in P9.* `fpsdet evaluate strength`: offline label-conditioned evidence ratios, fitted on a frozen development half and checked on the evaluation half (`fpsdet.strength/1`). Research only; never imported by detection. See [calibration.md](calibration.md#evidence-strength-offline-research). |
+| Synthetic | `fixtures.py` | — | *Added in P9.* Controlled fixtures beside the planted demo: plants and honest twins for detectors the demo never planted, and a probe for each eligibility status. |
 | Measure | `calibration.py` | — | *Added in P8.* `fpsdet evaluate`: each detector's firing rate in a labelled run's groups, among the players it could run on, with intervals, coverage, overlap and strata (`fpsdet.evaluation/1`). Never imported by detection. See [calibration.md](calibration.md). |
 | Synthetic | `synthetic.py`, `week.py` | 796, 526 | The 32 planted players with their expected decisions, and the 400-player synthetic week. |
 | Real data | `examples/cs2/cs2cd.py`, `examples/tf2/tf2logs.py` | 444, 510 | Converters from CS2CD and logs.tf to events, label joins, reports, desk pages. |
@@ -428,6 +430,8 @@ Each box is a module with one job and a test file of its own. The decision stays
 | The committed desk is what the scorer writes | CI `git diff --exit-code demo/board.html` |
 | Real TF2 and CS2 results do not move | `RealDataContractTest` on the committed desks; `tools/regress.py diff` on a local rerun |
 | Published numbers follow from the evaluation | `PublishedEvaluationTest` (P8): each committed evaluation verifies, its rows match the desk player for player, and the README, example and docs numbers are recomputed from it |
+| Every finding names an eligible unit | `packet/5` (P9): `verify_packet` runs `eligibility_problems`; `EveryDetectorEveryStatusTest` shows every detector eligible and firing, eligible and quiet, and in every status its rules allow |
+| Strength never reaches scoring | `FirewallTest` (P9): no detection module imports `fpsdet.strength`, `fpsdet score` has no strength option, and scores are identical with a strength file present |
 | Evaluation never reaches scoring | `SplitTest` (P8): no detection module imports `fpsdet.calibration`; `HarnessTest`: an evaluation changes no case, decision, seal or packet |
 | `automated_action` stays `none` | `GoldenPlantedTest`, `GoldenWeekTest` |
 | Reports never change evidence | `RecordedFindingsTest.test_reports_change_no_evidence` (P1) |

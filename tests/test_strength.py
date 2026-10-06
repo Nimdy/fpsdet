@@ -10,6 +10,7 @@ import math
 import os
 import tempfile
 import unittest
+from collections import Counter
 from functools import lru_cache
 from pathlib import Path
 
@@ -64,6 +65,11 @@ class EstimatorTest(unittest.TestCase):
             self.assertNotIn("Infinity", text)
             ratio = fitted["evidence_ratio"]
             self.assertTrue(all(math.isfinite(value) and value > 0 for value in (ratio["ratio"], *ratio["credible95"])))
+        self.assertEqual(st.fit(counts(0, 53, 0, 155))["evidence_ratio"]["no_fires"], "both")
+        # With no fires anywhere, the ratio is the prior alone: (n_comparison + 1) / (n_positive + 1).
+        self.assertAlmostEqual(st.fit(counts(0, 53, 0, 155))["evidence_ratio"]["ratio"], 156 / 54, places=5)
+        self.assertEqual(st.fit(counts(11, 182, 0, 1605))["evidence_ratio"]["no_fires"], "comparison")
+        self.assertIsNone(st.fit(counts(44, 182, 28, 1605))["evidence_ratio"]["no_fires"])
 
     def test_the_credible_set_comes_from_two_intervals_that_hold_together_with_95_percent(self):
         self.assertAlmostEqual(st.PER_RATE ** 2, 0.95, places=12)
@@ -247,6 +253,60 @@ class FirewallTest(unittest.TestCase):
         actions = {action.dest: action for action in parser._subparsers._group_actions}
         score = actions["cmd"].choices["score"]
         self.assertFalse([option for action in score._actions for option in action.option_strings if "strength" in option])
+
+
+def published(name: str, kind: str) -> dict:
+    return json.loads((ROOT / "examples" / name / f"{kind}.json").read_text(encoding="utf-8"))
+
+
+class PublishedStrengthTest(unittest.TestCase):
+    """The committed strength files: each verifies against its committed evaluation, and its report is current."""
+
+    def test_each_verifies_against_its_evaluation(self):
+        for name in ("tf2", "cs2"):
+            artifact, evaluation = published(name, "strength"), published(name, "evaluation")
+            self.assertEqual(st.verify_strength(artifact, evaluation), [], name)
+            self.assertEqual((ROOT / "examples" / name / "strength.md").read_text(encoding="utf-8"), st.render_markdown(artifact), name)
+            self.assertEqual(artifact["evaluation"]["digest"], evaluation["digest"])
+            self.assertEqual(artifact["inputs"]["detector"], evaluation["inputs"]["detector"])
+            self.assertEqual(artifact["split"]["unit"], {"tf2": "player", "cs2": "match"}[name])
+            halves = artifact["split"]["composition"]
+            for label, total in Counter(row["label"] for row in evaluation["rows"]).items():
+                self.assertEqual(halves["development"].get(label, 0) + halves["evaluation"].get(label, 0), total)
+
+    def test_what_real_data_cannot_calibrate_is_marked(self):
+        for name in ("tf2", "cs2"):
+            artifact, evaluation = published(name, "strength"), published(name, "evaluation")
+            for entry in artifact["detectors"]:
+                observable = evaluation["observability"][entry["kind"]]["observable"]
+                if entry["family"] == "challenge" or not observable:
+                    self.assertEqual(entry["status"], "not_calibrated", entry["kind"])
+                    self.assertNotIn("development", entry)
+                for key in ("hidden", "quiet_aim", "wire", "occluded_motion_replay"):
+                    self.assertEqual(next(e for e in artifact["detectors"] if e["kind"] == key)["status"], "not_calibrated")
+            self.assertNotIn("Infinity", json.dumps(artifact))
+
+    def test_the_results_in_the_docs_are_the_artifacts(self):
+        doc = (ROOT / "docs" / "calibration.md").read_text(encoding="utf-8")
+        for name in ("tf2", "cs2"):
+            artifact = published(name, "strength")
+            for entry in artifact["detectors"] + artifact["families"]:
+                if "development" not in entry:
+                    continue
+                dev, ev = entry["development"], entry["evaluation"]
+                label = entry.get("kind") or f"{entry['family']} (any)"
+                row = (f"| {label} | {dev['sample']} | {st._rate(dev['positive'])} vs {st._rate(dev['comparison'])} | {st._ratio(dev.get('evidence_ratio'))} | "
+                       f"{st._observed(ev)} | {ev['stability']} | {entry['sensitivity']['reverse_split']['check']['stability']} |")
+                self.assertIn(row, doc, (name, label))
+        rank = next(entry for entry in published("tf2", "strength")["detectors"] if entry["kind"] == "rank_tail")
+        low, high = rank["development"]["evidence_ratio"]["credible95"]
+        self.assertIn(f"The 95% credible set runs from {low:.2g} to {high:.2g}", doc)
+        self.assertEqual(round(rank["development"]["evidence_ratio"]["ratio"]), 14)
+
+    def test_p8_stays_the_headline(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for phrase in ("evidence ratio", "likelihood ratio", "strength.md"):
+            self.assertNotIn(phrase, readme)
 
 
 if __name__ == "__main__":
