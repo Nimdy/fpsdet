@@ -61,7 +61,7 @@
  "metrics_added": {
   "probe_distance_m": "server: from the participant's eye to the body's chest, each tick",
   "probe_speed_mps": "server: the body's ground speed, each tick",
-  "drafted": "Two drafts were replaced after machine smoke runs, before any person played. The first compared per-tick motion at 5 deg/s: per-tick jitter hid the controlled follower's motion, and a still player's probe was still too, since the challenge replays the player's own motion. The second compared 250 ms motion as seen from the eye: a pre-aiming stand-in that strafed while holding fixed spots then looked like it followed the probe, because its own movement turned its aim and the probe's direction together.",
+  "drafted": "Two drafts were replaced after machine smoke runs, before any person played. The first compared per-tick motion at 5 deg/s: per-tick jitter hid the controlled follower's motion, and a probe held inside its small sealed room barely moved at all. The second compared 250 ms motion as seen from the eye: a pre-aiming stand-in that strafed while holding fixed spots then looked like it followed the probe, because its own movement turned its aim and the probe's direction together.",
   "aim_speed_dps": "server: how fast the point the aim passes at the body's distance moved, over the last 250 ms, as an angle at that distance",
   "probe_speed_dps": "server: how fast the body moved, over the last 250 ms, as an angle at its distance",
   "co_motion_deg": "server: the angle between those two movements, over the last 250 ms",
