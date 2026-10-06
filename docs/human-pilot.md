@@ -1,6 +1,6 @@
 # The consented honest-human pilot
 
-**Status: designed, instrumented, dry-run with machines, and amended once before collection. No person has played yet, and there are no human results.** Everything below that is a number comes from machine stand-ins and says so.
+**Status: designed, instrumented, dry-run with machines, and amended twice before collection. No person has played yet, and there are no human results.** Everything below that is a number comes from machine stand-ins and says so.
 
 **The question:** when honest people play the repository's own Godot pilot ([pilot.md](pilot.md)), normally and aggressively, how often and for how long does their aim behave like challenge tracking? How close do they come to producing challenge evidence?
 
@@ -83,13 +83,19 @@ Amendment 1 adds, for analysis only:
 
 Two earlier drafts were replaced after machine smoke runs, before any person played. Per-tick motion hid the follower's tracking. Motion as seen from the eye made a strafing, pre-aiming stand-in look like it followed the probe.
 
-The primary outcome is review-grade challenge findings on honest sessions. They are counted at three levels, because one person's sessions and challenges are not independent:
+**The primary question (amendment 2):** did at least one protocol-valid honest session produce an unexplained review-grade challenge finding? The study stops on its first finding and continues past 4 participants only without one. So it is a falsification test, not a way to estimate a rate.
+
+Findings are counted at three levels, because one person's sessions and challenges are not independent:
 
 - **Participants:** the primary unit.
 - **Sessions.**
 - **Challenges.**
 
-With no finding, each level gets an exact one-sided 95% upper bound (1 − 0.05^(1/n)). With any, it gets counts and two-sided Clopper–Pearson intervals. At the target size, zero findings would bound the share at 0.31 per participant (8), 0.052 per session (56) and 0.013 per challenge (224). None of these is a false-positive rate.
+What each answer allows:
+
+- **A finding:** the finding and descriptive counts. No rate and no interval, at any level.
+- **No finding, and the planned group completed:** an exact one-sided 95% upper bound (1 − 0.05^(1/n)) at each level, labelled as following the pre-declared continuation rule. At the target size, that would be 0.31 per participant (8), 0.052 per session (56) and 0.013 per challenge (224). None of these is a false-positive rate.
+- **No finding yet, and the group incomplete:** descriptive counts only.
 
 The study stops on:
 
@@ -99,7 +105,7 @@ The study stops on:
 - a packet or graph that does not verify;
 - review-grade evidence on an honest session.
 
-A stop needs an investigation, recorded with `study.py clear-stop`, before anyone plays again. A stop for review-grade evidence on an honest session cannot be cleared: collection ends there (amendment 1).
+A stop needs an investigation, recorded with `study.py clear-stop`, before anyone plays again. A stop for review-grade evidence on a protocol-valid honest session cannot be cleared: collection ends there (amendments 1 and 2). A crossing on a session already invalid before it was scored still stops the study, but it does not answer the primary question, and that stop may be cleared.
 
 ## Amendment 1
 
@@ -126,6 +132,39 @@ Declared in [examples/human-pilot/amendment-1.json](../examples/human-pilot/amen
 - **The regression fixture:** the angle-holding case below is kept permanently as a false-positive control. Any future challenge detector must show that it is no longer review-grade, and why.
 - **The dry run stays as it is:** bound to the study code it was made with (commit `68a6fa3`) and never rewritten. Since then, only two files have changed: the server, which writes the new telemetry rows, and `study.py`.
 
+## Amendment 2
+
+Declared in [examples/human-pilot/amendment-2.json](../examples/human-pilot/amendment-2.json) on 2026-10-06, before anyone enrolled. It binds `design.json` and amendment 1 by digest. Outside review of the collection protocol found holes that could deadlock, bias or overclaim the study, and this closes them. Nothing that decides a challenge changed.
+
+- **Participants have states:** enrolled, practice passed, practice failed, withdrawn, discontinued; completed and incomplete follow from their valid sessions.
+  - At most 4 are in play until 4 have completed every mode with no finding, then at most 12.
+  - Someone who withdraws, is discontinued or fails practice frees a place for a replacement.
+- **Withdrawal:** `study.py withdraw`.
+  - **At the participant's request:** it deletes every session, the practice and the comments, and keeps only an anonymous record that someone withdrew.
+  - **Unable to continue:** it keeps their sessions and frees the place.
+  - **After publication:** the recordings are still deleted, but published totals cannot be recalled.
+- **Consent version 2** asks participants not to try to find, guess or follow the probes, adds the sixth question, and says what withdrawal after publication means. Nobody enrolled under version 1.
+- **Bindings:** enrollment records the digests of the consent notice, the design and both amendments. A session refuses to start, and the analysis refuses to run, when they differ.
+- **Before a session:** a passed practice, which now also checks that Esc releases the mouse. Sessions follow the participant's pre-registered order, and a mode is played again only when its last session did not count.
+- **Validity is fixed before scoring:**
+  - **The participant:** a sixth question asks whether they tried to find, guess or follow the probes. A yes makes the session a protocol deviation.
+  - **The operator:** declares whether the session ran as the protocol says, with a reason from a closed list: controls_failure, participant_withdrew, technical_failure, visibility_failure, audio_failure, protocol_deviation, privacy_failure.
+  - **Automatic:** some reasons follow from facts that do not depend on the score.
+  - **Never a reason:** a review-grade crossing.
+- **Privacy:** the whole session tree is scanned, operational files are deleted, and what is kept is scanned again. The same happens after practice. Any address or machine identity left in a kept file stops the study.
+- **Statistics:** the falsification question above is the headline. Intervals are gone.
+- **The motion split, exactly:** with aw and pw the aim point's and the body's movement over the last 250 ms as degrees a second at the body's distance, and co the angle between them:
+
+  | Part | Rule |
+  | --- | --- |
+  | both still | aw < 2.0 and pw < 2.0 |
+  | holding | aw < 2.0 and pw ≥ 2.0 |
+  | following | aw ≥ 2.0 and pw ≥ 2.0 and co ≤ 45.0 |
+  | otherwise | any other aw ≥ 2.0 |
+
+  Tests hold each boundary.
+- **A known confound:** probes in this arena replay a bot's route inside sealed rooms 1.2 to 2.3 m wide, and in the stress and sweep modes that bot stands still, so probes here are often near-still. A finding may say as much about this placement as about the challenge type, and the next phase must separate the two.
+
 ## Running it
 
 Follow the operator's checklist in [examples/human-pilot/README.md](../examples/human-pilot/README.md):
@@ -139,7 +178,7 @@ Each session:
 
 - plans with the real planner;
 - runs the study scene (`res://study.tscn` in the P12 project; P12's own files are untouched);
-- asks five yes-or-no questions, each with an optional comment kept private;
+- asks six yes-or-no questions, each with an optional comment kept private, and the operator declares whether the session ran as the protocol says;
 - scores the telemetry live and offline and checks every packet and graph;
 - reproduces the realization with the secret, then deletes the secret;
 - scans for leaks and personal data, and checks the stop conditions.

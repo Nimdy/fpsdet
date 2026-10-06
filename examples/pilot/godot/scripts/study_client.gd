@@ -78,7 +78,7 @@ func _ready() -> void:
 		gate.autowrap_mode = TextServer.AUTOWRAP_WORD
 		gate.size = Vector2(560, 300)
 		gate.text = ("Playtest: how honest players aim.\n\nThe game server records your movement, aim and shots in this game, and nothing else.\n"
-			+ "Hidden test objects exist behind walls; you will not see or hear them, and you do not need to look for them.\n"
+			+ "Hidden test objects exist behind walls; you will not see or hear them. Please don't try to find them: just play the round as asked.\n"
 			+ "You are " + participant + ". You can stop at any time.\n\nThis round: " + options.get("instructions", "") + "\n\nPress Y to agree and start, or N to leave.")
 		layer.add_child(gate)
 	if not human:

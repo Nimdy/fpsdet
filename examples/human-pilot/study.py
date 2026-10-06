@@ -6,6 +6,7 @@ or a private LAN address given with --bind for a participant on another machine.
     python examples/human-pilot/study.py controls-check --godot PATH                  # the human client's controls, no person
     python examples/human-pilot/study.py enroll --data ~/study --agree [--publish]       # a random participant id
     python examples/human-pilot/study.py practice --data ~/practice --study ~/study --participant hp-... --godot PATH
+    python examples/human-pilot/study.py withdraw --data ~/study --participant hp-... --reason participant_request --practice ~/practice
     python examples/human-pilot/study.py session --data ~/study --participant hp-... --mode free --godot PATH
     python examples/human-pilot/study.py analyze --data ~/study --out examples/human-pilot/result.json
     python examples/human-pilot/study.py dry-run --data /tmp/dry --godot PATH         # machine stand-ins, never people
@@ -49,6 +50,15 @@ import pilot  # noqa: E402  (P12's harness: fpsdet calls, Godot environment, sec
 PROJECT = ROOT / "examples" / "pilot" / "godot"
 DESIGN = HERE / "design.json"
 AMENDMENT = HERE / "amendment-1.json"
+AMENDMENT_2 = HERE / "amendment-2.json"
+CONSENT = HERE / "CONSENT.md"
+# Amendment 2: what a participant can be, which of those are out of play, and why a session may not count.
+INACTIVE = ("practice_failed", "withdrawn", "discontinued")
+WITHDRAWALS = ("participant_request", "unable_to_continue")
+# The stop that answers the primary question, and that clear-stop refuses (amendment 2).
+FALSIFYING = "review-grade challenge evidence on a protocol-valid honest session"
+# What a session leaves behind for the operator only: deleted after the post-match check, never kept (amendment 2).
+OPERATIONAL = ("server.out", "client.out", "godot-user", "cases-live", "cases-offline")
 PROFILE = HERE / "profile.json"
 FORMAT = "fpsdet.human-pilot/1"
 TICK_MS = 1000 / 60
@@ -67,9 +77,24 @@ def amendment() -> dict:
     return json.loads(AMENDMENT.read_text(encoding="utf-8"))
 
 
+def amendment_2() -> dict:
+    return json.loads(AMENDMENT_2.read_text(encoding="utf-8"))
+
+
 def questions() -> list[str]:
-    """design.json's questions, then amendment 1's."""
-    return [*design()["questionnaire"], *amendment()["questionnaire"]["added"]]
+    """design.json's questions, then amendment 1's, then amendment 2's."""
+    return [*design()["questionnaire"], *amendment()["questionnaire"]["added"], amendment_2()["validity"]["question_added"]]
+
+
+def validity_reasons() -> list[str]:
+    """Why a session may not count: amendment 2's closed list. A crossing is never one of them."""
+    return amendment_2()["validity"]["reasons"]
+
+
+def bindings() -> dict:
+    """What a participant agreed to and under which protocol, bound at enrollment (amendment 2)."""
+    return {"consent": pilot.sha256_file(CONSENT), "design": pilot.sha256_file(DESIGN), "amendment_1": pilot.sha256_file(AMENDMENT),
+            "amendment_2": pilot.sha256_file(AMENDMENT_2)}
 
 
 def code_identity() -> dict:
@@ -106,28 +131,89 @@ def cmd_enroll(args: argparse.Namespace) -> int:
     folder = data / participant
     folder.mkdir(parents=True)
     record = {"participant": participant, "kind": args.kind, "consent": True, "publish_consent": bool(args.publish),
-              "enrolled": datetime.date.today().isoformat(), "consent_notice_sha256": pilot.sha256_file(HERE / "CONSENT.md")}
-    (folder / "participant.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
+              "enrolled": datetime.date.today().isoformat(), "consent_notice_sha256": pilot.sha256_file(CONSENT), "bindings": bindings()}
+    set_status(record, "enrolled")
+    save_participant(data, record)
     order = session_order(participant)
     print(f"{participant}: sessions in this order: {', '.join(order)}")
     return 0
 
 
-def staging(data: Path) -> str | None:
-    """Amendment 1: the first 4 participants finish every session before anyone else is enrolled, and never
-    more than the design's maximum."""
+def load_participant(data: Path, participant: str) -> dict:
+    return json.loads((data / participant / "participant.json").read_text(encoding="utf-8"))
+
+
+def save_participant(data: Path, record: dict) -> None:
+    (data / record["participant"] / "participant.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
+
+
+def set_status(record: dict, status: str, **detail) -> None:
+    record["status"] = status
+    record.setdefault("history", []).append({"status": status, "date": datetime.date.today().isoformat(), **detail})
+
+
+def session_records(data: Path, participant: str) -> list[dict]:
+    return [json.loads(path.read_text(encoding="utf-8")) for path in sorted((data / participant).glob("*/session.json"))]
+
+
+def valid(row: dict) -> bool:
+    """Whether a session counts. Sessions from before amendment 2 carry no validity: they count by design.json's rule."""
+    if "validity" in row:
+        return bool(row["validity"]["valid"])
+    return row.get("played_ms", 0) >= 120_000 and "timeout" not in row.get("exit_codes", [])
+
+
+def state(data: Path, record: dict) -> str:
+    """A participant's state (amendment 2): stored, or derived from their protocol-valid sessions."""
+    status = record.get("status", "enrolled")
+    if status in INACTIVE:
+        return status
+    played = {row["mode"] for row in session_records(data, record["participant"]) if valid(row)}
+    return "completed" if set(design()["sessions"]["modes"]) <= played else status
+
+
+def humans(data: Path) -> list[dict]:
     people = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(data.glob("hp-*/participant.json"))]
-    people = [row for row in people if row.get("kind", "human") == "human"]
-    first = design()["participants"]["minimum_to_report"]
-    if len(people) >= design()["participants"]["maximum"]:
-        return f"The study already has {len(people)} participants, its maximum."
-    if len(people) >= first:
-        modes = set(design()["sessions"]["modes"])
-        unfinished = [row["participant"] for row in people[:first]
-                      if not modes <= {path.parent.name.rsplit("-", 1)[0] for path in (data / row["participant"]).glob("*/session.json")}]
-        if unfinished:
-            return (f"Staging (amendment 1): the first {first} participants finish all their sessions, with no unexplained review-grade finding, "
-                    f"before anyone else is enrolled. Unfinished: {', '.join(unfinished)}.")
+    return [row for row in people if row.get("kind", "human") == "human"]
+
+
+def staging(data: Path) -> str | None:
+    """Amendment 2: at most 4 participants in play until 4 have completed every mode, then at most 12. A
+    participant who withdraws, is discontinued or fails practice frees a place for a replacement."""
+    states = [state(data, row) for row in humans(data)]
+    first, maximum = design()["participants"]["minimum_to_report"], design()["participants"]["maximum"]
+    completed = states.count("completed")
+    in_play = sum(1 for status in states if status not in INACTIVE)
+    if completed >= first:
+        if in_play >= maximum:
+            return f"The study already has {in_play} participants in play, its maximum."
+        return None
+    if in_play >= first:
+        return (f"Staging (amendment 2): at most {first} participants are in play until {first} have completed every mode with no finding; "
+                f"{completed} have. A participant who withdraws, is discontinued or fails practice frees a place.")
+    return None
+
+
+def next_mode(data: Path, record: dict) -> str | None:
+    """The participant's next mode in their pre-registered order: the first without a protocol-valid session."""
+    played = {row["mode"] for row in session_records(data, record["participant"]) if valid(row)}
+    return next((mode for mode in session_order(record["participant"]) if mode not in played), None)
+
+
+def session_refusal(data: Path, record: dict, mode: str) -> str | None:
+    """Why a human session may not start (amendment 2), or None."""
+    participant = record["participant"]
+    if record.get("bindings") != bindings():
+        return (f"The consent notice, the design or an amendment changed since {participant} enrolled. Their sessions cannot join this study: "
+                "that would be a new study version.")
+    status = state(data, record)
+    if status == "completed":
+        return f"{participant} has completed every mode."
+    if status != "practice_passed":
+        return f"{participant} is {status}: a session needs a passed practice first (amendment 2)."
+    expected = next_mode(data, record)
+    if mode != expected:
+        return f"The next session for {participant} is {expected}, in their pre-registered order: {', '.join(session_order(participant))}."
     return None
 
 
@@ -146,9 +232,13 @@ def run_session(godot: str, data: Path, participant: str, mode: str, port: int, 
     if reason:
         raise SystemExit(f"The study is stopped: {reason.strip()} Investigate, then clear it with study.py clear-stop.")
     found = design()
-    record = json.loads((data / participant / "participant.json").read_text(encoding="utf-8"))
-    if not record["consent"]:
+    record = load_participant(data, participant)
+    if not record.get("consent"):
         raise SystemExit(f"{participant} has not agreed to take part.")
+    if kind == "human":
+        refusal = session_refusal(data, record, mode)
+        if refusal:
+            raise SystemExit(refusal)
     count = len(list((data / participant).glob(f"{mode}-*")))
     session = f"{mode}-{count + 1}"
     run = data / participant / session
@@ -172,7 +262,8 @@ def run_session(godot: str, data: Path, participant: str, mode: str, port: int, 
         client = [client[0], "--headless", *client[1:], "--input=standin", f"--behaviour={stand_in}"]
     codes = play(run, environment, server, client, remote, length)
     answers = questionnaire(found, kind, ask, run)
-    return post_session(run, plan, secret, participant, mode, kind, stand_in, codes, round(time.time() - started, 1), answers, engine)
+    declared = declare_validity(kind, answers, ask)  # before the session is scored (amendment 2)
+    return post_session(run, plan, secret, participant, mode, kind, stand_in, codes, round(time.time() - started, 1), answers, engine, declared)
 
 
 def play(run: Path, environment: dict, server: list[str], client: list[str], remote: bool, length: int) -> list:
@@ -235,6 +326,27 @@ def questionnaire(found: dict, kind: str, ask, run: Path | None = None) -> dict:
     return {"asked": True, "answers": answers, "comments": len(comments)}
 
 
+def declare_validity(kind: str, answers: dict, ask) -> dict:
+    """Whether the session ran as the protocol says, fixed before it is scored (amendment 2): the participant's
+    answer to the added question, then the operator's declaration, with a reason from the closed list."""
+    if kind != "human":
+        return {"valid": True, "reason": None, "by": "machine"}
+    if answers["answers"].get(amendment_2()["validity"]["question_added"]):
+        return {"valid": False, "reason": "protocol_deviation", "by": "participant"}
+    reply = ""
+    while reply not in ("y", "n"):
+        reply = ask("Operator: did this session run as the protocol says (the right mode, the participant playing normally, nothing broken)? [y/n] ").strip().lower()[:1]
+    if reply == "y":
+        return {"valid": True, "reason": None, "by": "operator"}
+    listed = validity_reasons()
+    for number, reason in enumerate(listed, 1):
+        print(f"  {number}. {reason}")
+    choice = ""
+    while not (choice.isdigit() and 1 <= int(choice) <= len(listed)):
+        choice = ask("  Which reason? ").strip()
+    return {"valid": False, "reason": listed[int(choice) - 1], "by": "operator"}
+
+
 # After the session.
 
 
@@ -265,26 +377,50 @@ def score(events: Path, plan: Path, out: Path) -> dict:
     return cases
 
 
-def personal_data(paths: list[Path]) -> list[str]:
-    """Anything in a public file that could name a person or a machine: an IP address, this machine's name,
-    the operator's user name or home folder. The study never writes them; this checks it."""
+def identifiers(text: str) -> list[str]:
+    """What in a text could name a person or a machine: an IP address, this machine's name, the operator's user
+    name or home folder. The study never writes them; this checks it."""
     needles = {"hostname": socket.gethostname(), "user": getpass.getuser(), "home": str(Path.home())}
-    found = []
-    for path in paths:
-        if not path.is_file() or path.suffix not in (".json", ".jsonl", ".ndjson", ".log", ".out"):
-            continue
-        text = path.read_text(encoding="utf-8", errors="replace")
-        for match in re.findall(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", text):
-            found.append(f"{path.name}: an IP address")
-            break
-        for name, value in needles.items():
-            if value and len(value) > 2 and re.search(r"\b" + re.escape(value) + r"\b", text):
-                found.append(f"{path.name}: the {name}")
+    found = ["an IP address"] if re.search(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", text) else []
+    for name, value in needles.items():
+        if value and len(value) > 2 and re.search(r"\b" + re.escape(value) + r"\b", text):
+            found.append(f"the {name}")
     return found
 
 
+def personal_data(paths: list[Path]) -> list[str]:
+    """identifiers() over every file given, whatever its kind."""
+    found = []
+    for path in paths:
+        if path.is_file():
+            found += [f"{path.name}: {what}" for what in identifiers(path.read_text(encoding="utf-8", errors="replace"))]
+    return found
+
+
+def privacy_sweep(run: Path) -> dict:
+    """Amendment 2: scan everything the run wrote, delete what is operational only, and scan what is kept again.
+    Identifiers in operational files are expected (paths, the engine's own logs) and go with them; any in a
+    kept file is a stop."""
+    every = [path for path in run.rglob("*") if path.is_file()]
+    operational = [run / name for name in OPERATIONAL if (run / name).exists()]
+    inside = [path for path in every if any(path == root or root in path.parents for root in operational)]
+    seen = len(personal_data(inside))
+    for root in operational:
+        shutil.rmtree(root) if root.is_dir() else root.unlink()
+    kept = [path for path in run.rglob("*") if path.is_file()]
+    hits = [f"{path.relative_to(run).as_posix()}: {what}" for path in kept for what in identifiers(path.read_text(encoding="utf-8", errors="replace"))]
+    return {"operational_deleted": sorted(root.name for root in operational), "operational_identifiers": seen, "kept_hits": hits}
+
+
+def challenge_channels(run: Path) -> set[str]:
+    """Which channels the server reported a challenge body known on, from the study telemetry."""
+    path = run / "private" / "study.ndjson"
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()] if path.exists() else []
+    return {name for name, key in (("vision", "v"), ("audio", "a")) if any(row.get(key) == "known" for row in rows)}
+
+
 def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: str, kind: str, stand_in: str | None, codes: list,
-                 wall_s: float, answers: dict, engine: dict | None = None) -> dict:
+                 wall_s: float, answers: dict, engine: dict | None = None, declared: dict | None = None) -> dict:
     public = run / "public"
     live = score(public / "events.ndjson", plan, run / "cases-live")
     offline = score(public / "events.ndjson", plan, run / "cases-offline")
@@ -294,8 +430,6 @@ def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: st
     leaks = pilot.leaks(public_files, plan, secret)
     secret.unlink()  # the post-match check is done; the design deletes the secret now
     without = reproduce(run, plan, None)["status"]
-    # What could ever be published: the session's own public folder (the local case folders hold the operator's paths).
-    people = personal_data([path for path in public.rglob("*") if path.is_file()])
     case = live.get(participant, {})
     metrics = challenge_metrics(run, case, plan)
     log = [json.loads(line) for line in (public / "server.log").read_text().splitlines() if line.strip()]
@@ -304,6 +438,16 @@ def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: st
     perf = json.loads((public / "perf.json").read_text()) if (public / "perf.json").exists() else {}
     played_ms = end.get("t_ms", 0)
     review = case.get("decision") == "review" and "occluded_motion_replay" in case.get("kinds", [])
+    sweep = privacy_sweep(run)  # the local case folders and the engine's logs are operational: gone now (amendment 2)
+    people = sweep["kept_hits"]
+    # Validity (amendment 2): the declaration made before scoring first, then facts that do not depend on the score.
+    known = challenge_channels(run)
+    automatic = [reason for reason, applies in (("technical_failure", played_ms < 120_000 or "timeout" in codes),
+                                                ("visibility_failure", "vision" in known), ("audio_failure", "audio" in known),
+                                                ("privacy_failure", bool(people))) if applies]
+    declared = declared or {"valid": True, "reason": None, "by": "machine"}
+    validity = {"valid": declared["valid"] and not automatic, "reason": declared["reason"] if not declared["valid"] else (automatic[0] if automatic else None),
+                "declared": declared, "automatic": automatic}
     record = {
         "participant": participant, "kind": kind, "stand_in": stand_in, "mode": mode, "session": run.name, "match_id": f"study-{participant}-{run.name}",
         "played_ms": played_ms, "exit_codes": codes, "wall_s": wall_s, "questionnaire": answers, "engine": engine,
@@ -313,7 +457,7 @@ def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: st
         "case": {key: case.get(key) for key in ("decision", "observations", "kinds", "graph", "packet", "inputs", "detector", "problems")},
         "review_grade": review,
         "live_vs_offline": "identical" if identical else "DIFFERENT",
-        "realization": reproduced, "without_secret": without, "secret_leaks": leaks, "personal_data": people,
+        "realization": reproduced, "without_secret": without, "secret_leaks": leaks, "personal_data": people, "privacy": sweep, "validity": validity,
         "challenges": metrics,
         "performance": {
             "tick_us_mean": round(perf.get("tick_us", 0) / max(perf.get("ticks", 1), 1), 1), "tick_us_max": perf.get("tick_us_max"),
@@ -331,16 +475,24 @@ def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: st
     if leaks:
         reasons.append("secret or realization material in a public output")
     if people:
-        reasons.append("personal data in a public output: " + "; ".join(people))
+        reasons.append("an address or a machine identity in a kept session file: " + "; ".join(people))
     if not identical:
         reasons.append("offline replay differs from live scoring")
     if any(case.get("problems") or [] for case in live.values()):
         reasons.append("a packet or graph does not verify")
     if review and kind != "controlled_follower":
-        reasons.append("review-grade challenge evidence on an honest session: stop collection, preserve and replay the session, inspect its episodes, "
-                       "classify the behaviour, change nothing, and propose P14 (amendment 1)")
+        if validity["valid"]:
+            reasons.append(f"{FALSIFYING}: stop collection, preserve and replay the session, inspect its episodes, classify the behaviour, "
+                           "change nothing, and propose the next phase (amendments 1 and 2)")
+        else:
+            reasons.append(f"review-grade challenge evidence on a session already invalid ({validity['reason']}): investigate; "
+                           "it does not answer the primary question (amendment 2)")
     record["stop"] = reasons
-    (run / "session.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
+    text = json.dumps(record, indent=1) + "\n"
+    if identifiers(text):
+        stop(run.parents[1], [f"{participant} {run.name}: the session record itself holds {', '.join(identifiers(text))}, so it was not written"])
+        raise SystemExit(f"{run.name}: the session record itself holds {', '.join(identifiers(text))}; it was not written, and the study is stopped.")
+    (run / "session.json").write_text(text, encoding="utf-8")
     if reasons and kind != "machine_standin":
         stop(run.parents[1], [f"{participant} {run.name}: {reason}" for reason in reasons])
     return record
@@ -495,27 +647,42 @@ def upper_zero(n: int) -> float | None:
     return round(1 - 0.05 ** (1 / n), 4) if n else None
 
 
-def interval(k: int, n: int) -> list[float] | None:
-    from fpsdet.strength import beta_quantile
-
-    if not n:
-        return None
-    low = 0.0 if k == 0 else beta_quantile(0.025, k, n - k + 1)
-    high = 1.0 if k == n else beta_quantile(0.975, k + 1, n - k)
-    return [round(low, 4), round(high, 4)]
-
-
 def summary(values: list[float]) -> dict:
     return {"n": len(values), "median": quantile(values, 0.5), "p90": quantile(values, 0.9), "p95": quantile(values, 0.95), "max": max(values, default=None)}
 
 
+def endpoint(findings: list[dict], complete: bool, units: dict) -> dict:
+    """Amendment 2: the primary question, and which statistics its answer allows. The study stops on its first
+    finding and continues only without one, so it is a falsification test, never a prevalence estimate."""
+    question = amendment_2()["statistics"]["primary_question"]
+    if findings:
+        return {"question": question, "answer": "yes",
+                "findings": [{key: row[key] for key in ("participant", "session", "mode")} for row in findings],
+                "statistics": "the finding and descriptive counts only: no rate and no interval, at any level (amendment 2)"}
+    if not complete:
+        return {"question": question, "answer": "not yet: the planned group has not completed",
+                "statistics": "descriptive counts only until the planned group completes (amendment 2)"}
+    return {"question": question, "answer": "no",
+            "upper_95_if_none": {unit: {"of": n, "bound": upper_zero(n)} for unit, n in units.items()},
+            "statistics": ("exact one-sided 95% upper bounds with no finding, at each level, the participant level first. They follow the "
+                           "pre-declared continuation rule, and none of them is a false-positive rate (amendment 2)")}
+
+
 def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
     found = design()
+    people = humans(data) if kind == "human" else []
+    if kind == "human":
+        bound = {json.dumps(row.get("bindings"), sort_keys=True) for row in people}
+        if bound != {json.dumps(bindings(), sort_keys=True)}:
+            raise SystemExit("Participants were enrolled under different consent notices, designs or amendments, or under ones that have "
+                             "changed since: they cannot be analysed as one study (amendment 2).")
+    states = {row["participant"]: state(data, row) for row in people}
     sessions = [json.loads(path.read_text()) for path in sorted(data.glob("hp-*/*/session.json"))]
-    sessions = [row for row in sessions if row["kind"] in (kind, "controlled_follower")]
+    sessions = [row for row in sessions if row["kind"] in (kind, "controlled_follower") and states.get(row["participant"]) != "withdrawn"]
     honest = [row for row in sessions if row["kind"] == kind]
-    included = [row for row in honest if row["played_ms"] >= 120_000 and "timeout" not in row["exit_codes"]]
-    excluded = [{"participant": row["participant"], "session": row["session"], "played_ms": row["played_ms"]} for row in honest if row not in included]
+    included = [row for row in honest if valid(row)]
+    excluded = [{"participant": row["participant"], "session": row["session"], "played_ms": row["played_ms"],
+                 "reason": (row.get("validity") or {}).get("reason") or "technical_failure"} for row in honest if row not in included]
     challenges = [dict(challenge, participant=row["participant"], session=row["session"], mode=row["mode"]) for row in included for challenge in row["challenges"]]
     participants = sorted({row["participant"] for row in included})
     bar = {"min_samples": found["frozen"]["hidden_track_min_samples"], "min_total_ms": found["frozen"]["hidden_track_min_ms"]}
@@ -523,10 +690,14 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
                "sessions": sum(1 for row in included if row["review_grade"]),
                "challenges": sum(1 for challenge in challenges if challenge["status"] == "followed")}
     units = {"participants": len(participants), "sessions": len(included), "challenges": len(challenges)}
-    bounds = {}
-    for unit, n in units.items():
-        k = len(reviews["participants"]) if unit == "participants" else reviews[unit]
-        bounds[unit] = {"with_findings": k, "of": n, "upper_95_if_none": upper_zero(n) if k == 0 else None, "interval_95": interval(k, n) if k else None}
+    counted = {unit: {"with_findings": len(reviews["participants"]) if unit == "participants" else reviews[unit], "of": n} for unit, n in units.items()}
+    if kind == "human":
+        tally = list(states.values())
+        complete = tally.count("completed") >= found["participants"]["minimum_to_report"] and not any(
+            status in ("enrolled", "practice_passed") for status in tally)
+    else:
+        complete = True
+    primary = endpoint([row for row in included if row["review_grade"]], complete, units)
     per_participant = []
     for participant in participants:
         mine = [challenge for challenge in challenges if challenge["participant"] == participant]
@@ -572,14 +743,17 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
         "kind": kind,
         "statement": ("Machine stand-ins only: scripted honest-style aiming that qualifies the instruments. Not people, and never evidence about how people aim."
                       if kind == "machine_standin" else
-                      "A consented honest-human pilot: a small behavioural baseline. Not a population, a calibration, a validation, or a false-positive rate."),
+                      "A consented honest-human pilot: a falsification test of the challenge rule on honest play, and a small behavioural baseline. "
+                      "Not a population, a calibration, a validation, or a false-positive rate."),
+        "primary": primary,
         "design": {"path": "examples/human-pilot/design.json", "sha256": pilot.sha256_file(DESIGN)},
         "code": code_identity(),
         "build": {"engines": [json.loads(text) for text in sorted({json.dumps(row["engine"], sort_keys=True) for row in included if row.get("engine")})],
                   "sessions_on_current_code": sum(1 for row in included if row.get("code") == code_identity()), "of": len(included)},
         "units": units,
+        "participants": {status: list(states.values()).count(status) for status in ("enrolled", "practice_passed", "practice_failed", "completed", "discontinued", "withdrawn")},
         "excluded_sessions": excluded,
-        "review_grade": {"bar": bar, **reviews, "bounds": bounds,
+        "review_grade": {"bar": bar, **reviews, "counts": counted,
                          "note": "Counts at three levels. A participant's sessions and challenges are not independent: the participant level is the primary unit."},
         "distributions": {key: summary([challenge[key] for challenge in challenges]) for key in
                           ("counted_ms", "counted_moments", "overlap_ms", "challenge_only_ms", "explained_ms", "longest_episode_ms", "episodes")},
@@ -611,6 +785,7 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
         "closeness": closeness,
         **({"motion": motion_summary(challenges)} if challenges and "both_still_ms" in challenges[0] else {}),
         "amendment": {"path": "examples/human-pilot/amendment-1.json", "sha256": pilot.sha256_file(AMENDMENT)},
+        "amendment_2": {"path": "examples/human-pilot/amendment-2.json", "sha256": pilot.sha256_file(AMENDMENT_2)},
         "stop": {"stopped": stopped(data) is not None, "reason": stopped(data),
                  "history": [json.loads(line) for line in (data / "stops.log").read_text().splitlines()] if (data / "stops.log").exists() else []},
         "runtime": {
@@ -740,15 +915,37 @@ def cmd_controls_check(args: argparse.Namespace) -> int:
     return 0 if all(checks.values()) else 1
 
 
+def practice_confirms() -> list[str]:
+    """What a practice confirms: amendment 1's list, with amendment 2's Esc check after mouse look."""
+    confirms = amendment()["practice"]["confirms"]
+    return [confirms[0], amendment_2()["practice_gate"]["adds_confirm"], *confirms[1:]]
+
+
+def practice_ready(answers: dict, fps: float | None) -> bool:
+    """Amendment 2: the frame rate, and everything working, except that a mouse which cannot be captured falls back
+    to the arrow keys; a mouse that can be captured must also let go with Esc."""
+    confirms = practice_confirms()
+    mouse, release = confirms[0], confirms[1]
+    return (fps is not None and fps >= amendment()["practice"]["min_client_fps"]
+            and all(answers[item] for item in confirms if item not in (mouse, release)) and (answers[release] or not answers[mouse]))
+
+
 def cmd_practice(args: argparse.Namespace) -> int:
     """Amendment 1's practice: free mode, no challenge, 90 seconds, in its own data folder that is never analysed."""
     rules = amendment()["practice"]
     data, study = Path(args.data).expanduser().resolve(), Path(args.study).expanduser().resolve()
     if data == study or study in data.parents or data in study.parents:
         raise SystemExit("Practice goes in its own data folder, apart from the study's: it is never analysed.")
-    record = json.loads((study / args.participant / "participant.json").read_text(encoding="utf-8"))
+    record = load_participant(study, args.participant)
     if not record.get("consent"):
         raise SystemExit(f"{args.participant} has not agreed to take part.")
+    if record.get("bindings") != bindings():
+        raise SystemExit(f"The consent notice, the design or an amendment changed since {args.participant} enrolled: a new study version.")
+    status = state(study, record)
+    if status not in ("enrolled", "practice_failed"):
+        raise SystemExit(f"{args.participant} is {status}: practice is for a participant who has not passed it yet.")
+    if status == "practice_failed" and staging(study):
+        raise SystemExit(f"{args.participant} failed practice and their place was taken: {staging(study)}")
     folder = data / args.participant
     run = folder / f"practice-{len(list(folder.glob('practice-*'))) + 1}"
     public = run / "public"
@@ -762,9 +959,10 @@ def cmd_practice(args: argparse.Namespace) -> int:
     client = [args.godot, "--path", str(PROJECT), "res://study.tscn", "--", "--role=client", f"--participant={args.participant}", f"--port={args.port}",
               f"--server={args.bind}", f"--match-ms={length}", f"--instructions={instructions}", f"--log={public / 'client.jsonl'}"]
     codes = play(run, environment, server, client, args.remote, length)
+    confirms = practice_confirms()
     print("Ask the participant, and type y or n:")
     answers = {}
-    for item in rules["confirms"]:
+    for item in confirms:
         reply = ""
         while reply not in ("y", "n"):
             reply = input(f"  Did this work: {item}? [y/n] ").strip().lower()[:1]
@@ -772,15 +970,61 @@ def cmd_practice(args: argparse.Namespace) -> int:
     fps = median(client_summary(public / "client.jsonl").get("fps", []))
     result = {"participant": args.participant, "practice": run.name, "exit_codes": codes, "answers": answers,
               "client_fps_median": fps, "server": server_saw(public / "events.ndjson", args.participant)}
-    result["ready"] = fps is not None and fps >= rules["min_client_fps"] and all(answers[item] for item in rules["confirms"] if "mouse" not in item)
-    result["fallback"] = "arrow keys" if not answers[rules["confirms"][0]] else None
+    result["ready"] = practice_ready(answers, fps)
+    result["fallback"] = "arrow keys" if not answers[confirms[0]] else None
     (run / "practice.json").write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
+    sweep = privacy_sweep(run)
+    result["privacy"] = sweep
+    if sweep["kept_hits"]:
+        stop(study, [f"{args.participant} {run.name}: an address or a machine identity in a kept practice file: " + "; ".join(sweep["kept_hits"])])
+    set_status(record, "practice_passed" if result["ready"] else "practice_failed")
+    record["practice"] = {"date": datetime.date.today().isoformat(), "ready": result["ready"], "fallback": result["fallback"], "client_fps_median": fps}
+    save_participant(study, record)
     print(json.dumps(result, indent=1))
     if fps is None or fps < rules["min_client_fps"]:
         print(f"The client ran at {fps} frames a second, under {rules['min_client_fps']}: {rules['below_min_fps']}")
     elif result["fallback"]:
         print(rules["fallback"])
     return 0 if result["ready"] else 1
+
+
+def cmd_withdraw(args: argparse.Namespace) -> int:
+    """Amendment 2. participant_request deletes every session, the practice and the comments, and keeps only an
+    anonymous record that someone withdrew. unable_to_continue keeps the sessions and frees the place."""
+    data = Path(args.data).expanduser()
+    record = load_participant(data, args.participant)
+    if record.get("kind", "human") != "human":
+        raise SystemExit(f"{args.participant} is not a participant.")
+    if args.reason == "unable_to_continue":
+        set_status(record, "discontinued", reason_class=args.reason)
+        save_participant(data, record)
+        print(f"{args.participant} is discontinued. Their sessions stay; their place is free.")
+        return 0
+    folder = data / args.participant
+    deleted = []
+    for child in sorted(folder.iterdir()):
+        if child.is_dir():
+            shutil.rmtree(child)
+            deleted.append(child.name)
+    if args.practice:
+        practice = Path(args.practice).expanduser().resolve()
+        if practice == data.resolve():
+            raise SystemExit("--practice is the practice folder, not the study's.")
+        if (practice / args.participant).exists():
+            shutil.rmtree(practice / args.participant)
+            deleted.append("practice")
+    kept = {"participant": record["participant"], "kind": "human", "status": "withdrawn", "sessions_deleted": True, "reason_class": args.reason,
+            "withdrawn": datetime.date.today().isoformat(), "bindings": record.get("bindings")}
+    save_participant(data, kept)
+    print(f"{args.participant} withdrew: deleted {', '.join(deleted) or 'nothing (no sessions yet)'}. Kept: that someone withdrew, under the random id.")
+    published = sorted((ROOT / "examples" / "human-pilot" / "sessions").glob(f"{args.participant}-*"))
+    if published:
+        print("Their published samples are in the repository; delete them too, and record the withdrawal in the next analysis:")
+        for path in published:
+            print(f"  {path.relative_to(ROOT)}")
+    if args.practice is None:
+        print("Their practice folder was not given: delete it with --practice, or by hand.")
+    return 0
 
 
 # Commands.
@@ -790,7 +1034,7 @@ def cmd_session(args: argparse.Namespace) -> int:
     data = Path(args.data).expanduser()
     record = run_session(args.godot, data, args.participant, args.mode, args.port, "controlled_follower" if args.follower else "human",
                          bind=args.bind, remote=args.remote)
-    print(json.dumps({key: record[key] for key in ("participant", "mode", "session", "played_ms", "review_grade", "live_vs_offline", "stop")}, indent=1))
+    print(json.dumps({key: record[key] for key in ("participant", "mode", "session", "played_ms", "validity", "review_grade", "live_vs_offline", "stop")}, indent=1))
     return 1 if record["stop"] else 0
 
 
@@ -800,10 +1044,10 @@ def cmd_clear_stop(args: argparse.Namespace) -> int:
     if reason is None:
         print("The study is not stopped.")
         return 0
-    if "review-grade" in reason:
-        raise SystemExit("A review-grade finding on an honest session ends collection (amendment 1): preserve and replay the session, verify "
-                         "its packet and graph, inspect its episodes, classify the behaviour, and propose the next phase. Continuing would be "
-                         "a new study version, not a cleared stop.")
+    if FALSIFYING in reason:
+        raise SystemExit("A review-grade finding on a protocol-valid honest session ends collection (amendments 1 and 2): preserve and replay the "
+                         "session, verify its packet and graph, inspect its episodes, classify the behaviour, and propose the next phase. "
+                         "Continuing would be a new study version, not a cleared stop.")
     with (data / "stops.log").open("a", encoding="utf-8") as log:
         log.write(json.dumps({"stopped": reason, "cleared": datetime.date.today().isoformat(), "investigation": args.reason}) + "\n")
     (data / "STOP").unlink()
@@ -819,7 +1063,7 @@ def cmd_analyze(args: argparse.Namespace) -> int:
         samples.append(publish_sample(data, participant, session, ROOT / args.samples_dir))
     body = analyze(data, args.kind, samples)
     Path(args.out).write_text(json.dumps(body, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Wrote {args.out}: {body['units']}, review-grade {body['review_grade']['sessions']} sessions, digest {body['digest']}")
+    print(f"Wrote {args.out}: {body['units']}; primary question: {body['primary']['answer']}; digest {body['digest']}")
     return 0
 
 
@@ -885,6 +1129,13 @@ def main(argv: list[str] | None = None) -> int:
     practice.add_argument("--bind", default="127.0.0.1", help="A private LAN address for a participant on another machine; never a public one")
     practice.add_argument("--remote", action="store_true", help="Print the client command to run on the participant's machine instead of opening it here")
     practice.set_defaults(func=cmd_practice)
+    withdraw = sub.add_parser("withdraw", help="A participant leaves (amendment 2): delete their data on request, or free their place")
+    withdraw.add_argument("--data", required=True)
+    withdraw.add_argument("--participant", required=True)
+    withdraw.add_argument("--reason", required=True, choices=list(WITHDRAWALS),
+                          help="participant_request deletes everything but an anonymous record; unable_to_continue keeps the sessions")
+    withdraw.add_argument("--practice", help="The practice folder, so their practice is deleted too")
+    withdraw.set_defaults(func=cmd_withdraw)
     session = sub.add_parser("session", help="One session: plan, play, ask, score, check")
     session.add_argument("--data", required=True)
     session.add_argument("--participant", required=True)

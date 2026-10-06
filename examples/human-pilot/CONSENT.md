@@ -1,5 +1,7 @@
 # Playtest: how honest players aim
 
+*Consent notice, version 2.*
+
 Thank you for considering this. Please read this page before you play. It takes two minutes.
 
 ## What this is
@@ -10,14 +12,14 @@ We are studying **honest** play. Nobody is being tested for cheating. We want to
 
 ## What you should know
 
-- **Hidden probes exist.** The game server places invisible test objects behind walls during each round. You cannot see or hear them, and you do not need to look for them. Please just play. You will not be told where or when they appear.
+- **Hidden probes exist.** The game server places invisible test objects behind walls during each round. You cannot see or hear them. Please don't try to find, guess or follow them: the study is about ordinary play. Just play each round the way it asks. You will not be told where or when they appear.
 - **Gameplay is recorded by the game server:** where you move and aim, when you shoot, and what you hit, inside this game only.
 - **Nothing else is recorded.** No screen recording, no other windows, no files, no processes and no memory of your computer are read. The game is an ordinary program; it needs no special permissions and installs nothing.
 - **No accounts.** No commercial game, no anti-cheat, and no game or social account is involved.
 - **You are a random code.** You get an id like `hp-3f9a2c71`. We do not record your name, email, game accounts, device or network address.
 - **Before the first round,** a 90-second practice checks that the controls work. It is not part of the results.
-- **After each round** we ask five yes-or-no questions: did you see or hear anything you could not explain, did anything look odd, did the game stutter, and did the controls behave normally. You may add a short comment to any answer. Comments are never published, and they are deleted with your recordings.
-- **It is voluntary.** You can stop at any time, for any reason, without saying why. Ask, and your sessions are deleted.
+- **After each round** we ask six yes-or-no questions: did you see or hear anything you could not explain, did anything look odd, did the game stutter, did the controls behave normally, and did you try to find the hidden probes. You may add a short comment to any answer. Comments are never published, and they are deleted with your recordings.
+- **It is voluntary.** You can stop at any time, for any reason, without saying why. Ask, and your sessions, your practice and your comments are deleted; only a note that someone withdrew is kept, under your random code. If you ask after the results are published, your recordings are still deleted, but totals already published cannot be recalled.
 
 ## What happens to the data
 

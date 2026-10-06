@@ -159,10 +159,8 @@ class MetricsTest(unittest.TestCase):
         study = harness()
         self.assertAlmostEqual(study.upper_zero(8), 1 - 0.05 ** (1 / 8), places=4)
         self.assertIsNone(study.upper_zero(0))
-        low, high = study.interval(1, 8)
-        self.assertLess(low, 1 / 8)
-        self.assertGreater(high, 1 / 8)
-        self.assertEqual(study.interval(0, 10)[0], 0.0)
+        # Amendment 2: a stop-on-first-finding design never prints an interval.
+        self.assertFalse(hasattr(study, "interval"))
 
     def test_session_order_is_fixed_by_the_participant(self):
         study = harness()
@@ -208,7 +206,8 @@ class DryRunTest(unittest.TestCase):
         now = harness().code_identity()
         self.assertEqual(set(now), set(found["code"]))
         changed = sorted(path for path in now if now[path] != found["code"][path])
-        self.assertLessEqual(set(changed), set(record["changed_by_this_amendment"]), "only the files amendment 1 names may differ")
+        named = set(record["changed_by_this_amendment"]) | set(amendment_2()["code_changed"])
+        self.assertLessEqual(set(changed), named, "only the files the amendments name may differ")
 
     def test_its_code_is_the_commit_it_names_when_history_is_available(self):
         import hashlib
@@ -279,6 +278,10 @@ def amendment() -> dict:
     return json.loads((STUDY / "amendment-1.json").read_text(encoding="utf-8"))
 
 
+def amendment_2() -> dict:
+    return json.loads((STUDY / "amendment-2.json").read_text(encoding="utf-8"))
+
+
 class RegressionFixtureTest(unittest.TestCase):
     """dry-run/sessions/hp-8e9f0d72-angle_holding-1: a machine stand-in holding the doorway's frame, still, over
     a probe in the sealed room behind it. Under the current rule it is review-grade. It is kept permanently as
@@ -334,9 +337,9 @@ class AmendmentTest(unittest.TestCase):
     def test_the_questions_are_the_designs_and_the_controls_question(self):
         questions = harness().questions()
         self.assertEqual(questions[:4], design()["questionnaire"])
-        self.assertEqual(questions[4:], ["Did the controls behave normally?"])
+        self.assertEqual(questions[4:], ["Did the controls behave normally?", "Did you try to find, guess or follow the hidden probes?"])
 
-        replies = iter(["n", "", "n", "a hum near the door", "n", "", "y", "", "y", ""])
+        replies = iter(["n", "", "n", "a hum near the door", "n", "", "y", "", "y", "", "n", ""])
         with __import__("tempfile").TemporaryDirectory() as folder:
             run = Path(folder)
             (run / "private").mkdir()
@@ -344,7 +347,7 @@ class AmendmentTest(unittest.TestCase):
             self.assertEqual(found["comments"], 1)
             self.assertIn("a hum", (run / "private" / "comments.json").read_text(encoding="utf-8"))
         self.assertNotIn("a hum", json.dumps(found), "comments stay in the private folder")
-        self.assertEqual(len(found["answers"]), 5)
+        self.assertEqual(len(found["answers"]), 6)
 
     def test_practice_is_short_unscored_and_kept_apart(self):
         import argparse
@@ -361,37 +364,52 @@ class AmendmentTest(unittest.TestCase):
                     harness().cmd_practice(argparse.Namespace(data=str(inside), study=str(study), participant="hp-12345678", godot="godot",
                                                               port=24800, bind="127.0.0.1", remote=False))
 
-    def test_staging_waits_for_the_first_four_and_stops_at_the_maximum(self):
+    def test_staging_waits_for_four_completed_and_stops_at_the_maximum(self):
+        """Amendment 2: four in play until four have completed every mode with a valid session; a participant who
+        withdraws, is discontinued or fails practice frees a place; then at most twelve."""
         import tempfile
 
         study = harness()
+        modes = design()["sessions"]["modes"]
         with tempfile.TemporaryDirectory() as folder:
             data = Path(folder)
 
-            modes = design()["sessions"]["modes"]
-
-            def enroll(name: str, sessions: int) -> None:
+            def enroll(name: str, status: str = "practice_passed", valid_modes: tuple = ()) -> None:
                 (data / name).mkdir()
-                (data / name / "participant.json").write_text(json.dumps({"participant": name, "kind": "human", "consent": True}))
-                for mode in modes[:sessions]:
-                    (data / name / f"{mode}-1").mkdir()
-                    (data / name / f"{mode}-1" / "session.json").write_text("{}")
+                (data / name / "participant.json").write_text(json.dumps({"participant": name, "kind": "human", "consent": True, "status": status}))
+                for mode in valid_modes:
+                    play(name, mode, True)
 
-            for index in range(3):
-                enroll(f"hp-0000000{index}", 0)
-            self.assertIsNone(study.staging(data))
-            enroll("hp-00000003", 6)
+            def play(name: str, mode: str, ok: bool) -> None:
+                count = len(list((data / name).glob(f"{mode}-*"))) + 1
+                (data / name / f"{mode}-{count}").mkdir()
+                (data / name / f"{mode}-{count}" / "session.json").write_text(json.dumps(
+                    {"mode": mode, "validity": {"valid": ok, "reason": None if ok else "technical_failure"}}))
+
             for index in range(4):
-                (data / f"hp-0000000{index}" / "free-2").mkdir()
-                (data / f"hp-0000000{index}" / "free-2" / "session.json").write_text("{}")  # a repeated mode is not another one
+                enroll(f"hp-0000000{index}")
             self.assertIn("Staging", study.staging(data))
-            for index in range(4):
-                for mode in modes:
-                    (data / f"hp-0000000{index}" / f"{mode}-1").mkdir(exist_ok=True)
-                    (data / f"hp-0000000{index}" / f"{mode}-1" / "session.json").write_text("{}")
+            # One leaves: a replacement may join, and the audit record stays.
+            study.save_participant(data, {"participant": "hp-00000000", "kind": "human", "status": "withdrawn", "sessions_deleted": True,
+                                          "reason_class": "participant_request"})
             self.assertIsNone(study.staging(data))
-            for index in range(4, 12):
-                enroll(f"hp-000000{index:02d}", 0)
+            enroll("hp-00000009", status="practice_failed")
+            self.assertIsNone(study.staging(data), "a failed practice frees its place")
+            enroll("hp-00000004")
+            self.assertIn("Staging", study.staging(data))
+            # An invalid session is not a completed mode; a valid one played again is.
+            for name in ("hp-00000001", "hp-00000002", "hp-00000003"):
+                for mode in modes:
+                    play(name, mode, True)
+            play("hp-00000004", modes[0], False)
+            self.assertEqual(study.state(data, study.load_participant(data, "hp-00000004")), "practice_passed")
+            self.assertIn("Staging", study.staging(data))
+            for mode in modes:
+                play("hp-00000004", mode, True)
+            self.assertEqual([study.state(data, row) for row in study.humans(data)].count("completed"), 4)
+            self.assertIsNone(study.staging(data))
+            for index in range(10, 18):
+                enroll(f"hp-000000{index}")
             self.assertIn("maximum", study.staging(data))
 
     def test_a_review_grade_stop_cannot_be_cleared(self):
@@ -401,11 +419,15 @@ class AmendmentTest(unittest.TestCase):
         study = harness()
         with tempfile.TemporaryDirectory() as folder:
             data = Path(folder)
-            study.stop(data, ["hp-12345678 angle_holding-1: review-grade challenge evidence on an honest session: stop collection"])
+            study.stop(data, [f"hp-12345678 angle_holding-1: {study.FALSIFYING}: stop collection"])
             with self.assertRaises(SystemExit):
                 study.cmd_clear_stop(argparse.Namespace(data=str(data), reason="looked at it"))
             self.assertTrue((data / "STOP").exists())
-            study.stop(data, ["hp-12345678 free-1: personal data in a public output: server.log: the hostname"])
+            (data / "STOP").unlink()
+            # A crossing on a session already invalid before scoring still stops, but it does not answer the primary question.
+            study.stop(data, ["hp-12345678 combat-1: review-grade challenge evidence on a session already invalid (protocol_deviation): investigate"])
+            self.assertEqual(study.cmd_clear_stop(argparse.Namespace(data=str(data), reason="the participant said they hunted the probe")), 0)
+            study.stop(data, ["hp-12345678 free-1: an address or a machine identity in a kept session file: public/server.log: the hostname"])
             self.assertEqual(study.cmd_clear_stop(argparse.Namespace(data=str(data), reason="a test fixture path; removed")), 0)
             self.assertFalse((data / "STOP").exists())
 
@@ -423,6 +445,210 @@ class AmendmentTest(unittest.TestCase):
             self.assertEqual({part: metrics[part] for part in study.MOTION_PARTS}, {part: 1000.0 if part == expected else 0.0 for part in study.MOTION_PARTS}, expected)
         self.assertEqual(study.motion_metrics(rows(6.0, 0.0, None), rows(6.0, 0.0, None))["aim_moving_otherwise_ms"], 1000.0, "sweeping across a still body")
 
+
+
+class Amendment2Test(unittest.TestCase):
+    """Amendment 2, declared before anyone enrolled: the collection protocol hardened, and nothing that decides a
+    challenge changed."""
+
+    def enrolled(self, data: Path) -> str:
+        import argparse
+        import contextlib
+        import io
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            harness().cmd_enroll(argparse.Namespace(data=str(data), agree=True, publish=False, kind="human"))
+        return sorted(path.parent.name for path in data.glob("hp-*/participant.json"))[-1]
+
+    def test_it_binds_both_earlier_documents_and_keeps_the_frozen_values(self):
+        found, study = amendment_2(), harness()
+        self.assertEqual((found["format"], found["amendment"]), ("fpsdet.human-pilot-amendment/1", 2))
+        self.assertEqual(found["amends"]["design"]["sha256"], study.pilot.sha256_file(STUDY / "design.json"))
+        self.assertEqual(found["amends"]["amendment_1"]["sha256"], study.pilot.sha256_file(STUDY / "amendment-1.json"))
+        self.assertIn("before any participant enrolled", found["declared"])
+        self.assertEqual(found["consent"]["enrolled_under_version_1"], 0)
+        self.assertFalse((STUDY / "result.json").exists())
+        self.assertEqual((design()["frozen"]["hidden_track_min_samples"], design()["frozen"]["hidden_track_min_ms"], design()["frozen"]["episode_gap_ms"]),
+                         (8, 1200, 250))
+        self.assertEqual(amendment()["metrics_added"]["frozen"], {"window_ms": 250, "still_deg_per_s": 2.0, "co_motion_deg": 45.0})
+        self.assertEqual(found["validity"]["reasons"], ["controls_failure", "participant_withdrew", "technical_failure", "visibility_failure",
+                                                         "audio_failure", "protocol_deviation", "privacy_failure"])
+        self.assertIn("never a reason", found["validity"]["rule"])
+
+    def test_consent_version_2_says_what_participants_now_need_to_know(self):
+        text = (STUDY / "CONSENT.md").read_text(encoding="utf-8")
+        self.assertIn("*Consent notice, version 2.*", text)
+        self.assertIn("Please don't try to find, guess or follow them: the study is about ordinary play.", text)
+        self.assertIn("six yes-or-no questions", text)
+        self.assertIn("did you try to find the hidden probes", text)
+        self.assertIn("totals already published cannot be recalled", text)
+        client = (GODOT / "scripts" / "study_client.gd").read_text(encoding="utf-8")
+        self.assertIn("Please don't try to find them: just play the round as asked.", client)
+
+    def test_enrollment_binds_what_the_participant_agreed_to(self):
+        import tempfile
+
+        study = harness()
+        with tempfile.TemporaryDirectory() as folder:
+            data = Path(folder)
+            participant = self.enrolled(data)
+            record = study.load_participant(data, participant)
+        self.assertEqual(record["bindings"], study.bindings())
+        self.assertEqual(set(record["bindings"]), {"consent", "design", "amendment_1", "amendment_2"})
+        self.assertEqual((record["status"], record["history"][0]["status"]), ("enrolled", "enrolled"))
+
+    def test_a_session_needs_a_passed_practice_the_next_mode_and_the_same_bindings(self):
+        import tempfile
+
+        study = harness()
+        with tempfile.TemporaryDirectory() as folder:
+            data = Path(folder)
+            participant = self.enrolled(data)
+            order = study.session_order(participant)
+
+            def refused(mode: str) -> str:
+                with self.assertRaises(SystemExit) as caught:
+                    study.run_session("no-engine-needed", data, participant, mode, 24800, "human")
+                return str(caught.exception)
+
+            self.assertIn("needs a passed practice", refused(order[0]))
+            record = study.load_participant(data, participant)
+            study.set_status(record, "practice_passed")
+            study.save_participant(data, record)
+            self.assertIn(f"The next session for {participant} is {order[0]}", refused(order[1]))
+            record["bindings"]["consent"] = "sha256:" + "0" * 64
+            study.save_participant(data, record)
+            self.assertIn("a new study version", refused(order[0]))
+            self.assertEqual(sorted(path.name for path in (data / participant).iterdir()), ["participant.json"], "nothing ran")
+
+    def test_practice_passes_only_when_the_controls_work(self):
+        study = harness()
+        confirms = study.practice_confirms()
+        self.assertEqual(confirms[1], amendment_2()["practice_gate"]["adds_confirm"])
+        everything = {item: True for item in confirms}
+        self.assertTrue(study.practice_ready(everything, 60))
+        self.assertFalse(study.practice_ready(everything, 29), "under 30 frames a second")
+        self.assertFalse(study.practice_ready(everything, None))
+        self.assertFalse(study.practice_ready({**everything, confirms[1]: False}, 60), "a captured mouse must let go with Esc")
+        self.assertTrue(study.practice_ready({**everything, confirms[0]: False, confirms[1]: False}, 60), "no mouse: the arrow keys")
+        for item in confirms[2:]:
+            self.assertFalse(study.practice_ready({**everything, item: False}, 60), item)
+
+    def test_withdrawal_deletes_the_data_and_keeps_only_that_someone_withdrew(self):
+        import argparse
+        import contextlib
+        import io
+        import tempfile
+
+        study = harness()
+        with tempfile.TemporaryDirectory() as folder:
+            data, practice = Path(folder) / "study", Path(folder) / "practice"
+            data.mkdir()
+            participant = self.enrolled(data)
+            for name in ("free-1", "combat-1"):
+                (data / participant / name / "private").mkdir(parents=True)
+                (data / participant / name / "private" / "comments.json").write_text('{"q": "a comment"}')
+            (practice / participant / "practice-1").mkdir(parents=True)
+            with contextlib.redirect_stdout(io.StringIO()):
+                study.cmd_withdraw(argparse.Namespace(data=str(data), participant=participant, reason="participant_request", practice=str(practice)))
+            self.assertEqual(sorted(path.name for path in (data / participant).iterdir()), ["participant.json"])
+            self.assertFalse((practice / participant).exists())
+            kept = study.load_participant(data, participant)
+            self.assertEqual(set(kept), {"participant", "kind", "status", "sessions_deleted", "reason_class", "withdrawn", "bindings"})
+            self.assertEqual((kept["status"], kept["sessions_deleted"], kept["reason_class"]), ("withdrawn", True, "participant_request"))
+            # Unable to continue: the sessions stay, the place is freed.
+            other = self.enrolled(data)
+            (data / other / "free-1").mkdir()
+            with contextlib.redirect_stdout(io.StringIO()):
+                study.cmd_withdraw(argparse.Namespace(data=str(data), participant=other, reason="unable_to_continue", practice=None))
+            self.assertTrue((data / other / "free-1").exists())
+            self.assertEqual(study.state(data, study.load_participant(data, other)), "discontinued")
+
+    def test_validity_is_fixed_before_the_score_and_a_crossing_is_never_a_reason(self):
+        study = harness()
+        question = amendment_2()["validity"]["question_added"]
+        asked = {"asked": True, "answers": {question: False}}
+        self.assertEqual(study.declare_validity("machine_standin", asked, None), {"valid": True, "reason": None, "by": "machine"})
+        self.assertEqual(study.declare_validity("human", {"asked": True, "answers": {question: True}}, None)["reason"], "protocol_deviation")
+        self.assertTrue(study.declare_validity("human", asked, lambda prompt: "y")["valid"])
+        replies = iter(["n", "9", "3"])
+        declared = study.declare_validity("human", asked, lambda prompt: next(replies))
+        self.assertEqual(declared, {"valid": False, "reason": "technical_failure", "by": "operator"})
+        for reason in study.validity_reasons():
+            self.assertNotIn("review", reason)
+            self.assertNotIn("cross", reason)
+        # declare_validity runs before post_session, which is where the score first exists.
+        source = (STUDY / "study.py").read_text(encoding="utf-8")
+        self.assertLess(source.index("declared = declare_validity(kind, answers, ask)"), source.index("return post_session(run, plan, secret"))
+
+    def test_the_privacy_sweep_covers_the_whole_session_tree(self):
+        import getpass
+        import tempfile
+
+        study = harness()
+        with tempfile.TemporaryDirectory() as folder:
+            run = Path(folder) / "free-1"
+            for path, text in (("server.out", f"loading {Path.home()}/project"), ("godot-user/godot/logs/godot.log", f"user {getpass.getuser()}"),
+                               ("cases-live/p.json", f"{Path.home()}/cases"), ("public/events.ndjson", '{"t_ms": 100}'),
+                               ("private/study.ndjson", '{"dist": 13.32}')):
+                (run / path).parent.mkdir(parents=True, exist_ok=True)
+                (run / path).write_text(text, encoding="utf-8")
+            sweep = study.privacy_sweep(run)
+            self.assertEqual(sweep["operational_deleted"], ["cases-live", "godot-user", "server.out"])
+            self.assertGreaterEqual(sweep["operational_identifiers"], 3)
+            self.assertEqual(sweep["kept_hits"], [])
+            self.assertEqual(sorted(path.relative_to(run).as_posix() for path in run.rglob("*") if path.is_file()),
+                             ["private/study.ndjson", "public/events.ndjson"])
+            (run / "private" / "comments.json").write_text('{"q": "my box is 192.168.1.20"}', encoding="utf-8")
+            self.assertEqual(study.privacy_sweep(run)["kept_hits"], ["private/comments.json: an IP address"])
+
+    def test_the_primary_question_allows_only_the_statistics_it_can_carry(self):
+        study = harness()
+        units = {"participants": 8, "sessions": 56, "challenges": 224}
+        finding = study.endpoint([{"participant": "hp-1", "session": "angle_holding-1", "mode": "angle_holding"}], True, units)
+        self.assertEqual(finding["answer"], "yes")
+        self.assertNotIn("upper_95_if_none", finding)
+        self.assertIn("no rate and no interval", finding["statistics"])
+        early = study.endpoint([], False, units)
+        self.assertTrue(early["answer"].startswith("not yet"))
+        self.assertNotIn("upper_95_if_none", early)
+        clean = study.endpoint([], True, units)
+        self.assertEqual(clean["answer"], "no")
+        self.assertEqual(clean["upper_95_if_none"]["participants"], {"of": 8, "bound": study.upper_zero(8)})
+        self.assertIn("continuation rule", clean["statistics"])
+
+    def test_the_analysis_refuses_participants_under_different_protocols(self):
+        import tempfile
+
+        study = harness()
+        with tempfile.TemporaryDirectory() as folder:
+            data = Path(folder)
+            first = self.enrolled(data)
+            self.enrolled(data)
+            study.analyze(data, "human")  # the same bindings: fine, with nothing played yet
+            record = study.load_participant(data, first)
+            record["bindings"]["consent"] = "sha256:" + "1" * 64
+            study.save_participant(data, record)
+            with self.assertRaises(SystemExit):
+                study.analyze(data, "human")
+
+    def test_the_motion_split_at_its_exact_boundaries(self):
+        study = harness()
+
+        def part(aw, pw, co):
+            row = {"t": 0, "in": True, "turn": aw, "dist": 10.0, "ps": 0.0, "aw": aw, "pw": pw, "co": co}
+            metrics = study.motion_metrics([row], [row])
+            return next(name for name in study.MOTION_PARTS if metrics[name] > 0)
+
+        self.assertEqual(part(1.9, 1.9, None), "both_still_ms")
+        self.assertEqual(part(1.9, 2.0, None), "stationary_aim_moving_probe_ms")
+        self.assertEqual(part(2.0, 1.9, None), "aim_moving_otherwise_ms")
+        self.assertEqual(part(2.0, 2.0, 45.0), "co_moving_ms")
+        self.assertEqual(part(2.0, 2.0, 45.1), "aim_moving_otherwise_ms")
+        self.assertEqual(part(2.0, 2.0, None), "aim_moving_otherwise_ms")
+        split = amendment_2()["motion_definitions"]["split"]
+        self.assertEqual(split["co_moving"], "aw >= 2.0 and pw >= 2.0 and co is not null and co <= 45.0")
+        self.assertEqual(amendment()["metrics_added"]["frozen"]["still_deg_per_s"], 2.0)
 
 if __name__ == "__main__":
     unittest.main()

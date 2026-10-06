@@ -38,6 +38,22 @@
 
 ### Added
 
+- **Amendment 2 to the human pilot, before anyone enrolled** ([examples/human-pilot/amendment-2.json](examples/human-pilot/amendment-2.json)). Outside review found collection holes that could deadlock, bias or overclaim the study. Nothing that decides a challenge changed.
+  - **Participant states and replacements:**
+    - at most 4 in play until 4 have completed, then at most 12;
+    - `study.py withdraw` deletes a participant's data on request and keeps only an anonymous record, or frees the place of someone unable to continue.
+  - **Consent version 2:** please don't try to find the probes, a sixth question, and what withdrawal after publication means.
+    - Enrollment binds the consent notice, the design and both amendments.
+    - Sessions and the analysis refuse mixed or changed versions.
+  - **Before each session:** a passed practice, now with an Esc check, and the participant's pre-registered order.
+  - **Validity fixed before scoring:** from the participant's answer, the operator's declaration with a closed list of reasons, and score-independent facts. A crossing is never a reason, and only the stop on a protocol-valid session is final.
+  - **Privacy:** the whole session tree is swept, operational files are deleted, and what is kept is scanned again; practice too.
+  - **Falsification is the headline.**
+    - A finding gives counts and no interval.
+    - Zero-event bounds appear only once the planned group completes.
+    - Motion-split boundaries are tested exactly.
+    - The study arena's near-still probes are named as a confound.
+
 - **Try it on your own logs** ([examples/historic](examples/historic/README.md), [the Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html)). An operator can score a copy of logs their server already wrote, offline. Nothing goes on their servers or players' PCs, and nobody is banned.
   - **`convert.py`** turns a CSV or JSON-lines export into fpsdet events:
     - it copies only the schema's fields, so names and addresses are dropped;

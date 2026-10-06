@@ -1,0 +1,127 @@
+{
+ "format": "fpsdet.human-pilot-amendment/1",
+ "study": "p13-consented-honest-human-pilot",
+ "amendment": 2,
+ "amends": {
+  "design": {
+   "path": "examples/human-pilot/design.json",
+   "sha256": "sha256:f12c0f830d8b35f9df74b70af826ae52550bf522ceda4574f2041c317607412f"
+  },
+  "amendment_1": {
+   "path": "examples/human-pilot/amendment-1.json",
+   "sha256": "sha256:e9b9a44456058f8c687d27d4b7bc5cbee3ad10133927b53a7b189c971044750d"
+  }
+ },
+ "declared": "2026-10-06, before any participant enrolled",
+ "why": "Outside review of the collection protocol found operational holes that could deadlock, bias or overclaim the study: the staging rule could wait forever on a participant who left, nothing could withdraw a participant, practice was not enforced, the privacy scan covered less than the study claims, validity was not fixed before scoring, and the analysis printed intervals that a stop-on-first-finding design cannot support. This amendment closes them. It changes nothing that decides a challenge.",
+ "unchanged": [
+  "the review bar (8 moments and 1,200 ms per challenge), the aim cone, the 250 ms episode gap",
+  "challenge placement, the schedule, four challenges a session, the seven modes and their order rule",
+  "the scorer, occluded_motion_replay version 2, and the motion metrics' frozen values (amendment 1)",
+  "the stop conditions of design.json and amendment 1"
+ ],
+ "participants": {
+  "states": {
+   "enrolled": "agreed and has a random id; may practise",
+   "practice_passed": "practice passed; may play sessions",
+   "practice_failed": "practice failed; plays no session; may practise again only while the stage has room",
+   "withdrawn": "asked to leave: every session and practice folder deleted; only an anonymous record stays",
+   "discontinued": "cannot continue, without asking for deletion: their sessions stay, and they free their place",
+   "completed": "derived: a protocol-valid session in every mode",
+   "incomplete": "derived: in play, not completed"
+  },
+  "in_play": "enrolled, practice_passed or completed",
+  "staging": "Stage 1 holds at most 4 participants in play. A participant who withdraws, is discontinued or fails practice frees a place for a replacement. Stage 2 opens once 4 participants have completed with no finding stopping the study: then at most 12 may be in play, aiming at 8."
+ },
+ "withdrawal": {
+  "command": "study.py withdraw --reason participant_request (deletes) or --reason unable_to_continue (keeps the sessions)",
+  "keeps": [
+   "participant (the random id)",
+   "kind",
+   "status",
+   "sessions_deleted",
+   "reason_class",
+   "withdrawn (the date)",
+   "bindings"
+  ],
+  "deletes": [
+   "every session folder",
+   "the practice folder, when given",
+   "comments",
+   "the publication choice"
+  ],
+  "after_publication": "Raw recordings are deleted; aggregates already published cannot be recalled, and the next analysis records the withdrawal.",
+  "stop_evidence": "A deletion request is honoured even when the session holds a stop's evidence. The stop stays in STOP and stops.log, and the session is recorded as deleted at the participant's request."
+ },
+ "consent": {
+  "version": 2,
+  "adds": [
+   "Please don't try to find, guess or follow the hidden probes: the study is about ordinary play.",
+   "the sixth question, and what withdrawal after publication means"
+  ],
+  "binding": "Enrollment records the SHA-256 of CONSENT.md, design.json, amendment-1.json and amendment-2.json. A session refuses to start, and the analysis refuses to run, when a participant's bindings differ from the files or from each other's.",
+  "enrolled_under_version_1": 0
+ },
+ "practice_gate": {
+  "rule": "A human session refuses to start unless the participant's practice passed.",
+  "adds_confirm": "the mouse is released with Esc, and taken back with a click",
+  "passes_when": "the client ran at 30 frames a second or more; movement, the arrow keys, the fire button and understanding all worked; and, when mouse look worked, Esc released it",
+  "records": "Only the outcome, the frame rate and the fallback go into the study folder. Practice telemetry stays in its own folder, and is swept like a session."
+ },
+ "session_order": "A human session must be the participant's next mode in their pre-registered order. A mode whose last session was not protocol-valid may be played again.",
+ "validity": {
+  "when": "Fixed before the session is scored: from the questionnaire and the operator's declaration, then from facts that do not depend on the score.",
+  "question_added": "Did you try to find, guess or follow the hidden probes?",
+  "reasons": [
+   "controls_failure",
+   "participant_withdrew",
+   "technical_failure",
+   "visibility_failure",
+   "audio_failure",
+   "protocol_deviation",
+   "privacy_failure"
+  ],
+  "declared_by_the_operator": "after the questionnaire and before scoring: was the session run as the protocol says, and if not, which reason",
+  "automatic": {
+   "protocol_deviation": "the participant answered yes to the added question",
+   "technical_failure": "under 120 s played, or a process timed out",
+   "visibility_failure": "the server reported a challenge body seen",
+   "audio_failure": "the server reported a challenge body heard",
+   "privacy_failure": "the privacy sweep found an address or a machine identity in a kept file"
+  },
+  "rule": "A review-grade crossing is never a reason. Only protocol-valid sessions count toward completion and toward the primary question. A crossing on a session already invalid still stops the study for investigation, but it does not answer the primary question, and that stop may be cleared."
+ },
+ "privacy_sweep": {
+  "scans": "every file the session or practice wrote: public, private and operational",
+  "classes": {
+   "public": "public/: events, plan, server log, client log, performance",
+   "private_research": "private/: study telemetry, realization records, comments; and session.json",
+   "operational": "server.out, client.out, the engine's user folder, and the local case folders: deleted after the post-match check"
+  },
+  "then": "delete the operational files, scan what is kept again, and stop on any address or machine identity in it"
+ },
+ "statistics": {
+  "primary_question": "Did at least one protocol-valid honest session produce an unexplained review-grade challenge finding?",
+  "design": "Falsification, with a stop on the first finding and continuation to stage 2 only without one. It is not a prevalence estimate.",
+  "if_a_finding": "Report the finding and descriptive counts. No rate and no interval at any level.",
+  "if_none_and_complete": "Exact one-sided 95% upper bounds (1 - 0.05^(1/n)) at participant, session and challenge level, labelled as following the pre-declared continuation rule.",
+  "if_none_and_incomplete": "Descriptive counts only.",
+  "supersedes": "design.json's two-sided intervals when there is a finding"
+ },
+ "motion_definitions": {
+  "telemetry": "Per tick, in the world, over the last k ticks (k at most 15, 250 ms at 60 Hz): d = |chest - eye|; aim point A = eye + aim * d; aw = degrees(|A_now - A_k_ago| / d) / (k / 60 s); pw = degrees(|P_now - P_k_ago| / d) / (k / 60 s), P the body's chest; co = the angle between the two displacements when both exceed 1e-6 m, else null. aw and pw are rounded to 0.1 deg/s and co to 0.1 deg in the telemetry.",
+  "split": {
+   "both_still": "aw < 2.0 and pw < 2.0",
+   "stationary_aim_moving_probe": "aw < 2.0 and pw >= 2.0",
+   "co_moving": "aw >= 2.0 and pw >= 2.0 and co is not null and co <= 45.0",
+   "aim_moving_otherwise": "aw >= 2.0 and not co_moving"
+  },
+  "use": "analysis only, as amendment 1"
+ },
+ "known_confound": "The study arena's probe replays a bot's recorded route, turned and delayed, inside a sealed room 1.2 to 2.3 m wide, 10 to 23 m from the spawn; in the stress and sweep modes that bot stands still. So probes in this arena are often near-still. A finding here may say as much about this placement as about the challenge type, and the next phase must separate the two.",
+ "code_changed": [
+  "examples/human-pilot/study.py",
+  "examples/pilot/godot/scripts/study_client.gd"
+ ],
+ "dry_run": "examples/human-pilot/dry-run stays as committed, bound to the code at 68a6fa3."
+}
