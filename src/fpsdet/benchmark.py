@@ -494,7 +494,7 @@ def _strength_estimates(artifact: Mapping) -> dict:
 def run_real(found: Mapping, data: Path, out: Path) -> tuple[dict, dict]:
     """Score one real dataset's prepared inputs offline, and evaluate, estimate and bind every step. Returns
     the result and the artifacts it wrote to ``out``."""
-    from .calibration import census, dumps, evaluate, load_dataset, render_markdown
+    from .calibration import EvaluationError, PublishedMismatch, census, dumps, evaluate, load_dataset, render_markdown
     from .parse import load_events, load_profile
     from .persist import case_to_dict, cohort_from_dict
     from .pipeline import run_score
@@ -529,7 +529,17 @@ def run_real(found: Mapping, data: Path, out: Path) -> tuple[dict, dict]:
     mark = time.perf_counter()
     labels = read_json(data / files["labels"])
     dataset = load_dataset(ROOT / found["label_semantics"]["definition"])
-    evaluation = evaluate(cases, labels, dataset, profile, telemetry_census=census(data / files["events"]))
+    found_census = census(data / files["events"])
+    mismatch = None
+    try:
+        evaluation = evaluate(cases, labels, dataset, profile, telemetry_census=found_census)
+    except PublishedMismatch as error:
+        # Another population (another pseudonym key, another download) need not give the published decisions.
+        # Say exactly how they differ, and evaluate what this run has.
+        mismatch = str(error)
+        evaluation = evaluate(cases, labels, {key: value for key, value in dataset.items() if key != "published"}, profile, telemetry_census=found_census)
+    except EvaluationError as error:
+        raise BenchmarkError(f"{found['id']}: {error}") from error
     timings["evaluate"] = time.perf_counter() - mark
     mark = time.perf_counter()
     estimated = strength(evaluation)
@@ -567,7 +577,8 @@ def run_real(found: Mapping, data: Path, out: Path) -> tuple[dict, dict]:
     }
     published = {
         "decisions_reproduce": bool((evaluation.get("published") or {}).get("reproduced")),
-        "where": (evaluation.get("published") or {}).get("where"),
+        "where": (evaluation.get("published") or {}).get("where") or (dataset.get("published") or {}).get("where"),
+        **({"mismatch": mismatch} if mismatch else {}),
         "decisions": {label: cell["counts"] for label, cell in evaluation["statistics"]["decisions"]["by_group"].items()},
     }
     result = assemble(found, chain, semantic, published, timings)
@@ -598,8 +609,9 @@ def result_digest(artifact: Mapping) -> str:
     return digest("result", {key: artifact[key] for key in IDENTITY if key in artifact})
 
 
-# Each field a comparison reads, the category a difference in it falls under, and its kind: an input,
-# a semantic number, provenance (who produced it), or presentation.
+# Each field a comparison reads, the category a difference in it falls under, and its kind. Causes: an input
+# or the detector code. Effects: a semantic number. Derived: a digest that binds the causes and moves with
+# them, reported only when nothing explains it. Presentation: a generated report's text.
 FIELDS = (
     ("chain.inputs.events.sha256", "input changed", "input"),
     ("chain.inputs.baseline.sha256", "input changed", "input"),
@@ -611,12 +623,12 @@ FIELDS = (
     ("chain.profile", "profile changed", "input"),
     ("chain.profiles", "profile changed", "input"),
     ("chain.label_definition", "label changed", "input"),
-    ("chain.detector", "detector code changed", "provenance"),
+    ("chain.detector", "detector code changed", "detector"),
     ("chain.cohort", "cohort changed", "input"),
-    ("chain.scored.packets", "detector code changed", "provenance"),
-    ("chain.packets", "detector code changed", "provenance"),
-    ("chain.evaluation.digest", "evaluation changed", "provenance"),
-    ("chain.strength.digest", "strength changed", "provenance"),
+    ("chain.scored.packets", "provenance changed", "derived"),
+    ("chain.packets", "provenance changed", "derived"),
+    ("chain.evaluation.digest", "provenance changed", "derived"),
+    ("chain.strength.digest", "provenance changed", "derived"),
     ("chain.reports", "presentation only", "presentation"),
     ("semantic.decisions_digest", "decision changed", "semantic"),
     ("semantic.observations_digest", "evidence changed", "semantic"),
@@ -624,7 +636,8 @@ FIELDS = (
     ("semantic.eligibility_digest", "eligibility changed", "semantic"),
     ("semantic.evaluation_statistics", "evaluation changed", "semantic"),
     ("semantic.strength_estimates", "strength changed", "semantic"),
-    ("semantic.split", "selection changed", "semantic"),
+    ("semantic.split", "split changed", "semantic"),
+    ("published.decisions_reproduce", "decision changed", "semantic"),
     ("semantic.demo", "decision changed", "semantic"),
     ("semantic.fixtures", "decision changed", "semantic"),
     ("semantic.week", "decision changed", "semantic"),
@@ -667,7 +680,7 @@ def compare(result: Mapping, expected: Mapping | None) -> dict:
         status = "INPUT_CHANGED"
     elif "semantic" in kinds:
         status = "DRIFT"
-    elif "provenance" in kinds:
+    elif kinds & {"detector", "derived"}:
         status = "PROVENANCE_ONLY"
     elif "presentation" in kinds:
         status = "PRESENTATION_ONLY"
@@ -675,10 +688,14 @@ def compare(result: Mapping, expected: Mapping | None) -> dict:
         status = "ENVIRONMENT_ONLY"
     else:
         status = "MATCH"
-    categories = sorted({change["category"] for change in changes})
-    if status == "PROVENANCE_ONLY" and categories == ["detector code changed", "evaluation changed", "strength changed"]:
-        categories = ["detector code changed"]  # the artifact digests bind the detector; their numbers did not move
-    return {"status": status, "categories": categories, "changes": changes + environment_only}
+    # Causes and their effects. A derived digest moves with its causes, and a report's text with its numbers, so
+    # each is named only when nothing else explains it.
+    categories = {change["category"] for change in changes if change["kind"] in ("input", "detector", "semantic")}
+    if "derived" in kinds and not categories:
+        categories.add("provenance changed")
+    if "presentation" in kinds and not categories:
+        categories.add("presentation only")
+    return {"status": status, "categories": sorted(categories), "changes": changes + environment_only}
 
 
 def expected_entry(result: Mapping) -> dict:

@@ -90,6 +90,25 @@ class CompareTest(unittest.TestCase):
                 self.assertEqual(found["status"], status)
                 self.assertIn(category, found["categories"])
 
+    def test_categories_are_causes_and_effects_not_their_echoes(self):
+        """Packet and artifact digests move with whatever they bind, and a report's text with its numbers:
+        they are named only when nothing else explains a change."""
+        def inputs_moved(r):
+            r["chain"]["code"]["src/fpsdet/fixtures.py"] = "sha256:" + "3" * 64
+            r["chain"]["packets"]["demo"] = "sha256:" + "7" * 64
+        found = self.status(inputs_moved)
+        self.assertEqual((found["status"], found["categories"]), ("INPUT_CHANGED", ["input changed"]))
+        found = self.status(lambda r: r["chain"]["packets"].update(demo="sha256:" + "7" * 64))
+        self.assertEqual((found["status"], found["categories"]), ("PROVENANCE_ONLY", ["provenance changed"]))
+
+    def test_a_published_mismatch_is_reported_not_raised(self):
+        from fpsdet.calibration import PublishedMismatch
+
+        source = (ROOT / "src" / "fpsdet" / "benchmark.py").read_text(encoding="utf-8")
+        self.assertIn("except PublishedMismatch", source)
+        self.assertTrue(issubclass(PublishedMismatch, Exception))
+        self.assertIn(("published.decisions_reproduce", "decision changed", "semantic"), bm.FIELDS)
+
     def test_a_drift_says_why_with_the_code_change_beside_it(self):
         def edit(r):
             r["chain"]["detector"] = "sha256:" + "1" * 64
