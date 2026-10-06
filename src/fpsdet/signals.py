@@ -153,6 +153,23 @@ def mirror_check_finding(
     )
 
 
+def mirror_eligibility(recoil: RecoilSummary, profile: GameProfile) -> str:
+    """Could the mirror check run on this build? The same gates as ``mirror_check_finding``, in its order."""
+    if recoil.unordered_moments:
+        return "conflict"
+    count = min(len(recoil.applied), len(recoil.compensation))
+    if count == 0:
+        return "telemetry_unavailable"
+    if count < profile.mirror_min_shots:
+        return "insufficient_samples"
+    groups = _by_spray(recoil.spray, count)
+    if groups is not None:
+        known = [rows for rows in groups.values() if len(rows) >= PATTERN_MIN_SPRAYS]
+        if sum(len(rows) for rows in known) >= profile.mirror_min_shots:
+            return "eligible"
+    return "eligible" if profile.recoil_pattern == "random" else "insufficient_samples"
+
+
 # A gap longer than this many cycles is a pause between bursts, not the firing cadence.
 CADENCE_CYCLES = 2.5
 # A match needs this many cadence gaps before its spread means anything.
@@ -240,6 +257,43 @@ def metronome_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str,
     }
 
 
+def metronome_eligibility(weapon: WeaponSummary, profile: GameProfile) -> str:
+    """Could the metronome check run on this weapon? It needs a cycle rule, and enough cadence gaps in
+    matches that did not simply fire at the gun's own cycle."""
+    rule = profile.weapon_rule(weapon.weapon_class, weapon.weapon_key)
+    if rule is None or rule.min_shot_interval_ms is None:
+        return "disabled"
+    if rule.server_paced:
+        return "not_applicable"
+    pace = rule.min_shot_interval_ms + max(rule.interval_slack_ms, profile.tick_ms or 0)
+    judged = 0
+    long_enough = False
+    for _match, _gun, gaps in keyed_match_gaps(weapon):
+        cadence = [gap for gap in gaps if gap <= CADENCE_CYCLES * rule.min_shot_interval_ms]
+        if len(cadence) < METRONOME_MATCH_GAPS:
+            continue
+        long_enough = True
+        if sum(cadence) / len(cadence) > pace:
+            judged += len(cadence)
+    if judged >= profile.metronome_min_gaps:
+        return "eligible"
+    # Every long enough match fired at the gun's own cycle: the server, not a person, set the cadence.
+    return "not_applicable" if long_enough and not judged else "insufficient_samples"
+
+
+def track_eligibility(weapon: WeaponSummary, check: str, profile: GameProfile) -> str:
+    """Could the hidden-mover check (``hidden``) or the legacy private replay (``private_replay``) run on
+    this weapon? Each needs as many readable moments as its bar has samples."""
+    seen = weapon.seen.get(check, {})
+    if seen.get("checked", 0) >= profile.hidden_track_min_samples:
+        return "eligible"
+    if seen.get("checked"):
+        return "insufficient_samples"
+    if seen.get("conflict"):
+        return "conflict"
+    return "disabled" if check == "private_replay" and seen.get("undecidable") else "telemetry_unavailable"
+
+
 def hidden_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     """Time the aim spent on an enemy the server had not made visible."""
     found = hidden_finding(weapon, profile)
@@ -311,6 +365,17 @@ def wire_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
     """
     found = wire_finding(weapon, profile)
     return None if found is None else found[0]
+
+
+def wire_eligibility(weapon: WeaponSummary, profile: GameProfile) -> str:
+    """Could the wire check run on this weapon? It needs as many shots with both errors as its bar has shots."""
+    if not weapon.interp_delay_ms:
+        return "telemetry_unavailable"
+    sent = sum(
+        1 for wire, picture, delay in zip(weapon.wire_error_deg, weapon.picture_error_deg, weapon.interp_delay_ms)
+        if delay > 0 and wire >= 0 and picture >= 0
+    )
+    return "eligible" if sent >= profile.hidden_track_min_samples else "insufficient_samples"
 
 
 def wire_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict] | None:
@@ -394,6 +459,21 @@ def smoothness_break(weapon: WeaponSummary, profile: GameProfile) -> str | None:
 
 # Aim noise under this, in degrees, is too quiet to drop further. Nothing to compare.
 SMOOTH_MIN_KNOWABLE_DEG = 0.05
+
+
+def quiet_eligibility(weapon: WeaponSummary, profile: GameProfile) -> str:
+    """Could the quiet-aim check run on this weapon? It needs enough aim samples on each side, knowable and
+    unknowable, and aim noise on the knowable side to drop from."""
+    knowable, unknowable = weapon.knowable_jitter, weapon.unknowable_jitter
+    if len(knowable) >= profile.unknowable_min_samples and len(unknowable) >= profile.unknowable_min_samples:
+        return "not_applicable" if median(knowable) < SMOOTH_MIN_KNOWABLE_DEG else "eligible"
+    if knowable or unknowable:
+        return "insufficient_samples"
+    causes = weapon.knowledge_skipped.get("quiet_aim", {})
+    if causes.get("conflict"):
+        return "conflict"
+    # Jitter on shots the knowledge engine could not place (no labels) is as good as none.
+    return "insufficient_samples" if set(causes) - {"unchecked", "conflict"} else "telemetry_unavailable"
 
 
 def smoothness_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict] | None:

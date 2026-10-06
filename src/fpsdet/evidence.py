@@ -89,6 +89,24 @@ RETIRED_KINDS = frozenset({"private_replay"})
 # An observation describes evidence. It never carries an instruction to act on an account.
 FORBIDDEN_KEYS = frozenset({"action", "automated_action", "recommended_action"})
 
+# Every detector fpsdet runs itself: the native kinds it emits today.
+NATIVE_KINDS = tuple(kind for kind, (family, _check, _role) in KINDS.items() if family != "external" and kind not in RETIRED_KINDS)
+
+# Detector eligibility: why each detector could or could not run, per unit, as the scorer found it.
+# A unit is what the detector judges one at a time: a weapon key, a recoil build, a declared metric and
+# its group ("metric:group"), a rank comparison ("metric:key"), a challenge, a party, or "" for the
+# whole account. Firing is not recorded here: an observation is the firing, and it must name an eligible
+# unit. The statuses, from a detector that ran to one that never could:
+#   eligible               it ran on this unit; it fired if and only if an observation names the unit
+#   baseline_too_thin      the number was computed, but the humans to compare it with were too few
+#   insufficient_samples   the telemetry is there, but too little of it for the detector ever to fire
+#   conflict               the telemetry contradicts itself, so the detector does not read it
+#   telemetry_unavailable  the fields the detector reads were never sent for this unit
+#   disabled               the profile gives the detector no rule for this unit, or the run no input it needs
+#   not_applicable         the detector does not apply to this unit (a server-paced gun, no partner to time)
+ELIGIBILITY_RECIPE = "fpsdet.detector-eligibility/1"
+ELIGIBILITY = ("eligible", "baseline_too_thin", "insufficient_samples", "conflict", "telemetry_unavailable", "disabled", "not_applicable")
+
 
 # Python 3.12 rounds a float sum() differently from 3.11 in the last bit. Twelve significant
 # digits is far past any meaningful precision and keeps one id for one finding on both.
@@ -217,6 +235,7 @@ def evidence_block(
     provenance: Mapping | None = None,
     challenges: list | None = None,
     fusion: Mapping | None = None,
+    detector_eligibility: Mapping[str, Mapping[str, str]] | None = None,
 ) -> dict:
     """``case["evidence"]``. ``compared`` lists each (metric, key) the scorer measured against a thick cohort.
 
@@ -226,7 +245,9 @@ def evidence_block(
     observations, or is null for a case scored outside a run. It is not part of any observation id.
     ``challenges`` is one result per challenge the player was given or named, followed or not
     (fpsdet.challenge). The key is there only when there is one. ``fusion`` says how external records met
-    the native decision; it is there only when the run was given external input.
+    the native decision; it is there only when the run was given external input. ``detector_eligibility``
+    is why each native detector could or could not run, per unit (``eligibility_block``); a case built by
+    hand outside the scorer has none.
     """
     block = {
         "version": EVIDENCE_VERSION,
@@ -238,7 +259,75 @@ def evidence_block(
         block["challenges"] = [_clean(result, "challenges") for result in challenges]
     if fusion is not None:
         block["fusion"] = _clean(fusion, "fusion")
+    if detector_eligibility:
+        block["detector_eligibility"] = eligibility_block(detector_eligibility)
     return block
+
+
+def eligibility_unit(obs: Mapping) -> str:
+    """The unit an observation's detector judged: the key its eligibility is recorded under."""
+    kind = "occluded_motion_replay" if obs["kind"] in RETIRED_KINDS else obs["kind"]
+    if kind in ("rank_tail", "extra", "supporting_extra"):
+        return f"{obs['evidence']['metric']}:{obs['key']}"
+    if kind == "voice":
+        return obs["evidence"]["party_id"]
+    return obs["key"]
+
+
+def eligibility_block(units: Mapping[str, Mapping[str, str]]) -> dict:
+    """``case["evidence"]["detector_eligibility"]``: for every native detector, its units by status.
+
+    ``units`` maps a kind to {unit: status}. The block lists each kind's units under their status, in
+    order, and leaves out statuses no unit has, so a detector that could not run anywhere is one line.
+    """
+    detectors = {}
+    for kind in NATIVE_KINDS:
+        found = units.get(kind) or {}
+        if not found:
+            raise ValueError(f"no eligibility was recorded for {kind}")
+        by_status: dict[str, list[str]] = {}
+        for unit, status in found.items():
+            if status not in ELIGIBILITY:
+                raise ValueError(f"{kind} {unit!r}: {status!r} is not an eligibility status")
+            by_status.setdefault(status, []).append(unit)
+        detectors[kind] = {status: sorted(by_status[status]) for status in ELIGIBILITY if status in by_status}
+    return {"recipe": ELIGIBILITY_RECIPE, "detectors": detectors}
+
+
+def rollup(entry: Mapping[str, list]) -> str:
+    """One detector's status for the whole player: eligible when it could run on any unit, otherwise the
+    status of the unit that came closest to running, in the order of ELIGIBILITY."""
+    for status in ELIGIBILITY:
+        if entry.get(status):
+            return status
+    raise ValueError("a detector with no units has no status")
+
+
+def eligibility_problems(block: Mapping) -> list[str]:
+    """Is ``detector_eligibility`` well formed, and does every native finding name a unit its detector could
+    run on? Empty when it is."""
+    eligibility = block.get("detector_eligibility")
+    if not isinstance(eligibility, Mapping) or eligibility.get("recipe") != ELIGIBILITY_RECIPE:
+        return ["the evidence has no detector eligibility"]
+    detectors = eligibility.get("detectors")
+    if not isinstance(detectors, Mapping) or set(detectors) != set(NATIVE_KINDS):
+        return ["detector eligibility does not list every native detector"]
+    problems = []
+    for kind, entry in detectors.items():
+        if not isinstance(entry, Mapping) or not entry or set(entry) - set(ELIGIBILITY):
+            problems.append(f"{kind}: eligibility statuses are not from the closed list")
+            continue
+        units = [unit for keys in entry.values() for unit in keys]
+        if len(units) != len(set(units)):
+            problems.append(f"{kind}: a unit has more than one status")
+    for obs in block.get("observations") or []:
+        if obs.get("source") != SOURCE or problems:
+            continue
+        kind = "occluded_motion_replay" if obs["kind"] in RETIRED_KINDS else obs["kind"]
+        unit = eligibility_unit(obs)
+        if unit not in (detectors.get(kind) or {}).get("eligible", ()):
+            problems.append(f"{kind} fired on {unit!r}, which its eligibility does not list as eligible")
+    return problems
 
 
 def _unit(obs: dict) -> str:

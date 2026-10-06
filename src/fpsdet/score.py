@@ -25,9 +25,11 @@ from __future__ import annotations
 import math
 
 from .baseline import CohortTable, Dist, cohort_is_thick, sample_std
-from .evidence import KINDS, Observation
+from .evidence import ELIGIBILITY, KINDS, NATIVE_KINDS, Observation
 from .challenge import (
+    ABSTAINED,
     FOLLOWED,
+    UNPLANNED,
     ChallengeRegistry,
     challenge_context,
     challenge_evidence,
@@ -53,11 +55,16 @@ from .signals import (
     hidden_finding,
     keyed_match_gaps,
     leftover_signature,
+    metronome_eligibility,
     metronome_finding,
     mirror_check_finding,
+    mirror_eligibility,
     private_finding,
     pearson,
+    quiet_eligibility,
     smoothness_finding,
+    track_eligibility,
+    wire_eligibility,
     wire_finding,
 )
 from .statsutil import clustered_lower, design_effect, median, median_bound, percentile, wilson_upper
@@ -339,6 +346,68 @@ def _fire_break(weapon: WeaponSummary, profile: GameProfile) -> tuple[str, dict]
     return None
 
 
+def _fire_eligibility(weapon: WeaponSummary, profile: GameProfile) -> str:
+    """Could the fire-interval rule run on this weapon? It needs a cycle rule, and as many gaps in matches
+    long enough to judge as the rule needs to fire."""
+    rule = profile.weapon_rule(weapon.weapon_class, weapon.weapon_key)
+    if rule is None or rule.min_shot_interval_ms is None:
+        return "disabled"
+    usable = sum(len(gaps) for _match, _gun, gaps in keyed_match_gaps(weapon) if len(gaps) >= FIRE_MATCH_GAPS)
+    return "eligible" if usable >= max(rule.min_intervals, rule.min_violations) else "insufficient_samples"
+
+
+def _floor_eligibility(recoil, profile: GameProfile) -> str:
+    """Could the blatant-recoil floor run on this build? It needs pitches, a floor, and a run's worth of eligible shots."""
+    if not recoil.pitch_reports:
+        return "telemetry_unavailable"
+    if recoil.floor is None:
+        return "disabled"
+    return "eligible" if len(recoil.pitches) >= profile.recoil_min_run else "insufficient_samples"
+
+
+def _speed_eligibility(speed, profile: GameProfile) -> str:
+    """Could the speed rule run? A sustained run needs at least ``speed_min_run`` eligible ground samples."""
+    if speed is None:
+        return "telemetry_unavailable"
+    if speed.eligible >= profile.speed_min_run:
+        return "eligible"
+    if speed.eligible:
+        return "insufficient_samples"
+    if speed.missing_cap:
+        return "disabled"  # ground samples, but no cap to test them against
+    if speed.excluded_innocent or speed.excluded_unknown or speed.excluded_airborne:
+        return "insufficient_samples"
+    return "telemetry_unavailable"
+
+
+def _challenge_eligibility(result, profile: GameProfile) -> str:
+    """Could a challenge be judged? It needs a plan for this player, a target the profile lets be unknowable,
+    and as many readable moments in the window as the bar has samples."""
+    if result.status == UNPLANNED:
+        return "disabled"
+    if result.status == ABSTAINED:
+        return "not_applicable" if result.cause == "other_subject" else "disabled"
+    if result.eligible >= profile.hidden_track_min_samples:
+        return "eligible"
+    if result.eligible:
+        return "insufficient_samples"
+    return "conflict" if result.not_counted.get("disagreed") else "telemetry_unavailable"
+
+
+def _aim_fields(weapon: WeaponSummary) -> dict[str, bool]:
+    """Whether a weapon's shots carried the field each aim metric reads. A field sent only on hits cannot be
+    told missing on a weapon that never hit, so it counts as there."""
+    hit = weapon.hits > 0
+    return {
+        "accuracy": True,
+        "headshot_rate": weapon.head_known_hits > 0 or not hit,
+        "median_distance": bool(weapon.distances) or not hit,
+        "geometry_rate": weapon.geometry_known > 0 or not hit,
+        "view_snaps": bool(weapon.view_deltas),
+        "acquire_timing": bool(weapon.acquire_ms),
+    }
+
+
 def _knowledge_context(kind: str, weapon: WeaponSummary, profile: GameProfile) -> dict:
     """Why the knowledge engine let these samples count, and what it kept out. Context: not identity."""
     skipped = {cause: n for cause, n in sorted(weapon.knowledge_skipped.get(kind, {}).items())}
@@ -451,6 +520,14 @@ def assess_player(
     beyond_band = 0
     supporting_families: set[str] = set()
     compared = False
+    # Why each detector could or could not run, per unit, read off the same state its check reads. Recorded
+    # only: nothing below reads it back, and no decision depends on it.
+    units: dict[str, dict[str, str]] = {kind: {} for kind in NATIVE_KINDS}
+
+    def could(kind: str, unit: str, status: str) -> None:
+        units[kind][unit] = status
+
+    could("speed", "", _speed_eligibility(record.speed, profile))
     if record.skill_band == "unrated":
         observations.append(
             "No skill_band or skill_prior was sent, so this player is compared with everyone else "
@@ -482,6 +559,14 @@ def assess_player(
         first_metric = len(metrics)
         key = weapon.weapon_key
         where = weapon.match_ids
+        could("fire_rate", key, _fire_eligibility(weapon, profile))
+        could("metronome", key, metronome_eligibility(weapon, profile))
+        could("hidden", key, track_eligibility(weapon, "hidden", profile))
+        if weapon.seen.get("private_replay"):
+            could("occluded_motion_replay", legacy_challenge_id(key), track_eligibility(weapon, "private_replay", profile))
+        could("wire", key, wire_eligibility(weapon, profile))
+        could("quiet_aim", key, quiet_eligibility(weapon, profile))
+        sent = _aim_fields(weapon)
         fire = _fire_break(weapon, profile)
         if fire:
             physics = True
@@ -527,6 +612,11 @@ def assess_player(
             fired("quiet_aim")
             observe("quiet_aim", "review", smooth[0], "reasons", smooth[1], key=key, match_ids=where, context={"knowledge": _knowledge_context("quiet_aim", weapon, profile)})
         if weapon.shots < profile.min_shots:
+            for kind, present in sent.items():
+                status = "insufficient_samples" if present else "telemetry_unavailable"
+                could(kind, key, status)
+                if kind in ("accuracy", "headshot_rate", "median_distance", "geometry_rate"):
+                    could("rank_tail", f"{kind}:{key}", status)
             observations.append(
                 f"{weapon.weapon_key}: {weapon.shots} shots, need {profile.min_shots} before aim is scored"
             )
@@ -550,6 +640,8 @@ def assess_player(
         )
         metrics.append(acc_view)
         compared = compared or did
+        could("accuracy", key, "eligible" if did else "baseline_too_thin")
+        could("rank_tail", f"accuracy:{key}", "eligible" if did else "baseline_too_thin")
         if did:
             compared_on.append(("accuracy", key))
         beyond_band += int(band)
@@ -586,6 +678,8 @@ def assess_player(
             )
             metrics.append(hs_view)
             compared = compared or did
+            could("headshot_rate", key, "eligible" if did else "baseline_too_thin")
+            could("rank_tail", f"headshot_rate:{key}", "eligible" if did else "baseline_too_thin")
             if did:
                 compared_on.append(("headshot_rate", key))
             beyond_band += int(band)
@@ -607,6 +701,10 @@ def assess_player(
                 observe("rank_tail", "watch", line, "observations", facts, key=key, match_ids=where)
             if hs_view.skipped:
                 observations.append(f"{weapon.weapon_key} headshots: {hs_view.skipped}")
+        else:
+            status = "insufficient_samples" if sent["headshot_rate"] else "telemetry_unavailable"
+            could("headshot_rate", key, status)
+            could("rank_tail", f"headshot_rate:{key}", status)
 
         if len(weapon.distances) >= profile.min_shots:
             dist_value = median(weapon.distances)
@@ -623,6 +721,8 @@ def assess_player(
             )
             metrics.append(dist_view)
             compared = compared or did
+            could("median_distance", key, "eligible" if did else "baseline_too_thin")
+            could("rank_tail", f"median_distance:{key}", "eligible" if did else "baseline_too_thin")
             if did:
                 compared_on.append(("median_distance", key))
             beyond_band += int(band)
@@ -642,6 +742,11 @@ def assess_player(
                 observations.append(line)
                 observe("rank_tail", "watch", line, "observations", facts, key=key, match_ids=where)
 
+        else:
+            status = "insufficient_samples" if sent["median_distance"] else "telemetry_unavailable"
+            could("median_distance", key, status)
+            could("rank_tail", f"median_distance:{key}", status)
+
         if weapon.geometry_known >= profile.min_shots:
             geo_view, band, human, did, facts = _rate_compare(
                 "geometry_rate",
@@ -655,6 +760,8 @@ def assess_player(
             )
             metrics.append(geo_view)
             compared = compared or did
+            could("geometry_rate", key, "eligible" if did else "baseline_too_thin")
+            could("rank_tail", f"geometry_rate:{key}", "eligible" if did else "baseline_too_thin")
             if did:
                 compared_on.append(("geometry_rate", key))
             beyond_band += int(band)
@@ -671,18 +778,27 @@ def assess_player(
                 observations.append(line)
                 observe("rank_tail", "watch", line, "observations", facts, key=key, match_ids=where)
 
+        else:
+            status = "insufficient_samples" if sent["geometry_rate"] else "telemetry_unavailable"
+            could("geometry_rate", key, status)
+            could("rank_tail", f"geometry_rate:{key}", status)
+
         if len(weapon.view_deltas) >= profile.min_shots:
             view_value = percentile(sorted(weapon.view_deltas), 0.95)
             view, _band, human, did, facts = _continuous_flags(
                 "view_p95", view_value, record, weapon, cohorts, profile, direction="high", samples=len(weapon.view_deltas)
             )
             metrics.append(view)
+            could("view_snaps", key, "eligible" if did else "baseline_too_thin")
             if did and human:
                 supporting_families.add("view")
                 fired("supporting")
                 line = f"{weapon.weapon_key} view snaps sit past every measured human"
                 observations.append(line)
                 observe("view_snaps", "supporting", line, "observations", facts, key=key, match_ids=where)
+
+        else:
+            could("view_snaps", key, "insufficient_samples" if sent["view_snaps"] else "telemetry_unavailable")
 
         if len(weapon.acquire_ms) >= profile.min_shots:
             acquire_med = median(weapon.acquire_ms)
@@ -694,17 +810,25 @@ def assess_player(
                 "acquire_std", acquire_dev, record, weapon, cohorts, profile, direction="low", samples=len(weapon.acquire_ms)
             )
             metrics.extend([med_view, dev_view])
+            could("acquire_timing", key, "eligible" if did1 else "baseline_too_thin")
             if did1 and (human1 or human2):
                 supporting_families.add("acquire")
                 fired("supporting")
                 line = f"{weapon.weapon_key} target-acquire timing is tighter than the human low end"
                 observations.append(line)
                 observe("acquire_timing", "supporting", line, "observations", {"metric": "acquire_ms", "median": med_facts, "spread": dev_facts}, key=key, match_ids=where)
+        else:
+            could("acquire_timing", key, "insufficient_samples" if sent["acquire_timing"] else "telemetry_unavailable")
         for view in metrics[first_metric:]:
             view.key = weapon.weapon_key
 
     for recoil in record.recoils:
         build = recoil.build_key
+        could("mirror", build, mirror_eligibility(recoil, profile))
+        could("recoil_floor", build, _floor_eligibility(recoil, profile))
+        # Until the build reaches a path below, the learned floor and the rank tail did not get to it.
+        could("recoil_learned", build, "not_applicable")
+        could("rank_tail", f"recoil:{build}", "not_applicable")
         mirror, mirror_note = mirror_check_finding(recoil, profile)
         if mirror:
             physics = True
@@ -735,6 +859,10 @@ def assess_player(
             }, key=build)
             continue
         if len(recoil.pitches) < profile.recoil_min_run:
+            status = "insufficient_samples" if recoil.pitch_reports else "telemetry_unavailable"
+            if recoil.untrained:
+                could("recoil_learned", build, status)
+            could("rank_tail", f"recoil:{build}", status)
             continue
         player_med = median(recoil.pitches)
         # Low recoil is the finding, so test the high end of the median.
@@ -756,11 +884,15 @@ def assess_player(
                 else cohorts.dist(ceiling_name, recoil.build_key, "recoil", record.player_id)
             )
             if not cohort_is_thick(ceiling, profile) or ceiling is None:
+                could("recoil_learned", build, "baseline_too_thin")
+                could("rank_tail", f"recoil:{build}", "baseline_too_thin")
                 untrained.append(recoil.build_key)
                 observations.append(
                     f"{recoil.build_key} has recoil samples but no curve and not enough humans yet. Not flagged."
                 )
                 continue
+            could("recoil_learned", build, "eligible")
+            could("rank_tail", f"recoil:{build}", "eligible")
             learned_floor = ceiling.mid * profile.recoil_floor_fraction
             learned = {
                 **pitch,
@@ -788,6 +920,7 @@ def assess_player(
             continue
         # A designer floor exists and the spray was not blatant. Still learn the human tail.
         own = cohorts.dist(recoil.skill_band, recoil.build_key, "recoil", record.player_id)
+        could("rank_tail", f"recoil:{build}", "eligible" if cohort_is_thick(own, profile) and own is not None else "baseline_too_thin")
         if cohort_is_thick(own, profile) and own is not None and pitch_high < own.p05:
             beyond_band += 1
             fired("rank_tail")
@@ -801,11 +934,25 @@ def assess_player(
             compared = True
             compared_on.append(("recoil", build))
 
+    declared = [spec for spec in profile.extra_metrics if spec.kind in ("primary", "supporting") and spec.direction in ("high", "low")]
+    for spec_kind, detector in (("primary", "extra"), ("supporting", "supporting_extra")):
+        if not any(spec.kind == spec_kind for spec in declared):
+            could(detector, "", "disabled")
+    sent_extras = {extra.name for extra in record.extras}
+    for spec in declared:
+        if spec.name not in sent_extras:
+            # A declared metric this player never sent: there is no group, so the metric names the unit.
+            could("extra" if spec.kind == "primary" else "supporting_extra", spec.name, "telemetry_unavailable")
     for extra in record.extras:
         spec = next((item for item in profile.extra_metrics if item.name == extra.name), None)
         if spec is None:
             continue
+        unit = f"{extra.name}:{extra.group_key}"
+        detector = "extra" if spec.kind == "primary" else "supporting_extra"
         if len(extra.values) < spec.min_samples:
+            could(detector, unit, "insufficient_samples")
+            if spec.kind == "primary":
+                could("rank_tail", unit, "insufficient_samples")
             observations.append(
                 f"{extra.name}: {len(extra.values)} samples, need {spec.min_samples}"
             )
@@ -814,9 +961,15 @@ def assess_player(
         extra_bound = median_bound(extra.values, upper=extra.direction == "low")
         dist = cohorts.dist(extra.group_key, extra.name, "extra", record.player_id)
         if not cohort_is_thick(dist, profile) or dist is None:
+            could(detector, unit, "baseline_too_thin")
+            if spec.kind == "primary":
+                could("rank_tail", unit, "baseline_too_thin")
             untrained.append(f"{extra.name}:{extra.group_key}")
             observations.append(f"{extra.name} on {extra.group_key} is waiting for a baseline")
             continue
+        could(detector, unit, "eligible")
+        if spec.kind == "primary":
+            could("rank_tail", unit, "eligible")
         compared = True
         compared_on.append((extra.name, extra.group_key))
         # The tail is one player in twenty. Past humans is past every one measured.
@@ -879,6 +1032,11 @@ def assess_player(
 
     results, unlinked = evaluate_challenges(record.player_id, record.match_ids, record.challenge_samples, challenges, profile)
     for result in results:
+        could("occluded_motion_replay", result.challenge_id, _challenge_eligibility(result, profile))
+    if not units["occluded_motion_replay"]:
+        # No challenge for this player and no legacy replay telemetry. Plans given for others: not this player's.
+        could("occluded_motion_replay", "", "telemetry_unavailable" if challenges is None else "not_applicable")
+    for result in results:
         if result.status != FOLLOWED:
             continue
         physics = True
@@ -891,6 +1049,27 @@ def assess_player(
         )
     observations.extend(_knowledge_notes(record, profile))
     observations.extend(challenge_notes(results, unlinked))
+    own_history = history_for(record, history)
+    if not own_history or not record.weapons:
+        could("account_jump", "", "telemetry_unavailable")
+    for weapon in record.weapons if own_history else ():
+        matched = [row for row in own_history if row.weapon_key == weapon.weapon_key and row.skill_band == weapon.skill_band]
+        if not matched:
+            could("account_jump", weapon.weapon_key, "telemetry_unavailable")
+        elif sum(row.shots for row in matched) < profile.min_shots or weapon.shots < profile.min_shots:
+            could("account_jump", weapon.weapon_key, "insufficient_samples")
+        else:
+            could("account_jump", weapon.weapon_key, "eligible")
+    # The relationship checks run across the batch. Until they do, nothing pairs this player with anyone.
+    leftover_keys = sorted({weapon.weapon_key for weapon in record.weapons} | {recoil.weapon_key for recoil in record.recoils})
+    with_kicks = {recoil.weapon_key for recoil in record.recoils if recoil.applied and recoil.compensation}
+    for weapon_key in leftover_keys:
+        could("leftover", weapon_key, "not_applicable" if weapon_key in with_kicks else "telemetry_unavailable")
+    for party in sorted(record.party_ids) or [""]:
+        could("voice", party, "not_applicable")
+    for kind in NATIVE_KINDS:
+        if not units[kind]:
+            could(kind, "", "telemetry_unavailable")
     identity, identity_text, identity_facts, jumped = _identity(record, history, profile)
     if identity:
         reasons.append(identity_text)
@@ -929,6 +1108,7 @@ def assess_player(
         evidence=found,
         compared_on=compared_on,
         challenges=results,
+        detector_eligibility=units,
     )
     case.seal = evidence_seal(case)
     return case
@@ -1024,9 +1204,12 @@ def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: Ga
     """
     by_case = {case.player_id: case for case in cases}
     builds: dict[str, dict[str, dict[tuple[str, int], float]]] = {}
+    kicks: dict[str, set[str]] = {}  # player -> weapon keys with recoil kick and command, for eligibility
     for record in records:
         longest: dict[str, int] = {}
         for recoil in record.recoils:
+            if recoil.applied and recoil.compensation:
+                kicks.setdefault(record.player_id, set()).add(recoil.weapon_key)
             found = leftover_signature(recoil, profile.vendor_min_points)
             if found is None:
                 continue
@@ -1035,6 +1218,15 @@ def annotate_vendors(cases: list[Case], records: list[PlayerRecord], profile: Ga
                 continue
             longest[recoil.weapon_key] = samples
             builds.setdefault(recoil.weapon_key, {})[record.player_id] = points
+    # Who the pair check could run on: a qualifying signature, and at least one other on the same weapon.
+    for player_id, keys in kicks.items():
+        case = by_case.get(player_id)
+        if case is None:
+            continue
+        for weapon_key in keys:
+            signed = builds.get(weapon_key, {})
+            status = "insufficient_samples" if player_id not in signed else ("eligible" if len(signed) > 1 else "baseline_too_thin")
+            case.detector_eligibility.setdefault("leftover", {})[weapon_key] = status
     best: dict[tuple[str, str], float] = {}
     measured: dict[tuple[str, str], dict] = {}
     for weapon_key in sorted(builds):
@@ -1101,6 +1293,9 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
     by_case = {case.player_id: case for case in cases}
     contacts: dict[str, list[tuple[str, int, str]]] = {}
     parties: dict[str, set[str]] = {}
+    # Shots on a named enemy the knowledge engine could place, per player: whether the voice check could time them.
+    placed = {record.player_id: sum(weapon.seen.get("contacts", {}).get("checked", 0) for weapon in record.weapons) for record in records}
+    voice: dict[tuple[str, str], str] = {}  # (teammate, party) -> eligibility, the closest to running across partners
     for record in records:
         found: list[tuple[str, int, str]] = []
         for weapon in record.weapons:
@@ -1126,6 +1321,9 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
             if not cheater_hits:
                 continue
             for mate in sorted(members):
+                if mate != cheater:
+                    status = "insufficient_samples" if placed.get(mate) else "telemetry_unavailable"
+                    voice[(mate, party)] = min(voice.get((mate, party), status), status, key=ELIGIBILITY.index)
                 if mate == cheater or mate not in contacts:
                     continue
                 lags: list[int] = []
@@ -1141,6 +1339,8 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
                         continue
                     lags.append(moment - max(priors))
                     lag_matches.append(match)
+                if len(lags) >= profile.inherit_min_events:
+                    voice[(mate, party)] = "eligible"
                 case = by_case.get(mate)
                 if case is None or not lags:
                     continue
@@ -1180,6 +1380,9 @@ def annotate_inheritance(cases: list[Case], records: list[PlayerRecord], profile
 
     for mate, candidates in timed.items():
         by_case[mate].inherit_lags_ms = min(candidates)[1]
+    for (mate, party), status in voice.items():
+        if mate in by_case:
+            by_case[mate].detector_eligibility.setdefault("voice", {})[party] = status
 
 
 def _partner_rank(fast: list[int], profile: GameProfile, cheater: str, party: str) -> tuple:

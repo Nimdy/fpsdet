@@ -270,6 +270,10 @@ class WeaponSummary:
     # conflict, disagreed), and the recent-perception state of the hidden samples it counted.
     knowledge_skipped: dict[str, dict[str, int]] = field(default_factory=dict)
     hidden_recent: dict[str, int] = field(default_factory=dict)
+    # Server moments each information check looked at, by check and outcome: "checked" (it could read the
+    # moment, whatever it found), "undecidable" (the knowledge engine could not say) or "conflict" (the
+    # shots at one moment disagreed). For detector eligibility only; no finding reads it.
+    seen: dict[str, dict[str, int]] = field(default_factory=dict)
 
 
 @dataclass
@@ -309,6 +313,8 @@ class RecoilSummary:
     spray: list[int | None] = field(default_factory=list)
     # Moments (one match, time and spray index) where the server sent different kicks: no order between them.
     unordered_moments: int = 0
+    # Shots that reported a recoil pitch at all, eligible or not. For detector eligibility only.
+    pitch_reports: int = 0
 
 
 @dataclass
@@ -395,6 +401,9 @@ class Case:
     challenges: list = field(default_factory=list)
     # How external records met the native decision (fpsdet.external.fuse); None when the run had no external input.
     fusion: dict | None = None
+    # Why each native detector could or could not run, by unit: kind -> {unit: status} (fpsdet.evidence.ELIGIBILITY).
+    # Recorded by the scorer as it goes; nothing reads it back to decide.
+    detector_eligibility: dict[str, dict[str, str]] = field(default_factory=dict)
     limits: str = (
         "This case is evidence for a person. It is not a ban. "
         "A sustained gear-rule break or a result past the best measured humans "

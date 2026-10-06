@@ -82,9 +82,9 @@ class NativeFusionSurfacesTest(unittest.TestCase):
 
     def test_what_packet_1_binds(self):
         case = case_to_dict(next(c for c in DEMO.cases if c.player_id == "elite-human"))
-        # P5 wrote fpsdet.packet/2 for every new case, P6 packet/3 and P7 packet/4 (it was packet/1 here before).
-        # packet/1 is unchanged.
-        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/4")
+        # P5 wrote fpsdet.packet/2 for every new case, P6 packet/3, P7 packet/4 and P9 packet/5 (it was packet/1
+        # here before). packet/1 is unchanged.
+        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/5")
         self.assertEqual(sorted(packet_material(case, "fpsdet.packet/1")), [
             "decision", "eligibility", "evidence_version", "game", "observations", "provenance", "provenance_version", "recipe", "subject",
         ])
@@ -718,8 +718,8 @@ class PacketV2Test(unittest.TestCase):
 
         for cases in (FUSED, NATIVE, {c.player_id: case_to_dict(c) for c in DEMO.cases}):
             for pid, case in cases.items():
-                # New cases are written with packet/4 since authenticated external evidence (P7); packet/2 is still computed exactly.
-                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/4", pid)
+                # New cases are written with packet/5 since detector eligibility (P9); packet/2 is still computed exactly.
+                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/5", pid)
                 self.assertEqual(case["evidence"]["packet"]["status"], "complete", pid)
                 self.assertEqual(verify_packet(case), [], pid)
                 self.assertEqual(packet_block(case, "fpsdet.packet/2")["status"], "complete", pid)

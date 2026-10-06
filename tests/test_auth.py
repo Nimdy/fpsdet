@@ -576,7 +576,8 @@ class GraphV2Test(unittest.TestCase):
 
         expected = {"historical-packets-p23.json": ("fpsdet.packet/1", None), "historical-packets-p3.json": ("fpsdet.packet/1", None),
                     "historical-packets-p4.json": ("fpsdet.packet/1", None), "historical-packets-p5.json": ("fpsdet.packet/2", None),
-                    "historical-packets-p6.json": ("fpsdet.packet/3", "fpsdet.graph/1")}
+                    "historical-packets-p6.json": ("fpsdet.packet/3", "fpsdet.graph/1"),
+                    "historical-packets-p8.json": ("fpsdet.packet/4", "fpsdet.graph/2")}
         for name, (recipe, graph) in expected.items():
             for case in json.loads((FIXTURES / name).read_text(encoding="utf-8"))["cases"]:
                 with self.subTest(name, player=case["player_id"]):
@@ -588,8 +589,9 @@ class GraphV2Test(unittest.TestCase):
         from fpsdet.provenance import packet_block, packet_material, verify_packet
 
         case = self.cases()["adrenaline"]
-        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/4")
-        external = packet_material(case)["provenance"]["external"]
+        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/5")
+        external = packet_material(case, "fpsdet.packet/4")["provenance"]["external"]
+        self.assertEqual(packet_material(case)["provenance"]["external"], external)
         self.assertEqual((external["registry"], external["policy"]), (registry().summary(), {"require_signed": False}))
         for name, edit in {"the registry": lambda e: e.update(registry={**e["registry"], "digest": "sha256:" + "0" * 64}),
                            "the policy": lambda e: e.update(policy={"require_signed": True})}.items():
@@ -614,7 +616,7 @@ class GraphV2Test(unittest.TestCase):
         case["evidence"]["graph"] = graph_block(case)
         self.assertEqual((case["evidence"]["graph"]["recipe"], case["evidence"]["graph"]["digest"]),
                          ("fpsdet.graph/2", "sha256:8e54e045e4129f2195f1229709d8b460d65865bbb1aa3ff42914d1258c1a1921"))
-        self.assertEqual(packet_block(case), {"recipe": "fpsdet.packet/4", "status": "complete",
+        self.assertEqual(packet_block(case, "fpsdet.packet/4"), {"recipe": "fpsdet.packet/4", "status": "complete",
                                               "digest": "sha256:5e7d3aaec90bb28d5b2f2d1a029b9256e142ee0b3570318b502b7062c0ebea59"})
 
 

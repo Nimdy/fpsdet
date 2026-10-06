@@ -546,8 +546,8 @@ class PacketV3Test(unittest.TestCase):
 
         for cases in (PLANTED, WEEKLY, FUSED):
             for pid, case in cases.items():
-                # packet/4 and graph/2 since authenticated external evidence (P7); both still bind and check the graph.
-                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/4", pid)
+                # packet/5 since detector eligibility (P9) and graph/2 since P7; packet/5 still binds and checks the graph.
+                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/5", pid)
                 self.assertEqual(case["evidence"]["graph"]["recipe"], "fpsdet.graph/2", pid)
                 self.assertEqual(case["evidence"]["packet"]["status"], "complete", pid)
                 self.assertEqual(verify_packet(case), [], pid)

@@ -160,7 +160,7 @@ That is deliberate. Whether two pieces of evidence are independent enough to cou
 
 ## In the packet: `fpsdet.packet/3` and `/4`
 
-`fpsdet.packet/3` binds everything `packet/2` binds, and the graph's recipe and digest. `fpsdet.packet/4`, which every new case is written with, also binds the provider-key registry and signature policy the external records were read under ([provenance.md](provenance.md)). Checking it runs `verify_graph`, so a packet/3 that verifies has a graph that matches its case. Packets written with `packet/1` or `packet/2` before the graph existed keep verifying with their own recipes. The graph adds no observation and changes no observation id, so the packet binds the same evidence it did, plus its structure.
+`fpsdet.packet/3` binds everything `packet/2` binds, and the graph's recipe and digest. `fpsdet.packet/4` also binds the provider-key registry and signature policy the external records were read under, and `fpsdet.packet/5`, which every new case is written with, adds detector eligibility ([provenance.md](provenance.md)). Eligibility is not in the graph: a detector that did not fire is not evidence, and has no node. Checking it runs `verify_graph`, so a packet/3 that verifies has a graph that matches its case. Packets written with `packet/1` or `packet/2` before the graph existed keep verifying with their own recipes. The graph adds no observation and changes no observation id, so the packet binds the same evidence it did, plus its structure.
 
 ## What the graph holds, and what it never does
 

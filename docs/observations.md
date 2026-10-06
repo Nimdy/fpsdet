@@ -114,6 +114,76 @@ Each row is a detector the scorer runs today. `key` is the weapon key unless the
 
 Not observations, because they never change a decision: the context lines for short samples, thin cohorts and untrained builds, a short speed spike, a mirror test that could not run, the in-file cohort warning, party notes, and reports.
 
+## Detector eligibility
+
+An observation is a detector that fired. A detector that did not fire leaves nothing, and without more, "it ran and found nothing" looks the same as "it could not run". `evidence.detector_eligibility` records the difference. The scorer writes it as it goes, from the same state each check reads. Nothing reads it back: no decision, finding, observation id, seal or graph depends on it.
+
+```json
+"detector_eligibility": {
+  "recipe": "fpsdet.detector-eligibility/1",
+  "detectors": {
+    "accuracy": {"eligible": ["rifle"], "insufficient_samples": ["pistol"]},
+    "hidden": {"telemetry_unavailable": ["pistol", "rifle"]},
+    "speed": {"eligible": [""]},
+    "...": "every native detector, always"
+  }
+}
+```
+
+**Units.** Each detector lists its units under their status. A unit is what the detector judges one at a time:
+- **Account:** speed, keyed `""`.
+- **Weapon key:** the aim checks and the information checks.
+- **Recoil build:** the recoil checks.
+- **Declared metric and group:** `metric:group`.
+- **Rank comparison:** `metric:key`, where the metric is any compared metric, recoil, or a primary declared number.
+- **Challenge:** a challenge id, or `legacy_private_replay:<aim key>`.
+- **Party:** the voice check.
+
+A detector with nothing to judge lists `""` as `telemetry_unavailable`: a player who fired no shot has no weapon for the aim checks. Several weapons never collapse into one status.
+
+**Statuses.** The vocabulary is closed, from a detector that ran to one that never could:
+
+| Status | Meaning |
+| --- | --- |
+| `eligible` | It ran on this unit. It fired if and only if an observation names the unit |
+| `baseline_too_thin` | The number was computed, but the humans to compare it with were too few |
+| `insufficient_samples` | The telemetry is there, but too little of it for the detector ever to fire |
+| `conflict` | The telemetry contradicts itself, so the detector does not read it |
+| `telemetry_unavailable` | The fields the detector reads were never sent for this unit |
+| `disabled` | The profile gives it no rule for this unit, or the run no input it needs |
+| `not_applicable` | It does not apply here: a server-paced gun, a floored build for the learned floor, no partner to time against |
+
+**Firing.** Firing is read from the observations: eligible and fired, or eligible and not fired. `packet/5` checks that every native finding names an eligible unit.
+
+**Player-level rollup.** A detector could run on a player when any of its units is eligible. Otherwise the player's status is the unit that came closest to running, in the order of the table.
+
+**When each detector is eligible.** The bar is the least the detector needs ever to fire, so a unit below it could not have fired whatever the player did.
+
+| Detector | Unit | Eligible when | Otherwise |
+| --- | --- | --- | --- |
+| `speed` | account | at least `speed_min_run` eligible ground samples | `insufficient_samples` (fewer, or every sample left out as airborne or a tagged cause); `disabled` (ground samples with no cap); `telemetry_unavailable` |
+| `fire_rate` | weapon | a cycle rule, and as many gaps in matches of 5 or more gaps as the rule needs to fire | `disabled` (no rule); `insufficient_samples` |
+| `metronome` | weapon | a cycle rule that is not server-paced, and `metronome_min_gaps` cadence gaps in matches that did not fire at the gun's own cycle | `disabled`; `not_applicable` (server-paced, or every long match at the cycle); `insufficient_samples` |
+| `recoil_floor` | build | recoil pitches, a floor, and `recoil_min_run` eligible pitches | `telemetry_unavailable`; `disabled` (no floor); `insufficient_samples` |
+| `mirror` | build | `mirror_min_shots` kick and command pairs, with repeated sprays (or a random pattern) | `conflict` (kicks the server did not order); `telemetry_unavailable`; `insufficient_samples` |
+| `recoil_learned` | build | no designer floor, `recoil_min_run` pitches and a thick ceiling cohort | `not_applicable` (a floored build); `telemetry_unavailable`; `insufficient_samples`; `baseline_too_thin` |
+| `accuracy` | weapon | `min_shots` shots and thick cohorts | `insufficient_samples`; `baseline_too_thin` |
+| `headshot_rate`, `median_distance`, `geometry_rate` | weapon | enough hits with the field and thick cohorts | `telemetry_unavailable` (hits, none with the field); `insufficient_samples`; `baseline_too_thin` |
+| `extra`, `supporting_extra` | `metric:group` | `min_samples` values and a thick cohort | `disabled` (no declared metric of that kind, unit `""`); `telemetry_unavailable` (a declared metric never sent, unit = its name); `insufficient_samples`; `baseline_too_thin` |
+| `rank_tail` | `metric:key` | the comparison it reads ran | that comparison's status; `not_applicable` for a build the recoil floor already reviewed |
+| `view_snaps`, `acquire_timing` | weapon | `min_shots` samples and thick cohorts | `telemetry_unavailable`; `insufficient_samples`; `baseline_too_thin` |
+| `account_jump` | weapon | `min_shots` in this window and in the account's history on that weapon and band | `telemetry_unavailable` (no history, unit `""`, or none on this weapon); `insufficient_samples` |
+| `hidden` | weapon | `hidden_track_min_samples` moments with a readable track time | `insufficient_samples`; `conflict` (every reported moment disagreed); `telemetry_unavailable` |
+| `quiet_aim` | weapon | `unknowable_min_samples` aim-noise samples on each side | `not_applicable` (knowable noise already under 0.05°); `insufficient_samples`; `conflict`; `telemetry_unavailable` (noise with no knowledge labels) |
+| `wire` | weapon | `hidden_track_min_samples` shots with both errors | `insufficient_samples`; `telemetry_unavailable` |
+| `occluded_motion_replay` | challenge | `hidden_track_min_samples` readable moments in the window, or on the legacy field | `disabled` (no plan for a named challenge, or the declared knowledge makes it unjudgeable); `not_applicable` (planned for someone else, or plans exist and none for this player, unit `""`); `conflict`; `insufficient_samples`; `telemetry_unavailable` |
+| `leftover` | weapon | a qualifying signature, and at least one other player with one on that weapon | `baseline_too_thin` (alone on the weapon); `insufficient_samples`; `telemetry_unavailable`; `not_applicable` (scored without the batch pass) |
+| `voice` | party | `inherit_min_events` swings timed against a confirmed hidden-mover teammate | `not_applicable` (no party, unit `""`, or no such teammate); `insufficient_samples`; `telemetry_unavailable` (no shot on a named enemy the knowledge engine could place) |
+
+**What it is not.**
+- **Not evidence:** a detector that could run and did not fire is not a finding, and the evidence graph has no node for it.
+- **Not a threshold change:** every bar above is the detector's own, read where the detector reads it.
+
 ### Open points
 
 - **The private replay moved to the `challenge` family** with the challenge engine (P4): kind `occluded_motion_replay`, for a planned challenge and for the legacy `private_track_ms` field alike. The case check id stays `private_replay`. Its observation ids moved, deliberately; the kind `private_replay` in the `information` family is retired, still readable so old packets verify, and never written ([challenges.md](challenges.md)).

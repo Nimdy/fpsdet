@@ -163,6 +163,7 @@ def _case_fields(case: Case) -> dict:
             case.provenance.to_dict() if case.provenance else None,
             challenges=[result.to_dict() for result in case.challenges],
             fusion=case.fusion,
+            detector_eligibility=case.detector_eligibility,
         ),
     }
 

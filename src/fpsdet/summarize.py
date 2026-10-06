@@ -21,7 +21,7 @@ from .models import (
     weight_class_name,
 )
 from .challenge import challenge_samples
-from .knowledge import UNKNOWABLE, KNOWN, presentation, private_knowledge, shot_knowledge, tracked_knowledge
+from .knowledge import KNOWN, UNKNOWABLE, UNKNOWN, presentation, private_knowledge, shot_knowledge, tracked_knowledge
 from .parse import aim_key, recoil_floor_for
 from .timeline import player_timelines, same_time_groups, timeline
 
@@ -178,9 +178,12 @@ def _knowledge_fields(event: Event) -> tuple:
     return (event.information_state, event.vision_state, event.audio_state, event.since_perceived_ms)
 
 
-def _track_times(shots: list[Event], profile: GameProfile) -> tuple[dict[int, float], dict[int, float], dict[int, tuple[str, str]]]:
-    """The hidden-mover and private-replay time each shot adds, keyed by id(shot), and why any shot
-    with time was left out: (check, cause).
+def _track_times(
+    shots: list[Event], profile: GameProfile
+) -> tuple[dict[int, float], dict[int, float], dict[int, tuple[str, str]], dict[int, list[tuple[str, str]]]]:
+    """The hidden-mover and private-replay time each shot adds, keyed by id(shot), why any shot
+    with time was left out: (check, cause), and what each check could read at each moment that
+    reported a track time: (check, checked / undecidable / conflict), on the moment's first claim.
 
     Each server moment (one match and time) adds at most one sample to each, cut to the time since
     the player's previous moment in that match. Shots at one moment are one aim. When the shots there
@@ -192,6 +195,7 @@ def _track_times(shots: list[Event], profile: GameProfile) -> tuple[dict[int, fl
     hidden: dict[int, float] = {}
     private: dict[int, float] = {}
     skipped: dict[int, tuple[str, str]] = {}
+    seen: dict[int, list[tuple[str, str]]] = {}
     replay = private_knowledge(profile)  # the same for every shot of the run
     previous: Event | None = None
     for moment in same_time_groups(shots):
@@ -199,6 +203,10 @@ def _track_times(shots: list[Event], profile: GameProfile) -> tuple[dict[int, fl
         window = first.t_ms - previous.t_ms if previous is not None and previous.match_id == first.match_id else None
         previous = first
         claims = [ev for ev in moment if ev.hidden_track_ms is not None]
+        if claims:
+            agreed = len({(ev.hidden_track_ms, *_knowledge_fields(ev)) for ev in claims}) == 1
+            outcome = "conflict" if not agreed else ("checked" if tracked_knowledge(claims[0], profile).status != UNKNOWN else "undecidable")
+            seen.setdefault(id(claims[0]), []).append(("hidden", outcome))
         if claims and len({(ev.hidden_track_ms, *_knowledge_fields(ev)) for ev in claims}) == 1:
             shot = claims[0]
             value = _windowed(shot.hidden_track_ms, window)
@@ -212,6 +220,9 @@ def _track_times(shots: list[Event], profile: GameProfile) -> tuple[dict[int, fl
             skipped[id(claims[0])] = ("hidden", "disagreed")
         # The legacy field, on events that name no challenge. On one that does, only challenge_track_ms is read.
         claims = [ev for ev in moment if ev.private_track_ms is not None and ev.challenge_id is None]
+        if claims:
+            outcome = "conflict" if len({ev.private_track_ms for ev in claims}) != 1 else ("checked" if replay.status == UNKNOWABLE else "undecidable")
+            seen.setdefault(id(claims[0]), []).append(("private_replay", outcome))
         if claims and len({ev.private_track_ms for ev in claims}) == 1:
             value = _windowed(claims[0].private_track_ms, window)
             if value is not None:
@@ -221,7 +232,7 @@ def _track_times(shots: list[Event], profile: GameProfile) -> tuple[dict[int, fl
                     skipped[id(claims[0])] = ("private_replay", replay.cause)
         elif claims and any(ev.private_track_ms > 0 for ev in claims):
             skipped[id(claims[0])] = ("private_replay", "disagreed")
-    return hidden, private, skipped
+    return hidden, private, skipped, seen
 
 
 def _skip(summary: WeaponSummary, check: str, cause: str) -> None:
@@ -229,9 +240,14 @@ def _skip(summary: WeaponSummary, check: str, cause: str) -> None:
     causes[cause] = causes.get(cause, 0) + 1
 
 
+def _seen(summary: WeaponSummary, check: str, outcome: str) -> None:
+    outcomes = summary.seen.setdefault(check, {})
+    outcomes[outcome] = outcomes.get(outcome, 0) + 1
+
+
 def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> list[WeaponSummary]:
     shots = [ev for ev in events if ev.event_type == "shot"]
-    hidden_times, private_times, track_skipped = _track_times(shots, profile)
+    hidden_times, private_times, track_skipped, track_seen = _track_times(shots, profile)
     groups: dict[str, list[Event]] = defaultdict(list)
     for event in shots:
         groups[aim_key(event, profile)].append(event)
@@ -276,6 +292,8 @@ def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> l
                 summary.private_track_ms.append(private_times[id(event)])
             if id(event) in track_skipped:
                 _skip(summary, *track_skipped[id(event)])
+            for check, outcome in track_seen.get(id(event), ()):
+                _seen(summary, check, outcome)
             shown = presentation(event)
             if shown is not None:
                 summary.wire_error_deg.append(shown.wire_error_deg)
@@ -294,6 +312,8 @@ def _weapon_summaries(events: list[Event], profile: GameProfile, band: str) -> l
                         _skip(summary, "quiet_aim", known.cause)
                 if known.status == UNKNOWABLE and event.enemy_id:
                     summary.hidden_contacts.append((event.match_id, event.t_ms, event.enemy_id))
+                if event.enemy_id:
+                    _seen(summary, "contacts", "undecidable" if known.status == UNKNOWN else "checked")
             phys_id = event.weapon_id or event.weapon_class
             by_match[(event.match_id, phys_id)].append(event)
         # Matches and guns in key order; each one's shots in time order, as the timeline gave them.
@@ -360,6 +380,8 @@ def _recoil_summaries(events: list[Event], profile: GameProfile, band: str) -> l
                     summary.compensation.append(event.compensation_pitch_deg)
                     summary.spray.append(event.spray_index)
                     kicks.add((event.applied_recoil_pitch_deg, event.compensation_pitch_deg))
+                if event.recoil_pitch_deg is not None:
+                    summary.pitch_reports += 1
                 if not eligible or event.recoil_pitch_deg is None:
                     all_low = False
                     continue

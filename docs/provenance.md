@@ -247,7 +247,7 @@ The plan digest shows a record was not edited after it was digested. It is not a
 "packet": {"recipe": "fpsdet.packet/1", "status": "complete", "digest": "sha256:<64 hex>"}
 ```
 
-Every new case is written with `fpsdet.packet/4`. Packets written earlier with `fpsdet.packet/1`, `/2` or `/3` keep verifying: `verify_packet` reads each packet with the recipe it names, and each recipe means exactly what it always did.
+Every new case is written with `fpsdet.packet/5`. Packets written earlier with `fpsdet.packet/1`, `/2`, `/3` or `/4` keep verifying: `verify_packet` reads each packet with the recipe it names, and each recipe means exactly what it always did.
 
 **What `fpsdet.packet/1` binds**, as canonical JSON:
 
@@ -277,6 +277,8 @@ External observations are bound by both recipes the way every observation is, by
 
 **What `fpsdet.packet/4` adds:** `provenance.external.registry` (the recipe, digest and key count of the provider-key registry signatures were checked against, or null) and `provenance.external.policy` (`{"require_signed": …}`), so the packet says under which trust configuration its external records were read ([external-authentication.md](external-authentication.md)). Each external record's own signature state, key and registry digest are in its observation, and so already bound by id. `packet/3` lists a fixed set of external fields, and the registry and policy are not among them, so the recipe moved again rather than `packet/3` changing what it means. New cases also carry `fpsdet.graph/2`.
 
+**What `fpsdet.packet/5` adds:** `evidence.detector_eligibility`, why each native detector could or could not run, per unit ([observations.md](observations.md)). Checking a `packet/5` also checks that every native finding names a unit its detector could run on. `packet/4` binds `evidence.eligibility`, the compared metrics, and not this block, which sits beside it, so the recipe moved again rather than `packet/4` changing what it means. Eligibility is recorded, not evidence: the graph, the observation ids and the seal do not include it.
+
 **Why every new case used `packet/2`, external input or not.** One recipe for everything fpsdet writes now is simpler to check and to explain than two, chosen by whether a run happened to have external records. For a run without them, `packet/2` binds `{"mode": "none"}` and a null fusion, which is a true statement about that run. Every packet digest moved once, when this recipe arrived; nothing else in any case did.
 
 **What they leave out:**
@@ -299,12 +301,12 @@ External observations are bound by both recipes the way every observation is, by
 `fpsdet.provenance.verify_packet(case)` reads a serialized case and returns what does not hold together, or nothing.
 
 1. **Observation ids.** Each id is recomputed from the observation's own fields, and the model refuses a role the scorer never gives that kind. An edited value with its old id is caught here, before the packet is considered.
-2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest. Old recipes stay known: a packet written with `fpsdet.player-events/1` before event normalization still verifies (`tests/fixtures/historical-packets-p23.json`), and so do `packet/1` cases from the knowledge and challenge engines (`historical-packets-p3.json`, `historical-packets-p4.json`) `packet/2` cases from external evidence (`historical-packets-p5.json`), and `packet/3` cases with `fpsdet.graph/1` graphs from the evidence graph (`historical-packets-p6.json`).
+2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest. Old recipes stay known: a packet written with `fpsdet.player-events/1` before event normalization still verifies (`tests/fixtures/historical-packets-p23.json`), and so do `packet/1` cases from the knowledge and challenge engines (`historical-packets-p3.json`, `historical-packets-p4.json`) `packet/2` cases from external evidence (`historical-packets-p5.json`), `packet/3` cases with `fpsdet.graph/1` graphs from the evidence graph (`historical-packets-p6.json`), and `packet/4` cases with `fpsdet.graph/2` graphs and signed external records from before detector eligibility (`historical-packets-p8.json`).
 3. **The packet.** It is rebuilt, with the recipe it names, by the same code that built it, and compared. A recipe this version does not know is a problem, not a guess.
 
 It needs no events, cohort, profile or code, and it does not prove that those sources would produce the packet again. That second level, source reproduction, is a rerun: score the same events with the same detector, profile, cohort and history, and `tools/regress.py diff` the result. `tools/regress.py verify` runs `verify_packet` on every case of a snapshot.
 
-**Caught:** an edited observation value, an edited observation id, an observation with a recomputed id (the packet moves), a changed role, the decision, the eligibility, the subject or game, and any detector, profile, cohort, cohort mode, integrity, input or history digest. With `packet/2`, also: an edited or removed external record, the external input digest, mode, record count or any source's counts, and any field of the fusion state. With `packet/3`, also: any node, edge or attribute of the evidence graph, a graph that no longer matches the case, and a summary that no longer matches the graph. With `packet/4`, also: the registry and the signature policy.
+**Caught:** an edited observation value, an edited observation id, an observation with a recomputed id (the packet moves), a changed role, the decision, the eligibility, the subject or game, and any detector, profile, cohort, cohort mode, integrity, input or history digest. With `packet/2`, also: an edited or removed external record, the external input digest, mode, record count or any source's counts, and any field of the fusion state. With `packet/3`, also: any node, edge or attribute of the evidence graph, a graph that no longer matches the case, and a summary that no longer matches the graph. With `packet/4`, also: the registry and the signature policy. With `packet/5`, also: any detector's eligibility, and a finding on a unit its detector could not run on.
 
 **Not caught, by design:** a reworded reason or context line, a new AI brief, a changed report count or queue rank, a different party note.
 

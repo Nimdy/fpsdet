@@ -8,6 +8,126 @@
    ],
    "decision": "watch",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -271,6 +391,126 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -414,6 +654,128 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -567,6 +929,126 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "insufficient_samples": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -712,6 +1194,128 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "eligible": [
+        "stack-radar"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -851,6 +1455,131 @@
    ],
    "decision": "watch",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "recoil:ak|"
+       ],
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "ak|"
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -1067,6 +1796,131 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "recoil:ak|"
+       ],
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "ak|"
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -1358,6 +2212,126 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -1503,6 +2477,128 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -1725,6 +2821,126 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -1870,6 +3086,131 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "recoil:ak|"
+       ],
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "ak|"
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -1995,6 +3336,126 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -2138,6 +3599,128 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -2265,6 +3848,128 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -2490,6 +4195,131 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "recoil:ak|"
+       ],
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "ak|"
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -2689,6 +4519,129 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        "ak|compensator,vertical_grip"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "recoil:ak|compensator,vertical_grip"
+       ],
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "ak|compensator,vertical_grip"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "ak|compensator,vertical_grip"
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -2832,6 +4785,129 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        "newgun|"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "recoil:newgun|"
+       ],
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "disabled": [
+        "newgun|"
+       ]
+      },
+      "recoil_learned": {
+       "baseline_too_thin": [
+        "newgun|"
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -2981,6 +5057,129 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        "ak|"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "not_applicable": [
+        "recoil:ak|"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "ak|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "ak|"
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -3197,6 +5396,128 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -3324,6 +5645,128 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -3546,6 +5989,124 @@
    ],
    "decision": "watch",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "eligible": [
+        "stack-radar"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": []
     },
@@ -3786,6 +6347,126 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        "stack-1"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -4245,6 +6926,126 @@
    ],
    "decision": "watch",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -4503,6 +7304,128 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "eligible": [
+        "legacy_private_replay:rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -4630,6 +7553,128 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "eligible": [
+        "legacy_private_replay:rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -4902,6 +7947,126 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -5047,6 +8212,126 @@
    "checks": [],
    "decision": "insufficient_data",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": []
     },
@@ -5136,6 +8421,128 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -5263,6 +8670,126 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        "stack-radar"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": []
     },
@@ -5450,6 +8977,128 @@
    "checks": [],
    "decision": "clean",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -5577,6 +9226,126 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        "stack-1"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {
@@ -5823,6 +9592,128 @@
    ],
    "decision": "review",
    "evidence": {
+    "detector_eligibility": {
+     "detectors": {
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "rank_tail": {
+       "eligible": [
+        "accuracy:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "headshot_rate:rifle"
+       ],
+       "telemetry_unavailable": [
+        "geometry_rate:rifle"
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "speed": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "telemetry_unavailable": [
+        "ads_ms"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      }
+     },
+     "recipe": "fpsdet.detector-eligibility/1"
+    },
     "eligibility": {
      "compared": [
       {

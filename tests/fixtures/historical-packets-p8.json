@@ -1,0 +1,1254 @@
+{
+ "cases": [
+  {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [],
+   "decision": "clean",
+   "evidence": {
+    "eligibility": {
+     "compared": [
+      {
+       "key": "rifle",
+       "metric": "accuracy"
+      },
+      {
+       "key": "rifle",
+       "metric": "headshot_rate"
+      },
+      {
+       "key": "rifle",
+       "metric": "median_distance"
+      }
+     ]
+    },
+    "fusion": {
+     "context": 2,
+     "decision": "clean",
+     "native_decision": "clean",
+     "policy": "fpsdet.fusion/1",
+     "provider_groups": [],
+     "rule": "none",
+     "signals": 0,
+     "telemetry_domains": []
+    },
+    "graph": {
+     "digest": "sha256:f3e6fbb5063907ad814022e87f68ebb42bfdd89fbd26bd4744191e8d0154c18e",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:adrenaline",
+       "target": "player:adrenaline"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "external_record:ext-12abb66fea075ef003f54f2a",
+       "target": "player:adrenaline"
+      },
+      {
+       "attributes": {},
+       "relation": "authenticated_by",
+       "source": "external_record:ext-12abb66fea075ef003f54f2a",
+       "target": "provider_key:example-integrity/2026-01"
+      },
+      {
+       "attributes": {},
+       "relation": "provided_by",
+       "source": "external_record:ext-12abb66fea075ef003f54f2a",
+       "target": "provider_group:example-integrity"
+      },
+      {
+       "attributes": {},
+       "relation": "uses_telemetry_domain",
+       "source": "external_record:ext-12abb66fea075ef003f54f2a",
+       "target": "telemetry_domain:unspecified"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "external_record:ext-6ae4099374c28b1ed6282e98",
+       "target": "player:adrenaline"
+      },
+      {
+       "attributes": {},
+       "relation": "authenticated_by",
+       "source": "external_record:ext-6ae4099374c28b1ed6282e98",
+       "target": "provider_key:example-integrity/2026-01"
+      },
+      {
+       "attributes": {},
+       "relation": "provided_by",
+       "source": "external_record:ext-6ae4099374c28b1ed6282e98",
+       "target": "provider_group:example-integrity"
+      },
+      {
+       "attributes": {},
+       "relation": "uses_telemetry_domain",
+       "source": "external_record:ext-6ae4099374c28b1ed6282e98",
+       "target": "telemetry_domain:unspecified"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-8bbc010ce3b7d266e3a1236e",
+       "target": "player:adrenaline"
+      },
+      {
+       "attributes": {},
+       "relation": "derived_from",
+       "source": "observation:obs-8bbc010ce3b7d266e3a1236e",
+       "target": "external_record:ext-12abb66fea075ef003f54f2a"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-94cda1e1df7622f803d94917",
+       "target": "player:adrenaline"
+      },
+      {
+       "attributes": {},
+       "relation": "derived_from",
+       "source": "observation:obs-94cda1e1df7622f803d94917",
+       "target": "external_record:ext-6ae4099374c28b1ed6282e98"
+      },
+      {
+       "attributes": {},
+       "relation": "belongs_to",
+       "source": "provider_key:example-integrity/2026-01",
+       "target": "provider_group:example-integrity"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:adrenaline",
+       "type": "case"
+      },
+      {
+       "attributes": {
+        "authenticity": "verified",
+        "direction": "adverse",
+        "provider": "example-integrity",
+        "source_class": "client_integrity"
+       },
+       "id": "external_record:ext-12abb66fea075ef003f54f2a",
+       "type": "external_record"
+      },
+      {
+       "attributes": {
+        "authenticity": "verified",
+        "direction": "adverse",
+        "provider": "example-integrity",
+        "source_class": "client_integrity"
+       },
+       "id": "external_record:ext-6ae4099374c28b1ed6282e98",
+       "type": "external_record"
+      },
+      {
+       "attributes": {
+        "family": "external",
+        "in_case": true,
+        "kind": "external_context",
+        "role": "external_context",
+        "source": "external"
+       },
+       "id": "observation:obs-8bbc010ce3b7d266e3a1236e",
+       "type": "observation"
+      },
+      {
+       "attributes": {
+        "family": "external",
+        "in_case": true,
+        "kind": "external_context",
+        "role": "external_context",
+        "source": "external"
+       },
+       "id": "observation:obs-94cda1e1df7622f803d94917",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:adrenaline",
+       "type": "player"
+      },
+      {
+       "attributes": {},
+       "id": "provider_group:example-integrity",
+       "type": "provider_group"
+      },
+      {
+       "attributes": {
+        "algorithm": "ed25519",
+        "key_id": "2026-01",
+        "key_status": "active",
+        "provider": "example-integrity",
+        "registry": "sha256:f5151fe1e0e95f26ac8b618ac0431015b94f37a87868711dd0c9c0f791887017"
+       },
+       "id": "provider_key:example-integrity/2026-01",
+       "type": "provider_key"
+      },
+      {
+       "attributes": {},
+       "id": "telemetry_domain:unspecified",
+       "type": "telemetry_domain"
+      }
+     ],
+     "recipe": "fpsdet.graph/2",
+     "summary": {
+      "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
+       "context_only": 2,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {
+       "observation:obs-8bbc010ce3b7d266e3a1236e": {
+        "authenticity": "verified",
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": "external_record:ext-12abb66fea075ef003f54f2a",
+        "family": "external",
+        "origin": "external",
+        "partner": null,
+        "provider_group": "example-integrity",
+        "provider_key": "provider_key:example-integrity/2026-01",
+        "relationship_derived": false,
+        "server_authoritative": false,
+        "supports": false,
+        "telemetry_domain": "unspecified"
+       },
+       "observation:obs-94cda1e1df7622f803d94917": {
+        "authenticity": "verified",
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": "external_record:ext-6ae4099374c28b1ed6282e98",
+        "family": "external",
+        "origin": "external",
+        "partner": null,
+        "provider_group": "example-integrity",
+        "provider_key": "provider_key:example-integrity/2026-01",
+        "relationship_derived": false,
+        "server_authoritative": false,
+        "supports": false,
+        "telemetry_domain": "unspecified"
+       }
+      },
+      "shared": [
+       {
+        "kind": "provider_group",
+        "observations": [
+         "observation:obs-8bbc010ce3b7d266e3a1236e",
+         "observation:obs-94cda1e1df7622f803d94917"
+        ],
+        "providers": [
+         "example-integrity"
+        ],
+        "value": "example-integrity"
+       },
+       {
+        "kind": "telemetry_domain",
+        "observations": [
+         "observation:obs-8bbc010ce3b7d266e3a1236e",
+         "observation:obs-94cda1e1df7622f803d94917"
+        ],
+        "value": "unspecified"
+       },
+       {
+        "kind": "provider_key",
+        "observations": [
+         "observation:obs-8bbc010ce3b7d266e3a1236e",
+         "observation:obs-94cda1e1df7622f803d94917"
+        ],
+        "value": "provider_key:example-integrity/2026-01"
+       }
+      ]
+     }
+    },
+    "observations": [
+     {
+      "context": {
+       "line": "External client_integrity record ext-12abb66fea075ef003f54f2a names no match. It does not change the decision.",
+       "printed_in": "observations"
+      },
+      "depends_on": [],
+      "evidence": {
+       "authenticity": {
+        "algorithm": "ed25519",
+        "key_id": "2026-01",
+        "key_status": "active",
+        "provider": "example-integrity",
+        "registry": "sha256:f5151fe1e0e95f26ac8b618ac0431015b94f37a87868711dd0c9c0f791887017",
+        "status": "verified"
+       },
+       "confidence": {
+        "meaning": null,
+        "scale": "unspecified",
+        "value": null
+       },
+       "context_because": "no_match",
+       "decision_effect": "none",
+       "direction": "adverse",
+       "external_id": "ext-12abb66fea075ef003f54f2a",
+       "kind": "memory_integrity_anomaly",
+       "metadata": {},
+       "provider": "example-integrity",
+       "provider_group": "example-integrity",
+       "provider_record_id": "a1",
+       "scope": {
+        "ended_ms": null,
+        "match_id": null,
+        "observed_at": null,
+        "started_ms": null
+       },
+       "source_class": "client_integrity",
+       "telemetry_domain": "unspecified"
+      },
+      "family": "external",
+      "key": "ext-12abb66fea075ef003f54f2a",
+      "kind": "external_context",
+      "match_ids": [],
+      "observation_id": "obs-8bbc010ce3b7d266e3a1236e",
+      "role": "external_context",
+      "source": "external",
+      "subject_id": "adrenaline"
+     },
+     {
+      "context": {
+       "line": "External client_integrity record ext-6ae4099374c28b1ed6282e98 names no match. It does not change the decision.",
+       "printed_in": "observations"
+      },
+      "depends_on": [],
+      "evidence": {
+       "authenticity": {
+        "algorithm": "ed25519",
+        "key_id": "2026-01",
+        "key_status": "active",
+        "provider": "example-integrity",
+        "registry": "sha256:f5151fe1e0e95f26ac8b618ac0431015b94f37a87868711dd0c9c0f791887017",
+        "status": "verified"
+       },
+       "confidence": {
+        "meaning": null,
+        "scale": "unspecified",
+        "value": null
+       },
+       "context_because": "no_match",
+       "decision_effect": "none",
+       "direction": "adverse",
+       "external_id": "ext-6ae4099374c28b1ed6282e98",
+       "kind": "second",
+       "metadata": {},
+       "provider": "example-integrity",
+       "provider_group": "example-integrity",
+       "provider_record_id": "a2",
+       "scope": {
+        "ended_ms": null,
+        "match_id": null,
+        "observed_at": null,
+        "started_ms": null
+       },
+       "source_class": "client_integrity",
+       "telemetry_domain": "unspecified"
+      },
+      "family": "external",
+      "key": "ext-6ae4099374c28b1ed6282e98",
+      "kind": "external_context",
+      "match_ids": [],
+      "observation_id": "obs-94cda1e1df7622f803d94917",
+      "role": "external_context",
+      "source": "external",
+      "subject_id": "adrenaline"
+     }
+    ],
+    "packet": {
+     "digest": "sha256:87aad946c23650bf654c9518d093aee909e357323c69c2fa3afd999a1b64cf48",
+     "recipe": "fpsdet.packet/4",
+     "status": "complete"
+    },
+    "provenance": {
+     "cohort": {
+      "digest": "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+      "integrity": {
+       "digest": "sha256:5f0fdccafd0565d24cc1a8e821229c9fc98ffe0aa895e609c7d725d6a5f9206b",
+       "recipe": "fpsdet.cohort-integrity/1",
+       "status": "unchecked"
+      },
+      "mode": "external",
+      "recipe": "fpsdet.cohort/1",
+      "stored_digest": "not_from_file"
+     },
+     "detector": {
+      "digest": "sha256:fb30982dca642ec961ed5600d78e9f0954b9459d73dfa6dd11fbc62f216ab381",
+      "modules": [
+       "fpsdet",
+       "fpsdet.auth",
+       "fpsdet.baseline",
+       "fpsdet.challenge",
+       "fpsdet.evidence",
+       "fpsdet.external",
+       "fpsdet.graph",
+       "fpsdet.knowledge",
+       "fpsdet.models",
+       "fpsdet.parse",
+       "fpsdet.persist",
+       "fpsdet.pipeline",
+       "fpsdet.provenance",
+       "fpsdet.score",
+       "fpsdet.signals",
+       "fpsdet.statsutil",
+       "fpsdet.summarize",
+       "fpsdet.timeline"
+      ],
+      "recipe": "fpsdet.detector/1"
+     },
+     "external": {
+      "digest": "sha256:1d7fec75db887351fb15d8e3e57f704ab4da56b3a012b81759fc83c00fad60f1",
+      "mode": "supplied",
+      "policy": {
+       "require_signed": false
+      },
+      "recipe": "fpsdet.external-input/1",
+      "records": 2,
+      "registry": {
+       "digest": "sha256:f5151fe1e0e95f26ac8b618ac0431015b94f37a87868711dd0c9c0f791887017",
+       "keys": 3,
+       "recipe": "fpsdet.provider-registry/1"
+      },
+      "sources": [
+       {
+        "adapter": "fpsdet.external/1",
+        "adapter_name": null,
+        "artifact": "sha256:49b3f05e2de6566bdbb7b13cf5ecbadbf7cdf1fcf3808b7922a365edc8dcaa75",
+        "authentication": {
+         "unsigned": 1,
+         "verified": 2
+        },
+        "duplicates": 0,
+        "errors": 0,
+        "excluded": 0,
+        "records": 3
+       }
+      ]
+     },
+     "history": {
+      "digest": "sha256:5f6a4f9954ab6f3f14deabe4e6abcb010cd01c063249b3f4564de78074b650b7",
+      "mode": "external",
+      "recipe": "fpsdet.history/1",
+      "windows": 0
+     },
+     "inputs": {
+      "digest": "sha256:7bf46ee80f9454553b51b94c98ac8dfaadc0bd6e6b855c783a5d54fd92a49e79",
+      "events": 230,
+      "matches": 1,
+      "recipe": "fpsdet.player-events/2"
+     },
+     "profile": {
+      "digest": "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb",
+      "recipe": "fpsdet.profile/1"
+     },
+     "version": 1
+    },
+    "version": 1
+   },
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.13968092282413902,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.18,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.1738768773160312,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.5142857142857142,
+     "ceiling_p95": 0.5074626865671642,
+     "key": "rifle",
+     "name": "headshot_rate",
+     "own_max": 0.3333333333333333,
+     "own_p95": 0.3333333333333333,
+     "player_value": 0.2777777777777778,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.6572608492716,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897289907,
+     "ceiling_p95": 43.814691444768805,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018160586376,
+     "own_p95": 33.56448833105132,
+     "player_value": 28.6572608492716,
+     "skipped": null
+    }
+   ],
+   "observations": [
+    "External client_integrity record ext-12abb66fea075ef003f54f2a names no match. It does not change the decision.",
+    "External client_integrity record ext-6ae4099374c28b1ed6282e98 names no match. It does not change the decision."
+   ],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "adrenaline",
+   "queue_rank": 0,
+   "reasons": [],
+   "recommended_action": "none",
+   "reports": 0,
+   "seal": "94013f3406215086db700ac57edede582d26c42761612b8eefe2ac6e89825130",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "server",
+    "detail": "",
+    "eligible": 30,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "voice"
+   ],
+   "decision": "watch",
+   "evidence": {
+    "eligibility": {
+     "compared": []
+    },
+    "fusion": {
+     "context": 0,
+     "decision": "watch",
+     "native_decision": "watch",
+     "policy": "fpsdet.fusion/1",
+     "provider_groups": [],
+     "rule": "none",
+     "signals": 0,
+     "telemetry_domains": []
+    },
+    "graph": {
+     "digest": "sha256:c88b0f5ac47eb9fcd0d41e58dd259e0976b1a6b9c95f11497bc6f1422e1bc5f4",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:radar-friend",
+       "target": "player:radar-friend"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-02fdbd7346a0b5e228029086",
+       "target": "player:wall-eye"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "player:radar-friend"
+      },
+      {
+       "attributes": {},
+       "relation": "depends_on",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "observation:obs-02fdbd7346a0b5e228029086"
+      },
+      {
+       "attributes": {},
+       "relation": "names_partner",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "player:wall-eye"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "match:radar-window"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "case:radar-friend"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "watch"
+       },
+       "id": "case:radar-friend",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:radar-window",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "in_case": false
+       },
+       "id": "observation:obs-02fdbd7346a0b5e228029086",
+       "type": "observation"
+      },
+      {
+       "attributes": {
+        "family": "relationship",
+        "in_case": true,
+        "kind": "voice",
+        "role": "watch",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-2c99ae537fbec3c732b00680",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:radar-friend",
+       "type": "player"
+      },
+      {
+       "attributes": {},
+       "id": "player:wall-eye",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/2",
+     "summary": {
+      "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "relationship"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-2c99ae537fbec3c732b00680": {
+        "authenticity": null,
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [
+         "observation:obs-02fdbd7346a0b5e228029086"
+        ],
+        "external_record": null,
+        "family": "relationship",
+        "origin": "native",
+        "partner": "player:wall-eye",
+        "provider_group": null,
+        "provider_key": null,
+        "relationship_derived": true,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
+    },
+    "observations": [
+     {
+      "context": {
+       "knowledge": {
+        "contacts": "both players' shots on an enemy that was unknowable to the shooter",
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "teammates": "a relationship check: it times a swing against the partner's, and does not assume the teammate could not have been told"
+       },
+       "line": "8 swings on a hidden enemy landed 40 ms after wall-eye, under the 350 ms a voice needs",
+       "printed_in": "reasons"
+      },
+      "depends_on": [
+       "obs-02fdbd7346a0b5e228029086"
+      ],
+      "evidence": {
+       "fast_lags_ms": [
+        40,
+        40,
+        40,
+        40,
+        40,
+        40,
+        40,
+        40
+       ],
+       "lags": 8,
+       "partner": "wall-eye",
+       "party_id": "stack-radar",
+       "thresholds": {
+        "min_fast": 4,
+        "voice_ms": 350
+       }
+      },
+      "family": "relationship",
+      "key": "",
+      "kind": "voice",
+      "match_ids": [
+       "radar-window"
+      ],
+      "observation_id": "obs-2c99ae537fbec3c732b00680",
+      "role": "watch",
+      "source": "fpsdet",
+      "subject_id": "radar-friend"
+     }
+    ],
+    "packet": {
+     "digest": "sha256:701f95c88fd4516190f4063b9f9da202bff704f90f464fc0d86479ff8ada1015",
+     "recipe": "fpsdet.packet/4",
+     "status": "complete"
+    },
+    "provenance": {
+     "cohort": {
+      "digest": "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+      "integrity": {
+       "digest": "sha256:5f0fdccafd0565d24cc1a8e821229c9fc98ffe0aa895e609c7d725d6a5f9206b",
+       "recipe": "fpsdet.cohort-integrity/1",
+       "status": "unchecked"
+      },
+      "mode": "external",
+      "recipe": "fpsdet.cohort/1",
+      "stored_digest": "not_from_file"
+     },
+     "detector": {
+      "digest": "sha256:fb30982dca642ec961ed5600d78e9f0954b9459d73dfa6dd11fbc62f216ab381",
+      "modules": [
+       "fpsdet",
+       "fpsdet.auth",
+       "fpsdet.baseline",
+       "fpsdet.challenge",
+       "fpsdet.evidence",
+       "fpsdet.external",
+       "fpsdet.graph",
+       "fpsdet.knowledge",
+       "fpsdet.models",
+       "fpsdet.parse",
+       "fpsdet.persist",
+       "fpsdet.pipeline",
+       "fpsdet.provenance",
+       "fpsdet.score",
+       "fpsdet.signals",
+       "fpsdet.statsutil",
+       "fpsdet.summarize",
+       "fpsdet.timeline"
+      ],
+      "recipe": "fpsdet.detector/1"
+     },
+     "external": {
+      "digest": "sha256:0f41789e589a8d52b05de6edb9d6c85326f13d8e2bae7a0466a9c3019f326eba",
+      "mode": "supplied",
+      "policy": {
+       "require_signed": false
+      },
+      "recipe": "fpsdet.external-input/1",
+      "records": 0,
+      "registry": {
+       "digest": "sha256:f5151fe1e0e95f26ac8b618ac0431015b94f37a87868711dd0c9c0f791887017",
+       "keys": 3,
+       "recipe": "fpsdet.provider-registry/1"
+      },
+      "sources": [
+       {
+        "adapter": "fpsdet.external/1",
+        "adapter_name": null,
+        "artifact": "sha256:49b3f05e2de6566bdbb7b13cf5ecbadbf7cdf1fcf3808b7922a365edc8dcaa75",
+        "authentication": {
+         "unsigned": 1,
+         "verified": 2
+        },
+        "duplicates": 0,
+        "errors": 0,
+        "excluded": 0,
+        "records": 3
+       }
+      ]
+     },
+     "history": {
+      "digest": "sha256:5f6a4f9954ab6f3f14deabe4e6abcb010cd01c063249b3f4564de78074b650b7",
+      "mode": "external",
+      "recipe": "fpsdet.history/1",
+      "windows": 0
+     },
+     "inputs": {
+      "digest": "sha256:3c710f2993c4963f8cc682f5109586303465c22739a9957246c9310559692b43",
+      "events": 8,
+      "matches": 1,
+      "recipe": "fpsdet.player-events/2"
+     },
+     "profile": {
+      "digest": "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb",
+      "recipe": "fpsdet.profile/1"
+     },
+     "version": 1
+    },
+    "version": 1
+   },
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [
+    40,
+    40,
+    40,
+    40,
+    40,
+    40,
+    40,
+    40
+   ],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "radar-window"
+   ],
+   "metrics": [],
+   "observations": [
+    "rifle: 8 shots, need 40 before aim is scored"
+   ],
+   "party_ids": [
+    "stack-radar"
+   ],
+   "party_note": "party stack-radar also has wall-eye at watch or review in this batch",
+   "player_id": "radar-friend",
+   "queue_rank": 1,
+   "reasons": [
+    "8 swings on a hidden enemy landed 40 ms after wall-eye, under the 350 ms a voice needs"
+   ],
+   "recommended_action": "monitor",
+   "reports": 0,
+   "seal": "df78061f1171e3bf73b6152e193cdc2a96588ba6758243aa875451f6d76c1fa4",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  },
+  {
+   "ai_brief": "",
+   "automated_action": "none",
+   "checks": [
+    "private_replay"
+   ],
+   "decision": "review",
+   "evidence": {
+    "eligibility": {
+     "compared": [
+      {
+       "key": "rifle",
+       "metric": "accuracy"
+      },
+      {
+       "key": "rifle",
+       "metric": "median_distance"
+      }
+     ]
+    },
+    "fusion": {
+     "context": 0,
+     "decision": "review",
+     "native_decision": "review",
+     "policy": "fpsdet.fusion/1",
+     "provider_groups": [],
+     "rule": "none",
+     "signals": 0,
+     "telemetry_domains": []
+    },
+    "graph": {
+     "digest": "sha256:8d97cc100eebb51044c3884683bbb7852f4c0fcde9f084d745bacaea2246c9da",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:replay-lock",
+       "target": "player:replay-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "challenge:legacy_private_replay:rifle",
+       "target": "player:replay-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-d6b0a455423d666f8428468e",
+       "target": "player:replay-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "derived_from",
+       "source": "observation:obs-d6b0a455423d666f8428468e",
+       "target": "challenge:legacy_private_replay:rifle"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-d6b0a455423d666f8428468e",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-d6b0a455423d666f8428468e",
+       "target": "case:replay-lock"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:replay-lock",
+       "type": "case"
+      },
+      {
+       "attributes": {
+        "commitment": null,
+        "origin": "legacy_private_replay",
+        "plan": null,
+        "type": "occluded_motion_replay",
+        "version": null,
+        "window": null
+       },
+       "id": "challenge:legacy_private_replay:rifle",
+       "type": "challenge"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "challenge",
+        "in_case": true,
+        "kind": "occluded_motion_replay",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-d6b0a455423d666f8428468e",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:replay-lock",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/2",
+     "summary": {
+      "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "challenge"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_challenge"
+       ]
+      },
+      "observations": {
+       "observation:obs-d6b0a455423d666f8428468e": {
+        "authenticity": null,
+        "challenge": "challenge:legacy_private_replay:rifle",
+        "challenge_derived": true,
+        "depends_on": [],
+        "external_record": null,
+        "family": "challenge",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "provider_key": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_challenge"
+       }
+      },
+      "shared": []
+     }
+    },
+    "observations": [
+     {
+      "context": {
+       "knowledge": {
+        "basis": "private_track_ms: placed where this client's line-of-sight and audio queries fail",
+        "channels": {
+         "audio": "absent",
+         "recent_perception": "not_applicable",
+         "vision": "absent"
+        },
+        "not_counted": {},
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "status": "unknowable"
+       },
+       "legacy": "private_track_ms names no challenge: there is no plan, window or commitment, and time from every match on this aim key adds up",
+       "line": "rifle aim stayed on a private replay for 1600 ms across 20 shots",
+       "printed_in": "reasons"
+      },
+      "depends_on": [],
+      "evidence": {
+       "challenge": {
+        "challenge_id": "legacy_private_replay:rifle",
+        "commitment": null,
+        "origin": "legacy_private_replay",
+        "plan": null,
+        "type": "occluded_motion_replay",
+        "version": null,
+        "window": null
+       },
+       "eligible_samples": null,
+       "knowledge": {
+        "defeated": [
+         "vision",
+         "audio"
+        ],
+        "not_applicable": [
+         "recent_perception"
+        ],
+        "required": [
+         "vision",
+         "audio"
+        ]
+       },
+       "linkage": "private_track_ms",
+       "scope": "aim_key",
+       "thresholds": {
+        "min_samples": 8,
+        "min_total_ms": 1200.0
+       },
+       "total_ms": 1600.0,
+       "tracked_samples": 20
+      },
+      "family": "challenge",
+      "key": "legacy_private_replay:rifle",
+      "kind": "occluded_motion_replay",
+      "match_ids": [
+       "m1"
+      ],
+      "observation_id": "obs-d6b0a455423d666f8428468e",
+      "role": "review",
+      "source": "fpsdet",
+      "subject_id": "replay-lock"
+     }
+    ],
+    "packet": {
+     "digest": "sha256:2f0d65b89b491841585b4002cc13fa4181eccda021b1f9bcc1339a03b78b9526",
+     "recipe": "fpsdet.packet/4",
+     "status": "complete"
+    },
+    "provenance": {
+     "cohort": {
+      "digest": "sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+      "integrity": {
+       "digest": "sha256:5f0fdccafd0565d24cc1a8e821229c9fc98ffe0aa895e609c7d725d6a5f9206b",
+       "recipe": "fpsdet.cohort-integrity/1",
+       "status": "unchecked"
+      },
+      "mode": "external",
+      "recipe": "fpsdet.cohort/1",
+      "stored_digest": "not_from_file"
+     },
+     "detector": {
+      "digest": "sha256:fb30982dca642ec961ed5600d78e9f0954b9459d73dfa6dd11fbc62f216ab381",
+      "modules": [
+       "fpsdet",
+       "fpsdet.auth",
+       "fpsdet.baseline",
+       "fpsdet.challenge",
+       "fpsdet.evidence",
+       "fpsdet.external",
+       "fpsdet.graph",
+       "fpsdet.knowledge",
+       "fpsdet.models",
+       "fpsdet.parse",
+       "fpsdet.persist",
+       "fpsdet.pipeline",
+       "fpsdet.provenance",
+       "fpsdet.score",
+       "fpsdet.signals",
+       "fpsdet.statsutil",
+       "fpsdet.summarize",
+       "fpsdet.timeline"
+      ],
+      "recipe": "fpsdet.detector/1"
+     },
+     "external": {
+      "digest": "sha256:0f41789e589a8d52b05de6edb9d6c85326f13d8e2bae7a0466a9c3019f326eba",
+      "mode": "supplied",
+      "policy": {
+       "require_signed": false
+      },
+      "recipe": "fpsdet.external-input/1",
+      "records": 0,
+      "registry": {
+       "digest": "sha256:f5151fe1e0e95f26ac8b618ac0431015b94f37a87868711dd0c9c0f791887017",
+       "keys": 3,
+       "recipe": "fpsdet.provider-registry/1"
+      },
+      "sources": [
+       {
+        "adapter": "fpsdet.external/1",
+        "adapter_name": null,
+        "artifact": "sha256:49b3f05e2de6566bdbb7b13cf5ecbadbf7cdf1fcf3808b7922a365edc8dcaa75",
+        "authentication": {
+         "unsigned": 1,
+         "verified": 2
+        },
+        "duplicates": 0,
+        "errors": 0,
+        "excluded": 0,
+        "records": 3
+       }
+      ]
+     },
+     "history": {
+      "digest": "sha256:5f6a4f9954ab6f3f14deabe4e6abcb010cd01c063249b3f4564de78074b650b7",
+      "mode": "external",
+      "recipe": "fpsdet.history/1",
+      "windows": 0
+     },
+     "inputs": {
+      "digest": "sha256:9e06689f0e09caac73734e373579b2ad692e8413480b396f1f31e85783c98bcd",
+      "events": 48,
+      "matches": 1,
+      "recipe": "fpsdet.player-events/2"
+     },
+     "profile": {
+      "digest": "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb",
+      "recipe": "fpsdet.profile/1"
+     },
+     "version": 1
+    },
+    "version": 1
+   },
+   "game_id": "example-loadout",
+   "inherit_lags_ms": [],
+   "limits": "This case is evidence for a person. It is not a ban. A sustained gear-rule break or a result past the best measured humans is the finding. One wild frame is not.",
+   "match_ids": [
+    "m1"
+   ],
+   "metrics": [
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 0.11248584522204352,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 0.37,
+     "ceiling_p95": 0.36,
+     "key": "rifle",
+     "name": "accuracy",
+     "own_max": 0.22,
+     "own_p95": 0.205,
+     "player_value": 0.1875,
+     "skipped": null
+    },
+    {
+     "beyond_band": false,
+     "beyond_human": false,
+     "bound": 28.6572608492716,
+     "ceiling_band": "elite",
+     "ceiling_extreme": 45.14391897289907,
+     "ceiling_p95": 43.814691444768805,
+     "key": "rifle",
+     "name": "median_distance",
+     "own_max": 34.00018160586376,
+     "own_p95": 33.56448833105132,
+     "player_value": 28.6572608492716,
+     "skipped": null
+    }
+   ],
+   "observations": [],
+   "party_ids": [],
+   "party_note": "",
+   "player_id": "replay-lock",
+   "queue_rank": 0,
+   "reasons": [
+    "rifle aim stayed on a private replay for 1600 ms across 20 shots"
+   ],
+   "recommended_action": "human_review",
+   "reports": 0,
+   "seal": "e73f0a73ef538ed1667e4bb7938b487d3de12323b3369441585381cf35b9e3ae",
+   "skill_band": "average",
+   "speed": {
+    "cap_source": "none",
+    "detail": "",
+    "eligible": 0,
+    "excluded_airborne": 0,
+    "excluded_innocent": 0,
+    "excluded_unknown": 0,
+    "longest_run": 0,
+    "missing_cap": 0,
+    "spike_samples": 0,
+    "sustained": false,
+    "violations": 0
+   },
+   "untrained": [],
+   "vendor_r": null,
+   "vendor_twin": "",
+   "version": 1
+  }
+ ],
+ "note": "Written by fpsdet at a6ba971 (P8), before detector eligibility: adrenaline (two signed external records, verified, with provider_key nodes), radar-friend (a voice watch depending on another case) and replay-lock (a legacy challenge). Their graphs use fpsdet.graph/2 and their packets fpsdet.packet/4, and must keep verifying after fpsdet.packet/5."
+}
