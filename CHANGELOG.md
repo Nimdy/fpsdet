@@ -32,6 +32,15 @@
 
 ### Added
 
+- **Try it on your own logs** ([examples/historic](examples/historic/README.md), [the Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html)). An operator can score a copy of logs their server already wrote, offline. Nothing goes on their servers or players' PCs, and nobody is banned.
+  - **`convert.py`** turns a CSV or JSON-lines export into fpsdet events:
+    - it copies only the schema's fields, so names and addresses are dropped;
+    - account ids become HMAC pseudonyms under a salt kept in an owner-only file;
+    - every value is checked against the schema;
+    - `--who` finds an account's pseudonym again.
+  - **Example files:** a made-up sample export, its column map, and a one-line profile. On the sample, they give one speed review and keep an explosion out of the case, as the page says.
+  - **Every page asks.** A "Try it" nav link and a banner above every footer, a banner at the top of the home page, and the desk's nav. The second ask is a dedicated server for a live test.
+
 - **Amendment 1 to the human pilot, before any person plays** ([examples/human-pilot/amendment-1.json](examples/human-pilot/amendment-1.json)). It changes nothing that decides a challenge: the bar, the cone, the episode gap, placement and scoring are as pre-registered.
   - **Staging:** the first 4 participants finish before anyone else is enrolled. Review-grade evidence on an honest session ends collection, and `clear-stop` refuses it.
   - **Before the sessions:**
