@@ -123,7 +123,7 @@ ROW_KINDS = {"view_snaps": "view_p95", "acquire_timing": "acquire_median"}
 # Kinds whose observation key is "metric:key", because one key can carry several metrics.
 METRIC_KEYED = frozenset({"rank_tail", "extra", "supporting_extra"})
 # Shared structure between two different findings on one player, read from the case's evidence graph.
-STRUCTURES = ("cohort", "match", "key", "dependency", "partner")
+STRUCTURES = ("cohort", "match", "key", "dependency", "partner", "domain")
 
 
 class EvaluationError(ValueError):
@@ -176,6 +176,8 @@ def check_dataset(dataset: Mapping) -> dict:
         raise EvaluationError("a dataset has exactly one positive label and at least one comparison label")
     if not isinstance(dataset.get("telemetry"), list) or not all(isinstance(field, str) for field in dataset["telemetry"]):
         raise EvaluationError("telemetry lists the event fields the data carries")
+    if dataset.get("split_unit", "player") not in ("player", "match"):
+        raise EvaluationError("split_unit is the unit of independence: player, or match where each player is one match")
     if not isinstance(dataset.get("server_shot_timing"), bool):
         raise EvaluationError("server_shot_timing says whether shot times are the server's own (true) or made by a converter (false)")
     for field in ("dataset", "title", "source", "unit", "match_level", "not_scored"):
@@ -290,6 +292,7 @@ def _kind(obs: Mapping) -> str:
 def _structure(case: Mapping, native: list[dict]) -> list[list]:
     """For each pair of different detectors that fired on this player, what the evidence graph says they share."""
     graph = (case["evidence"].get("graph") or {})
+    described = (graph.get("summary") or {}).get("observations") or {}
     out: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
     for edge in graph.get("edges") or []:
         out[edge["source"]][edge["relation"]].add(edge["target"])
@@ -312,6 +315,9 @@ def _structure(case: Mapping, native: list[dict]) -> list[list]:
                 shared.add("dependency")
             if ea["names_partner"] & eb["names_partner"]:
                 shared.add("partner")
+            domain = (described.get(a_id) or {}).get("telemetry_domain")
+            if domain and domain == (described.get(b_id) or {}).get("telemetry_domain"):
+                shared.add("domain")
     return [[a, b, sorted(shared)] for (a, b), shared in sorted(found.items(), key=lambda item: (NATIVE_KINDS.index(item[0][0]), NATIVE_KINDS.index(item[0][1])))]
 
 
@@ -687,9 +693,11 @@ def _co_occurrence(rows: list[dict], dataset: Mapping, kinds: list[str]) -> dict
                 })
         by_group[group["label"]] = cells
     structure: dict[str, dict] = {}
+    # A /1 artifact's rows predate the shared telemetry domain.
+    names = STRUCTURES[:-1] if any("partial" in row for row in rows) else STRUCTURES
     for row in rows:
         for a, b, shared in row.get("pairs", []):
-            entry = structure.setdefault(f"{a} + {b}", {"players": 0, **{name: 0 for name in STRUCTURES}, "none_recorded": 0})
+            entry = structure.setdefault(f"{a} + {b}", {"players": 0, **{name: 0 for name in names}, "none_recorded": 0})
             entry["players"] += 1
             for name in shared:
                 entry[name] += 1
@@ -914,6 +922,13 @@ def evaluate(cases: list[dict], labels: Mapping[str, str], dataset: Mapping, pro
         (player_row(case, labels[case["player_id"]], profile, labels, runnable) for case in cases if case["player_id"] in labels),
         key=lambda row: row["player"],
     )
+    if dataset.get("split_unit") == "match":
+        # Each player is one match here; a split by match keeps a lobby's players together.
+        matches = {case["player_id"]: case.get("match_ids") or [] for case in cases}
+        for row in rows:
+            if len(matches[row["player"]]) != 1:
+                raise EvaluationError(f"{row['player']}: split_unit is match, but this player has {len(matches[row['player']])} matches")
+            row["split_group"] = matches[row["player"]][0]
     unlabelled = sum(case["player_id"] not in labels for case in cases)
     label_counts = dict(sorted(Counter(labels.values()).items()))
     stats = statistics(rows, dataset, observable, label_counts, unlabelled)
@@ -1203,12 +1218,13 @@ def render_markdown(artifact: Mapping) -> str:
     if co["graph_structure"]:
         add("What the evidence graph says two co-firing findings share, by pair (players):")
         add("")
-        add("| Pair | Players | Same cohort | Same match | Same weapon or group key | Dependency | Same partner | Nothing recorded |")
-        add("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
+        domain = not v1
+        add("| Pair | Players | Same cohort | Same match | Same weapon or group key | Dependency | Same partner |" + (" Same telemetry domain |" if domain else "") + " Nothing recorded |")
+        add("| --- | ---: | ---: | ---: | ---: | ---: | ---: |" + (" ---: |" if domain else "") + " ---: |")
         order = {f"{a} + {b}": (NATIVE_KINDS.index(a), NATIVE_KINDS.index(b)) for a in NATIVE_KINDS for b in NATIVE_KINDS}
         for pair in sorted(co["graph_structure"], key=order.__getitem__):
             cell = co["graph_structure"][pair]
-            add(f"| {pair} | {cell['players']} | {cell['cohort']} | {cell['match']} | {cell['key']} | {cell['dependency']} | {cell['partner']} | {cell['none_recorded']} |")
+            add(f"| {pair} | {cell['players']} | {cell['cohort']} | {cell['match']} | {cell['key']} | {cell['dependency']} | {cell['partner']} |" + (f" {cell['domain']} |" if domain else "") + f" {cell['none_recorded']} |")
         add("")
         add("Every native finding is server behaviour, one telemetry domain. Two findings measured against the same cohort move together if that cohort is off.")
         add("")

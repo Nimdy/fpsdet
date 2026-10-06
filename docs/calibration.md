@@ -217,6 +217,48 @@ At equal evidence (15–20 matches) it was 30 of 80 against 6 of 228. The 97 pla
 - **Aim:** the aim checks fired on a few hand-labelled cheaters and no hand-reviewed player.
 - **What one match cannot give:** one match per player is too little evidence for most players, so this is not a measure of what fpsdet does over an account's week.
 
+## Evidence strength (offline research)
+
+P8 measured how often each detector fired in each group. `fpsdet evaluate strength` (`src/fpsdet/strength.py`, `fpsdet.strength/1`) asks a narrower, offline question: using only a frozen development half of one labelled population, how much more often did a detector fire for positive-labelled players than for comparison players, among players it could run on? And did the untouched evaluation half behave the same way?
+
+It is research only:
+- **No path to scoring:** the scorer never imports it (`NOT_DETECTOR`), and `fpsdet score` has no option for it.
+- **Not evidence:** no estimate becomes a weight, a threshold, a role or a probability that anyone cheated.
+- **P8 stays the measurement:** P8's observed rates remain the published measurement. This is a separate layer, and the README does not headline it.
+
+**Declared before any estimate was computed.** Every choice below was committed with the code, before it ran on real data, and is the same for every detector.
+
+| Choice | Declared |
+| --- | --- |
+| Split | `fpsdet.calibration-split/1`: SHA-256 of the recipe and the unit of independence, first byte under 128 is development, the rest evaluation. Half and half. The unit is the dataset's `split_unit`: the account for TF2, which spans many lobbies, and the match for CS2, so a lobby's players stay together. Nothing about a player's label, decision or numbers goes in |
+| Event | The detector fired at least once on the player, among players its case records as eligible. Repeat findings are not more evidence |
+| Prior | Jeffreys, Beta(½, ½), for each group's firing rate. It is the reference prior for a binomial rate, invariant to how the rate is parameterised, adds one half fire and one half non-fire, and its interval has near-nominal frequentist coverage. Uniform Beta(1, 1) is reported beside it as a sensitivity check only |
+| Rate | The posterior mean, (fires + ½) / (eligible + 1) |
+| Ratio | The **label-conditioned evidence ratio**: positive posterior mean over comparison posterior mean. It is a likelihood ratio in form, but these labels are not ground truth, so it is never called one. It is finite even with no comparison fires |
+| Credible set | Each rate's central interval at √0.95 (97.47%). With independent groups both hold with 95% posterior probability, so the ratio lies in [positive low / comparison high, positive high / comparison low] with at least 95%. A set where a group had no fires is flagged: the prior sets its far end |
+| Gates | P8's: no estimate below 20 eligible players in either group of the development half; `measured` from 100, `descriptive_only` from 20 |
+| Comparison | The dataset's first comparison group: never-banned for TF2, hand-reviewed for CS2 |
+| Stability | Against the development posterior predictive (beta-binomial, central 95%) for the evaluation half's size. **unsupported**: no development estimate, or its credible set does not exclude 1. **unstable**: the evaluation fires fall outside the prediction in either group. **tentative**: consistent, but the evaluation half is under 20 in a group, or its own credible set does not exclude 1. **replicated**: consistent, and its own set excludes 1. Nothing is ever called validated from one split |
+| Reverse split | Fit on evaluation, check on development, as sensitivity only. Never averaged with the canonical fit |
+| Families | Any finding in human_baseline, physics, weapon_rules or relationship, as its own empirical event, where observable |
+| Not calibrated | The challenge family (no public data carries planned challenges), external provider evidence (no provider-specific rates), human reviewers' findings, and any detector the dataset cannot observe |
+
+**Never combined.** Detector estimates are never multiplied or added: two findings on one player share a cohort, matches and telemetry. The development half's co-occurring pairs are tagged from the evidence graph as candidates for future fusion research:
+- `explicit_dependency`;
+- `shared_cohort`;
+- `shared_domain`;
+- `co_occurring_no_explicit_dependency`.
+
+**The artifact** binds:
+- the evaluation it was estimated from, by digest, and through it the cases, labels, profile, detector and cohort;
+- the dataset definition's digest and its label semantics;
+- the split and its composition;
+- the estimator, prior and gates;
+- the code's digest;
+- every estimate, check and sensitivity result.
+
+There is no timestamp. It is unsigned, and it is in no case packet. `fpsdet evaluate strength-verify` recomputes it from its evaluation.
+
 ## Controlled fixtures
 
 `fpsdet evaluate fixtures` runs two worlds:

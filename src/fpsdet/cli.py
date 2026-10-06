@@ -536,6 +536,37 @@ def cmd_evaluate_verify(args: argparse.Namespace) -> int:
     return 1 if failed else 0
 
 
+def cmd_evaluate_strength(args: argparse.Namespace) -> int:
+    """Label-conditioned evidence ratios, fitted on the development half of one evaluation. Offline research only."""
+    import time
+
+    from .strength import StrengthError, dumps, render_markdown, strength
+
+    start = time.perf_counter()
+    try:
+        artifact = strength(read_json(args.evaluation))
+    except StrengthError as error:
+        raise SystemExit(f"evaluate strength: {error}")
+    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.out).write_text(dumps(artifact), encoding="utf-8")
+    if args.report:
+        Path(args.report).write_text(render_markdown(artifact), encoding="utf-8")
+    stability = Counter(entry["evaluation"]["stability"] for entry in artifact["detectors"] if "evaluation" in entry)
+    print(f"Estimated in {time.perf_counter() - start:.2f}s. Stability: " + (", ".join(f"{name} {stability[name]}" for name in ("replicated", "tentative", "unstable", "unsupported") if stability[name]) or "nothing estimated"))
+    print(f"Wrote {args.out}" + (f" and {args.report}" if args.report else "") + f": {artifact['digest']}")
+    return 0
+
+
+def cmd_evaluate_strength_verify(args: argparse.Namespace) -> int:
+    from .strength import verify_strength
+
+    problems = verify_strength(read_json(args.strength), read_json(args.evaluation))
+    print(f"{args.strength}: {'ok' if not problems else 'FAILED'}")
+    for problem in problems:
+        print(f"  {problem}")
+    return 1 if problems else 0
+
+
 def cmd_evaluate_fixtures(args: argparse.Namespace) -> int:
     from .calibration import qualify_fixtures, render_fixtures
 
@@ -670,7 +701,16 @@ def build_parser() -> argparse.ArgumentParser:
     check_evaluation = evaluate_actions.add_parser("verify", help="Recompute an evaluation's statistics from its rows and check its digest")
     check_evaluation.add_argument("evaluations", nargs="+")
     check_evaluation.set_defaults(func=cmd_evaluate_verify)
-    fixtures = evaluate_actions.add_parser("fixtures", help="Controlled-fixture qualification on the planted demo. Never a real-world rate")
+    strength = evaluate_actions.add_parser("strength", help="Offline research: label-conditioned evidence ratios from a frozen development half")
+    strength.add_argument("evaluation", help="An fpsdet.evaluation/2 file")
+    strength.add_argument("--out", required=True)
+    strength.add_argument("--report", help="Also write the Markdown report here")
+    strength.set_defaults(func=cmd_evaluate_strength)
+    strength_verify = evaluate_actions.add_parser("strength-verify", help="Recompute a strength file from its evaluation and check its digest")
+    strength_verify.add_argument("strength")
+    strength_verify.add_argument("--evaluation", required=True)
+    strength_verify.set_defaults(func=cmd_evaluate_strength_verify)
+    fixtures = evaluate_actions.add_parser("fixtures", help="Controlled-fixture qualification on the planted demo and the controlled fixtures. Never a real-world rate")
     fixtures.add_argument("--out", help="Also write the result as JSON")
     fixtures.set_defaults(func=cmd_evaluate_fixtures)
     return parser
