@@ -13,7 +13,7 @@ from pathlib import Path
 from .ai_triage import openai_compatible_transport, triage_case
 from .baseline import build_cohorts, screen_matches
 from .casefile import safe_name, write_case
-from .challenge import CURRENT, Budget, ChallengeError, ChallengeRegistry, case_problems, plan_file_from_dict
+from .challenge import CURRENT, SPECS, Budget, ChallengeError, ChallengeRegistry, case_problems, plan_file_from_dict, spec_for
 from .challenge_plan import SECRET_ENV, SecretError, load_secret, new_secret_file, plan_match, reproduce
 from .auth import AuthError, load_registry
 from .external import ExternalError, load_adapter, read_external
@@ -397,12 +397,13 @@ def cmd_challenge_plan(args: argparse.Namespace) -> int:
         max_duration_ms=args.max_duration_ms,
     )
     try:
-        planned = plan_match(secret, profile, args.match, args.player, budget, nonce=args.nonce)
+        spec = spec_for("occluded_motion_replay", args.version) if args.version else CURRENT["occluded_motion_replay"]
+        planned = plan_match(secret, profile, args.match, args.player, budget, nonce=args.nonce, spec=spec)
     except ChallengeError as error:
         raise SystemExit(str(error))
     write_json(args.out, planned.to_dict())
     players = len({plan.subject_id for plan in planned.plans})
-    print(f"Wrote {len(planned.plans)} challenges for {players} players in {planned.match_id} to {args.out}.")
+    print(f"Wrote {len(planned.plans)} {planned.spec.name} challenges for {players} players in {planned.match_id} to {args.out}.")
     print("It holds no key and no realization. Keep it on the server until the match is over.")
     return 0
 
@@ -476,7 +477,7 @@ def cmd_challenge_verify(args: argparse.Namespace) -> int:
 
 
 def cmd_challenge_types(args: argparse.Namespace) -> int:
-    print(json.dumps([spec.to_dict() for spec in CURRENT.values()], indent=2))
+    print(json.dumps([{**spec.to_dict(), "current": CURRENT.get(spec.challenge_type) is spec} for spec in SPECS.values()], indent=2))
     return 0
 
 
@@ -747,6 +748,7 @@ def cmd_benchmark_report(args: argparse.Namespace) -> int:
             print(f"{name} is not what the committed artifacts generate; run fpsdet benchmark report")
         return 1 if stale else 0
     for path, text in files.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
     print("Wrote " + ", ".join(str(path.relative_to(ROOT)) for path in files))
     return 0
@@ -838,6 +840,8 @@ def build_parser() -> argparse.ArgumentParser:
     plan.add_argument("--min-duration-ms", type=int, default=Budget.min_duration_ms)
     plan.add_argument("--max-duration-ms", type=int, default=Budget.max_duration_ms)
     plan.add_argument("--nonce", help="Reuse a plan's nonce to reproduce it. Default: a fresh random one")
+    plan.add_argument("--version", type=int, choices=sorted({version for _type, version in SPECS}),
+                      help="The challenge type's version. Default: the current one (2, which needs the server's per-moment verdict on the body)")
     plan.add_argument("--secret-file", help=f"Hex secret file; /dev/fd/N works. Default: {SECRET_ENV}")
     plan.add_argument("--out", required=True)
     plan.set_defaults(func=cmd_challenge_plan)

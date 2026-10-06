@@ -228,6 +228,10 @@ class Event:
     # A response to a planned challenge (fpsdet.challenge): which one, and the aim time on its target.
     challenge_id: str | None = None
     challenge_track_ms: float | None = None
+    # What the server's own queries said about the challenge's body for this client, over the time this
+    # event covers: never about enemy_id, which vision_state and audio_state describe.
+    challenge_vision_state: str | None = None
+    challenge_audio_state: str | None = None
     extras: dict[str, float] = field(default_factory=dict)
 
     @property

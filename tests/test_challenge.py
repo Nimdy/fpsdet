@@ -578,9 +578,12 @@ class PlanOutputLeakTest(unittest.TestCase):
     def test_the_types_command_prints_the_spec_and_no_secret(self):
         code, printed = run_cli("challenge", "types")
         self.assertEqual(code, 0)
-        (spec,) = json.loads(printed)
-        self.assertEqual((spec["challenge_type"], spec["defeats"]), ("occluded_motion_replay", ["vision", "audio"]))
-        self.assertTrue(spec["capability"]["limits"])
+        first, second = json.loads(printed)
+        for spec in (first, second):
+            self.assertEqual((spec["challenge_type"], spec["defeats"]), ("occluded_motion_replay", ["vision", "audio"]))
+            self.assertTrue(spec["capability"]["limits"])
+        self.assertEqual([(spec["version"], spec["current"], spec.get("verification")) for spec in (first, second)],
+                         [(1, False, None), (2, True, "per_sample")])
 
 
 def plan_for(subject: str = "x", match: str = "m1", count: int = 1, profile=GAME, secret: ServerSecret | None = None):
@@ -1085,6 +1088,142 @@ class SecretLeakTest(unittest.TestCase):
             with self.subTest(path.name):
                 self.assertNotIn('"origin": "planned"', path.read_text(encoding="utf-8"))
                 self.assertNotIn('"ch-', path.read_text(encoding="utf-8"))
+
+
+def plan_v2(subject: str = "x", match: str = "m1", count: int = 1, profile=GAME):
+    from fpsdet.challenge import OCCLUDED_MOTION_REPLAY_V2
+
+    return plan_match(fresh()[1], profile, match, [subject], Budget(to_ms=1_500_000, count=count), nonce=os.urandom(16).hex(), spec=OCCLUDED_MOTION_REPLAY_V2)
+
+
+HIDDEN = {"challenge_vision_state": "absent", "challenge_audio_state": "absent"}
+
+
+class PerMomentVerdictTest(unittest.TestCase):
+    """occluded_motion_replay/2: the plan saying the body was hidden is not enough. A moment counts only when
+    the server's own verdict for that moment says both channels were absent (P12, I4 to I6)."""
+
+    def test_a_verified_follow_is_evidence_that_says_how_it_was_known(self):
+        planned = plan_v2()
+        (plan,) = planned.plans
+        self.assertEqual((plan.version, plan.spec.verification), (2, "per_sample"))
+        case = scored_with(follow(plan, **HIDDEN), [planned])
+        result = results_of(case)[plan.challenge_id]
+        self.assertEqual((result["status"], result["verification"], result["verified_samples"], result["tracked_samples"]), ("followed", "per_sample", 20, 20))
+        (finding,) = challenge_findings(case)
+        self.assertEqual(finding["evidence"]["knowledge"]["verification"], "per_sample")
+        self.assertEqual(finding["evidence"]["knowledge"]["verified_samples"], 20)
+        self.assertEqual(finding["evidence"]["challenge"]["version"], 2)
+        self.assertEqual(case["decision"], "review")
+        self.assertEqual(verify_packet(case), [])
+        self.assertEqual(case["evidence"]["provenance"]["inputs"]["recipe"], "fpsdet.player-events/3")
+
+    def test_without_a_verdict_a_version_2_challenge_abstains(self):
+        planned = plan_v2()
+        (plan,) = planned.plans
+        for fields, cause in (({}, "unchecked"), ({"challenge_vision_state": "absent"}, "unchecked"),
+                              ({**HIDDEN, "challenge_audio_state": "unchecked"}, "unchecked")):
+            with self.subTest(fields=fields):
+                case = scored_with(follow(plan, **fields), [planned])
+                result = results_of(case)[plan.challenge_id]
+                self.assertEqual((result["status"], result["cause"], result["tracked_samples"]), ("abstained", cause, 0))
+                self.assertEqual(challenge_findings(case), [])
+                self.assertEqual(case["evidence"]["detector_eligibility"]["detectors"]["occluded_motion_replay"], {"telemetry_unavailable": [plan.challenge_id]})
+
+    def test_one_moment_seen_or_heard_voids_the_challenge(self):
+        planned = plan_v2()
+        (plan,) = planned.plans
+        for channel, cause in (("challenge_vision_state", "seen"), ("challenge_audio_state", "heard")):
+            with self.subTest(channel=channel):
+                events = follow(plan, n=40, **HIDDEN)
+                events[25] = dataclasses.replace(events[25], **{channel: "known"})
+                case = scored_with(events, [planned])
+                result = results_of(case)[plan.challenge_id]
+                self.assertEqual((result["status"], result["cause"]), ("abstained", cause))
+                self.assertEqual(result["not_counted"][cause], 1)
+                self.assertEqual(challenge_findings(case), [])
+                self.assertTrue(any(f"its body {cause}" in line for line in case["observations"]))
+
+    def test_contradictory_verdicts_abstain_with_a_diagnostic(self):
+        planned = plan_v2()
+        (plan,) = planned.plans
+        events = follow(plan, n=40, **HIDDEN)
+        events.append(dataclasses.replace(events[10], challenge_vision_state="known", event_type="movement"))
+        case = scored_with(events, [planned])
+        result = results_of(case)[plan.challenge_id]
+        self.assertEqual((result["status"], result["cause"]), ("abstained", "conflict"))
+        self.assertEqual(challenge_findings(case), [])
+        self.assertTrue(any("disagree about the challenge's body" in line for line in case["observations"]))
+        self.assertEqual(case["evidence"]["detector_eligibility"]["detectors"]["occluded_motion_replay"], {"conflict": [plan.challenge_id]})
+
+    def test_only_verified_moments_count(self):
+        planned = plan_v2()
+        (plan,) = planned.plans
+        events = follow(plan, n=40, **HIDDEN)
+        events = [dataclasses.replace(event, challenge_audio_state="unchecked") if index % 2 else event for index, event in enumerate(events)]
+        result = results_of(scored_with(events, [planned]))[plan.challenge_id]
+        self.assertEqual((result["status"], result["verified_samples"], result["tracked_samples"], result["not_counted"]), ("followed", 20, 20, {"unchecked": 20}))
+
+    def test_a_visible_enemy_on_the_same_event_still_explains_the_aim(self):
+        planned = plan_v2()
+        (plan,) = planned.plans
+        events = follow(plan, n=40, enemy_id="e1", vision_state="known", audio_state="absent", **HIDDEN)
+        result = results_of(scored_with(events, [planned]))[plan.challenge_id]
+        self.assertEqual((result["status"], result["tracked_samples"], result["not_counted"]), ("not_followed", 0, {"seen": 40}))
+
+    def test_the_body_verdict_never_describes_the_events_enemy(self):
+        """The enemy's vision_state says nothing about the body, and the body's verdict nothing about the enemy."""
+        planned = plan_v2()
+        (plan,) = planned.plans
+        hidden_enemy = follow(plan, n=40, enemy_id="e1", vision_state="absent", audio_state="absent", challenge_vision_state="known", challenge_audio_state="absent")
+        result = results_of(scored_with(hidden_enemy, [planned]))[plan.challenge_id]
+        self.assertEqual((result["status"], result["cause"]), ("abstained", "seen"))
+        enemy_only = follow(plan, n=40, enemy_id="e1", vision_state="absent", audio_state="absent")
+        result = results_of(scored_with(enemy_only, [planned]))[plan.challenge_id]
+        self.assertEqual((result["status"], result["cause"]), ("abstained", "unchecked"))
+
+    def test_a_version_1_challenge_honours_a_verdict_when_one_is_sent(self):
+        planned = plan_for()
+        (plan,) = planned.plans
+        self.assertEqual(results_of(scored_with(follow(plan), [planned]))[plan.challenge_id]["status"], "followed")  # P4, unchanged
+        events = follow(plan, n=40, **HIDDEN)
+        events[3] = dataclasses.replace(events[3], challenge_vision_state="known")
+        result = results_of(scored_with(events, [planned]))[plan.challenge_id]
+        self.assertEqual((result["status"], result["cause"], result["verification"]), ("abstained", "seen", "per_sample"))
+
+    def test_damaged_verdicts_never_strengthen(self):
+        planned = plan_v2()
+        (plan,) = planned.plans
+        base = follow(plan, n=40, **HIDDEN)
+        good = results_of(scored_with(base, [planned]))[plan.challenge_id]
+        damages = {
+            "verdicts dropped": [dataclasses.replace(e, challenge_vision_state=None, challenge_audio_state=None) if i % 3 == 0 else e for i, e in enumerate(base)],
+            "unchecked": [dataclasses.replace(e, challenge_audio_state="unchecked") if i % 2 == 0 else e for i, e in enumerate(base)],
+            "known": [dataclasses.replace(e, challenge_vision_state="known") if i == 39 else e for i, e in enumerate(base)],
+            "ids dropped": [dataclasses.replace(e, challenge_id=None) if i % 2 == 0 else e for i, e in enumerate(base)],
+            "duplicated with another verdict": base + [dataclasses.replace(e, challenge_audio_state="unchecked") for e in base[:5]],
+        }
+        for name, events in damages.items():
+            with self.subTest(name):
+                result = results_of(scored_with(events, [planned]))[plan.challenge_id]
+                self.assertLessEqual(result["tracked_samples"], good["tracked_samples"])
+                self.assertLessEqual(result["total_ms"], good["total_ms"])
+
+    def test_a_verdict_must_be_a_channel_state_and_names_its_challenge(self):
+        base = {"game_id": "g", "match_id": "m", "player_id": "p", "t_ms": 1, "skill_band": "average"}
+        self.assertEqual(parse_event({**base, "challenge_vision_state": "absent"}).challenge_vision_state, "absent")
+        for bad in ("hidden", "visible", "", 1, True):
+            with self.assertRaises(ParseError):
+                parse_event({**base, "challenge_audio_state": bad})
+        planned = plan_v2()
+        (plan,) = planned.plans
+        orphan = [dataclasses.replace(e, challenge_id=None, challenge_track_ms=None) for e in follow(plan, n=5, **HIDDEN)]
+        case = scored_with(orphan, [planned])
+        self.assertTrue(any("reported on a challenge's body with no challenge_id" in line for line in case["observations"]))
+
+    def test_events_without_a_verdict_keep_their_input_recipe(self):
+        case = scored_with(follow(plan_for().plans[0]), [])
+        self.assertEqual(case["evidence"]["provenance"]["inputs"]["recipe"], "fpsdet.player-events/2")
 
 
 def evidence_seal_of(row: dict) -> str:

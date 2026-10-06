@@ -68,6 +68,8 @@ _RESERVED = {
     "audio_state",
     "challenge_id",
     "challenge_track_ms",
+    "challenge_vision_state",
+    "challenge_audio_state",
     "utc",
 }
 
@@ -208,6 +210,8 @@ def parse_event(obj: dict) -> Event:
         audio_state=_channel_state(obj, "audio_state"),
         challenge_id=_challenge_id(obj),
         challenge_track_ms=_num(obj, "challenge_track_ms"),
+        challenge_vision_state=_channel_state(obj, "challenge_vision_state"),
+        challenge_audio_state=_channel_state(obj, "challenge_audio_state"),
         extras=extras,
     )
 

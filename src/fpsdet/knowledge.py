@@ -13,7 +13,8 @@ declared channel makes the answer ``unknown``. Information checks act only on ``
 missing telemetry can only make them abstain, never make them stronger.
 
 Channels with telemetry today are ``vision`` and ``audio`` (from ``information_state``, or per channel
-from ``vision_state`` and ``audio_state``) and ``recent_perception`` (from ``since_perceived_ms`` and the
+from ``vision_state`` and ``audio_state``; for a challenge's body, from ``challenge_vision_state`` and
+``challenge_audio_state``, which never describe the event's own enemy) and ``recent_perception`` (from ``since_perceived_ms`` and the
 profile's ``hidden_grace_ms``). Recent perception only ever adds knowledge: inside the grace window the
 target is known; outside it, or when not sent, it decides nothing unless the profile declares it.
 ``FUTURE_CHANNELS`` can be declared by a game that has them, but no event field reports them yet, so
@@ -183,6 +184,23 @@ def tracked_knowledge(event, profile) -> KnowledgeState:
     """
     recent = recent_perception(event, profile.hidden_grace_ms)
     return _tracked_state(event.information_state, event.vision_state, event.audio_state, recent, profile.knowledge_channels)
+
+
+def challenge_channels(event) -> tuple[tuple[str, str], ...] | None:
+    """What the server's own queries said about a challenge's body for this client, over the time the
+    event covers, or None when the event says nothing about it. A channel left out is unchecked."""
+    if event.challenge_vision_state is None and event.challenge_audio_state is None:
+        return None
+    return (("audio", event.challenge_audio_state or CHANNEL_UNCHECKED), ("vision", event.challenge_vision_state or CHANNEL_UNCHECKED))
+
+
+def body_knowledge(channels: Iterable[tuple[str, str]] | None, not_applicable: Iterable[str], required: Iterable[str]) -> KnowledgeState:
+    """Could this client know a challenge's body at one moment, by the server's verdict for that moment?
+    Channels the challenge type rules out (recent perception: the body was never perceivable) are not
+    applicable; anything the server did not report is unchecked, and makes the answer unknown."""
+    states = dict(channels or ())
+    states.update({name: CHANNEL_NOT_APPLICABLE for name in not_applicable})
+    return resolve(states, required)
 
 
 def private_knowledge(profile) -> KnowledgeState:

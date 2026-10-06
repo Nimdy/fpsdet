@@ -29,6 +29,7 @@ from .evidence import ELIGIBILITY, KINDS, NATIVE_KINDS, Observation
 from .challenge import (
     ABSTAINED,
     FOLLOWED,
+    PER_SAMPLE,
     UNPLANNED,
     ChallengeRegistry,
     challenge_context,
@@ -386,7 +387,13 @@ def _challenge_eligibility(result, profile: GameProfile) -> str:
     if result.status == UNPLANNED:
         return "disabled"
     if result.status == ABSTAINED:
-        return "not_applicable" if result.cause == "other_subject" else "disabled"
+        if result.cause == "other_subject":
+            return "not_applicable"
+        if result.verification == PER_SAMPLE:
+            # By the server's own verdict: a body this client could know is not a challenge; a contradiction
+            # cannot be judged; a verdict never reported is missing telemetry.
+            return {"conflict": "conflict", "unchecked": "telemetry_unavailable"}.get(result.cause, "not_applicable")
+        return "disabled"
     if result.eligible >= profile.hidden_track_min_samples:
         return "eligible"
     if result.eligible:
@@ -1049,6 +1056,9 @@ def assess_player(
         )
     observations.extend(_knowledge_notes(record, profile))
     observations.extend(challenge_notes(results, unlinked))
+    orphan_verdicts = sum(1 for sample in record.challenge_samples if sample.challenge_id is None and sample.track_ms is None)
+    if orphan_verdicts:
+        observations.append(f"{orphan_verdicts} events reported on a challenge's body with no challenge_id. They were not read; check the emitter.")
     own_history = history_for(record, history)
     if not own_history or not record.weapons:
         could("account_jump", "", "telemetry_unavailable")

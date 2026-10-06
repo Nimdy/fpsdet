@@ -29,7 +29,18 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 
 from .evidence import canonical_json
-from .knowledge import CHANNEL_ABSENT, CHANNEL_NOT_APPLICABLE, UNKNOWABLE, KnowledgeState, resolve, shot_knowledge
+from .knowledge import (
+    CHANNEL_ABSENT,
+    CHANNEL_KNOWN,
+    CHANNEL_NOT_APPLICABLE,
+    KNOWN,
+    UNKNOWABLE,
+    KnowledgeState,
+    body_knowledge,
+    challenge_channels,
+    resolve,
+    shot_knowledge,
+)
 from .statsutil import exact_sum
 
 # The domain prefix of every keyed derivation (fpsdet.challenge_plan). A new prefix is a new recipe.
@@ -40,6 +51,12 @@ COMMITMENT_RECIPE = "fpsdet.challenge-commitment/1"
 PLAN_RECIPE = "fpsdet.challenge-plan/1"
 # A plan file: one match, its challenges, and the budget they were scheduled under.
 PLAN_FILE_FORMAT = "fpsdet.challenge-plans/1"
+
+# How a challenge type knows its body was hidden. "plan": by the type's own requirements, which the server
+# promised to keep (version 1). "per_sample": by the server's own vision and audio verdict for the body,
+# reported on every event that names the challenge (version 2).
+BY_PLAN = "plan"
+PER_SAMPLE = "per_sample"
 
 # The budget's hard ceiling. A player is not a target range: more probes make a challenge-aware cheat's
 # job easier, and add nothing a person needs to review a case.
@@ -78,6 +95,8 @@ class ChallengeSpec:
     requirements: tuple[str, ...]
     # Machine-readable entry for the capability matrix: what this catches, how well, and what beats it.
     capability: Mapping
+    # How the body's hiddenness is known: BY_PLAN or PER_SAMPLE.
+    verification: str = BY_PLAN
 
     @property
     def name(self) -> str:
@@ -92,6 +111,7 @@ class ChallengeSpec:
             "parameters": [{"name": name, "low": low, "high": high} for name, low, high in self.parameters],
             "requirements": list(self.requirements),
             "capability": dict(self.capability),
+            **({"verification": self.verification} if self.verification != BY_PLAN else {}),
         }
 
 
@@ -140,9 +160,41 @@ OCCLUDED_MOTION_REPLAY = ChallengeSpec(
     },
 )
 
-SPECS: dict[tuple[str, int], ChallengeSpec] = {(OCCLUDED_MOTION_REPLAY.challenge_type, OCCLUDED_MOTION_REPLAY.version): OCCLUDED_MOTION_REPLAY}
-# The version a new plan uses, by type.
-CURRENT: dict[str, ChallengeSpec] = {OCCLUDED_MOTION_REPLAY.challenge_type: OCCLUDED_MOTION_REPLAY}
+# Version 2: the same probe, but the plan's word that the body was hidden is not enough. The server checks
+# this client's line-of-sight and audio queries against the body at every moment of the window and reports
+# the verdict on each event that names the challenge. A moment counts only when the verdict says both were
+# absent; a moment where the body was seen or heard, or where the verdicts contradict each other, voids the
+# whole challenge. Version 1 is kept unchanged, so plans and benchmarks made with it reproduce.
+OCCLUDED_MOTION_REPLAY_V2 = ChallengeSpec(
+    challenge_type="occluded_motion_replay",
+    version=2,
+    defeats=OCCLUDED_MOTION_REPLAY.defeats,
+    not_applicable=OCCLUDED_MOTION_REPLAY.not_applicable,
+    parameters=OCCLUDED_MOTION_REPLAY.parameters,
+    requirements=(
+        *OCCLUDED_MOTION_REPLAY.requirements,
+        "Query this client's line-of-sight and audio against the body at every server tick of the window, and send the verdict over the time each event covers on every event that names the challenge: challenge_vision_state and challenge_audio_state, known if the query succeeded at any tick, unchecked if it did not run at every tick, absent otherwise.",
+    ),
+    capability={
+        **OCCLUDED_MOTION_REPLAY.capability,
+        "strength": "strong when every knowledge channel the game declares is one the challenge defeats, the server's own per-moment verdict says the body was neither seen nor heard, and the plan, window and linkage all check out",
+        "needs": [
+            "challenge_id, challenge_track_ms, challenge_vision_state and challenge_audio_state on the subject's events",
+            "the public plan file when the events are scored",
+            "knowledge_channels no wider than vision and audio",
+        ],
+    },
+    verification=PER_SAMPLE,
+)
+
+SPECS: dict[tuple[str, int], ChallengeSpec] = {
+    (spec.challenge_type, spec.version): spec for spec in (OCCLUDED_MOTION_REPLAY, OCCLUDED_MOTION_REPLAY_V2)
+}
+# The version a new plan uses, by type: what fpsdet challenge plan writes.
+CURRENT: dict[str, ChallengeSpec] = {OCCLUDED_MOTION_REPLAY_V2.challenge_type: OCCLUDED_MOTION_REPLAY_V2}
+# What challenge_plan.plan_match plans when its caller names no type: version 1, so code written before
+# version 2, the benchmark's controlled scenarios among it, plans exactly what it always did.
+DEFAULT_SPEC = OCCLUDED_MOTION_REPLAY
 
 
 def spec_for(challenge_type: str, version: int) -> ChallengeSpec:
@@ -435,6 +487,8 @@ class ChallengeSample:
     # When the event's own enemy could explain the aim, why: seen, heard, recent, unchecked or conflict.
     # Empty when the event names no enemy, or that enemy was unknowable too.
     competing: str
+    # The server's verdict on the challenge's body (challenge_vision_state, challenge_audio_state), or None.
+    channels: tuple[tuple[str, str], ...] | None = None
 
 
 def _competing(event, profile) -> str:
@@ -455,12 +509,15 @@ def _competing(event, profile) -> str:
 
 
 def challenge_samples(events: Iterable, profile) -> list[ChallengeSample]:
-    """Every event that names a challenge or carries challenge time, in the order given (a timeline)."""
-    return [
-        ChallengeSample(event.challenge_id, event.match_id, event.t_ms, event.challenge_track_ms, _competing(event, profile))
-        for event in events
-        if event.challenge_id is not None or event.challenge_track_ms is not None
-    ]
+    """Every event that names a challenge, carries challenge time, or reports on a challenge's body, in
+    the order given (a timeline)."""
+    out = []
+    for event in events:
+        channels = challenge_channels(event)
+        if event.challenge_id is None and event.challenge_track_ms is None and channels is None:
+            continue
+        out.append(ChallengeSample(event.challenge_id, event.match_id, event.t_ms, event.challenge_track_ms, _competing(event, profile), channels))
+    return out
 
 
 FOLLOWED = "followed"
@@ -482,6 +539,8 @@ class ChallengeResult:
     tracked: list[float] = field(default_factory=list)  # the time each counted moment added
     not_counted: dict[str, int] = field(default_factory=dict)
     knowledge: KnowledgeState | None = None
+    verification: str = BY_PLAN
+    verified: int = 0  # eligible moments whose own verdict made the body unknowable (PER_SAMPLE only)
 
     @property
     def total_ms(self) -> float:
@@ -500,6 +559,9 @@ class ChallengeResult:
         }
         if self.cause:
             out["cause"] = self.cause
+        if self.verification != BY_PLAN:
+            out["verification"] = self.verification
+            out["verified_samples"] = self.verified
         return out
 
 
@@ -518,6 +580,9 @@ def _moments(rows: list[ChallengeSample]):
 
 
 def _judge(result: ChallengeResult, rows: list[ChallengeSample], plan: ChallengePlan, profile) -> None:
+    if plan.spec.verification == PER_SAMPLE or any(sample.channels is not None for sample in rows):
+        _judge_verified(result, rows, plan, profile)
+        return
     state = challenge_knowledge(plan.spec, profile)
     result.knowledge = state
     previous = plan.start_ms
@@ -559,6 +624,86 @@ def _judge(result: ChallengeResult, rows: list[ChallengeSample], plan: Challenge
         result.status = NOT_FOLLOWED if result.eligible else NO_SAMPLES
 
 
+def _judge_verified(result: ChallengeResult, rows: list[ChallengeSample], plan: ChallengePlan, profile) -> None:
+    """Per-moment proof: a moment counts only when the server's own verdict for that moment says every
+    declared channel was absent for the body. Used for every version 2 challenge, and for a version 1
+    challenge whose events carry a verdict, which can then only lose samples.
+
+    One moment where the body was seen or heard voids the challenge: from then on the client could know
+    it, and the server should have ended it. Events at one moment that disagree about the body void it
+    too: nothing says which is right. A moment with a declared channel unchecked does not count; with no
+    moment verified at all, the challenge abstains.
+    """
+    spec = plan.spec
+    required = profile.knowledge_channels
+    result.verification = PER_SAMPLE
+    previous = plan.start_ms
+    exposed: KnowledgeState | None = None
+    conflict = ""
+    unverified = 0
+    for moment in _moments(rows):
+        first = moment[0]
+        if first.match_id != plan.match_id:
+            _skip(result, "other_match", len(moment))
+            continue
+        if not plan.start_ms <= first.t_ms <= plan.end_ms:
+            _skip(result, "outside_window", len(moment))
+            continue
+        window = first.t_ms - previous
+        previous = first.t_ms
+        verdicts = {sample.channels for sample in moment}
+        if len(verdicts) != 1:
+            # One aim, two accounts of what this client could know about the body.
+            conflict = conflict or f"events at {first.match_id} {first.t_ms} ms disagree about the challenge's body: " + " / ".join(
+                sorted(", ".join(f"{name} {state}" for name, state in verdict) if verdict else "no verdict" for verdict in verdicts))
+            _skip(result, "conflict", len(moment))
+            continue
+        state = body_knowledge(first.channels, spec.not_applicable, required)
+        if state.status == KNOWN:
+            exposed = exposed or state
+            _skip(result, state.cause)
+            continue
+        claims = [sample for sample in moment if sample.track_ms is not None]
+        if not claims:
+            _skip(result, "no_measurement", len(moment))
+            continue
+        if len({(sample.track_ms, sample.competing) for sample in claims}) != 1:
+            _skip(result, "disagreed")
+            continue
+        result.eligible += 1
+        if state.status != UNKNOWABLE:
+            unverified += 1
+            _skip(result, state.cause)
+            continue
+        result.verified += 1
+        value = min(claims[0].track_ms, window)
+        if not value > 0:
+            continue
+        if claims[0].competing:
+            _skip(result, claims[0].competing)
+        else:
+            result.tracked.append(value)
+    absent = {name: CHANNEL_ABSENT for name in spec.defeats}
+    absent.update({name: CHANNEL_NOT_APPLICABLE for name in spec.not_applicable})
+    if conflict:
+        result.knowledge = resolve({}, required, conflict)
+        result.status, result.cause = ABSTAINED, "conflict"
+    elif exposed is not None:
+        result.knowledge = exposed
+        result.status, result.cause = ABSTAINED, exposed.cause
+    elif not result.verified and unverified:
+        result.knowledge = resolve({name: state for name, state in absent.items() if name in spec.not_applicable}, required)
+        result.status, result.cause = ABSTAINED, result.knowledge.cause
+    else:
+        result.knowledge = resolve(absent, required)
+        if result.knowledge.status != UNKNOWABLE:
+            result.status, result.cause = ABSTAINED, result.knowledge.cause
+        elif len(result.tracked) >= profile.hidden_track_min_samples and result.total_ms >= profile.hidden_track_min_ms:
+            result.status = FOLLOWED
+        else:
+            result.status = NOT_FOLLOWED if result.eligible else NO_SAMPLES
+
+
 def evaluate_challenges(
     subject_id: str,
     match_ids: Iterable[str],
@@ -578,7 +723,7 @@ def evaluate_challenges(
     unlinked = 0
     for sample in samples:
         if sample.challenge_id is None:
-            unlinked += 1
+            unlinked += sample.track_ms is not None  # a verdict on a body with no challenge named is reported by challenge_notes' caller
         else:
             rows.setdefault(sample.challenge_id, []).append(sample)
     if registry is not None:
@@ -617,6 +762,18 @@ def challenge_notes(results: list[ChallengeResult], unlinked: int) -> list[str]:
     foreign = sum(1 for result in results if result.cause == "other_subject")
     if foreign:
         notes.append(f"{foreign} challenges named on this player's events were planned for another player. They were not read.")
+    for result in results:
+        if result.verification != PER_SAMPLE or result.plan is None:
+            continue
+        name = result.challenge_id
+        if result.cause == "conflict":
+            notes.append(f"Challenge {name}: {result.knowledge.conflict}. It does not count; check the emitter.")
+        elif result.status == ABSTAINED and result.cause in ("seen", "heard"):
+            moments = result.not_counted.get(result.cause, 0)
+            notes.append(f"Challenge {name}: the server reported its body {result.cause} at {moments} moments, so this client could know it. It does not count; check the placement.")
+        unverified = result.not_counted.get("unchecked", 0)
+        if unverified:
+            notes.append(f"Challenge {name}: {unverified} moments had no complete vision and audio verdict for its body. They were not counted.")
     return notes
 
 
@@ -683,8 +840,11 @@ def challenge_line(result: ChallengeResult) -> str:
 
 def challenge_evidence(result: ChallengeResult, profile) -> dict:
     """A followed planned challenge, as evidence: the challenge it binds to, by id, plan digest and
-    commitment; its window; what was counted; the knowledge it needed; the bar."""
+    commitment; its window; what was counted; the knowledge it needed, and how it was known; the bar."""
     plan = result.plan
+    knowledge = _knowledge(plan.spec, profile)
+    if result.verification == PER_SAMPLE:
+        knowledge = {**knowledge, "verification": PER_SAMPLE, "verified_samples": result.verified}
     return {
         "challenge": {
             "challenge_id": plan.challenge_id,
@@ -700,7 +860,7 @@ def challenge_evidence(result: ChallengeResult, profile) -> dict:
         "eligible_samples": result.eligible,
         "tracked_samples": len(result.tracked),
         "total_ms": result.total_ms,
-        "knowledge": _knowledge(plan.spec, profile),
+        "knowledge": knowledge,
         "thresholds": {"min_samples": profile.hidden_track_min_samples, "min_total_ms": profile.hidden_track_min_ms},
     }
 
@@ -714,7 +874,8 @@ def challenge_context(result: ChallengeResult, results: Iterable[ChallengeResult
     return {
         "knowledge": {
             **result.knowledge.to_dict(),
-            "basis": f"challenge_track_ms on events naming {result.challenge_id}; {result.plan.spec.name} defeats {', '.join(result.plan.spec.defeats)}",
+            "basis": (f"challenge_track_ms on events naming {result.challenge_id}; {result.plan.spec.name} defeats {', '.join(result.plan.spec.defeats)}"
+                      + ("; the server's own vision and audio verdict for the body at every counted moment" if result.verification == PER_SAMPLE else "")),
             "not_counted": dict(sorted(result.not_counted.items())),
         },
         "series": {"planned": sum(series.values()), **dict(sorted(series.items()))},

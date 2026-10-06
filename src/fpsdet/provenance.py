@@ -43,6 +43,11 @@ DETECTOR_RECIPE = "fpsdet.detector/1"
 COHORT_RECIPE = "fpsdet.cohort/1"
 INTEGRITY_RECIPE = "fpsdet.cohort-integrity/1"
 INPUTS_RECIPE = "fpsdet.player-events/2"
+# The same construction over a timeline in which some event reports the server's verdict on a challenge's
+# body (challenge_vision_state, challenge_audio_state). Those fields did not exist when /2 was defined, so a
+# timeline that sets them is digested under its own recipe, and /2 keeps meaning exactly what it meant.
+INPUTS_RECIPE_V3 = "fpsdet.player-events/3"
+_V3_FIELDS = ("challenge_vision_state", "challenge_audio_state")
 # What fpsdet wrote before event normalization: the events in the order they arrived. Packets that
 # carry it still verify; nothing writes it any more.
 ARRIVAL_INPUTS_RECIPE = "fpsdet.player-events/1"
@@ -315,9 +320,10 @@ class PlayerInputs:
     digest: str
     events: int
     matches: int
+    recipe: str = INPUTS_RECIPE
 
     def to_dict(self) -> dict:
-        return {"recipe": INPUTS_RECIPE, "digest": self.digest, "events": self.events, "matches": self.matches}
+        return {"recipe": self.recipe, "digest": self.digest, "events": self.events, "matches": self.matches}
 
 
 _EVENT_FIELDS: tuple[str, ...] = ()
@@ -362,9 +368,15 @@ def arrival_digest(events: list) -> str:
     return _events_digest(ARRIVAL_INPUTS_RECIPE, list(events))
 
 
+def timeline_recipe(events: list) -> str:
+    """``fpsdet.player-events/3`` when any event reports on a challenge's body, ``/2`` otherwise."""
+    return INPUTS_RECIPE_V3 if any(getattr(event, name) is not None for event in events for name in _V3_FIELDS) else INPUTS_RECIPE
+
+
 def timeline_digest(events: list) -> str:
-    """``fpsdet.player-events/2`` over events already in canonical timeline order (fpsdet.timeline)."""
-    return _events_digest(INPUTS_RECIPE, events)
+    """``fpsdet.player-events/2`` (or ``/3``, by ``timeline_recipe``) over events already in canonical
+    timeline order (fpsdet.timeline)."""
+    return _events_digest(timeline_recipe(events), events)
 
 
 def player_digest(events: Iterable) -> str:
@@ -377,7 +389,7 @@ def player_digest(events: Iterable) -> str:
 def timeline_inputs(timelines: Mapping[str, list]) -> dict[str, PlayerInputs]:
     """Each player's input identity from the timelines a run already built for scoring."""
     return {
-        player_id: PlayerInputs(timeline_digest(rows), len(rows), len({event.match_id for event in rows}))
+        player_id: PlayerInputs(timeline_digest(rows), len(rows), len({event.match_id for event in rows}), timeline_recipe(rows))
         for player_id, rows in timelines.items()
     }
 
@@ -571,7 +583,7 @@ RECIPES = {
     "detector": (DETECTOR_RECIPE,),
     "profile": (PROFILE_RECIPE,),
     "cohort": (COHORT_RECIPE,),
-    "inputs": (INPUTS_RECIPE, ARRIVAL_INPUTS_RECIPE),
+    "inputs": (INPUTS_RECIPE_V3, INPUTS_RECIPE, ARRIVAL_INPUTS_RECIPE),
     "history": (HISTORY_RECIPE,),
     "external": (EXTERNAL_INPUT_RECIPE,),
 }

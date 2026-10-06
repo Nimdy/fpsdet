@@ -47,7 +47,7 @@ from pathlib import Path
 
 from .challenge import (
     COMMITMENT_RECIPE,
-    CURRENT,
+    DEFAULT_SPEC,
     DERIVATION_RECIPE,
     NONCE,
     Budget,
@@ -226,8 +226,10 @@ def plan_match(
     spec: ChallengeSpec | None = None,
 ) -> PlanFile:
     """The public plan for one match. Without a nonce a fresh random one is drawn and written into the
-    plan, so the same match id used twice never repeats its challenges; with one, the plan is reproducible."""
-    spec = spec or CURRENT["occluded_motion_replay"]
+    plan, so the same match id used twice never repeats its challenges; with one, the plan is reproducible.
+    Without a spec it plans challenge.DEFAULT_SPEC (version 1, as it always did); fpsdet challenge plan
+    passes the current version."""
+    spec = spec or DEFAULT_SPEC
     subjects = list(subjects)
     if not subjects or any(not isinstance(subject, str) or not subject for subject in subjects):
         raise ChallengeError("name at least one player, each a non-empty id")
