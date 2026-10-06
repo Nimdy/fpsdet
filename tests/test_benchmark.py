@@ -216,5 +216,57 @@ class FirewallTest(unittest.TestCase):
         self.assertEqual(json.dumps(before, sort_keys=True), json.dumps(after, sort_keys=True))
 
 
+class PublishedBenchmarkTest(unittest.TestCase):
+    """The committed benchmark: every artifact verifies, the report is what they generate, and the
+    synthetic class still matches its pin on this Python."""
+
+    def test_every_committed_artifact_verifies_without_scoring(self):
+        failed = [check for check in bm.verify() if not check["ok"]]
+        self.assertEqual(failed, [])
+
+    def test_the_report_and_the_readme_block_are_generated(self):
+        ctx = bm.context()
+        self.assertEqual((ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8"), bm.render_report(ctx))
+        self.assertIn(bm.readme_block(ctx), (ROOT / "README.md").read_text(encoding="utf-8"))
+        _rows, problems = bm.capability_matrix(ctx)
+        self.assertEqual(problems, [])
+
+    def test_the_synthetic_class_matches_its_pin_on_this_python(self):
+        comparison = bm.compare(synthetic_result(), bm.load_expected()["datasets"]["synthetic-v1"])
+        self.assertIn(comparison["status"], ("MATCH", "ENVIRONMENT_ONLY", "PROVENANCE_ONLY"), comparison)
+        self.assertEqual([change for change in comparison["changes"] if change.get("kind") in ("semantic", "input")], [])
+
+    def test_what_a_dataset_cannot_observe_is_never_a_zero(self):
+        ctx = bm.context()
+        for row in bm.coverage_matrix(ctx):
+            for dataset in ctx["evaluations"]:
+                cell = row[dataset]
+                if not cell["observable"]:
+                    self.assertEqual(cell["status"], "not_observable", (row["detector"], dataset))
+                    self.assertIn(cell["strength"], ("not_calibrated",), (row["detector"], dataset))
+        report = (ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8")
+        self.assertLess(report.index("## What this benchmark cannot prove"), report.index("## 1. Benchmark datasets"))
+        self.assertIn("Controlled synthetic qualification", report)
+        self.assertIn("not real-world calibration", report)
+
+    def test_the_pinned_real_decisions_are_the_published_ones(self):
+        expected = bm.load_expected()["datasets"]
+        for name, short in (("tf2-rgl-v1", "tf2"), ("cs2cd-v1", "cs2")):
+            dataset = json.loads((ROOT / "examples" / short / "evaluation.dataset.json").read_text(encoding="utf-8"))
+            pinned = expected[name]["published"]
+            self.assertTrue(pinned["decisions_reproduce"])
+            for label, counts in dataset["published"]["decisions"].items():
+                self.assertEqual(pinned["decisions"][label], counts, (name, label))
+
+    def test_capability_evidence_is_worked_out_not_declared(self):
+        rows = {row["id"]: row for row in bm.capability_matrix(bm.context())[0]}
+        self.assertEqual(rows["hidden_target_tracking"]["evidence"], "controlled only")
+        self.assertIn("which cheat they used is unknown", rows["statistical_aimbot"]["evidence"])
+        self.assertIn("no separation shown", rows["speed_hack"]["evidence"])
+        self.assertTrue(rows["no_behavior_wallhack"]["evidence"].startswith("architecture statement"))
+        declared = json.loads((ROOT / "benchmark" / "capabilities.json").read_text(encoding="utf-8"))
+        self.assertFalse(any("evidence" in technique for technique in declared["techniques"]))
+
+
 if __name__ == "__main__":
     unittest.main()

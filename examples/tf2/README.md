@@ -21,9 +21,12 @@ Standard library only.
 DATA=~/tf2
 python examples/tf2/tf2logs.py cohort --out $DATA          # RGL's ban list
 python examples/tf2/tf2logs.py fetch --out $DATA --plan    # match lists only: how much would be fetched
-python examples/tf2/tf2logs.py fetch --out $DATA           # each cheater's recent team matches before the ban
+python examples/tf2/tf2logs.py fetch --out $DATA --per-account 20   # each cheater's 20 latest team matches before the ban
 python examples/tf2/tf2logs.py honest --out $DATA          # 150 honest players per half, 20 matches each
 python examples/tf2/tf2logs.py convert $DATA               # baseline.ndjson, scored.ndjson, labels.json
+
+# The same steps, with every parameter pinned and every output checked: fpsdet benchmark fetch/prepare/run --dataset tf2
+# (docs/benchmark.md). The published run fetched 20 matches per account; the fetcher's default is 40.
 
 PYTHONPATH=src python -m fpsdet baseline $DATA/baseline.ndjson --profile examples/tf2/tf2.json --screen-matches --out $DATA/cohort.json
 PYTHONPATH=src python -m fpsdet score $DATA/scored.ndjson --profile examples/tf2/tf2.json --cohort $DATA/cohort.json --out $DATA/cases

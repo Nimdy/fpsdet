@@ -36,3 +36,11 @@ jobs:
         run: PYTHONPATH=src python -m fpsdet demo
       - name: Committed desk is current
         run: git diff --exit-code demo/board.html
+      - name: Benchmark artifacts verify, without scoring
+        run: PYTHONPATH=src python -m fpsdet benchmark verify
+      - name: Synthetic benchmark matches its pin
+        # 0 is MATCH or ENVIRONMENT_ONLY; 3 is changed detector code with the same numbers (re-pin when convenient).
+        # A drift (1) or changed fixture inputs (2) fail. The real-data runs need data CI does not have.
+        run: PYTHONPATH=src python -m fpsdet benchmark run --dataset synthetic || [ $? -eq 3 ]
+      - name: Benchmark report is current
+        run: PYTHONPATH=src python -m fpsdet benchmark report --check

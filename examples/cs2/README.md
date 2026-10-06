@@ -44,6 +44,9 @@ $PY convert ~/cs2cd/with_cheater_present --out cheaters.ndjson
 cat holdout.ndjson cheaters.ndjson > scored.ndjson
 PYTHONPATH=src python -m fpsdet score scored.ndjson --profile examples/cs2/cs2.json --cohort cs2-cohort.json --out cs2-cases/
 
+# The same steps, with every parameter pinned and every output checked: fpsdet benchmark fetch/prepare/run --dataset cs2
+# (docs/benchmark.md). Its baseline is rebuilt with today's fpsdet baseline; see docs/calibration.md for how it compares.
+
 # Compare the decisions with the labels. fpsdet never sees the labels.
 $PY labels ~/cs2cd --out labels.json
 $PY report cs2-cases/ --labels labels.json

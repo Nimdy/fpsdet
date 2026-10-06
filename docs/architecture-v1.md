@@ -49,6 +49,7 @@ These hold before, during and after the work below. A change that breaks one sto
 | AI | `ai_triage.py` | 135 | Redaction and one chat call per case a person might open. |
 | View | `ops.py` | 423 | The operations payload (`ops.json`) and merging nightly runs. |
 | View | `opsview.py`, `board.py`, `pages.py` | 992, 2,024, 53 | The dashboard, the review desk (Python, HTML, CSS and JS in one file), the public site. |
+| Measure | `benchmark.py` | — | *Added in P10.* `fpsdet benchmark`: manifests, offline runs from prepared inputs, results bound by digest, drift classification against the pin, verification without scoring, and the generated report and matrices. Never imported by detection. See [benchmark.md](benchmark.md). |
 | Measure | `strength.py` | — | *Added in P9.* `fpsdet evaluate strength`: offline label-conditioned evidence ratios, fitted on a frozen development half and checked on the evaluation half (`fpsdet.strength/1`). Research only; never imported by detection. See [calibration.md](calibration.md#evidence-strength-offline-research). |
 | Synthetic | `fixtures.py` | — | *Added in P9.* Controlled fixtures beside the planted demo: plants and honest twins for detectors the demo never planted, and a probe for each eligibility status. |
 | Measure | `calibration.py` | — | *Added in P8.* `fpsdet evaluate`: each detector's firing rate in a labelled run's groups, among the players it could run on, with intervals, coverage, overlap and strata (`fpsdet.evaluation/1`). Never imported by detection. See [calibration.md](calibration.md). |
@@ -431,6 +432,7 @@ Each box is a module with one job and a test file of its own. The decision stays
 | Real TF2 and CS2 results do not move | `RealDataContractTest` on the committed desks; `tools/regress.py diff` on a local rerun |
 | Published numbers follow from the evaluation | `PublishedEvaluationTest` (P8): each committed evaluation verifies, its rows match the desk player for player, and the README, example and docs numbers are recomputed from it |
 | Every finding names an eligible unit | `packet/5` (P9): `verify_packet` runs `eligibility_problems`; `EveryDetectorEveryStatusTest` shows every detector eligible and firing, eligible and quiet, and in every status its rules allow |
+| Published claims follow from frozen inputs | `fpsdet benchmark verify` in CI (P10): every committed evaluation, strength file, split manifest and result verifies, and binds what the manifests pin; the synthetic class is re-run against its pin on Python 3.11 and 3.12; `benchmark report --check` keeps docs/benchmark.md and the README's limits generated |
 | Strength never reaches scoring | `FirewallTest` (P9): no detection module imports `fpsdet.strength`, `fpsdet score` has no strength option, and scores are identical with a strength file present |
 | Evaluation never reaches scoring | `SplitTest` (P8): no detection module imports `fpsdet.calibration`; `HarnessTest`: an evaluation changes no case, decision, seal or packet |
 | `automated_action` stays `none` | `GoldenPlantedTest`, `GoldenWeekTest` |

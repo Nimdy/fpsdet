@@ -101,7 +101,7 @@ Pairs of detectors that fired on the same player in the development half, and wh
 
 ## Provenance
 
-- Evaluation `sha256:75acccd8a35124e8eda1eb7467b405e0c3414889bff5008f6af0c2c86b5083ab` (fpsdet.evaluation/2), dataset definition `sha256:4d56c84fc40c1dbdd47d9e1342dee5787e51368e5f0e7fa5ce1afae8294cba55`
-- Detector `sha256:af59a3efac41bb9ef1e784d6aae48ea75ea4f4e61a65d476845ee722a13b32b2`, profile `sha256:e580d90f46d8b9a37195e8f636747af409fd517b9b60cf80bea25fa86c228366`, cohort `sha256:8b4120f688e5d02727c04603147055b552b597ec4a75e24a7ee9afbf25756b24`
-- Labels `sha256:582220fa0489ba421a73f51b8347772a776f827fb3f2801fefa13f6a7c8a1930`; estimator `fpsdet.strength-estimator/1`; code `sha256:2bf52e34428a5d4e03bd2db6348528dbbbf63036302d2b12ccfdfbb57dc76c95`
-- Strength digest `sha256:99f4f6f96717b9ec4ce13b9c1a6168bbd1c3634dff864a3c0d64d6a82246d957` (not signed, and in no case packet)
+- Evaluation `sha256:e83d92971ff3df8032ab788e69bc3bce42ebdb76b889cbb06e0a9923670aa291` (fpsdet.evaluation/2), dataset definition `sha256:4d56c84fc40c1dbdd47d9e1342dee5787e51368e5f0e7fa5ce1afae8294cba55`
+- Detector `sha256:a75b28fb3b00fa5868444318d44c7c4d235e94a76a85a96fad4f1f040b80ad81`, profile `sha256:e580d90f46d8b9a37195e8f636747af409fd517b9b60cf80bea25fa86c228366`, cohort `sha256:143ce6f0e26bd4df6bfcde2f3f7ea84d96245aea321e982d380e8b1d68108fa6`
+- Labels `sha256:582220fa0489ba421a73f51b8347772a776f827fb3f2801fefa13f6a7c8a1930`; estimator `fpsdet.strength-estimator/1`; code `sha256:04a0dc675ef79abff7f640b5fc6ad2980b7b95e769fa510cd2cc523c7ff4b0ed`
+- Strength digest `sha256:31c7a2c80465d37f5902c83184e980d0850c5fc5be91cc8b5150c4b07185ecf6` (not signed, and in no case packet)

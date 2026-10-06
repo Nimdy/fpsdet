@@ -1,0 +1,704 @@
+{
+ "benchmark": "fpsdet.benchmark/1",
+ "chain": {
+  "code": {
+   "examples/external/example-integrity.adapter.json": "sha256:58659824f45e722dc2d71547a7816ab125ca4e8ab23f43eea9140dead6f2eb84",
+   "examples/external/example-integrity.ndjson": "sha256:2d134dcf1309b29c06d5bc8bd2197a884445176fb34136d038519d83fc241f37",
+   "examples/external/registry.json": "sha256:7bab416bd0349e31242a1c7b9c518affc50d0138e25799d34adc66aa4968bbcb",
+   "src/fpsdet/fixtures.py": "sha256:9653e6f468f305541a2bb4ec27d768dde13ba84a723dc2fd5caaa010a451eaee",
+   "src/fpsdet/synthetic.py": "sha256:d1a054cb8601f083c6c2bfd1674103c9f6631ca3e862c4aa9060b47a7b806f80",
+   "src/fpsdet/week.py": "sha256:65fd86ac6c37ccea1b5e2ad6986ae48eaec28e14977789be82cd7526aef9543f",
+   "tests/fixtures/auth-test-keys.json": "sha256:8bf19bcd8fd10adda9cf80833a6536461582967b2c123486898694d2511a17ed"
+  },
+  "detector": "sha256:a75b28fb3b00fa5868444318d44c7c4d235e94a76a85a96fad4f1f040b80ad81",
+  "manifest": "sha256:6d091db274e57c14f15a0e74248260c2466c131b85497fee62d01d8094d565eb",
+  "packets": {
+   "demo": "sha256:e072207361529963abd32913f92e04b8f62704b7ace181f256831551a70f9b1b",
+   "fixtures": "sha256:8e5fb3414616f6b0b1ef4f43dfd1bb76a506ff7cf77ca6acb5c269cfe86c2a8a",
+   "nightly": "sha256:c268eb480ad2f93251c82c07ef0becafbed31ba384d2537aec5129dcab0fc345",
+   "week": "sha256:d66de6a4aaae6be564b2ad3bdbe058e89ae88a4d9bc59b5a9b43d050cc6a1ac4"
+  },
+  "profiles": {
+   "demo": "sha256:8449d14cd18ae04cddd7d009a1c41a8b5a5f8187baa76866727c26ea503b94fb"
+  },
+  "verified": {
+   "demo": {
+    "graphs_checked": 32,
+    "packets_verified": 32,
+    "problems": []
+   },
+   "fixtures": {
+    "graphs_checked": 74,
+    "packets_verified": 74,
+    "problems": []
+   },
+   "week": {
+    "graphs_checked": 400,
+    "packets_verified": 400,
+    "problems": []
+   }
+  }
+ },
+ "dataset": {
+  "class": "synthetic",
+  "id": "synthetic-v1",
+  "manifest": "sha256:6d091db274e57c14f15a0e74248260c2466c131b85497fee62d01d8094d565eb"
+ },
+ "format": "fpsdet.benchmark-result/1",
+ "published": {
+  "auth_as_expected": 10,
+  "auth_scenarios": 10,
+  "challenge_as_expected": 10,
+  "challenge_scenarios": 10,
+  "detectors": 22,
+  "qualification_passes": 22
+ },
+ "semantic": {
+  "auth": {
+   "scenarios": [
+    {
+     "as_expected": true,
+     "expected": "unsigned",
+     "observed": "unsigned",
+     "read": true,
+     "scenario": "unsigned"
+    },
+    {
+     "as_expected": true,
+     "expected": "verified",
+     "observed": "verified",
+     "read": true,
+     "scenario": "verified"
+    },
+    {
+     "as_expected": true,
+     "expected": "verified",
+     "observed": "verified",
+     "read": true,
+     "scenario": "retired_key"
+    },
+    {
+     "as_expected": true,
+     "expected": "invalid",
+     "observed": "invalid",
+     "read": false,
+     "scenario": "invalid"
+    },
+    {
+     "as_expected": true,
+     "expected": "revoked_key",
+     "observed": "revoked_key",
+     "read": false,
+     "scenario": "revoked"
+    },
+    {
+     "as_expected": true,
+     "expected": "unsupported_algorithm",
+     "observed": "unsupported_algorithm",
+     "read": false,
+     "scenario": "unsupported_algorithm"
+    },
+    {
+     "as_expected": true,
+     "expected": "unknown_key",
+     "observed": "unknown_key",
+     "read": true,
+     "scenario": "unknown_key"
+    },
+    {
+     "as_expected": true,
+     "expected": "invalid",
+     "observed": "invalid",
+     "read": false,
+     "scenario": "adapter_other_provider"
+    },
+    {
+     "as_expected": true,
+     "expected": "invalid",
+     "observed": "invalid",
+     "read": false,
+     "scenario": "adapter_changed_field"
+    },
+    {
+     "as_expected": true,
+     "expected": "refused",
+     "observed": "refused",
+     "read": false,
+     "scenario": "self_vouching"
+    }
+   ],
+   "status": "run"
+  },
+  "challenge": [
+   {
+    "as_expected": true,
+    "decision": "review",
+    "expected": "caught",
+    "findings": 4,
+    "observed": "caught",
+    "scenario": "naive_reader"
+   },
+   {
+    "as_expected": true,
+    "decision": "review",
+    "expected": "caught",
+    "findings": 1,
+    "observed": "caught",
+    "scenario": "first_probe_reader"
+   },
+   {
+    "as_expected": true,
+    "decision": "insufficient_data",
+    "expected": "not_caught",
+    "findings": 0,
+    "observed": "not_caught",
+    "scenario": "brief_reactions"
+   },
+   {
+    "as_expected": true,
+    "decision": "review",
+    "expected": "caught",
+    "findings": 1,
+    "observed": "caught",
+    "scenario": "delayed_reader"
+   },
+   {
+    "as_expected": true,
+    "decision": "insufficient_data",
+    "expected": "not_caught",
+    "findings": 0,
+    "observed": "not_caught",
+    "scenario": "last_second_reader"
+   },
+   {
+    "as_expected": true,
+    "decision": "review",
+    "expected": "caught",
+    "findings": 2,
+    "observed": "caught",
+    "scenario": "every_second_challenge"
+   },
+   {
+    "as_expected": true,
+    "decision": "insufficient_data",
+    "expected": "not_caught",
+    "findings": 0,
+    "observed": "not_caught",
+    "scenario": "visible_enemy_cover"
+   },
+   {
+    "as_expected": true,
+    "decision": "insufficient_data",
+    "expected": "abstained",
+    "findings": 0,
+    "observed": "abstained",
+    "scenario": "radar_declared"
+   },
+   {
+    "as_expected": true,
+    "decision": "insufficient_data",
+    "expected": "abstained",
+    "findings": 0,
+    "observed": "abstained",
+    "scenario": "team_share_declared"
+   },
+   {
+    "as_expected": true,
+    "decision": "insufficient_data",
+    "expected": "abstained",
+    "findings": 0,
+    "observed": "abstained",
+    "scenario": "ability_declared"
+   }
+  ],
+  "demo": {
+   "cases": 32,
+   "decisions": {
+    "clean": 16,
+    "insufficient_data": 1,
+    "review": 11,
+    "watch": 4
+   },
+   "decisions_digest": "sha256:f36fac09a98ca4cb94cf35cd90e9069262aa7d756ebaebceab7247159b938f18",
+   "eligibility_digest": "sha256:0a47c36947489faf0b0e5933d9a4da3d2aee1204232994415656f96e8f78a6a2",
+   "observations_digest": "sha256:49a2ec873e94d49115b8794dad09a17b77486946c57c28fd91797d3087e5c76b",
+   "seals_digest": "sha256:e90da68e94d53c9d129ded3216b8984faeced84add76b5538920a62ead48354a"
+  },
+  "demo_failures": [],
+  "eligibility_states": {
+   "account_jump": [
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "accuracy": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "acquire_timing": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "extra": [
+    "baseline_too_thin",
+    "disabled",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "fire_rate": [
+    "disabled",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "geometry_rate": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "headshot_rate": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "hidden": [
+    "conflict",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "leftover": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "median_distance": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "metronome": [
+    "disabled",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "not_applicable",
+    "telemetry_unavailable"
+   ],
+   "mirror": [
+    "conflict",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "occluded_motion_replay": [
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "quiet_aim": [
+    "conflict",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "not_applicable",
+    "telemetry_unavailable"
+   ],
+   "rank_tail": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "not_applicable",
+    "telemetry_unavailable"
+   ],
+   "recoil_floor": [
+    "disabled",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "recoil_learned": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "not_applicable",
+    "telemetry_unavailable"
+   ],
+   "speed": [
+    "disabled",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "supporting_extra": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "view_snaps": [
+    "baseline_too_thin",
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ],
+   "voice": [
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "not_applicable",
+    "telemetry_unavailable"
+   ],
+   "wire": [
+    "eligible (fired)",
+    "eligible (quiet)",
+    "insufficient_samples",
+    "telemetry_unavailable"
+   ]
+  },
+  "fixture_failures": [],
+  "fixtures": {
+   "cases": 74,
+   "decisions": {
+    "clean": 54,
+    "insufficient_data": 13,
+    "review": 3,
+    "watch": 4
+   },
+   "decisions_digest": "sha256:d61a822e0003f15acdfb05f207db5064e120b7e338ffbfa895fb1d2926f423c0",
+   "eligibility_digest": "sha256:27cdbd10aa74024fc36c061fd1822864cdc71f1c785c2a380a1a2c21dab1871f",
+   "observations_digest": "sha256:ea11b9c3e8daa8c25cfef2e774f7dcaa6fa69a7c77967914f7b7b02a189c2fc4",
+   "seals_digest": "sha256:cbfed99fdd01b6c4065de330cb9da10c7ec51f7c51f7ef9e2f3c530c7942a2b2"
+  },
+  "honest_demo_fixtures_clean": 16,
+  "nightly": {
+   "cases": 2669,
+   "decisions": {
+    "clean": 1132,
+    "insufficient_data": 1498,
+    "review": 28,
+    "watch": 11
+   },
+   "decisions_digest": "sha256:a199966b2b3d8c860cad8dcd3285fae73696ae4ecd16f72d0cdcd7a90814f704",
+   "eligibility_digest": "sha256:96a81604696b975841406229d9137ec7e4f217e817d5283e46df75ebceb079ac",
+   "observations_digest": "sha256:3b55e0d370716d64d335789ebfcc3b370a57669292bcc8fdcb9dfcf6b0d0b343",
+   "seals_digest": "sha256:1f488d05d3e9f770f13a14a6260cdad4f2fae5509f55238574eebc0959b44937"
+  },
+  "qualification": {
+   "account_jump": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:account-changed"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-improved"
+    ],
+    "twins_quiet": true
+   },
+   "accuracy": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:rage"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:elite-human",
+     "demo:weak-human",
+     "demo:reported-streamer"
+    ],
+    "twins_quiet": true
+   },
+   "acquire_timing": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "fixtures:fx-acquire"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-acquire-twin"
+    ],
+    "twins_quiet": true
+   },
+   "extra": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "fixtures:fx-kills"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-kills-twin"
+    ],
+    "twins_quiet": true
+   },
+   "fire_rate": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:fire-rate"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-trigger-twin",
+     "fixtures:fx-held-trigger"
+    ],
+    "twins_quiet": true
+   },
+   "geometry_rate": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "fixtures:fx-geometry"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-geometry-twin"
+    ],
+    "twins_quiet": true
+   },
+   "headshot_rate": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:rage"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:elite-human",
+     "demo:weak-human",
+     "demo:reported-streamer"
+    ],
+    "twins_quiet": true
+   },
+   "hidden": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:wall-eye"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:angle-holder",
+     "demo:real-fight",
+     "demo:listened"
+    ],
+    "twins_quiet": true
+   },
+   "leftover": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:clone-source",
+     "demo:clone-buyer"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:late-compensate"
+    ],
+    "twins_quiet": true
+   },
+   "median_distance": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:rage"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:elite-human",
+     "demo:weak-human",
+     "demo:reported-streamer"
+    ],
+    "twins_quiet": true
+   },
+   "metronome": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:metronome"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-steady-twin",
+     "fixtures:fx-held-trigger"
+    ],
+    "twins_quiet": true
+   },
+   "mirror": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:mirror-script",
+     "demo:clone-source"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:late-compensate"
+    ],
+    "twins_quiet": true
+   },
+   "occluded_motion_replay": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:replay-lock"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:real-fight"
+    ],
+    "twins_quiet": true
+   },
+   "quiet_aim": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:quiet-radar"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:steady-hands",
+     "demo:listened"
+    ],
+    "twins_quiet": true
+   },
+   "rank_tail": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:rank-outlier"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:elite-human",
+     "demo:weak-human",
+     "demo:new-gun"
+    ],
+    "twins_quiet": true
+   },
+   "recoil_floor": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:no-recoil"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:modded-recoil",
+     "demo:late-compensate"
+    ],
+    "twins_quiet": true
+   },
+   "recoil_learned": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "fixtures:fx-recoil"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-recoil-twin"
+    ],
+    "twins_quiet": true
+   },
+   "speed": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:weight-cheat"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:legal-heavy",
+     "demo:blasted",
+     "demo:glitch",
+     "demo:adrenaline"
+    ],
+    "twins_quiet": true
+   },
+   "supporting_extra": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "fixtures:fx-reaction"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-reaction-twin"
+    ],
+    "twins_quiet": true
+   },
+   "view_snaps": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "fixtures:fx-snaps"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "fixtures:fx-snaps-twin"
+    ],
+    "twins_quiet": true
+   },
+   "voice": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:radar-friend"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:callout-friend"
+    ],
+    "twins_quiet": true
+   },
+   "wire": {
+    "outcome": "passes_controlled_fixture",
+    "planted": [
+     "demo:wire-lock"
+    ],
+    "planted_fired": true,
+    "twins": [
+     "demo:picture-track"
+    ],
+    "twins_quiet": true
+   }
+  },
+  "week": {
+   "cases": 400,
+   "decisions": {
+    "clean": 382,
+    "insufficient_data": 3,
+    "review": 11,
+    "watch": 4
+   },
+   "decisions_digest": "sha256:9f7187c11a04cadf2f7c80ccb82c89628c459134e8fea94d340197e311bca39a",
+   "eligibility_digest": "sha256:ea0de02ce9e0e88f41e4b4585799b02e097b7f5c94c3f3ac19cf8af7cc2f0de9",
+   "observations_digest": "sha256:0e81c9f31f5ea42c8b777abd16f874e52641f36f53c8a277fe1cd6f35182cfb8",
+   "seals_digest": "sha256:79eba705f32c7dc1a3536c504bfe295d1f2ae5dcd28f7a77d951ad9de67827b3"
+  }
+ },
+ "digest": "sha256:98b0d3bf54585f9a8ee3acd1c8bc72bd7ec326695b82b83a19f93b035c320414",
+ "environment": {
+  "python": "3.12.3",
+  "implementation": "CPython",
+  "platform": "Linux",
+  "machine": "x86_64",
+  "fpsdet": "0.3.0",
+  "cryptography": "50.0.2"
+ },
+ "timings_s": {
+  "build": 6.18,
+  "qualify": 0.56
+ }
+}

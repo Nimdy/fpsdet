@@ -165,7 +165,7 @@ A detector that is not observable is never reported as 0%. The dataset definitio
 
 ## Results
 
-Both runs are from 2026-10-04, re-scored with detector eligibility by detector `sha256:af59a3ef…`; no decision moved. The full reports are [examples/tf2/evaluation.md](../examples/tf2/evaluation.md) and [examples/cs2/evaluation.md](../examples/cs2/evaluation.md), with every number in the JSON beside them.
+Both runs are from 2026-10-04, rebuilt and re-scored by the benchmark ([benchmark.md](benchmark.md)) with detector `sha256:a75b28fb…`; no decision and no number here moved. The CS2 baseline is the one `fpsdet benchmark prepare` rebuilds (`sha256:143ce6f0…`): the cohort the earlier runs used was screened with settings the README did not record, and cannot be rebuilt. The rebuild holds 14 more players from 3 more matches, gives the same 1,529 decisions and identical statistics, and moves 15 observations' cohort numbers. The full reports are [examples/tf2/evaluation.md](../examples/tf2/evaluation.md) and [examples/cs2/evaluation.md](../examples/cs2/evaluation.md), with every number in the JSON beside them.
 
 ### TF2: RGL cheating-ban labelled against the never-banned comparison
 

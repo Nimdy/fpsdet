@@ -101,15 +101,15 @@
   "unit": "an RGL account, over at most its 20 latest team matches (before the ban date, for a banned account). Rates are per account."
  },
  "evaluator": {
-  "digest": "sha256:f93c11fcc1d3f60e734ef894fc7c90c6ba765e809cf1ad781e06739f5fc77c7a",
+  "digest": "sha256:bca57086c916abeef03e1d9a28dc07f7a26d02b546b2e6b417bb19a13978dce4",
   "recipe": "fpsdet.evaluator/1"
  },
  "inputs": {
   "cases": 2764,
   "cohort": "sha256:fc38c02f30b9ccda4b922d8806e9ab0fb50569ebd020ea653a8582e06017fd35",
   "cohort_mode": "external",
-  "detector": "sha256:af59a3efac41bb9ef1e784d6aae48ea75ea4f4e61a65d476845ee722a13b32b2",
-  "digest": "sha256:e14f344ba148b6f8839488a08c642c8f91a765e37dc18e78193eb572a9d6af08",
+  "detector": "sha256:a75b28fb3b00fa5868444318d44c7c4d235e94a76a85a96fad4f1f040b80ad81",
+  "digest": "sha256:33894907a9b45162b75709891dd2fd311196d23244068c2e3ce3f79e7b3494e6",
   "eligibility": {
    "inferred": 0,
    "recorded": 2764
@@ -9079,5 +9079,5 @@
    "kills_per_min"
   ]
  },
- "digest": "sha256:42c86acb05ae9c45ca755dcdca477f59d9206b23b4e65e12792320c36602dd49"
+ "digest": "sha256:5a0dfabd2ba984bdf6065103fb7c7231146774f8efc83239154c1be46610d612"
 }

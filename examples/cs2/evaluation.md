@@ -256,10 +256,10 @@ Two fixed halves of the population, from a hash of the pseudonym. No threshold w
 
 ## Provenance
 
-- Cases: 1,529, every evidence packet verified; input identity `sha256:2704921ff4f27d4f4dce487ec95a5f6f536cdf1810d604c56ed22595a9d93fc5`
+- Cases: 1,529, every evidence packet verified; input identity `sha256:1fddbfedecaf603807a67a681cb0d4f85a6c3f35abfe6a9ded6155e93a29fa44`
 - Detector eligibility: recorded by the scorer on 1,529 cases, inferred on 0
-- Detector `sha256:af59a3efac41bb9ef1e784d6aae48ea75ea4f4e61a65d476845ee722a13b32b2`, profile `sha256:e580d90f46d8b9a37195e8f636747af409fd517b9b60cf80bea25fa86c228366`, cohort `sha256:8b4120f688e5d02727c04603147055b552b597ec4a75e24a7ee9afbf25756b24` (external)
+- Detector `sha256:a75b28fb3b00fa5868444318d44c7c4d235e94a76a85a96fad4f1f040b80ad81`, profile `sha256:e580d90f46d8b9a37195e8f636747af409fd517b9b60cf80bea25fa86c228366`, cohort `sha256:143ce6f0e26bd4df6bfcde2f3f7ea84d96245aea321e982d380e8b1d68108fa6` (external)
 - Labels `sha256:582220fa0489ba421a73f51b8347772a776f827fb3f2801fefa13f6a7c8a1930`
-- Evaluator `sha256:f93c11fcc1d3f60e734ef894fc7c90c6ba765e809cf1ad781e06739f5fc77c7a`
+- Evaluator `sha256:bca57086c916abeef03e1d9a28dc07f7a26d02b546b2e6b417bb19a13978dce4`
 - Telemetry: displacement_cause, distance_m, expected_max_ground_speed_mps, hit, hitbox, on_ground, speed_mps, spray_index, through_geometry, view_delta_deg (checked against a census of every event)
-- Evaluation digest `sha256:75acccd8a35124e8eda1eb7467b405e0c3414889bff5008f6af0c2c86b5083ab` (not signed)
+- Evaluation digest `sha256:e83d92971ff3df8032ab788e69bc3bce42ebdb76b889cbb06e0a9923670aa291` (not signed)

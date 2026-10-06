@@ -237,7 +237,7 @@ def eligibility_states(cases: Iterable[Mapping]) -> dict[str, list[str]]:
         for kind, entry in case["evidence"]["detector_eligibility"]["detectors"].items():
             for name, units in entry.items():
                 for unit in units:
-                    found[kind].add(name if name != "eligible" else ("eligible, fired" if (kind, unit) in fired else "eligible, quiet"))
+                    found[kind].add(name if name != "eligible" else ("eligible (fired)" if (kind, unit) in fired else "eligible (quiet)"))
     return {kind: sorted(states) for kind, states in found.items()}
 
 
@@ -908,16 +908,21 @@ def capability_matrix(ctx: Mapping, root: Path = ROOT) -> tuple[list[dict], list
             stable = sorted(entry["kind"] for entry in ctx["strengths"].get(dataset, {}).get("detectors", [])
                             if entry["kind"] in detectors and entry.get("evaluation", {}).get("stability") == "replicated")
             real[dataset] = {"measured": measured, "replicated": stable}
+        short = {dataset: ctx["manifests"][dataset]["title"].split(" ")[0] for dataset in real}
+        controlled = "controlled" if caught_ok and all(caught_ok) else ("architecture statement" if technique.get("architecture") else "no proof")
         if claim == "not_detectable":
-            evidence = "architecture statement" + (" and controlled scenarios" if through_ok else "")
+            evidence = "architecture statement" + (", and controlled scenarios that get through" if through_ok else "")
         elif any(item["replicated"] for item in real.values()):
-            evidence = "real-world measured, replicated on one split"
+            # Labels say who was banned or judged a cheater, not which cheat they used: this is the detectors, not the technique.
+            evidence = f"{controlled}; real data: " + "; ".join(
+                f"{short[dataset]} labelled cheaters fire {', '.join(item['replicated'])} more, replicated on one split" for dataset, item in real.items() if item["replicated"]
+            ) + " (which cheat they used is unknown)"
         elif any(item["measured"] for item in real.values()):
-            evidence = "real-world measured"
-        elif caught_ok and all(caught_ok):
-            evidence = "controlled only"
+            evidence = f"{controlled}; real data observes " + "; ".join(
+                f"{', '.join(item['measured'])} on {short[dataset]}" for dataset, item in real.items() if item["measured"]
+            ) + ", with no separation shown"
         else:
-            evidence = "architecture statement"
+            evidence = f"{controlled} only" if controlled == "controlled" else controlled
         rows.append({
             "id": name, "name": technique["name"], "behaviour": technique["behaviour"], "claim": claim, "evidence": evidence,
             "detectors": detectors, "requires": technique.get("requires", []), "caught": technique.get("caught", []),
@@ -944,10 +949,12 @@ def limitations(ctx: Mapping) -> list[str]:
     through, then the limits of data and trust the benchmark shows."""
     rows, _problems = capability_matrix(ctx)
     out = [row["gets_through"] for row in rows if row["claim"] in ("not_detectable", "partially_detectable") and row["gets_through"]]
-    for dataset, evaluation in ctx["evaluations"].items():
-        unseen = sum(entry["status"] == "not_observable" for entry in evaluation["statistics"]["detectors"])
-        title = evaluation["dataset"]["title"]
-        out.append(f"Anything its telemetry cannot show: on {title}, {unseen} of {len(NATIVE_KINDS)} detectors are not observable at all, which is not the same as finding nothing.")
+    unseen = [
+        f"{sum(entry['status'] == 'not_observable' for entry in evaluation['statistics']['detectors'])} of {len(NATIVE_KINDS)} detectors on {ctx['manifests'][dataset]['title'].split(' ')[0]}"
+        for dataset, evaluation in ctx["evaluations"].items()
+    ]
+    if unseen:
+        out.append(f"Anything a game's telemetry cannot show. In the benchmark's real data, {' and '.join(unseen)} are not observable at all, which is not the same as finding nothing.")
     out.append("A number with too few humans behind it: a detector waits for a thick enough baseline, and says so, before it compares.")
     out += [limit["text"] for limit in ctx["capabilities"].get("limits", [])]
     return out
