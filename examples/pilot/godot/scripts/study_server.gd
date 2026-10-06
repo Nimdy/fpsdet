@@ -57,6 +57,7 @@ var sounds := []
 var accumulator := {}
 var tick_fields := {}
 var last_aim := Vector3.ZERO
+var motion_window := []  # the last 250 ms of [where the aim passes at the body's distance, the body's chest] (study telemetry only)
 
 var perf := {"ticks": 0, "tick_us": 0, "tick_us_max": 0, "challenge_us": 0, "knowledge_us": 0, "study_us": 0, "telemetry_us": 0, "rays": 0,
 	"event_bytes": 0, "event_lines": 0, "snapshot_bytes": 0, "probe_ticks": 0, "tracked_ticks": 0, "verdicts": {"vision": {}, "audio": {}}}
@@ -344,6 +345,7 @@ func _begin(entry: Dictionary) -> void:
 		"heading": float(parameters.heading_offset_deg), "delay_ticks": delay_ticks, "base": _track_at(players[source], tick - delay_ticks),
 		"position": anchor, "yaw": 0.0, "ticks": 0, "first_ms": Arena.t_ms(tick)}
 	accumulator = {}
+	motion_window = []
 	_log({"kind": "challenge_start", "challenge_id": entry.plan.challenge_id, "t_ms": Arena.t_ms(tick)})
 
 
@@ -413,11 +415,35 @@ func _observe() -> void:
 	accumulator["audio"] = _worst(accumulator.get("audio", "absent"), audio)
 
 
-## The study's own row for this tick: angles only, no position. Private; the analysis publishes aggregates.
+## The study's own row for this tick: angles, distances and speeds, never a position. Private; the analysis
+## publishes aggregates. Amendment 1 added the body's distance and speed, and how the aim moved against it.
 func _study_row(eye: Vector3, aim: Vector3, chest: Vector3, tracked: bool, vision: String, audio: String) -> void:
 	if study == null:
 		return
 	var to := chest - eye
+	# Motion in the world over the last 250 ms (the episode gap): the point the aim passes at the body's
+	# distance, and the body itself, as angular speeds at that distance. In the world, a player's own movement
+	# does not turn the aim and the body's direction together, and over 250 ms a hand's jitter does not hide
+	# where the aim went.
+	var distance := maxf(to.length(), 0.01)
+	var aim_point := eye + aim * distance
+	var probe_speed := 0.0
+	var aim_rate := 0.0
+	var probe_rate := 0.0
+	var co_motion = null
+	if not motion_window.is_empty():
+		var first: Array = motion_window[0]
+		var span := float(motion_window.size()) / Arena.TICK_HZ
+		probe_speed = Vector2(chest.x - motion_window[-1][1].x, chest.z - motion_window[-1][1].z).length() * Arena.TICK_HZ
+		var aim_move: Vector3 = aim_point - first[0]
+		var probe_move: Vector3 = chest - first[1]
+		aim_rate = rad_to_deg(aim_move.length() / distance) / span
+		probe_rate = rad_to_deg(probe_move.length() / distance) / span
+		if aim_move.length() > 1e-6 and probe_move.length() > 1e-6:
+			co_motion = snappedf(rad_to_deg(aim_move.angle_to(probe_move)), 0.1)
+	motion_window.append([aim_point, chest])
+	if motion_window.size() > roundi(250.0 / Arena.TICK_MS):
+		motion_window.pop_front()
 	var visible_in_cone := false
 	var separation := -1.0
 	for name in bots:
@@ -432,7 +458,8 @@ func _study_row(eye: Vector3, aim: Vector3, chest: Vector3, tracked: bool, visio
 	var row := {"t": Arena.t_ms(tick), "c": active.plan.challenge_id, "in": tracked, "ang": snappedf(rad_to_deg(aim.angle_to(to)), 0.01),
 		"lim": snappedf(CONE_DEG + rad_to_deg(atan(Arena.BODY_RADIUS / maxf(to.length(), 0.01))), 0.01),
 		"turn": snappedf(rad_to_deg(last_aim.angle_to(aim)) * Arena.TICK_HZ if last_aim != Vector3.ZERO else 0.0, 0.1),
-		"vis_in": visible_in_cone, "sep": snappedf(separation, 0.01) if separation >= 0 else null, "v": vision, "a": audio}
+		"vis_in": visible_in_cone, "sep": snappedf(separation, 0.01) if separation >= 0 else null, "v": vision, "a": audio,
+		"dist": snappedf(to.length(), 0.01), "ps": snappedf(probe_speed, 0.01), "aw": snappedf(aim_rate, 0.1), "pw": snappedf(probe_rate, 0.1), "co": co_motion}
 	study.store_string(JSON.stringify(row, "", true) + "\n")
 
 

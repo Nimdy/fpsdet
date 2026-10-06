@@ -9,7 +9,7 @@ or a private LAN address given with --bind for a participant on another machine.
     python examples/human-pilot/study.py dry-run --data /tmp/dry --godot PATH         # machine stand-ins, never people
 
 A session plans its challenges with fpsdet's planner and a fresh secret, runs the study server and the
-participant's client, asks the four questions, then scores the telemetry live and again offline, checks every
+participant's client, asks the five questions, then scores the telemetry live and again offline, checks every
 packet and graph, reproduces the plan and the realization with the secret and deletes the secret, scans every
 public file for secrets and personal data, computes the study's metrics, and checks the stop conditions. A stop
 condition writes STOP into the data folder, and no session starts until the operator clears it.
@@ -45,6 +45,7 @@ import pilot  # noqa: E402  (P12's harness: fpsdet calls, Godot environment, sec
 
 PROJECT = ROOT / "examples" / "pilot" / "godot"
 DESIGN = HERE / "design.json"
+AMENDMENT = HERE / "amendment-1.json"
 PROFILE = HERE / "profile.json"
 FORMAT = "fpsdet.human-pilot/1"
 TICK_MS = 1000 / 60
@@ -57,6 +58,15 @@ CODE = ("study.tscn", "study.gd", "scripts/study_arena.gd", "scripts/study_serve
 
 def design() -> dict:
     return json.loads(DESIGN.read_text(encoding="utf-8"))
+
+
+def amendment() -> dict:
+    return json.loads(AMENDMENT.read_text(encoding="utf-8"))
+
+
+def questions() -> list[str]:
+    """design.json's questions, then amendment 1's."""
+    return [*design()["questionnaire"], *amendment()["questionnaire"]["added"]]
 
 
 def code_identity() -> dict:
@@ -126,6 +136,7 @@ def run_session(godot: str, data: Path, participant: str, mode: str, port: int, 
               f"--private={run / 'private'}", f"--perf={public / 'perf.json'}"]
     if kind == "controlled_follower":
         server.append("--follower=true")
+    engine = build(godot)
     started = time.time()
     processes = [subprocess.Popen(server, env=environment, stdout=(run / "server.out").open("w"), stderr=subprocess.STDOUT)]
     time.sleep(1.5)
@@ -145,8 +156,14 @@ def run_session(godot: str, data: Path, participant: str, mode: str, port: int, 
         except subprocess.TimeoutExpired:
             process.kill()
             codes.append("timeout")
-    answers = questionnaire(found, kind, ask)
-    return post_session(run, plan, secret, participant, mode, kind, stand_in, codes, round(time.time() - started, 1), answers)
+    answers = questionnaire(found, kind, ask, run)
+    return post_session(run, plan, secret, participant, mode, kind, stand_in, codes, round(time.time() - started, 1), answers, engine)
+
+
+def build(godot: str) -> dict:
+    """The engine a session ran on: the binary's own digest, and the pinned release it should come from."""
+    engine = pilot.qualification()["engine"]
+    return {"name": engine["name"], "version": engine["version"], "release_sha512": engine["sha512"], "binary": pilot.sha256_file(Path(godot))}
 
 
 def plan_session(run: Path, match_id: str, participant: str) -> tuple[Path, Path]:
@@ -165,17 +182,24 @@ def plan_session(run: Path, match_id: str, participant: str) -> tuple[Path, Path
     return plan, secret
 
 
-def questionnaire(found: dict, kind: str, ask) -> dict:
+def questionnaire(found: dict, kind: str, ask, run: Path | None = None) -> dict:
+    """The fixed questions, yes or no. An optional short comment per answer goes only to the session's private
+    folder (amendment 1): free text could identify someone, so it never reaches the artifact."""
     if kind != "human":
         return {"asked": False, "why": "machine stand-in: nobody to ask"}
-    answers = {}
-    print("Ask the participant, and type y or n:")
-    for question in found["questionnaire"]:
+    answers, comments = {}, {}
+    print("Ask the participant, and type y or n; then a short comment, or Enter for none:")
+    for question in questions():
         reply = ""
         while reply not in ("y", "n"):
             reply = ask(f"  {question} [y/n] ").strip().lower()[:1]
         answers[question] = reply == "y"
-    return {"asked": True, "answers": answers}
+        comment = ask("    comment (optional): ").strip()
+        if comment:
+            comments[question] = comment[:200]
+    if comments and run is not None:
+        (run / "private" / "comments.json").write_text(json.dumps(comments, indent=1) + "\n", encoding="utf-8")
+    return {"asked": True, "answers": answers, "comments": len(comments)}
 
 
 # After the session.
@@ -227,7 +251,7 @@ def personal_data(paths: list[Path]) -> list[str]:
 
 
 def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: str, kind: str, stand_in: str | None, codes: list,
-                 wall_s: float, answers: dict) -> dict:
+                 wall_s: float, answers: dict, engine: dict | None = None) -> dict:
     public = run / "public"
     live = score(public / "events.ndjson", plan, run / "cases-live")
     offline = score(public / "events.ndjson", plan, run / "cases-offline")
@@ -249,7 +273,8 @@ def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: st
     review = case.get("decision") == "review" and "occluded_motion_replay" in case.get("kinds", [])
     record = {
         "participant": participant, "kind": kind, "stand_in": stand_in, "mode": mode, "session": run.name, "match_id": f"study-{participant}-{run.name}",
-        "played_ms": played_ms, "exit_codes": codes, "wall_s": wall_s, "questionnaire": answers,
+        "played_ms": played_ms, "exit_codes": codes, "wall_s": wall_s, "questionnaire": answers, "engine": engine,
+        "code": code_identity(),
         "plan": {"sha256": pilot.sha256_file(plan), "challenges": [{"challenge_id": row["challenge_id"], "plan": row["plan"]} for row in json.loads(plan.read_text())["challenges"]]},
         "events": {"sha256": pilot.sha256_file(public / "events.ndjson"), "lines": len((public / "events.ndjson").read_text().splitlines())},
         "case": {key: case.get(key) for key in ("decision", "observations", "kinds", "graph", "packet", "inputs", "detector", "problems")},
@@ -269,7 +294,7 @@ def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: st
     if any(row["verdicts"].get("known") for row in metrics):
         reasons.append("a challenge body was reported known: visible or audible")
     if answers.get("asked") and (answers["answers"].get(design()["questionnaire"][0]) or answers["answers"].get(design()["questionnaire"][1])):
-        reasons.append("the participant reported an unexplained avatar or sound")
+        reasons.append("the participant reported an unexplained avatar or sound: inspect the verdicts, the placement and KnowledgeState; the challenge is not hidden evidence")
     if leaks:
         reasons.append("secret or realization material in a public output")
     if people:
@@ -279,7 +304,8 @@ def post_session(run: Path, plan: Path, secret: Path, participant: str, mode: st
     if any(case.get("problems") or [] for case in live.values()):
         reasons.append("a packet or graph does not verify")
     if review and kind != "controlled_follower":
-        reasons.append("review-grade challenge evidence on an honest session: investigate before any more data")
+        reasons.append("review-grade challenge evidence on an honest session: stop collection, preserve and replay the session, inspect its episodes, "
+                       "classify the behaviour, change nothing, and propose P14 (amendment 1)")
     record["stop"] = reasons
     (run / "session.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
     if reasons and kind != "machine_standin":
@@ -377,11 +403,58 @@ def challenge_metrics(run: Path, case: dict, plan: Path) -> list[dict]:
             "turn_rate_dps": {"median": quantile([row["turn"] for row in overlap], 0.5), "p95": quantile([row["turn"] for row in overlap], 0.95)},
             "enemy_separation_deg": quantile([row["sep"] for row in overlap if row["sep"] is not None], 0.5),
             "verdicts": verdicts,
+            **motion_metrics(mine, overlap),
         })
     return out
 
 
+def motion_metrics(rows: list[dict], overlap: list[dict]) -> dict:
+    """Amendment 1: the body's distance and motion, and how the aim moved against it, in the world over 250 ms
+    windows. Overlap is split four ways: both still; the aim point still while the body moved (holding a spot);
+    the aim point moving with the body (following); the aim point moving otherwise. Empty for telemetry
+    written before the amendment (the machine dry run), which has none of it."""
+    if not rows or "aw" not in rows[0]:
+        return {}
+    frozen = amendment()["metrics_added"]["frozen"]
+    still, along = frozen["still_deg_per_s"], frozen["co_motion_deg"]
+
+    def ms(test) -> float:
+        return round(sum(1 for row in overlap if test(row)) * TICK_MS, 3)
+
+    def moving_with(row: dict) -> bool:
+        return row["pw"] >= still and row["co"] is not None and row["co"] <= along
+
+    return {
+        "probe_distance_m": {"median": quantile([row["dist"] for row in rows], 0.5), "during_overlap": quantile([row["dist"] for row in overlap], 0.5)},
+        "probe_speed_mps": {"median": quantile([row["ps"] for row in rows], 0.5), "during_overlap": quantile([row["ps"] for row in overlap], 0.5)},
+        "probe_speed_dps": {"median": quantile([row["pw"] for row in rows], 0.5), "during_overlap": quantile([row["pw"] for row in overlap], 0.5)},
+        "aim_speed_dps": {"during_overlap": quantile([row["aw"] for row in overlap], 0.5), "p95": quantile([row["aw"] for row in overlap], 0.95)},
+        "both_still_ms": ms(lambda row: row["aw"] < still and row["pw"] < still),
+        "stationary_aim_moving_probe_ms": ms(lambda row: row["aw"] < still and row["pw"] >= still),
+        "co_moving_ms": ms(lambda row: row["aw"] >= still and moving_with(row)),
+        "aim_moving_otherwise_ms": ms(lambda row: row["aw"] >= still and not moving_with(row)),
+    }
+
+
 # The artifact: fpsdet.human-pilot/1.
+
+
+MOTION_PARTS = ("both_still_ms", "stationary_aim_moving_probe_ms", "co_moving_ms", "aim_moving_otherwise_ms")
+
+
+def motion_summary(challenges: list[dict]) -> dict:
+    """Amendment 1, over challenges with any overlap: how their overlap divides between the aim point and the
+    body both still, the aim holding while the body moved, the aim moving with it, and the aim moving otherwise."""
+    touched = [challenge for challenge in challenges if challenge["overlap_ms"] > 0]
+    overlap = max(sum(challenge["overlap_ms"] for challenge in touched), 1e-9)
+    return {
+        "challenges_with_overlap": len(touched),
+        "share_of_overlap": {part[:-3]: round(sum(challenge[part] for challenge in touched) / overlap, 3) for part in MOTION_PARTS},
+        **{part: summary([challenge[part] for challenge in touched]) for part in MOTION_PARTS},
+        "aim_speed_dps": summary([challenge["aim_speed_dps"]["during_overlap"] for challenge in touched if challenge["aim_speed_dps"]["during_overlap"] is not None]),
+        "probe_speed_dps": summary([challenge["probe_speed_dps"]["during_overlap"] for challenge in touched if challenge["probe_speed_dps"]["during_overlap"] is not None]),
+        "probe_distance_m": summary([challenge["probe_distance_m"]["during_overlap"] for challenge in touched if challenge["probe_distance_m"]["during_overlap"] is not None]),
+    }
 
 
 def upper_zero(n: int) -> float | None:
@@ -425,17 +498,35 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
     for participant in participants:
         mine = [challenge for challenge in challenges if challenge["participant"] == participant]
         counted = [challenge["counted_ms"] for challenge in mine]
+        strongest = max(mine, key=lambda challenge: (challenge["counted_ms"], challenge["longest_episode_ms"]), default=None)
         per_participant.append({
             "participant": participant,
             "sessions": sum(1 for row in included if row["participant"] == participant),
             "challenges_exposed": len(mine),
             "challenges_with_any_overlap": sum(1 for challenge in mine if challenge["overlap_ms"] > 0),
             "counted_ms": {"max": max(counted, default=0.0), "median": quantile(counted, 0.5), "p95": quantile(counted, 0.95)},
+            "overlap_ms": {"max": max((challenge["overlap_ms"] for challenge in mine), default=0.0), "median": quantile([challenge["overlap_ms"] for challenge in mine], 0.5),
+                           "p95": quantile([challenge["overlap_ms"] for challenge in mine], 0.95)},
+            "longest_episode_ms": max((challenge["longest_episode_ms"] for challenge in mine), default=0.0),
             "reacquired": sum(1 for challenge in mine if challenge["episodes"] >= 2),
             "review_grade_findings": sum(1 for challenge in mine if challenge["status"] == "followed"),
+            "strongest": None if strongest is None else {key: strongest[key] for key in ("mode", "room", "status", "counted_ms", "counted_moments", "longest_episode_ms", "episodes")},
             "decisions": sorted({row["case"]["decision"] for row in included if row["participant"] == participant}),
         })
     worst = max(challenges, key=lambda challenge: (challenge["counted_ms"], challenge["counted_moments"], challenge["overlap_ms"]), default=None)
+    # How close people come to the bar (amendment 1): who ever reached each mark, and which sessions did.
+    marks = {"any_overlap": lambda challenge: challenge["overlap_ms"] > 0, "counted_500_ms": lambda challenge: challenge["counted_ms"] >= 500,
+             "counted_1200_ms": lambda challenge: challenge["counted_ms"] >= bar["min_total_ms"], "review_grade": lambda challenge: challenge["status"] == "followed"}
+    closeness = {
+        "participants": {name: sum(1 for participant in participants if any(test(challenge) for challenge in challenges if challenge["participant"] == participant))
+                         for name, test in marks.items()},
+        "sessions": {
+            "any_overlap": sum(1 for row in included if any(challenge["overlap_ms"] > 0 for challenge in row["challenges"])),
+            "repeated_overlap": sum(1 for row in included if any(challenge["episodes"] >= 2 for challenge in row["challenges"])),
+            "review_grade": sum(1 for row in included if row["review_grade"]),
+        },
+        "of": {"participants": len(participants), "sessions": len(included)},
+    }
     rooms = {}
     for room in found["challenges"]["rooms"]:
         mine = [challenge for challenge in challenges if challenge["room"] == room]
@@ -451,6 +542,8 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
                       "A consented honest-human pilot: a small behavioural baseline. Not a population, a calibration, a validation, or a false-positive rate."),
         "design": {"path": "examples/human-pilot/design.json", "sha256": pilot.sha256_file(DESIGN)},
         "code": code_identity(),
+        "build": {"engines": [json.loads(text) for text in sorted({json.dumps(row["engine"], sort_keys=True) for row in included if row.get("engine")})],
+                  "sessions_on_current_code": sum(1 for row in included if row.get("code") == code_identity()), "of": len(included)},
         "units": units,
         "excluded_sessions": excluded,
         "review_grade": {"bar": bar, **reviews, "bounds": bounds,
@@ -469,6 +562,8 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
             **{key: worst[key] for key in ("participant", "mode", "room", "status", "counted_moments", "counted_ms", "overlap_ms", "explained_ms",
                                            "challenge_only_ms", "episodes", "episode_ms", "longest_episode_ms", "time_to_first_overlap_ms",
                                            "aim_error_deg", "turn_rate_dps", "enemy_separation_deg", "not_counted")},
+            **{key: worst[key] for key in ("probe_distance_m", "probe_speed_mps", "probe_speed_dps", "aim_speed_dps", *MOTION_PARTS)
+               if key in worst},
             "against_the_bar": {"moments": f"{worst['counted_moments']} of {bar['min_samples']}", "ms": f"{worst['counted_ms']:.0f} of {bar['min_total_ms']:.0f}",
                                 "crossed": worst["status"] == "followed"}},
         "controlled_follower": {
@@ -477,7 +572,14 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
             "counted_ms": summary([challenge["counted_ms"] for challenge in followers]),
             "longest_episode_ms": summary([challenge["longest_episode_ms"] for challenge in followers]),
             "followed": sum(1 for challenge in followers if challenge["status"] == "followed"),
+            "reacquired": sum(1 for challenge in followers if challenge["episodes"] >= 2),
+            **({"motion": motion_summary(followers)} if followers and "both_still_ms" in followers[0] else {}),
         },
+        "closeness": closeness,
+        **({"motion": motion_summary(challenges)} if challenges and "both_still_ms" in challenges[0] else {}),
+        "amendment": {"path": "examples/human-pilot/amendment-1.json", "sha256": pilot.sha256_file(AMENDMENT)},
+        "stop": {"stopped": stopped(data) is not None, "reason": stopped(data),
+                 "history": [json.loads(line) for line in (data / "stops.log").read_text().splitlines()] if (data / "stops.log").exists() else []},
         "runtime": {
             "verdicts": {state: sum(challenge["verdicts"].get(state, 0) for challenge in challenges) for state in ("absent", "known", "unchecked")},
             "ended_early": sum(1 for challenge in challenges if challenge["ended_early"]),
@@ -489,7 +591,7 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
             "personal_data": sum(len(row["personal_data"]) for row in included),
         },
         "questionnaire": {question: sum(1 for row in included if row["questionnaire"].get("asked") and row["questionnaire"]["answers"].get(question))
-                          for question in found["questionnaire"]} if kind == "human" else "not asked: machine stand-ins",
+                          for question in questions()} if kind == "human" else "not asked: machine stand-ins",
         "performance": {key: summary([row["performance"][key] for row in included if row["performance"].get(key) is not None])
                         for key in ("tick_us_mean", "tick_us_max", "event_bytes_per_s", "snapshot_bytes_per_s", "client_fps_median")},
         "sessions": [{key: row[key] for key in ("participant", "kind", "stand_in", "mode", "session", "played_ms", "review_grade", "live_vs_offline")}

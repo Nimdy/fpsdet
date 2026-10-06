@@ -118,6 +118,18 @@ class StudyCodeTest(unittest.TestCase):
         result = json.loads((ROOT / "examples" / "pilot" / "result.json").read_text(encoding="utf-8"))
         self.assertEqual(module.code_identity(), result["code"])
 
+    def test_amendment_1s_telemetry_stays_in_the_study_rows(self):
+        """The body's distance and motion are study telemetry only: written by _study_row, reset by _begin, and
+        never part of what fpsdet scores."""
+        import re
+
+        study = (GODOT / "scripts" / "study_server.gd").read_text(encoding="utf-8")
+        functions = re.split(r"\n(?=func )", study)
+        users = [part.split("(")[0] for part in functions[1:] if "motion_window" in part]
+        self.assertEqual(users, ["func _begin", "func _study_row"])
+        for key in ('"dist"', '"ps"', '"aw"', '"pw"', '"co"'):
+            self.assertEqual([part.split("(")[0] for part in functions[1:] if key in part], ["func _study_row"], key)
+
 
 class MetricsTest(unittest.TestCase):
     """The study's own numbers, defined before collection."""
@@ -308,6 +320,35 @@ class AmendmentTest(unittest.TestCase):
         self.assertEqual(found["metrics_added"]["frozen"], {"window_ms": 250, "still_deg_per_s": 2.0, "co_motion_deg": 45.0})
         self.assertEqual(found["metrics_added"]["frozen"]["window_ms"], design()["frozen"]["episode_gap_ms"])
         self.assertIn("never enter scoring", found["metrics_added"]["use"])
+
+    def test_the_questions_are_the_designs_and_the_controls_question(self):
+        questions = harness().questions()
+        self.assertEqual(questions[:4], design()["questionnaire"])
+        self.assertEqual(questions[4:], ["Did the controls behave normally?"])
+
+        replies = iter(["n", "", "n", "a hum near the door", "n", "", "y", "", "y", ""])
+        with __import__("tempfile").TemporaryDirectory() as folder:
+            run = Path(folder)
+            (run / "private").mkdir()
+            found = harness().questionnaire(design(), "human", lambda prompt: next(replies), run)
+            self.assertEqual(found["comments"], 1)
+            self.assertIn("a hum", (run / "private" / "comments.json").read_text(encoding="utf-8"))
+        self.assertNotIn("a hum", json.dumps(found), "comments stay in the private folder")
+        self.assertEqual(len(found["answers"]), 5)
+
+    def test_motion_metrics_split_overlap_four_ways(self):
+        study = harness()
+        self.assertEqual(study.motion_metrics([{"t": 0, "in": True, "turn": 0.0}], []), {}, "telemetry from before the amendment has none")
+
+        def rows(aim: float, probe: float, co: float | None) -> list[dict]:
+            return [{"t": i * 17, "in": True, "turn": aim, "dist": 6.0, "ps": 1.0, "aw": aim, "pw": probe, "co": co} for i in range(60)]
+
+        cases = {"both_still_ms": rows(0.5, 0.0, None), "stationary_aim_moving_probe_ms": rows(0.5, 6.0, 120.0),
+                 "co_moving_ms": rows(6.0, 6.0, 20.0), "aim_moving_otherwise_ms": rows(6.0, 6.0, 120.0)}
+        for expected, found in cases.items():
+            metrics = study.motion_metrics(found, found)
+            self.assertEqual({part: metrics[part] for part in study.MOTION_PARTS}, {part: 1000.0 if part == expected else 0.0 for part in study.MOTION_PARTS}, expected)
+        self.assertEqual(study.motion_metrics(rows(6.0, 0.0, None), rows(6.0, 0.0, None))["aim_moving_otherwise_ms"], 1000.0, "sweeping across a still body")
 
 
 if __name__ == "__main__":
