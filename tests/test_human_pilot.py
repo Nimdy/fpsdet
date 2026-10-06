@@ -163,5 +163,56 @@ class MetricsTest(unittest.TestCase):
             self.assertEqual(len(study.personal_data([dirty])), 2)
 
 
+def dry_run() -> dict:
+    return json.loads((STUDY / "dry-run" / "result.json").read_text(encoding="utf-8"))
+
+
+class DryRunTest(unittest.TestCase):
+    """examples/human-pilot/dry-run: machine stand-ins that qualify the instruments before any person plays.
+    Never people, never counted as human, and what they found is recorded, not hidden."""
+
+    def test_it_says_it_is_machines_and_was_made_by_this_code(self):
+        found = dry_run()
+        self.assertEqual((found["format"], found["kind"]), ("fpsdet.human-pilot/1", "machine_standin"))
+        self.assertIn("Not people", found["statement"])
+        self.assertEqual(found["questionnaire"], "not asked: machine stand-ins")
+        self.assertEqual(found["code"], harness().code_identity())
+        self.assertEqual(found["design"]["sha256"], harness().pilot.sha256_file(STUDY / "design.json"))
+        self.assertEqual(found["digest"], harness().digest(found))
+
+    def test_every_runtime_check_held(self):
+        runtime = dry_run()["runtime"]
+        self.assertEqual(runtime["verdicts"]["known"], 0)
+        self.assertEqual(runtime["verdicts"]["unchecked"], 0)
+        self.assertEqual(runtime["live_vs_offline"], ["identical"])
+        self.assertTrue(runtime["packets_and_graphs_verify"])
+        self.assertEqual(runtime["realization"], ["reproduced"])
+        self.assertEqual((runtime["secret_leaks"], runtime["personal_data"]), (0, 0))
+
+    def test_the_strongest_honest_style_case_is_recorded_against_the_bar(self):
+        found = dry_run()
+        worst = found["worst_case"]
+        self.assertEqual(worst["counted_ms"], found["distributions"]["counted_ms"]["max"])
+        self.assertEqual(worst["against_the_bar"]["crossed"], worst["status"] == "followed")
+        crossed = found["review_grade"]
+        self.assertEqual(crossed["sessions"], sum(1 for row in found["sessions"] if row["review_grade"] and row["kind"] == "machine_standin"))
+        self.assertGreaterEqual(crossed["challenges"], crossed["sessions"])
+        follower = found["controlled_follower"]
+        self.assertEqual(follower["followed"], follower["challenges"])
+        self.assertGreater(follower["counted_ms"]["median"], worst["counted_ms"])
+
+    def test_the_samples_replay_offline(self):
+        self.assertEqual(harness().verify_samples(STUDY / "dry-run" / "result.json"), [])
+        self.assertEqual(len(dry_run()["samples"]), 2)
+
+    def test_machine_results_never_become_the_human_addendum(self):
+        from fpsdet import benchmark as bm
+
+        with self.assertRaises(bm.BenchmarkError):
+            bm.human_addendum_from(dry_run(), "sha256:" + "0" * 64)
+        self.assertFalse((ROOT / "benchmark" / "addenda" / "p13-consented-human-pilot.json").exists())
+        self.assertFalse((STUDY / "result.json").exists(), "no human result exists until people have played")
+
+
 if __name__ == "__main__":
     unittest.main()

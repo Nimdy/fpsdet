@@ -1,0 +1,627 @@
+{
+ "format": "fpsdet.human-pilot/1",
+ "study": "p13-consented-honest-human-pilot",
+ "kind": "machine_standin",
+ "statement": "Machine stand-ins only: scripted honest-style aiming that qualifies the instruments. Not people, and never evidence about how people aim.",
+ "design": {
+  "path": "examples/human-pilot/design.json",
+  "sha256": "sha256:f12c0f830d8b35f9df74b70af826ae52550bf522ceda4574f2041c317607412f"
+ },
+ "code": {
+  "examples/pilot/godot/study.tscn": "sha256:a46eb764772c9e65cf7a1d2a86cf06afc5067bd5fb17d1292acbc193837c5dd7",
+  "examples/pilot/godot/study.gd": "sha256:162b9b8874c46fc0c172d8d40564d2daadef5bfb3cfcf6c508f863a11a135377",
+  "examples/pilot/godot/scripts/study_arena.gd": "sha256:3690e0e9b4efca5b1d833693bfc08aa8c9652cf2be3bbe576c769f7ea049ca9a",
+  "examples/pilot/godot/scripts/study_server.gd": "sha256:d8ca27bc7f483ab49a60ed2501116ff286b2b6f68e91c55ab5c2170e8af46b20",
+  "examples/pilot/godot/scripts/study_client.gd": "sha256:81d8fddafdf5a0958858f47cb52f32449e5ea7ef646e2d9ac4fdbb36fcbd347d",
+  "examples/pilot/godot/scripts/arena.gd": "sha256:560cccfcf300164bd18d15a9dfc250cf7a9030c63d0f12af5ade32be04751a13",
+  "examples/pilot/godot/scripts/recipe.gd": "sha256:1d77e38dd63624bd3a9950ff9db8542568457362e8cd1284a6a7944480ef24e0",
+  "examples/human-pilot/study.py": "sha256:543f54c00b640753e56db564816d9a8165da34fc4a203a3c7b9edeab5ab9279f"
+ },
+ "units": {
+  "participants": 2,
+  "sessions": 14,
+  "challenges": 56
+ },
+ "excluded_sessions": [],
+ "review_grade": {
+  "bar": {
+   "min_samples": 8,
+   "min_total_ms": 1200
+  },
+  "participants": [
+   "hp-8e9f0d72"
+  ],
+  "sessions": 1,
+  "challenges": 1,
+  "bounds": {
+   "participants": {
+    "with_findings": 1,
+    "of": 2,
+    "upper_95_if_none": null,
+    "interval_95": [
+     0.0126,
+     0.9874
+    ]
+   },
+   "sessions": {
+    "with_findings": 1,
+    "of": 14,
+    "upper_95_if_none": null,
+    "interval_95": [
+     0.0018,
+     0.3387
+    ]
+   },
+   "challenges": {
+    "with_findings": 1,
+    "of": 56,
+    "upper_95_if_none": null,
+    "interval_95": [
+     0.0005,
+     0.0955
+    ]
+   }
+  },
+  "note": "Counts at three levels. A participant's sessions and challenges are not independent: the participant level is the primary unit."
+ },
+ "distributions": {
+  "counted_ms": {
+   "n": 56,
+   "median": 66.668,
+   "p90": 833.0,
+   "p95": 950.001,
+   "max": 5499.999
+  },
+  "counted_moments": {
+   "n": 56,
+   "median": 2.0,
+   "p90": 11.0,
+   "p95": 13.25,
+   "max": 56
+  },
+  "overlap_ms": {
+   "n": 56,
+   "median": 183.333,
+   "p90": 1091.667,
+   "p95": 5391.667,
+   "max": 7050.0
+  },
+  "challenge_only_ms": {
+   "n": 56,
+   "median": 83.333,
+   "p90": 750.0,
+   "p95": 962.5,
+   "max": 5516.667
+  },
+  "explained_ms": {
+   "n": 56,
+   "median": 0.0,
+   "p90": 283.333,
+   "p95": 3175.0,
+   "max": 6650.0
+  },
+  "longest_episode_ms": {
+   "n": 56,
+   "median": 116.667,
+   "p90": 1025.167,
+   "p95": 1687.667,
+   "max": 2633.667
+  },
+  "episodes": {
+   "n": 56,
+   "median": 2.0,
+   "p90": 5.5,
+   "p95": 7.0,
+   "max": 7
+  }
+ },
+ "any_overlap": {
+  "challenges": 35,
+  "of": 56
+ },
+ "explained": {
+  "overlap_ms": 39599.998,
+  "explained_by_visible_bot_ms": 21683.333,
+  "challenge_only_ms": 17916.665,
+  "fpsdet_not_counted_seen": 258
+ },
+ "reacquired": {
+  "challenges_with_2_or_more_episodes": 32,
+  "of": 56
+ },
+ "rooms": {
+  "door_edge": {
+   "challenges": 12,
+   "with_overlap": 7,
+   "overlap_ms": {
+    "n": 12,
+    "median": 158.333,
+    "p90": 583.333,
+    "p95": 2812.5,
+    "max": 5516.667
+   },
+   "counted_ms": {
+    "n": 12,
+    "median": 158.334,
+    "p90": 426.534,
+    "p95": 2712.233,
+    "max": 5499.999
+   }
+  },
+  "corner": {
+   "challenges": 13,
+   "with_overlap": 7,
+   "overlap_ms": {
+    "n": 13,
+    "median": 183.333,
+    "p90": 5550.0,
+    "p95": 6180.0,
+    "max": 7050.0
+   },
+   "counted_ms": {
+    "n": 13,
+    "median": 0.0,
+    "p90": 613.333,
+    "p95": 699.733,
+    "max": 799.334
+   }
+  },
+  "chokepoint": {
+   "challenges": 17,
+   "with_overlap": 12,
+   "overlap_ms": {
+    "n": 17,
+    "median": 283.333,
+    "p90": 976.667,
+    "p95": 1076.667,
+    "max": 1116.667
+   },
+   "counted_ms": {
+    "n": 17,
+    "median": 100.001,
+    "p90": 766.667,
+    "p95": 876.666,
+    "max": 916.668
+   }
+  },
+  "long_wall": {
+   "challenges": 14,
+   "with_overlap": 9,
+   "overlap_ms": {
+    "n": 14,
+    "median": 116.666,
+    "p90": 1015.0,
+    "p95": 1055.833,
+    "max": 1066.667
+   },
+   "counted_ms": {
+    "n": 14,
+    "median": 91.667,
+    "p90": 1005.001,
+    "p95": 1055.834,
+    "max": 1066.667
+   }
+  }
+ },
+ "per_participant": [
+  {
+   "participant": "hp-8e9f0d72",
+   "sessions": 7,
+   "challenges_exposed": 28,
+   "challenges_with_any_overlap": 16,
+   "counted_ms": {
+    "max": 5499.999,
+    "median": 41.668,
+    "p95": 1003.334
+   },
+   "reacquired": 14,
+   "review_grade_findings": 1,
+   "decisions": [
+    "insufficient_data",
+    "review"
+   ]
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "sessions": 7,
+   "challenges_exposed": 28,
+   "challenges_with_any_overlap": 19,
+   "counted_ms": {
+    "max": 1066.667,
+    "median": 83.334,
+    "p95": 784.999
+   },
+   "reacquired": 18,
+   "review_grade_findings": 0,
+   "decisions": [
+    "insufficient_data"
+   ]
+  }
+ ],
+ "worst_case": {
+  "participant": "hp-8e9f0d72",
+  "mode": "angle_holding",
+  "room": "door_edge",
+  "status": "followed",
+  "counted_moments": 56,
+  "counted_ms": 5499.999,
+  "overlap_ms": 5516.667,
+  "explained_ms": 0.0,
+  "challenge_only_ms": 5516.667,
+  "episodes": 3,
+  "episode_ms": [
+   1116.667,
+   2633.667,
+   1766.667
+  ],
+  "longest_episode_ms": 2633.667,
+  "time_to_first_overlap_ms": 186,
+  "aim_error_deg": {
+   "median": 2.59,
+   "min": 2.26
+  },
+  "turn_rate_dps": {
+   "median": 0.0,
+   "p95": 0.0
+  },
+  "enemy_separation_deg": 14.45,
+  "not_counted": {
+   "seen": 1
+  },
+  "against_the_bar": {
+   "moments": "56 of 8",
+   "ms": "5500 of 1200",
+   "crossed": true
+  }
+ },
+ "controlled_follower": {
+  "label": "the P12 stand-in for a reader of the probe it was sent, in this arena; for comparison only, never trained on",
+  "challenges": 8,
+  "counted_ms": {
+   "n": 8,
+   "median": 13258.332,
+   "p90": 14941.667,
+   "p95": 15204.167,
+   "max": 15466.667
+  },
+  "longest_episode_ms": {
+   "n": 8,
+   "median": 13416.667,
+   "p90": 15538.767,
+   "p95": 15544.717,
+   "max": 15550.667
+  },
+  "followed": 8
+ },
+ "runtime": {
+  "verdicts": {
+   "absent": 80298,
+   "known": 0,
+   "unchecked": 0
+  },
+  "ended_early": 0,
+  "abstained": 0,
+  "live_vs_offline": [
+   "identical"
+  ],
+  "packets_and_graphs_verify": true,
+  "realization": [
+   "reproduced"
+  ],
+  "secret_leaks": 0,
+  "personal_data": 0
+ },
+ "questionnaire": "not asked: machine stand-ins",
+ "performance": {
+  "tick_us_mean": {
+   "n": 14,
+   "median": 312.6,
+   "p90": 508.22,
+   "p95": 555.875,
+   "max": 558.8
+  },
+  "tick_us_max": {
+   "n": 14,
+   "median": 2583.0,
+   "p90": 5750.7,
+   "p95": 6489.2,
+   "max": 6757
+  },
+  "event_bytes_per_s": {
+   "n": 14,
+   "median": 6794.3,
+   "p90": 11875.85,
+   "p95": 11949.245,
+   "max": 11954.9
+  },
+  "snapshot_bytes_per_s": {
+   "n": 14,
+   "median": 3064.35,
+   "p90": 5470.9,
+   "p95": 5486.53,
+   "max": 5491.6
+  },
+  "client_fps_median": {
+   "n": 14,
+   "median": 145.0,
+   "p90": 145.0,
+   "p95": 145.0,
+   "max": 145.0
+  }
+ },
+ "sessions": [
+  {
+   "participant": "hp-41030ecd",
+   "kind": "controlled_follower",
+   "stand_in": "tracker",
+   "mode": "stress",
+   "session": "stress-1",
+   "played_ms": 240000,
+   "review_grade": true,
+   "live_vs_offline": "identical",
+   "plan": "sha256:dcbc0fdeab0b7108296829a8f0172434eb3edd8945ec048a68d86ae4a69f5981",
+   "events": "sha256:e0e3416b8f0608921b4337817b85ed0d6a5705b5be76d2b3fd3234fd10c81287",
+   "packet": "sha256:efbb783c458dc58faac3d7f21524efd5bab32c80414bfa23a24d1f97ae8a43bf",
+   "graph": "sha256:e4fbf228512448de55d0953dcc2f04f485e67919c5e8899a6fa50c7cf006220e",
+   "decision": "review",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-41030ecd",
+   "kind": "controlled_follower",
+   "stand_in": "tracker",
+   "mode": "tracking",
+   "session": "tracking-1",
+   "played_ms": 240000,
+   "review_grade": true,
+   "live_vs_offline": "identical",
+   "plan": "sha256:4c375c82124bbdb79d67a5b4f31007920346678c2946bddcc73c5704421151bc",
+   "events": "sha256:5a542caa7e3a97a9f6eb8177e2a5f876a161a627f0ef9909667acc55fb4b2435",
+   "packet": "sha256:f4e8ec20832544b858021407a3e4c3e0c48047d03230eb3c528c71623c3e474c",
+   "graph": "sha256:371b429f7dd1fae1990e1d5b5f83f38f3056aba0100ec40708d621c7fcfecea0",
+   "decision": "review",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-8e9f0d72",
+   "kind": "machine_standin",
+   "stand_in": "holder",
+   "mode": "angle_holding",
+   "session": "angle_holding-1",
+   "played_ms": 240000,
+   "review_grade": true,
+   "live_vs_offline": "identical",
+   "plan": "sha256:1a245853f5050f62457744708b552bc785cf552fbc5fa80d96a69eb762aa796a",
+   "events": "sha256:e622518f4eb55a736a33ba106a6d6ad23ea66f6b0b19e9e33a6777224cbb1875",
+   "packet": "sha256:949bc89fe20cab5a60c94d8bedc6eecf427fbb8c22a0486837c380feb422cab1",
+   "graph": "sha256:031f6f2a91c088d3c4c1a6a2a1ac2852fcfea3a7e16c11befc68655d01650e20",
+   "decision": "review",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-8e9f0d72",
+   "kind": "machine_standin",
+   "stand_in": "tracker",
+   "mode": "combat",
+   "session": "combat-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:a98b7bd8951a92e8d58d96991c035d2cebc89f27ecf8c1879e095e8c0ca32a1e",
+   "events": "sha256:dcd474a46966988c67b6b7d4a669af53a99b82f7805ee0c9e4843154d396949d",
+   "packet": "sha256:e0c88f767f68fa54b8a431c5693e84c4aa10b6fe3b176b7f42ae17194a900c09",
+   "graph": "sha256:7f654b5daa3812a9fdd926ae6a53680b1bfd8f7f595c9c75599fcf12e482dbaa",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-8e9f0d72",
+   "kind": "machine_standin",
+   "stand_in": "tracker",
+   "mode": "free",
+   "session": "free-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:d4cd1082e4de46167363dc71fcd5fa16a4b277d8540f34e62121debce2387764",
+   "events": "sha256:4aadd88422ea819ea2470f56e395ee1a01c4efdc162e72b4c36b999999c01a3e",
+   "packet": "sha256:27765896977242f8504b47c675c59dca4fd127e19cced8d49877132b58c9c1ac",
+   "graph": "sha256:7f654b5daa3812a9fdd926ae6a53680b1bfd8f7f595c9c75599fcf12e482dbaa",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-8e9f0d72",
+   "kind": "machine_standin",
+   "stand_in": "flicker",
+   "mode": "high_motion",
+   "session": "high_motion-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:3655a81d26ca7c6fd68c118e90d24f46d167d0100f2d4a2dea141844e12e0447",
+   "events": "sha256:16278db1a198a69275853b2a029dff924be8e8ea64ce756da82f2bcf08e7312d",
+   "packet": "sha256:c119019232303458161db1c0565d9e98449d19a1167fe408dc9e6167b3b2567b",
+   "graph": "sha256:7f654b5daa3812a9fdd926ae6a53680b1bfd8f7f595c9c75599fcf12e482dbaa",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-8e9f0d72",
+   "kind": "machine_standin",
+   "stand_in": "prefire",
+   "mode": "stress",
+   "session": "stress-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:4bccdb0d03c1c1589a0bfd1417eeacdcaf661fda5c0cb08f1b16c8df4dd5affc",
+   "events": "sha256:120f05024dfd10db2829429e1415666ac6738972e286b394c236a0b5fae0c91c",
+   "packet": "sha256:9a1ca5c20e8f6863d0095f9876202ba19271eb956983249214b9e4eb4e62a25e",
+   "graph": "sha256:7f654b5daa3812a9fdd926ae6a53680b1bfd8f7f595c9c75599fcf12e482dbaa",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-8e9f0d72",
+   "kind": "machine_standin",
+   "stand_in": "sweeper",
+   "mode": "sweep_search",
+   "session": "sweep_search-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:915b14a5e143c200577191810a4d946b9fefc996c778be88916f33846cdfdaed",
+   "events": "sha256:3f60ac4211c10f0807b423fd13fc1921c1c8afb51a8b11c00b4f213875f4ca85",
+   "packet": "sha256:78e3d4e07cd874b677e876645acaec4cd8cc76932d04afe7ae0f014f75a14d50",
+   "graph": "sha256:7f654b5daa3812a9fdd926ae6a53680b1bfd8f7f595c9c75599fcf12e482dbaa",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-8e9f0d72",
+   "kind": "machine_standin",
+   "stand_in": "tracker",
+   "mode": "tracking",
+   "session": "tracking-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:f78e7595bdff6874c058afac25bce6f7d7d620bc8c3aabe0a00396f30120a8cc",
+   "events": "sha256:096d8b756d302f63c05ea6c7b1791af887e8f349f69ebffb4f5a7bb03d60dcac",
+   "packet": "sha256:fba7baf9514a98d7e47a3eb7ccb61e59c07cb8bbdb2d0d7dbfda92f6ccea57b8",
+   "graph": "sha256:7f654b5daa3812a9fdd926ae6a53680b1bfd8f7f595c9c75599fcf12e482dbaa",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "kind": "machine_standin",
+   "stand_in": "holder",
+   "mode": "angle_holding",
+   "session": "angle_holding-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:6211c042a5b3627c94617fc4702e68f171933ac55450593599de99753d7d36de",
+   "events": "sha256:a93e4f9f45fa12274ab19f820540f347c0e30b9f95c649d5ba246a91bcb8dd63",
+   "packet": "sha256:b904e3c852261ee08962e179786187d48abdd21b028a1300ecdc5ce7c3885dab",
+   "graph": "sha256:c9f8686c9485acad057362107dda0dd7cc16da911184f9c486ff45982322315b",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "kind": "machine_standin",
+   "stand_in": "tracker",
+   "mode": "combat",
+   "session": "combat-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:0cee1ef851f37885b501a45d7b6ff45cce75003bb500386a90c95a3c1f98af7c",
+   "events": "sha256:6f5263307c1c901e98a0eb2cea4e6bc8e9b91359da938a54d3c5414ca6370247",
+   "packet": "sha256:20ff0b7f8b07f3110044958498ba863cf7d823e2e767d463797c1dacceee5dc7",
+   "graph": "sha256:c9f8686c9485acad057362107dda0dd7cc16da911184f9c486ff45982322315b",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "kind": "machine_standin",
+   "stand_in": "tracker",
+   "mode": "free",
+   "session": "free-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:4f0badf46a193caa8ac3156b9749398fc204b721d6625640f6f1c4a392b3e3d8",
+   "events": "sha256:edf580b1afa19aeb883ab0543b5fe2e769886898de3d37e29c532bb5ee9c29d7",
+   "packet": "sha256:4efcc68994498315215be6055a0dd0f590703ed753c8519c24f29f68e903ca74",
+   "graph": "sha256:c9f8686c9485acad057362107dda0dd7cc16da911184f9c486ff45982322315b",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "kind": "machine_standin",
+   "stand_in": "flicker",
+   "mode": "high_motion",
+   "session": "high_motion-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:034e1a7883eda646de3d97cb1abb7b28b46a2b0e875a2084d99befa50adb727c",
+   "events": "sha256:7b48f0337542b24f18995f19c3c4cb913c8597270ecf4db84b61ddebe607ab2e",
+   "packet": "sha256:1006c7e95b53ad3917033bed07aacea2415ac272c0cac04909658f8c5a592e6c",
+   "graph": "sha256:c9f8686c9485acad057362107dda0dd7cc16da911184f9c486ff45982322315b",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "kind": "machine_standin",
+   "stand_in": "prefire",
+   "mode": "stress",
+   "session": "stress-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:8ff1ab7c52b2c857492a47f6dcae83245e9388dc1e095b0cb121452b83786716",
+   "events": "sha256:49bb7b1d8722fdb8551928ae4a1717970341d8675bc926b3a0834ee0de9a86ba",
+   "packet": "sha256:22be518ad0239fa054405e891f3ff65ebf362936a4abd8be7ecec822cfa5bd01",
+   "graph": "sha256:c9f8686c9485acad057362107dda0dd7cc16da911184f9c486ff45982322315b",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "kind": "machine_standin",
+   "stand_in": "sweeper",
+   "mode": "sweep_search",
+   "session": "sweep_search-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:20144921dee9b37cd6afd4e0d460e39295fbb6512f163dd519a489ee0049ee9c",
+   "events": "sha256:fb135ce37b1d868e10283274aae021e8bdecf30ec94fa17f45ecd92f56dc7c8b",
+   "packet": "sha256:fda99a5856dbb65057770732333f33fba24e9cd6360bde565472399dd31e6d13",
+   "graph": "sha256:c9f8686c9485acad057362107dda0dd7cc16da911184f9c486ff45982322315b",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "kind": "machine_standin",
+   "stand_in": "tracker",
+   "mode": "tracking",
+   "session": "tracking-1",
+   "played_ms": 240000,
+   "review_grade": false,
+   "live_vs_offline": "identical",
+   "plan": "sha256:0c42f8d6e1408589724b61ba1fb72d914697203c46b6d80c08abd8bba6e263b1",
+   "events": "sha256:ae99a4cc07892b4cb18a482a84654614f37ced3fd909a3e8d3125b1cbbd51d50",
+   "packet": "sha256:a706fd2a5284becde104be043b1ceaaf6d2cedfd4d3f549c29edc9fb46ea9a41",
+   "graph": "sha256:c9f8686c9485acad057362107dda0dd7cc16da911184f9c486ff45982322315b",
+   "decision": "insufficient_data",
+   "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb"
+  }
+ ],
+ "samples": [
+  {
+   "participant": "hp-8e9f0d72",
+   "session": "angle_holding-1",
+   "folder": "examples/human-pilot/dry-run/sessions/hp-8e9f0d72-angle_holding-1",
+   "events": "sha256:e622518f4eb55a736a33ba106a6d6ad23ea66f6b0b19e9e33a6777224cbb1875",
+   "plan": "sha256:1a245853f5050f62457744708b552bc785cf552fbc5fa80d96a69eb762aa796a"
+  },
+  {
+   "participant": "hp-d3aef6bc",
+   "session": "tracking-1",
+   "folder": "examples/human-pilot/dry-run/sessions/hp-d3aef6bc-tracking-1",
+   "events": "sha256:ae99a4cc07892b4cb18a482a84654614f37ced3fd909a3e8d3125b1cbbd51d50",
+   "plan": "sha256:0c42f8d6e1408589724b61ba1fb72d914697203c46b6d80c08abd8bba6e263b1"
+  }
+ ],
+ "digest": "sha256:3c564b13b5814f36fffa5ec2a703a8527b3dcc01c627ae86f85cde8c1a920ff6"
+}

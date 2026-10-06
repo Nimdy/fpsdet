@@ -1,0 +1,87 @@
+{
+  "format": "fpsdet.challenge-plans/1",
+  "notice": "Public plan: challenge ids, windows and commitments. It holds no key and no realization. Keep it on the server until the match is over, because its windows say when each challenge runs.",
+  "game_id": "fpsdet-godot-study",
+  "match_id": "study-hp-8e9f0d72-angle_holding-1",
+  "nonce": "cc57710c0d7e8c395e3a072931706ba5",
+  "challenge_type": "occluded_motion_replay",
+  "version": 2,
+  "schedule": {
+    "count": 4,
+    "from_ms": 20000,
+    "to_ms": 230000,
+    "cooldown_ms": 30000,
+    "min_duration_ms": 8000,
+    "max_duration_ms": 16000
+  },
+  "requirements": [
+    "Place the body only where this client's line-of-sight and audio queries both fail, for the whole window; end it early if either would succeed.",
+    "Send it to this client only.",
+    "Never draw it in the stock client, and never show it in the scoreboard, kill feed, radar, minimap or any other UI.",
+    "It makes no sound.",
+    "It has no collision: it blocks no player, projectile or trace.",
+    "It cannot be hit, damaged or killed, and deals no damage.",
+    "It changes no movement, score, objective, economy or match result.",
+    "Send it with the same fields as a real player: no decoy bit.",
+    "Keep it away from any enemy this client can see or hear, so the aim on a real enemy does not cross it.",
+    "Query this client's line-of-sight and audio against the body at every server tick of the window, and send the verdict over the time each event covers on every event that names the challenge: challenge_vision_state and challenge_audio_state, known if the query succeeded at any tick, unchecked if it did not run at every tick, absent otherwise."
+  ],
+  "challenges": [
+    {
+      "challenge_id": "ch-5719028cb9a17c7f007988d7",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "study-hp-8e9f0d72-angle_holding-1",
+      "subject_id": "hp-8e9f0d72",
+      "counter": 0,
+      "nonce": "cc57710c0d7e8c395e3a072931706ba5",
+      "start_ms": 25785,
+      "end_ms": 37850,
+      "commitment": "sha256:a009ebcbcfbe85d70e8a95f9bc04dbfcb09126c538aeebf9442882421cca6f28",
+      "plan": "sha256:c6710bf6056aae3f6ed1a1529a7240623df0cc9c5d5a3cc14d931743b5324d09"
+    },
+    {
+      "challenge_id": "ch-9206e2783fd5b7a2330c8fe7",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "study-hp-8e9f0d72-angle_holding-1",
+      "subject_id": "hp-8e9f0d72",
+      "counter": 1,
+      "nonce": "cc57710c0d7e8c395e3a072931706ba5",
+      "start_ms": 83466,
+      "end_ms": 91759,
+      "commitment": "sha256:2a57f0c4619d59c436e4020d457b7c1f9da1cb288b47a692711c2d7292fee03e",
+      "plan": "sha256:110d4d677785cb4b26743817a909638fc1d5a84cfb6fbd3b33d8f9de3d8516d1"
+    },
+    {
+      "challenge_id": "ch-22ecf797655dfc3ad1279dfe",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "study-hp-8e9f0d72-angle_holding-1",
+      "subject_id": "hp-8e9f0d72",
+      "counter": 2,
+      "nonce": "cc57710c0d7e8c395e3a072931706ba5",
+      "start_ms": 124361,
+      "end_ms": 132850,
+      "commitment": "sha256:242952d20272ae490dbcb71ea7fae145d8320eedc2511dab7c00ef4275b34b67",
+      "plan": "sha256:9bc48eed636bb0e8363cfa2f8fa89adfd1418a77c80b88889916aa504da57215"
+    },
+    {
+      "challenge_id": "ch-5f8b5a312e1e2d48c45a3bd3",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "study-hp-8e9f0d72-angle_holding-1",
+      "subject_id": "hp-8e9f0d72",
+      "counter": 3,
+      "nonce": "cc57710c0d7e8c395e3a072931706ba5",
+      "start_ms": 190931,
+      "end_ms": 200835,
+      "commitment": "sha256:d484ee75a0cb1ca11d4a02c25fcf1fbb1effdaf8f5593e933b24fb48b07c98ca",
+      "plan": "sha256:2d080c801e1ec330b2e4ba3d0c76c9f59ad4dfff1ae1f2c0bacfe367770260e1"
+    }
+  ]
+}

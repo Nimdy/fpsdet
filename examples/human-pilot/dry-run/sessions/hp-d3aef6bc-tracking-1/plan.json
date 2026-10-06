@@ -1,0 +1,87 @@
+{
+  "format": "fpsdet.challenge-plans/1",
+  "notice": "Public plan: challenge ids, windows and commitments. It holds no key and no realization. Keep it on the server until the match is over, because its windows say when each challenge runs.",
+  "game_id": "fpsdet-godot-study",
+  "match_id": "study-hp-d3aef6bc-tracking-1",
+  "nonce": "dd9b9792bcb509ffe333d3dcc3a67dd7",
+  "challenge_type": "occluded_motion_replay",
+  "version": 2,
+  "schedule": {
+    "count": 4,
+    "from_ms": 20000,
+    "to_ms": 230000,
+    "cooldown_ms": 30000,
+    "min_duration_ms": 8000,
+    "max_duration_ms": 16000
+  },
+  "requirements": [
+    "Place the body only where this client's line-of-sight and audio queries both fail, for the whole window; end it early if either would succeed.",
+    "Send it to this client only.",
+    "Never draw it in the stock client, and never show it in the scoreboard, kill feed, radar, minimap or any other UI.",
+    "It makes no sound.",
+    "It has no collision: it blocks no player, projectile or trace.",
+    "It cannot be hit, damaged or killed, and deals no damage.",
+    "It changes no movement, score, objective, economy or match result.",
+    "Send it with the same fields as a real player: no decoy bit.",
+    "Keep it away from any enemy this client can see or hear, so the aim on a real enemy does not cross it.",
+    "Query this client's line-of-sight and audio against the body at every server tick of the window, and send the verdict over the time each event covers on every event that names the challenge: challenge_vision_state and challenge_audio_state, known if the query succeeded at any tick, unchecked if it did not run at every tick, absent otherwise."
+  ],
+  "challenges": [
+    {
+      "challenge_id": "ch-ca7a1862dfe33b151664d696",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "study-hp-d3aef6bc-tracking-1",
+      "subject_id": "hp-d3aef6bc",
+      "counter": 0,
+      "nonce": "dd9b9792bcb509ffe333d3dcc3a67dd7",
+      "start_ms": 27058,
+      "end_ms": 35325,
+      "commitment": "sha256:30b434fbdbb90dc4e13599e47ef86beb449a2699ac58db34a457c3a88b2650e0",
+      "plan": "sha256:9daa4cd43123892f722f776c916c916cd0442e0e07375cd080d77c50cba6a487"
+    },
+    {
+      "challenge_id": "ch-6dee6b6263919430532d1b8c",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "study-hp-d3aef6bc-tracking-1",
+      "subject_id": "hp-d3aef6bc",
+      "counter": 1,
+      "nonce": "dd9b9792bcb509ffe333d3dcc3a67dd7",
+      "start_ms": 66702,
+      "end_ms": 75815,
+      "commitment": "sha256:f68889e3a9e8c3c3edf204c80f7000d97b676fe023edae38494debd26a074b94",
+      "plan": "sha256:a8342574b3fd273e04c934adf127a422e6fbee47c6d9c7b9ed419a9fb2d483e2"
+    },
+    {
+      "challenge_id": "ch-90d5c15b65e2e1747c453a99",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "study-hp-d3aef6bc-tracking-1",
+      "subject_id": "hp-d3aef6bc",
+      "counter": 2,
+      "nonce": "dd9b9792bcb509ffe333d3dcc3a67dd7",
+      "start_ms": 124992,
+      "end_ms": 134106,
+      "commitment": "sha256:0b7e2de85018a36e5d1bae314381e406b77e6013da6991c15e428dc4f048beac",
+      "plan": "sha256:69899a3bbbb5d66fbed85de2438cfe6e3651c897a22bf9f7eeed3c332d70f7c6"
+    },
+    {
+      "challenge_id": "ch-2236d2a7de5e6140242a4e48",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "study-hp-d3aef6bc-tracking-1",
+      "subject_id": "hp-d3aef6bc",
+      "counter": 3,
+      "nonce": "dd9b9792bcb509ffe333d3dcc3a67dd7",
+      "start_ms": 214225,
+      "end_ms": 229237,
+      "commitment": "sha256:5d7ee21fcf55769d89aa345018550dbcbc4dc837e9c7983302f487f6cde7014f",
+      "plan": "sha256:2e43bda6dccaff048296ce87041a17cc901a4b9d425d3349fd3e3335585f2645"
+    }
+  ]
+}
