@@ -13,7 +13,7 @@ So an external record stays what it is: one provider's claim about one player. f
 | The native format, `fpsdet.external/1` | Implemented. The integration contract for studios; `schema/external_record.schema.json` |
 | Data-only adapters, `fpsdet.external-adapter/1` | Implemented, with three fictional examples in `examples/external/` |
 | Adapters for VAC, EAC, BattlEye, Vanguard or any real provider | **Not built.** fpsdet has no provider-supported record schema for any of them. An adapter can be written when a provider supports one |
-| Signature verification | Not built. Every record is `unverified` |
+| Signature verification | Ed25519 signatures checked against the operator's provider-key registry ([external-authentication.md](external-authentication.md)). Unsigned records still work, and say `unsigned` |
 
 ## The record
 
@@ -127,7 +127,7 @@ Each record's id is `ext-` and the first 24 hex digits of SHA-256 over `fpsdet.e
 
 ## Authenticity
 
-A digest is an identity, not a signature. It shows that a record has not changed since it was digested. It does not show who wrote it. Nothing in `fpsdet.external/1` is signed, and fpsdet does not pretend otherwise: every external observation says `authenticity: unverified`. A verified state will exist only when a format carries a signature fpsdet checks.
+A digest is an identity, not a signature. It shows that a record has not changed since it was digested. It does not show who wrote it. A record can now be signed by its provider, and checked against the operator's registry of provider keys ([external-authentication.md](external-authentication.md)). Each external observation says what was established, in `authenticity`: `unsigned`, `not_checked`, `unknown_key` or `verified`, with the key and the registry it was checked against. `verified` means the provider's registered key signed the claim. It does not mean the claim is true, and it changes no fusion rule.
 
 ## Scoring with external records
 
@@ -179,7 +179,7 @@ Each record becomes one observation, with `source: "external"` and family `exter
 | `kind`, `role` | `external_signal`, `external_watch` for a qualifying signal; `external_context`, `external_context` for the rest |
 | `key` | the record's `external_id` |
 | `match_ids` | the record's match, when it has one |
-| `evidence` | the record id; the provider, group, class, domain, kind and direction; the scope; the confidence with its scale and meaning; the provider's record id; the metadata; `authenticity: "unverified"`; `decision_effect` (`watch_at_most` or `none`); and, for context, `context_because` (`account_status`, `favorable`, `context`, `no_match` or `other_match`) |
+| `evidence` | the record id; the provider, group, class, domain, kind and direction; the scope; the confidence with its scale and meaning; the provider's record id; the metadata; `authenticity` (its signature state, and the key and registry when it was checked); `decision_effect` (`watch_at_most` or `none`); and, for context, `context_because` (`account_status`, `favorable`, `context`, `no_match` or `other_match`) |
 | `context.line` | fpsdet's own sentence about the record |
 
 External records add no id to `checks`, so the dashboards and their filters are as they were.
@@ -266,7 +266,7 @@ Records are indexed by player as they are read, so each case reads only its own.
 ## What this version does not do
 
 - **Make a review.** Not from one provider, not from many, not with a native watch. A rule that lets independent external evidence join native evidence for a review needs calibration against providers' real error rates, and an independence analysis. Neither exists.
-- **Authenticate.** No record is signed or checked; `unverified` is the only state. A forged record can make a watch.
+- **Count authentication.** A verified record makes the same watch an unsigned one does. Under the default policy, an unsigned record can still make a watch, and so can a forged one; `--require-signed-external` reads only verified records.
 - **Read a provider's confidence.** It is shown, not used. A low-confidence adverse signal makes the same watch as a high one; the adapter, which the operator controls, is where a provider's weak signals can be mapped to `context`.
 - **Integrate a real anti-cheat.** There is no VAC, EAC, BattlEye or Vanguard adapter, and none is implied.
 - **Show external records in the dashboards.** They are in the case and its evidence; the dashboards group on fpsdet's own checks.

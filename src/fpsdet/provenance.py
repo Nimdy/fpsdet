@@ -63,6 +63,7 @@ PACKAGE_DIR = Path(__file__).resolve().parent
 # and fail when the two disagree, so a new detection module cannot fall outside the fingerprint.
 DETECTOR_MODULES = (
     "fpsdet",  # __init__.py runs on every import of the package, so it is part of what runs
+    "fpsdet.auth",
     "fpsdet.baseline",
     "fpsdet.challenge",
     "fpsdet.evidence",
@@ -99,7 +100,6 @@ NOT_DETECTOR = {
     "fpsdet.synthetic": "the planted demo players",
     "fpsdet.week": "the synthetic week",
     "fpsdet.challenge_plan": "plans challenges with the server secret; detection never imports it, so scoring never needs the secret",
-    "fpsdet.auth": "provider keys and signature checking; scoring does not read signatures yet",
 }
 # GameProfile fields the scorer never reads. Editing them changes no detection.
 PROFILE_NOT_MATERIAL = frozenset({"notes"})
@@ -424,6 +424,8 @@ class ExternalProvenance:
     digest: str | None = None
     records: int = 0
     sources: tuple = ()
+    registry: Mapping | None = None  # the provider-key registry signatures were checked against
+    policy: Mapping | None = None  # {"require_signed": bool}
 
     def to_dict(self) -> dict:
         if self.mode == "none":
@@ -434,6 +436,8 @@ class ExternalProvenance:
             "digest": self.digest,
             "records": self.records,
             "sources": [dict(source) for source in self.sources],
+            "registry": None if self.registry is None else dict(self.registry),
+            "policy": dict(self.policy or {}),
         }
 
 
@@ -453,7 +457,10 @@ def external_provenance(external, subject_id: str) -> ExternalProvenance:
         return ExternalProvenance("none")
     records = external.for_subject(subject_id)
     sources = tuple(source.to_dict() for source in external.sources)
-    return ExternalProvenance("supplied", external_digest(record.digest for record in records), len(records), sources)
+    registry = None if external.registry is None else external.registry.summary()
+    return ExternalProvenance(
+        "supplied", external_digest(record.digest for record in records), len(records), sources, registry, external.policy(),
+    )
 
 
 @dataclass(frozen=True)

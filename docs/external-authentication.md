@@ -65,6 +65,41 @@ Canonical JSON is sorted keys, no spaces, UTF-8, with no NaN or Infinity: the sa
 
 A malformed envelope or signature is refused like any malformed line.
 
+## Reading signed records
+
+```bash
+fpsdet score events.ndjson --profile profiles/your-game.json \
+    --external-mapped examples/external/example-integrity.adapter.json examples/external/example-integrity-signed.ndjson \
+    --external-registry examples/external/registry.json [--require-signed-external]
+fpsdet external verify --external-mapped ADAPTER RECORDS --external-registry REGISTRY
+```
+
+- **Any external file can hold signed envelopes,** line by line, beside unsigned records. A line is an envelope only if it is exactly `format`, `claim` and `signature`, with format `fpsdet.external-signed/1`. Nothing is guessed.
+- **Verify, then read.** The signature is checked over the exact claim before anything maps or normalizes it. Only then is the claim read: directly if it is an `fpsdet.external/1` record, or through its adapter if it is the provider's own record.
+- **The provider must match.** The signature must name the provider the record will be read as: the claim's own `provider`, or the adapter's. A provider's signature cannot be carried into another provider's identity, whatever an adapter says.
+- **Refused states are errors.** `invalid`, `revoked_key` and `unsupported_algorithm` lines are skipped and named, like malformed lines, and counted on their source. `--external-strict` stops the run on them instead.
+- **One claim, its strongest signature.** The same claim read twice is one record, as before. If one copy is verified, the record is verified, whichever file or order it came in. The claim's identity (`ext-…`) does not depend on any signature, so the same claim signed by a rotated key is still the same record.
+- **`--require-signed-external`** reads only records whose signature verified. Unsigned, unchecked and unknown-key records are counted as excluded. Native scoring and every native decision are untouched. It needs `--external-registry`, and it is off by default, so unsigned records from community servers, research data and providers without keys keep working.
+- **`fpsdet external verify`** reads the files and reports, for each, how many records were read, repeated and refused, and every line's signature state. It exits non-zero if any line was refused. It scores nothing.
+
+### Where the adapter boundary is
+
+The provider signs its own record, before any adapter touches it. fpsdet verifies that record, and then the adapter maps it. So an adapter cannot change a signed field and keep the signature: the signature was checked over the provider's record, not over the adapter's output. An adapter can still choose how to read the provider's fields: which path is the subject, which kinds are adverse, what the provider's score means. That interpretation is the operator's, not the provider's. It is bound by the adapter's digest in each source's provenance, as before, and a verified signature says nothing about it.
+
+### In the case
+
+Each external observation's `evidence.authenticity` says what was established:
+
+```json
+{"status": "verified", "algorithm": "ed25519", "provider": "example-integrity", "key_id": "2026-01",
+ "key_status": "active", "registry": "sha256:…"}
+```
+
+An unsigned record says `{"status": "unsigned"}`. Authentication is part of the observation's identity, so the same claim, signed or not, is one record but two different observations. `provenance.external` also gains:
+- `registry`: the recipe, digest and key count of the registry, or null;
+- `policy`: `{"require_signed": …}`;
+- for each source, `excluded` and `authentication`, a count of every readable line by signature state.
+
 ## Rotation and revocation
 
 - **`active`**: the provider signs with it now. Its signatures verify.

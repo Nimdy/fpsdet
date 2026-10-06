@@ -4,7 +4,8 @@ fpsdet does not own or understand client anti-cheat, platform attestation, accou
 adjudication. It records what they report, says where each record came from, and keeps it apart from
 its own server evidence. A provider's confidence is preserved with the meaning the provider gave it,
 never turned into an fpsdet probability. A record's digest is its identity, not proof of who wrote it:
-every record here is ``unverified``.
+a record is authenticated only when a registered provider key signed it (fpsdet.auth), and even then that
+says who made the claim, not that it is true.
 
 Records arrive in one of two ways:
 
@@ -19,6 +20,7 @@ errors name the file, line and field, never the value.
 
 from __future__ import annotations
 
+import dataclasses
 import datetime as dt
 import hashlib
 import json
@@ -28,6 +30,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .auth import REJECTED, UNSIGNED_RECORD, VERIFIED, Authentication, AuthError, Registry, is_envelope, parse_envelope, verify
 from .evidence import FLOAT_DIGITS, FORBIDDEN_KEYS, canonical_json
 
 # The native record format, and the recipe of a record's identity.
@@ -67,8 +70,6 @@ CONFIDENCE_SCALES = (
     "label",  # a word on the provider's own scale, such as "high"
     "unspecified",  # the provider did not say
 )
-# Nothing is cryptographically verified yet, so nothing is anything but this.
-UNVERIFIED = "unverified"
 
 # Bounds. External input is untrusted.
 MAX_FILE_BYTES = 256 * 1024 * 1024
@@ -231,6 +232,8 @@ class ExternalRecord:
     confidence_meaning: str | None
     provider_record_id: str | None  # the provider's own id for the record, when it has one
     metadata: tuple[tuple[str, object], ...] = ()
+    # Who signed it (fpsdet.auth). Not part of the claim or its identity: the same claim signed or not is one record.
+    auth: Authentication = field(default=UNSIGNED_RECORD, compare=False)
     digest: str = field(default="", init=False)  # the whole SHA-256 of the claim
     external_id: str = field(default="", init=False)  # its first 24 hex digits, as the record's name
 
@@ -504,7 +507,9 @@ class ExternalSource:
     adapter_name: str | None
     records: int = 0  # new records it added
     duplicates: int = 0  # records already read, from it or an earlier file
-    errors: int = 0  # lines not read
+    errors: int = 0  # lines not read: malformed, or a signature that was refused
+    excluded: int = 0  # readable records left out because the run required verified signatures
+    authentication: dict[str, int] = field(default_factory=dict)  # every readable line's signature state
 
     def to_dict(self) -> dict:
         return {
@@ -514,6 +519,8 @@ class ExternalSource:
             "records": self.records,
             "duplicates": self.duplicates,
             "errors": self.errors,
+            "excluded": self.excluded,
+            "authentication": dict(sorted(self.authentication.items())),
         }
 
 
@@ -525,15 +532,23 @@ class ExternalInput:
     errors: list[str] = field(default_factory=list)
     records: dict[str, ExternalRecord] = field(default_factory=dict)  # by external_id
     by_subject: dict[str, list[ExternalRecord]] = field(default_factory=dict)
+    registry: Registry | None = None  # the provider keys signatures were checked against, if any
+    require_signed: bool = False  # only records with a verified signature were read
 
     def for_subject(self, subject_id: str) -> list[ExternalRecord]:
         """This player's records, in external id order: never in file order."""
         return self.by_subject.get(subject_id, [])
 
     def add(self, record: ExternalRecord, source: ExternalSource) -> str | None:
-        """Keep a record once. Returns why it was not kept, or None."""
-        if record.external_id in self.records:
+        """Keep a record once. Returns why it was not kept, or None. When the same claim arrives again with a
+        stronger signature, the claim is kept once with the stronger one, whatever the order it came in."""
+        known = self.records.get(record.external_id)
+        if known is not None:
             source.duplicates += 1
+            if _stronger(record.auth, known.auth):
+                self.records[record.external_id] = record
+                rows = self.by_subject[record.subject_id]
+                rows[rows.index(known)] = record
             return None
         rows = self.by_subject.setdefault(record.subject_id, [])
         if len(rows) >= MAX_RECORDS_PER_SUBJECT:
@@ -545,23 +560,42 @@ class ExternalInput:
         source.records += 1
         return None
 
+    def policy(self) -> dict:
+        return {"require_signed": self.require_signed}
+
     def finish(self) -> ExternalInput:
         for rows in self.by_subject.values():
             rows.sort(key=lambda record: record.external_id)
         return self
 
 
+def _stronger(new: Authentication, old: Authentication) -> bool:
+    """Is ``new`` the better signature for a claim already read? Verified over anything; then a fixed order,
+    so which one is kept never depends on file order."""
+    if new.rank != old.rank:
+        return new.rank > old.rank
+    return (new.provider or "", new.key_id or "", new.status) < (old.provider or "", old.key_id or "", old.status)
+
+
 def read_external(
     sources: Iterable[tuple[str | Path, Adapter | None]],
     *,
     strict: bool = False,
+    registry: Registry | None = None,
+    require_signed: bool = False,
 ) -> ExternalInput:
     """Read external files, each in the native format (adapter None) or through its adapter.
 
     A line fpsdet will not read is skipped and named in ``errors``, by file, line and reason, and counted
     on its source; native scoring goes on without it. With ``strict``, the first one raises instead.
+
+    A line may be a signed envelope (fpsdet.auth). Its signature is checked against ``registry`` over the
+    exact claim, before the claim is mapped or read, as the provider the record will be read as: the
+    claim's own, or the adapter's. A signature that is invalid, from a revoked key or in an algorithm
+    fpsdet does not verify is refused like a malformed line. With ``require_signed``, only records with a
+    verified signature are read; the rest are counted as excluded.
     """
-    out = ExternalInput()
+    out = ExternalInput(registry=registry, require_signed=require_signed)
     for path, adapter in sources:
         target = Path(path)
 
@@ -604,10 +638,23 @@ def read_external(
                     continue
                 try:
                     raw = _loads(line)
+                    auth = UNSIGNED_RECORD
+                    if is_envelope(raw):
+                        raw, signature = parse_envelope(raw)
+                        claimed = adapter.provider if adapter is not None else raw.get("provider")
+                        auth = verify(raw, signature, claimed if isinstance(claimed, str) else "", registry)
+                    source.authentication[auth.status] = source.authentication.get(auth.status, 0) + 1
+                    if auth.status in REJECTED:
+                        raise ExternalError(f"signature {auth.status.replace('_', ' ')}; not read")
+                    # The signature was checked over this exact claim. Only now is it mapped and read.
                     record = native_record(raw) if adapter is None else adapter.map(raw)
-                except ExternalError as error:
+                except (ExternalError, AuthError) as error:
                     fail(f"{target} line {number}: {error}", source)
                     continue
+                if require_signed and auth.status != VERIFIED:
+                    source.excluded += 1
+                    continue
+                record = dataclasses.replace(record, auth=auth)
                 refused = out.add(record, source)
                 if refused:
                     fail(f"{target} line {number}: {refused}", source)
@@ -688,7 +735,7 @@ def observation_for(record: ExternalRecord, subject_id: str, match_ids: set[str]
             "confidence": {"value": record.confidence, "scale": record.confidence_scale, "meaning": record.confidence_meaning},
             "provider_record_id": record.provider_record_id,
             "metadata": dict(record.metadata),
-            "authenticity": UNVERIFIED,
+            "authenticity": record.auth.to_dict(),
             "decision_effect": "watch_at_most" if not why else "none",
             "context_because": why or None,
         },

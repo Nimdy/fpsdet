@@ -39,14 +39,16 @@ class CurrentTrustModelTest(unittest.TestCase):
     def test_every_external_observation_is_unverified(self):
         rows = [obs for case in FUSED.values() for obs in external_obs(case)]
         self.assertEqual(len(rows), 19)  # 20 example records; one is about a player with no case
-        self.assertEqual({obs["evidence"]["authenticity"] for obs in rows}, {"unverified"})
+        # P7 replaced "unverified" with explicit states. These records carry no signature: "unsigned".
+        self.assertEqual({json.dumps(obs["evidence"]["authenticity"]) for obs in rows}, {'{"status": "unsigned"}'})
 
     def test_a_line_naming_any_provider_is_that_providers_claim(self):
-        # Anyone who can write to the external file can make a watch for a player in a scored match.
+        # Anyone who can write to the external file can make a watch for a player in a scored match. Still true
+        # for an unsigned record under the default policy; it now says so, as "unsigned".
         cases = run([native(subject_id="adrenaline", provider="example-integrity", provider_record_id="forged-1")])
         self.assertEqual(cases["adrenaline"]["decision"], "watch")
         (obs,) = external_obs(cases["adrenaline"])
-        self.assertEqual((obs["evidence"]["provider"], obs["evidence"]["authenticity"]), ("example-integrity", "unverified"))
+        self.assertEqual((obs["evidence"]["provider"], obs["evidence"]["authenticity"]), ("example-integrity", {"status": "unsigned"}))
 
     def test_a_record_chooses_its_own_provider_group(self):
         cases = run([native(subject_id="adrenaline", provider="someone-else", provider_group="example-integrity")])
@@ -74,10 +76,10 @@ class CurrentTrustModelTest(unittest.TestCase):
     def test_packet_3_binds_these_external_fields(self):
         self.assertEqual(PACKET_V2_PROVENANCE["external"], ("mode", "recipe", "digest", "records", "sources"))
         case = FUSED["adrenaline"]
-        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/3")
-        self.assertEqual(sorted(case["evidence"]["provenance"]["external"]), ["digest", "mode", "recipe", "records", "sources"])
+        # P7 added the registry and the policy to provenance.external, and each source's signature counts.
+        self.assertEqual(sorted(case["evidence"]["provenance"]["external"]), ["digest", "mode", "policy", "recipe", "records", "registry", "sources"])
         self.assertEqual(sorted(case["evidence"]["provenance"]["external"]["sources"][0]), [
-            "adapter", "adapter_name", "artifact", "duplicates", "errors", "records",
+            "adapter", "adapter_name", "artifact", "authentication", "duplicates", "errors", "excluded", "records",
         ])
 
     def test_identity_is_the_claim(self):
@@ -275,6 +277,231 @@ class SignatureTest(unittest.TestCase):
 
         self.assertEqual(set(STATUSES), REJECTED | UNAUTHENTICATED | {VERIFIED})
         self.assertEqual(REJECTED & UNAUTHENTICATED, set())
+
+
+def envelope(claim: dict, key_id: str = "2026-01", *, seed=None, label=None, provider="example-integrity") -> dict:
+    from fpsdet.auth import sign
+
+    return sign(claim, seed or SEEDS[key_id], provider, label or key_id)
+
+
+def read(*sources, registry_rows="default", **options):
+    """Read sources: each (rows, adapter or None). Written to temporary files in order."""
+    with tempfile.TemporaryDirectory() as folder:
+        paths = [(write_lines(Path(folder), f"r{index}.ndjson", rows), adapter) for index, (rows, adapter) in enumerate(sources)]
+        reg = None if registry_rows is None else registry(REGISTRY_JSON if registry_rows == "default" else registry_rows)
+        return read_external(paths, registry=reg, **options)
+
+
+def integrity_adapter():
+    from fpsdet.external import load_adapter
+
+    return load_adapter(EXAMPLES / "example-integrity.adapter.json")
+
+
+def integrity_rows(name: str) -> list[dict]:
+    return [json.loads(line) for line in (EXAMPLES / name).read_text().splitlines()]
+
+
+@unittest.skipUnless(HAVE_CRYPTO, "signature checking needs the optional cryptography package")
+class AuthenticatedRecordsTest(unittest.TestCase):
+    """Signatures checked while reading: before mapping, as the provider the record is read as."""
+
+    def test_the_signed_examples_verify_and_dedupe_with_their_unsigned_claims(self):
+        signed, unsigned = integrity_rows("example-integrity-signed.ndjson"), integrity_rows("example-integrity.ndjson")
+        for order in ((signed, unsigned), (unsigned, signed)):
+            loaded = read(*[(rows, integrity_adapter()) for rows in order])
+            (adrenaline,) = loaded.for_subject("adrenaline")
+            self.assertEqual((adrenaline.auth.status, adrenaline.auth.key_id), ("verified", "2026-01"))
+            self.assertEqual(adrenaline.external_id, integrity_adapter().map(unsigned[0]).external_id)  # the claim's identity
+            self.assertEqual(loaded.for_subject("weak-human")[0].auth.key_status, "retired")
+            self.assertEqual(len(loaded.records), 14)  # 12 unsigned claims and 2 new signed ones; the shared claim counts once
+
+    def test_a_tampered_claim_is_refused_and_makes_no_watch(self):
+        bad = envelope(native(subject_id="adrenaline", provider_record_id="t-1"))
+        bad["claim"]["kind"] = "something_else"
+        loaded = read(([bad, native(subject_id="glitch")], None))
+        self.assertEqual((len(loaded.records), loaded.sources[0].errors, loaded.sources[0].authentication), (1, 1, {"invalid": 1, "unsigned": 1}))
+        self.assertIn("signature invalid", loaded.errors[0])
+        self.assertEqual(scored(loaded)["adrenaline"]["decision"], "clean")
+
+    def test_a_revoked_key_and_an_unsupported_algorithm_are_refused(self):
+        revoked = envelope(native(subject_id="adrenaline"), "2024-11")
+        odd = envelope(native(subject_id="glitch"))
+        odd["signature"]["algorithm"] = "rsa-pss"
+        loaded = read(([revoked, odd], None))
+        self.assertEqual((len(loaded.records), loaded.sources[0].authentication), (0, {"revoked_key": 1, "unsupported_algorithm": 1}))
+
+    def test_an_unknown_key_is_read_but_never_authenticated(self):
+        loaded = read(([envelope(native(subject_id="adrenaline"), label="2027-01")], None))
+        (record,) = loaded.for_subject("adrenaline")
+        self.assertEqual(record.auth.status, "unknown_key")
+        cases = scored(loaded)
+        self.assertEqual(cases["adrenaline"]["decision"], "watch")  # as any unauthenticated record, by the default policy
+        self.assertEqual(external_obs(cases["adrenaline"])[0]["evidence"]["authenticity"]["status"], "unknown_key")
+
+    def test_a_provider_name_alone_is_not_verification(self):
+        loaded = read(([native(subject_id="adrenaline", provider="example-integrity")], None))
+        self.assertEqual(loaded.for_subject("adrenaline")[0].auth.status, "unsigned")
+
+    def test_15_an_adapter_cannot_carry_a_signature_across_providers_or_past_a_change(self):
+        from fpsdet.external import adapter_from_dict
+
+        raw = integrity_rows("example-integrity.ndjson")[0]
+        other = adapter_from_dict({**json.loads((EXAMPLES / "example-integrity.adapter.json").read_text()), "provider": "another-vendor"})
+        signed = envelope(raw)
+        loaded = read(([signed], other))
+        self.assertEqual((len(loaded.records), loaded.sources[0].authentication), (0, {"invalid": 1}))
+        changed = envelope(raw)
+        changed["claim"]["detection"]["score"] = 99
+        loaded = read(([changed], integrity_adapter()))
+        self.assertEqual(loaded.sources[0].authentication, {"invalid": 1})
+
+    def test_14_a_record_cannot_vouch_for_itself(self):
+        claims_verified = native(subject_id="adrenaline")
+        claims_verified["authenticity"] = "verified"
+        with_key = envelope(native(subject_id="glitch"))
+        with_key["signature"]["public_key"] = REGISTRY_JSON["providers"]["example-integrity"]["keys"][0]["public_key"]
+        loaded = read(([claims_verified, with_key], None))
+        self.assertEqual((len(loaded.records), len(loaded.errors)), (0, 2))
+
+    def test_verified_means_signed_not_true(self):
+        from fpsdet.models import GameProfile
+
+        rows = [
+            envelope(native(subject_id="adrenaline")),  # adverse
+            envelope(native(subject_id="steady-hands", direction="favorable", kind="integrity_ok")),
+            envelope(native(subject_id="legal-heavy", source_class="account_status", kind="game_ban", match_id=None)),
+            envelope(native(subject_id="listened", source_class="tournament_finding", kind="confirmed_cheating")),
+        ]
+        cases = scored(read((rows, None)))
+        self.assertEqual({pid: cases[pid]["decision"] for pid in ("adrenaline", "steady-hands", "legal-heavy", "listened")},
+                         {"adrenaline": "watch", "steady-hands": "clean", "legal-heavy": "clean", "listened": "watch"})
+        for pid in ("adrenaline", "steady-hands", "legal-heavy", "listened"):
+            (obs,) = external_obs(cases[pid])
+            self.assertEqual(obs["evidence"]["authenticity"]["status"], "verified")
+        self.assertEqual(external_obs(cases["steady-hands"])[0]["evidence"]["direction"], "favorable")
+        self.assertEqual(external_obs(cases["legal-heavy"])[0]["evidence"]["context_because"], "account_status")
+        self.assertEqual({pid for pid, case in cases.items() if case["decision"] == "review"},
+                         {pid for pid, case in FUSED.items() if case["evidence"]["fusion"]["native_decision"] == "review"})
+
+    def test_signing_changes_no_decision_or_fusion(self):
+        claims = [native(subject_id=pid, provider_record_id=f"r-{pid}") for pid in ("adrenaline", "one-past", "replay-lock", "weight-cheat")]
+        plain = scored(read((claims, None)))
+        signed = scored(read(([envelope(claim) for claim in claims], None)))
+        for pid in plain:
+            self.assertEqual(plain[pid]["decision"], signed[pid]["decision"], pid)
+            self.assertEqual(plain[pid]["reasons"], signed[pid]["reasons"], pid)
+            self.assertEqual(plain[pid]["evidence"].get("fusion"), signed[pid]["evidence"].get("fusion"), pid)
+        self.assertEqual({signed[pid]["decision"] for pid in ("replay-lock", "weight-cheat")}, {"review"})
+        self.assertEqual(signed["one-past"]["decision"], "watch")
+
+    def test_the_observation_and_provenance_say_how_it_was_checked(self):
+        loaded = read(([envelope(native(subject_id="adrenaline"))], None))
+        case = scored(loaded)["adrenaline"]
+        (obs,) = external_obs(case)
+        self.assertEqual(obs["evidence"]["authenticity"], {"status": "verified", "algorithm": "ed25519", "provider": "example-integrity",
+                                                           "key_id": "2026-01", "key_status": "active", "registry": registry().digest})
+        external = case["evidence"]["provenance"]["external"]
+        self.assertEqual(external["registry"], registry().summary())
+        self.assertEqual(external["policy"], {"require_signed": False})
+        self.assertEqual(external["sources"][0]["authentication"], {"verified": 1})
+
+    def test_require_signed_reads_only_verified_records(self):
+        rows = [envelope(native(subject_id="adrenaline")), native(subject_id="glitch"), envelope(native(subject_id="weak-human"), label="2027-01")]
+        loaded = read((rows, None), require_signed=True)
+        self.assertEqual(sorted(loaded.by_subject), ["adrenaline"])
+        self.assertEqual(loaded.sources[0].excluded, 2)
+        cases = scored(loaded)
+        self.assertEqual((cases["adrenaline"]["decision"], cases["glitch"]["decision"], cases["weak-human"]["decision"]), ("watch", "clean", "clean"))
+        self.assertEqual(cases["glitch"]["evidence"]["provenance"]["external"]["policy"], {"require_signed": True})
+        from tests.test_external import NATIVE, native_part
+
+        for pid in NATIVE:
+            self.assertEqual(native_part(cases[pid]), native_part(NATIVE[pid]), pid)
+
+    def test_without_a_registry_signatures_are_not_checked_and_need_no_package(self):
+        from fpsdet import auth
+
+        signed = envelope(native(subject_id="adrenaline"))  # made with the package, by the provider
+        with mock.patch.object(auth, "_ed25519", side_effect=auth.AuthUnavailable("needs cryptography")):
+            loaded = read(([signed], None), registry_rows=None)
+        self.assertEqual(loaded.for_subject("adrenaline")[0].auth.status, "not_checked")
+
+
+@unittest.skipUnless(HAVE_CRYPTO, "signature checking needs the optional cryptography package")
+class ExternalAuthCommandTest(unittest.TestCase):
+    def cli(self, *argv):
+        import contextlib
+        import io
+
+        from fpsdet.cli import main
+
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            try:
+                code = main(list(argv))
+            except SystemExit as stop:
+                code = stop.code if isinstance(stop.code, int) else 1
+                err.write(str(stop.code))
+        return code, out.getvalue() + err.getvalue()
+
+    def test_verify_and_score_with_a_registry(self):
+        from fpsdet.persist import event_to_dict
+        from tests.test_external import EVENTS
+
+        with tempfile.TemporaryDirectory() as folder:
+            folder = Path(folder)
+            bad = envelope(native(subject_id="adrenaline"))
+            bad["claim"]["kind"] = "x"
+            bad_path = write_lines(folder, "bad.ndjson", [bad])
+            reg = str(EXAMPLES / "registry.json")
+            code, printed = self.cli("external", "verify", "--external-mapped", str(EXAMPLES / "example-integrity.adapter.json"),
+                                     str(EXAMPLES / "example-integrity-signed.ndjson"), "--external-registry", reg)
+            self.assertEqual(code, 0, printed)
+            self.assertIn("signatures: verified 3", printed)
+            code, printed = self.cli("external", "verify", "--external", str(bad_path), "--external-registry", reg)
+            self.assertEqual(code, 1)
+            self.assertIn("signature invalid", printed)
+            events = folder / "events.ndjson"
+            events.write_text("".join(json.dumps(event_to_dict(e)) + "\n" for e in EVENTS))
+            profile = str(Path(__file__).resolve().parents[1] / "profiles" / "example-loadout.json")
+            code, printed = self.cli("score", str(events), "--profile", profile, "--external-mapped", str(EXAMPLES / "example-integrity.adapter.json"),
+                                     str(EXAMPLES / "example-integrity-signed.ndjson"), "--external-registry", reg, "--require-signed-external",
+                                     "--out", str(folder / "out"))
+            self.assertEqual(code, 0, printed)
+            self.assertIn("signatures: verified 3", printed)
+            code, printed = self.cli("score", str(events), "--profile", profile, "--external", str(bad_path), "--require-signed-external")
+            self.assertNotEqual(code, 0)
+            self.assertIn("needs --external-registry", printed)
+
+    def test_16_no_output_carries_a_private_key(self):
+        from fpsdet.ai_triage import triage_case
+        from fpsdet.persist import event_to_dict
+        from tests.test_challenge import leaks
+        from tests.test_external import EVENTS
+
+        with tempfile.TemporaryDirectory() as folder:
+            folder = Path(folder)
+            events = folder / "events.ndjson"
+            events.write_text("".join(json.dumps(event_to_dict(e)) + "\n" for e in EVENTS))
+            signed = write_lines(folder, "signed.ndjson", [envelope(native(subject_id="adrenaline")), envelope(native(subject_id="weak-human"), "2025-07")])
+            code, printed = self.cli("score", str(events), "--profile", str(Path(__file__).resolve().parents[1] / "profiles" / "example-loadout.json"),
+                                     "--external", str(signed), "--external-registry", str(EXAMPLES / "registry.json"), "--out", str(folder / "out"))
+            self.assertEqual(code, 0, printed)
+            surfaces = {"score output": printed}
+            for path in sorted((folder / "out").rglob("*")):
+                if path.is_file():
+                    surfaces[path.name] = path.read_text(encoding="utf-8")
+            case = next(row for row in json.loads((folder / "out" / "review-index.json").read_text())["cases"] if row["player_id"] == "adrenaline")
+            self.assertEqual(case["decision"], "watch")
+            sent: list[dict] = []
+            triage_case(case, lambda body: sent.append(body) or "brief", known_ids=["adrenaline"])
+            surfaces["AI brief input"] = json.dumps(sent)
+            code, surfaces["verify output"] = self.cli("external", "verify", "--external", str(signed), "--external-registry", str(EXAMPLES / "registry.json"))
+        for name, text in surfaces.items():
+            with self.subTest(name):
+                self.assertEqual(leaks(text, *SEEDS.values()), [])
 
 
 if __name__ == "__main__":

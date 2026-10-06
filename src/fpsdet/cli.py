@@ -14,6 +14,7 @@ from .baseline import build_cohorts, screen_matches
 from .casefile import safe_name, write_case
 from .challenge import CURRENT, Budget, ChallengeError, ChallengeRegistry, case_problems, plan_file_from_dict
 from .challenge_plan import SECRET_ENV, SecretError, load_secret, new_secret_file, plan_match, reproduce
+from .auth import AuthError, load_registry
 from .external import ExternalError, load_adapter, read_external
 from .lake import ingest_lines, read_lines
 from .parse import iter_events, load_events, load_profile
@@ -278,22 +279,65 @@ def cmd_score(args: argparse.Namespace) -> int:
     return 0
 
 
+def _external_sources(args: argparse.Namespace) -> list:
+    sources = [(path, None) for path in args.external or []]
+    sources += [(path, load_adapter(adapter)) for adapter, path in args.external_mapped or []]
+    return sources
+
+
 def _external_from_args(args: argparse.Namespace):
     """External records from --external (the native format) and --external-mapped (an adapter and its file),
-    or None when neither was given. Bad lines are reported and skipped unless --external-strict."""
-    sources = [(path, None) for path in args.external or []]
+    or None when neither was given. Signatures are checked against --external-registry when it is given.
+    Bad lines and refused signatures are reported and skipped unless --external-strict."""
     try:
-        sources += [(path, load_adapter(adapter)) for adapter, path in args.external_mapped or []]
+        sources = _external_sources(args)
         if not sources:
+            if args.external_registry or args.require_signed_external:
+                raise SystemExit("--external-registry and --require-signed-external need --external or --external-mapped records")
             return None
-        external = read_external(sources, strict=args.external_strict)
-    except ExternalError as error:
+        if args.require_signed_external and not args.external_registry:
+            raise SystemExit("--require-signed-external needs --external-registry: there is nothing to verify signatures against")
+        registry = load_registry(args.external_registry) if args.external_registry else None
+        external = read_external(sources, strict=args.external_strict, registry=registry, require_signed=args.require_signed_external)
+    except (ExternalError, AuthError) as error:
         raise SystemExit(f"external evidence: {error}")
     for error in external.errors[:50]:
         print(f"external evidence: {error}", file=sys.stderr)
     if len(external.errors) > 50:
         print(f"external evidence: {len(external.errors) - 50} more lines not read", file=sys.stderr)
+    states: dict[str, int] = {}
+    for source in external.sources:
+        for state, count in source.authentication.items():
+            states[state] = states.get(state, 0) + count
+    excluded = sum(source.excluded for source in external.sources)
+    summary = ", ".join(f"{state} {count}" for state, count in sorted(states.items()))
+    print(f"external evidence: {len(external.records)} records read; signatures: {summary or 'none'}"
+          + (f"; {excluded} left out by --require-signed-external" if excluded else ""), file=sys.stderr)
     return external
+
+
+def cmd_external_verify(args: argparse.Namespace) -> int:
+    """Check external files' signatures and lines without scoring anything."""
+    args.external_strict = False
+    try:
+        sources = _external_sources(args)
+        if not sources:
+            raise SystemExit("name at least one file with --external or --external-mapped")
+        registry = load_registry(args.external_registry) if args.external_registry else None
+        external = read_external(sources, registry=registry)
+    except (ExternalError, AuthError) as error:
+        raise SystemExit(f"external evidence: {error}")
+    names = [path for path, _adapter in sources]
+    for name, source in zip(names, external.sources):
+        states = ", ".join(f"{state} {count}" for state, count in sorted(source.authentication.items())) or "none"
+        print(f"{name}: {source.records} records, {source.duplicates} repeated, {source.errors} not read; signatures: {states}")
+    if registry is None:
+        print("No registry given (--external-registry): signatures were not checked.")
+    else:
+        print(f"Checked against registry {registry.digest} ({len(registry)} keys).")
+    for error in external.errors[:50]:
+        print(f"  {error}")
+    return 1 if external.errors else 0
 
 
 def cmd_dashboard(args: argparse.Namespace) -> int:
@@ -482,6 +526,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="A provider's records and the fpsdet.external-adapter/1 file that maps them. Repeat for more",
     )
     score.add_argument("--external-strict", action="store_true", help="Stop on the first external line that cannot be read")
+    score.add_argument("--external-registry", help="The operator's provider-key registry (fpsdet.provider-registry/1); signatures are checked against it")
+    score.add_argument(
+        "--require-signed-external", action="store_true",
+        help="Read only external records a registered key signed. Native scoring is unaffected",
+    )
     score.add_argument("--out")
     score.add_argument("--ai", action="store_true", help="Attach a brief from any OpenAI-compatible endpoint")
     score.set_defaults(func=cmd_score)
@@ -526,6 +575,14 @@ def build_parser() -> argparse.ArgumentParser:
     verify.set_defaults(func=cmd_challenge_verify)
     types = actions.add_parser("types", help="Print the challenge types, their requirements and limits")
     types.set_defaults(func=cmd_challenge_types)
+
+    external = sub.add_parser("external", help="Check external records and their signatures. Scores nothing")
+    external_actions = external.add_subparsers(dest="action", required=True)
+    check = external_actions.add_parser("verify", help="Read external files and report every line's signature state")
+    check.add_argument("--external", action="append", help="Records in the fpsdet.external/1 format. Repeat for more")
+    check.add_argument("--external-mapped", nargs=2, action="append", metavar=("ADAPTER", "RECORDS"), help="A provider's records and their adapter")
+    check.add_argument("--external-registry", help="The provider-key registry to check signatures against")
+    check.set_defaults(func=cmd_external_verify)
     return parser
 
 
