@@ -618,5 +618,27 @@ class GraphV2Test(unittest.TestCase):
                                               "digest": "sha256:5e7d3aaec90bb28d5b2f2d1a029b9256e142ee0b3570318b502b7062c0ebea59"})
 
 
+@unittest.skipUnless(HAVE_CRYPTO, "signature checking needs the optional cryptography package")
+class VerifyOnceTest(unittest.TestCase):
+    def test_a_repeated_signature_is_checked_once_and_a_changed_one_again(self):
+        from fpsdet import auth
+
+        signed = envelope(native(subject_id="adrenaline"))
+        tampered = copy.deepcopy(signed)
+        tampered["claim"]["kind"] = "changed"
+        calls = []
+        real = auth.Registry._verify
+
+        def counting(self, *args):
+            calls.append(args)
+            return real(self, *args)
+
+        with mock.patch.object(auth.Registry, "_verify", counting):
+            loaded = read(([signed] * 5 + [tampered], None))
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(loaded.sources[0].authentication, {"invalid": 1, "verified": 5})
+        self.assertEqual((loaded.sources[0].records, loaded.sources[0].duplicates), (1, 4))
+
+
 if __name__ == "__main__":
     unittest.main()

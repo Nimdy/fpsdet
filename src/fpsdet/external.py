@@ -30,7 +30,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .auth import REJECTED, UNSIGNED_RECORD, VERIFIED, Authentication, AuthError, Registry, is_envelope, parse_envelope, verify
+from .auth import REJECTED, UNSIGNED_RECORD, VERIFIED, Authentication, AuthError, Registry, is_envelope, parse_envelope, signed_bytes, verify
 from .evidence import FLOAT_DIGITS, FORBIDDEN_KEYS, canonical_json
 
 # The native record format, and the recipe of a record's identity.
@@ -596,6 +596,8 @@ def read_external(
     verified signature are read; the rest are counted as excluded.
     """
     out = ExternalInput(registry=registry, require_signed=require_signed)
+    # The same signature over the same bytes, for the same provider, is checked once per run.
+    checked: dict[tuple, Authentication] = {}
     for path, adapter in sources:
         target = Path(path)
 
@@ -642,7 +644,12 @@ def read_external(
                     if is_envelope(raw):
                         raw, signature = parse_envelope(raw)
                         claimed = adapter.provider if adapter is not None else raw.get("provider")
-                        auth = verify(raw, signature, claimed if isinstance(claimed, str) else "", registry)
+                        claimed = claimed if isinstance(claimed, str) else ""
+                        seen = (claimed, signature.algorithm, signature.provider, signature.key_id, signature.value,
+                                hashlib.sha256(signed_bytes(raw)).digest())
+                        auth = checked.get(seen)
+                        if auth is None:
+                            auth = checked[seen] = verify(raw, signature, claimed, registry)
                     source.authentication[auth.status] = source.authentication.get(auth.status, 0) + 1
                     if auth.status in REJECTED:
                         raise ExternalError(f"signature {auth.status.replace('_', ' ')}; not read")
