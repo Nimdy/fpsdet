@@ -1,0 +1,14 @@
+{
+ "t_ms": "time_utc",
+ "match_id": "round",
+ "player_id": "account",
+ "event_type": "kind",
+ "weapon_id": "gun",
+ "hit": "hit",
+ "hitbox": "bone",
+ "distance_m": "range_m",
+ "speed_mps": "ground_speed",
+ "on_ground": "grounded",
+ "expected_max_ground_speed_mps": "server_cap",
+ "displacement_cause": "moved_by"
+}

@@ -1,0 +1,4 @@
+{
+ "game_id": "my-game",
+ "notes": "The smallest profile: every default. Enough when your logs carry the server's own caps (expected_max_ground_speed_mps, expected_min_recoil_pitch_deg). Copy profiles/example-loadout.json instead to declare weight classes, weapon cycles and recoil floors."
+}

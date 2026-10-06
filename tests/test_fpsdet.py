@@ -2354,5 +2354,68 @@ class Tf2ExampleTest(unittest.TestCase):
         self.assertEqual((profile.game_id, profile.aim_group), ("tf2", "weapon_id"))
 
 
+
+class TryItTest(unittest.TestCase):
+    """examples/historic and the Try it page: an operator's own logs, converted with pseudonyms and scored
+    offline. The page's numbers are what the bundled sample actually gives."""
+
+    HERE = ROOT / "examples" / "historic"
+
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("historic_convert", cls.HERE / "convert.py")
+        cls.convert = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.convert)
+
+    def run_convert(self, folder: Path, *extra: str) -> tuple[str, list[dict]]:
+        out = folder / "events.ndjson"
+        printed = io.StringIO()
+        with contextlib.redirect_stdout(printed), contextlib.redirect_stderr(io.StringIO()):
+            code = self.convert.main([str(self.HERE / "sample.csv"), "--map", str(self.HERE / "map.json"), "--game", "my-game",
+                                      "--salt-file", str(folder / "salt.hex"), "--out", str(out), *extra])
+        self.assertEqual(code, 0)
+        return printed.getvalue(), [json.loads(line) for line in out.read_text(encoding="utf-8").splitlines()]
+
+    def test_the_converter_keeps_only_fpsdet_fields_under_pseudonyms(self):
+        import csv
+        import os
+        import re
+        import stat
+
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            printed, events = self.run_convert(folder)
+            sample = list(csv.DictReader((self.HERE / "sample.csv").open(encoding="utf-8")))
+            self.assertEqual(len(events), len(sample))
+            self.assertIn(f"{len(sample)} of {len(sample)} rows written", printed)
+            self.assertIn("columns not copied (fpsdet has no field for them): ip, name", printed)
+            properties = json.loads((ROOT / "schema" / "combat_event.schema.json").read_text(encoding="utf-8"))["properties"]
+            text = (folder / "events.ndjson").read_text(encoding="utf-8")
+            for row in sample:  # no account id, name or address survives
+                for column in ("account", "name", "ip"):
+                    self.assertNotIn(row[column], text)
+            for event in events:
+                self.assertLessEqual(set(event), set(properties))
+                self.assertRegex(event["player_id"], r"^p-[0-9a-f]{16}$")
+                self.assertIsInstance(event["t_ms"], int)
+                parse_event(event)
+            accounts = {row["account"] for row in sample}
+            self.assertEqual(len({event["player_id"] for event in events}), len(accounts))
+            self.assertEqual(stat.S_IMODE(os.stat(folder / "salt.hex").st_mode), 0o600)
+            # The same salt gives the same pseudonyms, and --who finds an account's.
+            _, again = self.run_convert(folder)
+            self.assertEqual(events, again)
+            who = io.StringIO()
+            with contextlib.redirect_stdout(who):
+                self.convert.main(["--who", "acct-1001", "--salt-file", str(folder / "salt.hex")])
+            self.assertIn(who.getvalue().strip(), {event["player_id"] for event in events})
+            # Another salt, other pseudonyms.
+            other = folder / "other"
+            other.mkdir()
+            _, elsewhere = self.run_convert(other)
+            self.assertNotEqual({e["player_id"] for e in events}, {e["player_id"] for e in elsewhere})
+            self.assertIsNone(re.search(r"acct-\d+", json.dumps(elsewhere)))
+
+
 if __name__ == "__main__":
     unittest.main()
