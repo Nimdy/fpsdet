@@ -244,6 +244,8 @@ Each followed challenge is one observation:
 
 The evidence binds the challenge by id, plan digest and commitment. It holds no secret and no realization, and nothing in it helps predict another challenge: the next challenge's id, window and realization come from HMAC outputs this one says nothing about. The observation id covers all of it, so the evidence packet binds the challenge through the observation, as it binds every other finding. No new packet recipe was needed.
 
+In the evidence graph ([evidence-graph.md](evidence-graph.md)), a challenge observation is `derived_from` a `challenge` node holding that same public identity: the plan digest, the commitment and the window, never the secret or the realization.
+
 ### Checking a case against its plan
 
 ```bash

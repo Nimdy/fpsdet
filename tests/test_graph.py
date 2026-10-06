@@ -10,7 +10,12 @@ import copy
 import random
 import unittest
 
-from fpsdet.graph import ACYCLIC, NODE_TYPES, RELATIONS, EvidenceGraph, GraphError, schema
+import json
+import os
+import tempfile
+from pathlib import Path
+
+from fpsdet.graph import ACYCLIC, NODE_TYPES, RELATIONS, EvidenceGraph, GraphError, build_graph, describe, graph_block, schema, verify_graph, verify_graphs
 
 from fpsdet.persist import case_to_dict
 from fpsdet.synthetic import build_demo
@@ -208,6 +213,325 @@ class GraphModelTest(unittest.TestCase):
         self.assertEqual(set(described["node_types"]), set(NODE_TYPES))
         self.assertEqual(set(described["relations"]), set(RELATIONS))
         self.assertNotIn("related_to", RELATIONS)
+
+
+def graph_of(case: dict) -> EvidenceGraph:
+    return EvidenceGraph.from_dict({key: value for key, value in case["evidence"]["graph"].items() if key != "summary"})
+
+
+def node_ids(graph: EvidenceGraph, node_type: str) -> list[str]:
+    return [node.id for node in graph.of_type(node_type)]
+
+
+def regraph(case: dict) -> dict:
+    """The case with its graph block rebuilt from its own evidence, as case_to_dict writes it."""
+    case = copy.deepcopy(case)
+    case["evidence"].pop("graph", None)
+    case["evidence"]["graph"] = graph_block(case)
+    return case
+
+
+class CaseGraphTest(unittest.TestCase):
+    """Every case carries its graph, and every graph holds together."""
+
+    def test_every_planted_and_weekly_graph_verifies(self):
+        for cases in (PLANTED, WEEKLY):
+            for pid, case in cases.items():
+                self.assertEqual(verify_graph(case), [], pid)
+            self.assertEqual(verify_graphs(cases.values()), [])
+
+    def test_the_graph_does_not_touch_the_decision(self):
+        for case in DEMO.cases:
+            row = case_to_dict(case)
+            self.assertEqual(row["decision"], case.decision)
+            self.assertEqual(graph_of(row).get(f"case:{case.player_id}").attributes, {"decision": case.decision})
+
+    def test_observation_order_does_not_move_the_graph(self):
+        case = copy.deepcopy(PLANTED["clone-source"])
+        before = case["evidence"]["graph"]["digest"]
+        case["evidence"]["observations"].reverse()
+        self.assertEqual(build_graph(case).digest(), before)
+
+    def test_a_voice_watch_depends_on_its_partners_hidden_mover(self):
+        graph = graph_of(PLANTED["radar-friend"])
+        (voice,) = [n.id for n in graph.of_type("observation") if n.attributes.get("kind") == "voice"]
+        (hidden,) = [obs["observation_id"] for obs in observations(PLANTED["wall-eye"], "hidden")]
+        self.assertEqual(graph.out(voice, "depends_on"), [f"observation:{hidden}"])
+        self.assertEqual(graph.get(f"observation:{hidden}").attributes, {"in_case": False})
+        self.assertEqual(graph.out(f"observation:{hidden}", "about"), ["player:wall-eye"])
+        self.assertEqual(graph.out(voice, "names_partner"), ["player:wall-eye"])
+        self.assertEqual(graph.out(voice, "supports"), ["case:radar-friend"])
+
+    def test_a_shared_leftover_names_its_partner(self):
+        graph = graph_of(PLANTED["clone-buyer"])
+        (leftover,) = [n.id for n in graph.of_type("observation")]
+        self.assertEqual(graph.out(leftover, "names_partner"), ["player:clone-source"])
+        self.assertEqual(graph.out(leftover, "depends_on"), [])
+        source = graph_of(PLANTED["clone-source"])
+        self.assertEqual(sorted(t for n in source.of_type("observation") for t in source.out(n.id, "names_partner")), ["player:clone-buyer"])
+
+    def test_history_and_cohort_are_identities_not_copies(self):
+        graph = graph_of(PLANTED["account-changed"])
+        (jump,) = node_ids(graph, "observation")
+        history = PLANTED["account-changed"]["evidence"]["provenance"]["history"]
+        self.assertEqual(graph.out(jump, "uses_history"), [f"history:{history['digest']}"])
+        self.assertEqual(graph.get(f"history:{history['digest']}").attributes, {"mode": "external", "recipe": "fpsdet.history/1", "windows": 1})
+        rage = graph_of(PLANTED["rage"])
+        cohort = PLANTED["rage"]["evidence"]["provenance"]["cohort"]["digest"]
+        for name in node_ids(rage, "observation"):
+            self.assertEqual(rage.out(name, "compared_against"), [f"cohort:{cohort}"])
+        self.assertEqual(node_ids(graph_of(PLANTED["elite-human"]), "cohort"), [])  # nothing of its was compared into a finding
+
+    def test_a_legacy_replay_is_a_challenge_with_no_plan(self):
+        graph = graph_of(PLANTED["replay-lock"])
+        (replay,) = node_ids(graph, "observation")
+        (challenge,) = graph.out(replay, "derived_from")
+        self.assertEqual(challenge, "challenge:legacy_private_replay:rifle")
+        attributes = graph.get(challenge).attributes
+        self.assertEqual((attributes["origin"], attributes["plan"], attributes["commitment"], attributes["window"]), ("legacy_private_replay", None, None, None))
+
+    def test_a_planned_challenge_is_its_public_identity_and_nothing_secret(self):
+        from tests.test_challenge import follow, fresh, leaks, plan_for
+        from fpsdet.challenge import ChallengeRegistry
+        from fpsdet.challenge_plan import realize
+        from fpsdet.pipeline import run_score
+
+        key, secret = fresh()
+        planned = plan_for(secret=secret)
+        (plan,) = planned.plans
+        case = next(case_to_dict(c) for c in run_score(follow(plan, n=16), DEMO.profile, challenges=ChallengeRegistry(planned.plans)))
+        self.assertEqual(verify_graph(case), [])
+        graph = graph_of(case)
+        (challenge,) = node_ids(graph, "challenge")
+        self.assertEqual(challenge, f"challenge:{plan.challenge_id}")
+        self.assertEqual(graph.get(challenge).attributes, {
+            "origin": "planned", "type": "occluded_motion_replay", "version": 1, "commitment": plan.commitment,
+            "plan": plan.digest, "window": {"start_ms": plan.start_ms, "end_ms": plan.end_ms},
+        })
+        self.assertEqual(graph.out(challenge, "about"), [f"player:{plan.subject_id}"])
+        self.assertEqual(graph.out(challenge, "occurred_in"), [f"match:{plan.match_id}"])
+        material = realize(secret, plan, planned.budget).material
+        self.assertEqual(leaks(json.dumps(case["evidence"]["graph"]), key, material), [])
+
+    def test_external_records_their_groups_and_domains(self):
+        from tests.test_external import FUSED
+
+        graph = graph_of(FUSED["blasted"])
+        records = node_ids(graph, "external_record")
+        self.assertEqual(len(records), 2)
+        for record in records:
+            self.assertEqual(graph.out(record, "provided_by"), ["provider_group:example-integrity"])
+            self.assertEqual(graph.out(record, "uses_telemetry_domain"), ["telemetry_domain:endpoint_memory"])
+            self.assertEqual(graph.out(record, "about"), ["player:blasted"])
+        summary = FUSED["blasted"]["evidence"]["graph"]["summary"]
+        kinds = {item["kind"]: item for item in summary["shared"]}
+        self.assertEqual(kinds["provider_group"]["providers"], ["example-integrity"])
+        self.assertEqual(len(kinds["provider_group"]["observations"]), 2)
+        self.assertEqual(kinds["telemetry_domain"]["value"], "endpoint_memory")
+        elite = graph_of(FUSED["elite-human"])
+        self.assertEqual([graph_of(FUSED["elite-human"]).out(n.id, "supports") for n in elite.of_type("observation")], [[], []])  # context only
+        for pid, case in FUSED.items():
+            self.assertEqual(verify_graph(case), [], pid)
+
+    def test_reports_are_not_in_the_graph(self):
+        case = PLANTED["reported-streamer"]
+        quiet = copy.deepcopy(case)
+        quiet["reports"] = 0
+        self.assertEqual(regraph(quiet)["evidence"]["graph"], case["evidence"]["graph"])
+        self.assertEqual(sorted({node.type for node in graph_of(case).nodes}), ["case", "match", "player"])
+
+
+class GraphTamperTest(unittest.TestCase):
+    """verify_graph rebuilds the graph from the case and checks each relationship; it trusts no stored id."""
+
+    def tampered(self, pid: str, edit, *, regraph_after: bool = False) -> list[str]:
+        case = copy.deepcopy(PLANTED[pid])
+        edit(case)
+        if regraph_after:
+            case["evidence"]["graph"]["digest"] = EvidenceGraph.from_dict(
+                {k: v for k, v in case["evidence"]["graph"].items() if k not in ("summary", "digest")}).digest()
+        return verify_graph(case)
+
+    def test_edits_are_caught(self):
+        def add_dependency(case):
+            graph = case["evidence"]["graph"]
+            graph["nodes"].append({"id": "observation:obs-nowhere", "type": "observation", "attributes": {"in_case": False}})
+            voice = next(n["id"] for n in graph["nodes"] if n["attributes"].get("kind") == "voice")
+            graph["edges"].append({"source": voice, "relation": "depends_on", "target": "observation:obs-nowhere", "attributes": {}})
+
+        def drop_dependency(case):
+            graph = case["evidence"]["graph"]
+            graph["edges"] = [e for e in graph["edges"] if e["relation"] != "depends_on"]
+
+        def edit_evidence_keep_id(case):
+            observations(case, "voice")[0]["evidence"]["fast_lags_ms"] = [1]
+
+        def edit_depends_on_keep_id(case):
+            observations(case, "voice")[0]["depends_on"] = ["obs-somewhere-else"]
+
+        def rename_partner(case):
+            for edge in case["evidence"]["graph"]["edges"]:
+                if edge["relation"] == "names_partner":
+                    edge["target"] = "player:radar-friend"
+
+        def edit_summary(case):
+            case["evidence"]["graph"]["summary"]["independence"]["supporting"] = 9
+
+        def drop_graph(case):
+            del case["evidence"]["graph"]
+
+        cases = {
+            "an extra dependency": (add_dependency, True),
+            "a dropped dependency": (drop_dependency, True),
+            "an edited value under its old id": (edit_evidence_keep_id, False),
+            "an edited depends_on under its old id": (edit_depends_on_keep_id, False),
+            "a partner renamed": (rename_partner, True),
+            "an edited summary": (edit_summary, False),
+            "no graph": (drop_graph, False),
+        }
+        for name, (edit, regraph_after) in cases.items():
+            with self.subTest(name):
+                self.assertTrue(self.tampered("radar-friend", edit, regraph_after=regraph_after))
+
+    def test_a_self_consistent_but_wrong_graph_is_caught(self):
+        case = copy.deepcopy(PLANTED["clone-buyer"])
+        stored = graph_of(case)
+        forged = EvidenceGraph()
+        for node in stored.nodes:
+            forged.node(node.type, node.id.split(":", 1)[1], **node.attributes)
+        for edge in stored.edges:
+            if edge.relation != "names_partner":
+                forged.edge(edge.source, edge.relation, edge.target)
+        forged.edge(next(n.id for n in stored.of_type("observation")), "names_partner", forged.node("player", "someone-else"))
+        case["evidence"]["graph"] = {**forged.to_dict(), "summary": describe(forged)}
+        problems = verify_graph(case)
+        self.assertTrue(any("does not match the case's evidence" in p for p in problems))
+        self.assertTrue(any("does not name its partner" in p for p in problems))
+
+    def test_a_cycle_or_a_dangling_edge_is_not_a_graph(self):
+        for damage in ("cycle", "dangling"):
+            case = copy.deepcopy(PLANTED["radar-friend"])
+            graph = case["evidence"]["graph"]
+            voice = next(n["id"] for n in graph["nodes"] if n["attributes"].get("kind") == "voice")
+            hidden = next(n["id"] for n in graph["nodes"] if n["attributes"].get("in_case") is False)
+            target, source = (voice, hidden) if damage == "cycle" else ("observation:gone", voice)
+            graph["edges"].append({"source": source, "relation": "depends_on", "target": target, "attributes": {}})
+            with self.subTest(damage):
+                self.assertIn("not well formed", " ".join(verify_graph(case)))
+
+    def test_a_dependency_on_a_stranger_is_incompatible(self):
+        case = copy.deepcopy(PLANTED["radar-friend"])
+        graph = graph_of(case)
+        forged = EvidenceGraph()
+        for node in graph.nodes:
+            forged.node(node.type, node.id.split(":", 1)[1], **node.attributes)
+        for edge in graph.edges:
+            if not (edge.relation == "about" and edge.source.startswith("observation:") and edge.target == "player:wall-eye"):
+                forged.edge(edge.source, edge.relation, edge.target)
+        hidden = next(n.id for n in forged.of_type("observation") if n.attributes.get("in_case") is False)
+        forged.edge(hidden, "about", forged.node("player", "stranger"))
+        from fpsdet.graph import _relationship_problems
+
+        self.assertIn("not its partner's", " ".join(_relationship_problems(case, forged)))
+
+    def test_across_cases_the_dependency_must_exist_on_the_partners_case(self):
+        cases = copy.deepcopy(PLANTED)
+        self.assertEqual(verify_graphs(cases.values()), [])
+        cases["wall-eye"]["evidence"]["observations"] = []
+        self.assertTrue(verify_graphs(cases.values()))
+        del cases["wall-eye"]
+        self.assertTrue(verify_graphs(cases.values()))
+
+
+class GraphBoundaryTest(unittest.TestCase):
+    """Provider data fills values. fpsdet decides every node type, relation and key."""
+
+    def test_external_metadata_cannot_shape_the_graph(self):
+        from tests.test_external import native, scored, write_lines
+        from fpsdet.external import read_external
+
+        hostile = native(subject_id="adrenaline", kind="depends_on observation:obs-x", provider_record_id="case:adrenaline",
+                         metadata={"relation": "depends_on", "node": "observation:obs-1", "type": "challenge"})
+        with tempfile.TemporaryDirectory() as folder:
+            loaded = read_external([(write_lines(Path(folder), "r.ndjson", [hostile]), None)])
+        case = scored(loaded)["adrenaline"]
+        self.assertEqual(verify_graph(case), [])
+        graph = graph_of(case)
+        self.assertEqual(sorted({node.type for node in graph.nodes}), ["case", "external_record", "match", "observation", "player", "provider_group", "telemetry_domain"])
+        self.assertEqual(len(graph.of_type("observation")), 1)
+        self.assertNotIn("obs-x", json.dumps(case["evidence"]["graph"]))
+        self.assertNotIn("depends_on observation", json.dumps(case["evidence"]["graph"]))
+
+
+class IndependenceReadinessTest(unittest.TestCase):
+    """Why the graph matters before any rule uses it: evidence that looks separate and is not."""
+
+    def records(self, rows, events=None):
+        from tests.test_external import scored, write_lines
+        from fpsdet.external import read_external
+
+        with tempfile.TemporaryDirectory() as folder:
+            loaded = read_external([(write_lines(Path(folder), "r.ndjson", rows), None)])
+        return scored(loaded, events=events)
+
+    def test_independent_looking_names_from_one_provider_group(self):
+        from tests.test_external import native
+
+        case = self.records([native(subject_id="adrenaline", provider="vendor-a", provider_group="parent-company-x"),
+                             native(subject_id="adrenaline", provider="vendor-b", provider_group="parent-company-x")])["adrenaline"]
+        summary = case["evidence"]["graph"]["summary"]
+        (group,) = [item for item in summary["shared"] if item["kind"] == "provider_group"]
+        self.assertEqual((group["value"], group["providers"]), ("parent-company-x", ["vendor-a", "vendor-b"]))
+        self.assertEqual(summary["independence"]["provider_groups"], ["parent-company-x"])
+        self.assertEqual(case["decision"], "watch")
+
+    def test_different_providers_on_one_telemetry_domain(self):
+        from tests.test_external import native
+
+        case = self.records([native(subject_id="adrenaline", provider="vendor-a", telemetry_domain="endpoint_memory"),
+                             native(subject_id="adrenaline", provider="vendor-b", telemetry_domain="endpoint_memory")])["adrenaline"]
+        summary = case["evidence"]["graph"]["summary"]
+        self.assertEqual(summary["independence"]["provider_groups"], ["vendor-a", "vendor-b"])
+        (domain,) = [item for item in summary["shared"] if item["kind"] == "telemetry_domain"]
+        self.assertEqual(domain["value"], "endpoint_memory")
+        self.assertEqual(case["decision"], "watch")  # two names, one domain, still a watch
+
+    def test_a_server_challenge_and_an_endpoint_signal_are_kept_apart(self):
+        from tests.test_challenge import follow, plan_for
+        from tests.test_external import native, write_lines
+        from fpsdet.challenge import ChallengeRegistry
+        from fpsdet.external import read_external
+        from fpsdet.models import GameProfile
+        from fpsdet.pipeline import run_score
+
+        planned = plan_for()
+        (plan,) = planned.plans
+        with tempfile.TemporaryDirectory() as folder:
+            loaded = read_external([(write_lines(Path(folder), "r.ndjson", [native(subject_id="x", match_id=plan.match_id, telemetry_domain="endpoint_memory")]), None)])
+        case = next(case_to_dict(c) for c in run_score(follow(plan, n=16), GameProfile(game_id="g"), challenges=ChallengeRegistry(planned.plans), external=loaded))
+        self.assertEqual(verify_graph(case), [])
+        summary = case["evidence"]["graph"]["summary"]
+        domains = {row["family"]: row["telemetry_domain"] for row in summary["observations"].values()}
+        self.assertEqual(domains, {"challenge": "server_challenge", "external": "endpoint_memory"})
+        self.assertEqual(summary["shared"], [])
+        self.assertEqual(summary["independence"]["telemetry_domains"], ["endpoint_memory", "server_challenge"])
+        self.assertEqual((case["decision"], case["evidence"]["fusion"]["rule"]), ("review", "C"))  # the challenge's review; nothing escalated
+
+    def test_two_observations_resting_on_one_hidden_mover_share_a_dependency(self):
+        graph = EvidenceGraph()
+        case = graph.node("case", "mate", decision="watch")
+        graph.edge(case, "about", graph.node("player", "mate"))
+        hidden = graph.node("observation", "obs-hidden", in_case=False)
+        graph.edge(hidden, "about", graph.node("player", "cheater"))
+        for name in ("obs-voice-1", "obs-voice-2"):
+            node = graph.node("observation", name, in_case=True, source="fpsdet", family="relationship", kind="voice", role="watch")
+            graph.edge(node, "depends_on", hidden)
+            graph.edge(node, "names_partner", "player:cheater")
+            graph.edge(node, "supports", case)
+        shared = {item["kind"]: item for item in describe(graph)["shared"]}
+        self.assertEqual(shared["dependency"]["value"], "observation:obs-hidden")
+        self.assertEqual(shared["dependency"]["observations"], ["observation:obs-voice-1", "observation:obs-voice-2"])
+        self.assertEqual(shared["partner"]["value"], "player:cheater")
 
 
 if __name__ == "__main__":

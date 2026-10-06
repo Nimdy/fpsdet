@@ -18,7 +18,7 @@ insertion order never shows.
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
 from .evidence import canonical_json
@@ -273,3 +273,300 @@ def schema() -> dict:
         },
     }
 
+
+
+# Building a case's graph. Everything comes from the serialized case: its observations, their evidence,
+# and its provenance. Nothing is inferred that the case does not already say, and provider text never
+# becomes a node type, a relation or a key beyond the checked ids it already is.
+
+# Roles that take part in a decision. An external record that is context only does not support the case.
+SUPPORTING_ROLES = frozenset({"review", "past_human", "account_change", "supporting", "watch", "external_watch"})
+# What fpsdet's own evidence was measured from, in the same words as external telemetry domains.
+SERVER_BEHAVIOR = "server_behavior"
+SERVER_CHALLENGE = "server_challenge"
+
+
+def build_graph(case: Mapping) -> EvidenceGraph:
+    """The evidence graph of one serialized case (``persist.case_to_dict``), without its graph block."""
+    graph = EvidenceGraph()
+    evidence = case["evidence"]
+    provenance = evidence.get("provenance") or {}
+    rows = evidence["observations"]
+    subject = graph.node("player", case["player_id"])
+    case_node = graph.node("case", case["player_id"], decision=case["decision"])
+    graph.edge(case_node, "about", subject)
+    for match in case["match_ids"]:
+        graph.edge(subject, "played_in", graph.node("match", match))
+    cohort = provenance.get("cohort") if isinstance(provenance.get("cohort"), Mapping) else None
+    history = provenance.get("history") if isinstance(provenance.get("history"), Mapping) else None
+    # Every observation of this case first, so a dependency between two of them finds its target.
+    local = {obs["observation_id"]: graph.node(
+        "observation", obs["observation_id"], in_case=True, source=obs["source"], family=obs["family"], kind=obs["kind"], role=obs["role"],
+    ) for obs in rows}
+    for obs in rows:
+        node = local[obs["observation_id"]]
+        graph.edge(node, "about", graph.node("player", obs["subject_id"]))
+        for match in obs["match_ids"]:
+            graph.edge(node, "occurred_in", graph.node("match", match))
+        if obs["role"] in SUPPORTING_ROLES:
+            graph.edge(node, "supports", case_node)
+        partner = obs["evidence"].get("partner") if obs["family"] == "relationship" else None
+        if partner is not None:
+            graph.edge(node, "names_partner", graph.node("player", partner))
+        for dependency in obs["depends_on"]:
+            target = local.get(dependency)
+            if target is None:
+                # On another case. All this case knows is its id, and whose evidence it is: the partner's.
+                target = graph.node("observation", dependency, in_case=False)
+                if partner is not None:
+                    graph.edge(target, "about", graph.node("player", partner))
+            graph.edge(node, "depends_on", target)
+        if obs["family"] == "challenge":
+            claim = obs["evidence"]["challenge"]
+            challenge = graph.node(
+                "challenge", claim["challenge_id"], origin=claim["origin"], type=claim["type"], version=claim["version"],
+                commitment=claim["commitment"], plan=claim["plan"], window=claim["window"],
+            )
+            graph.edge(node, "derived_from", challenge)
+            graph.edge(challenge, "about", subject)
+            if claim["origin"] == "planned":
+                for match in obs["match_ids"]:
+                    graph.edge(challenge, "occurred_in", graph.node("match", match))
+        elif obs["family"] == "external":
+            claim = obs["evidence"]
+            record = graph.node(
+                "external_record", claim["external_id"], provider=claim["provider"], source_class=claim["source_class"], direction=claim["direction"],
+            )
+            graph.edge(node, "derived_from", record)
+            graph.edge(record, "about", subject)
+            if claim["scope"]["match_id"] is not None:
+                graph.edge(record, "occurred_in", graph.node("match", claim["scope"]["match_id"]))
+            graph.edge(record, "provided_by", graph.node("provider_group", claim["provider_group"]))
+            graph.edge(record, "uses_telemetry_domain", graph.node("telemetry_domain", claim["telemetry_domain"]))
+        elif obs["family"] == "human_baseline" and cohort and cohort.get("digest"):
+            graph.edge(node, "compared_against", graph.node(
+                "cohort", cohort["digest"], mode=cohort.get("mode"), recipe=cohort.get("recipe"),
+                integrity=(cohort.get("integrity") or {}).get("status"),
+            ))
+        elif obs["family"] == "account_history" and history and history.get("digest"):
+            graph.edge(node, "uses_history", graph.node(
+                "history", history["digest"], mode=history.get("mode"), recipe=history.get("recipe"), windows=history.get("windows"),
+            ))
+    return graph
+
+
+def describe(graph: EvidenceGraph) -> dict:
+    """What the graph says about independence, as facts. No score, and nothing here changes a decision.
+
+    ``observations`` describes each of this case's observations: native or external, the family, whether
+    it is server-authoritative, challenge-derived or relationship-derived, its provider group and
+    telemetry domain (plain values), and the record, challenge, partner and dependencies it points to
+    (node ids). fpsdet's own evidence is ``server_behavior``, or ``server_challenge`` for a challenge. ``independence`` lists what the supporting evidence comes from. ``shared`` lists
+    every provider group, telemetry domain, record, challenge, dependency and partner that two or more
+    observations have in common: evidence that is not separate, whatever its names say.
+    """
+    described: dict[str, dict] = {}
+    for node in graph.of_type("observation"):
+        if not node.attributes.get("in_case"):
+            continue
+        attributes = node.attributes
+        external = attributes["source"] == "external"
+        record = (graph.out(node.id, "derived_from") or [None])[0] if external else None
+        challenge = (graph.out(node.id, "derived_from") or [None])[0] if attributes["family"] == "challenge" else None
+        group_node = (graph.out(record, "provided_by") or [None])[0] if record else None
+        domain_node = (graph.out(record, "uses_telemetry_domain") or [None])[0] if record else None
+        group = group_node.split(":", 1)[1] if group_node else None
+        domain = domain_node.split(":", 1)[1] if domain_node else None
+        described[node.id] = {
+            "origin": "external" if external else "native",
+            "family": attributes["family"],
+            "supports": bool(graph.out(node.id, "supports")),
+            "server_authoritative": not external,
+            "challenge_derived": challenge is not None,
+            "relationship_derived": attributes["family"] == "relationship",
+            "external_record": record,
+            "challenge": challenge,
+            "provider_group": group,
+            "telemetry_domain": domain if external else (SERVER_CHALLENGE if challenge else SERVER_BEHAVIOR),
+            "depends_on": graph.out(node.id, "depends_on"),
+            "partner": (graph.out(node.id, "names_partner") or [None])[0],
+        }
+    supporting = [row for row in described.values() if row["supports"]]
+    sources = sorted({graph.get(row["external_record"]).attributes["source_class"] for row in supporting if row["external_record"]})
+
+    def shared(kind: str, key: str) -> list[dict]:
+        groups: dict[str, list[str]] = {}
+        for name, row in described.items():
+            values = row[key] if isinstance(row[key], list) else ([row[key]] if row[key] else [])
+            for value in values:
+                groups.setdefault(value, []).append(name)
+        return [{"kind": kind, "value": value, "observations": sorted(names)} for value, names in sorted(groups.items()) if len(names) > 1]
+
+    common = (
+        shared("provider_group", "provider_group") + shared("telemetry_domain", "telemetry_domain") + shared("external_record", "external_record")
+        + shared("challenge", "challenge") + shared("dependency", "depends_on") + shared("partner", "partner")
+    )
+    for item in common:
+        if item["kind"] == "provider_group":
+            records = {described[name]["external_record"] for name in item["observations"]}
+            item["providers"] = sorted({graph.get(record).attributes["provider"] for record in records})
+    return {
+        "observations": described,
+        "independence": {
+            "native_families": sorted({row["family"] for row in supporting if row["origin"] == "native"}),
+            "external_sources": sources,
+            "provider_groups": sorted({row["provider_group"] for row in supporting if row["provider_group"]}),
+            "telemetry_domains": sorted({row["telemetry_domain"] for row in supporting}),
+            "supporting": len(supporting),
+            "context_only": len(described) - len(supporting),
+        },
+        "shared": common,
+    }
+
+
+def graph_block(case: Mapping) -> dict:
+    """``case["evidence"]["graph"]``: the graph, its digest, and its description (not part of the digest)."""
+    graph = build_graph(case)
+    graph.check_acyclic()
+    return {**graph.to_dict(), "summary": describe(graph)}
+
+
+def verify_graph(case: Mapping) -> list[str]:
+    """Does a serialized case's graph hold together? Empty when it does.
+
+    It reads the stored graph strictly (types, relations, endpoints, no duplicates, no derivation cycle,
+    its digest), recomputes every observation id from the observation's own contents, rebuilds the graph
+    from the case and compares, then checks each relationship against the evidence and provenance it
+    came from. It needs no raw input, and it does not trust any stored id.
+    """
+    from .evidence import Observation
+
+    evidence = case.get("evidence") if isinstance(case, Mapping) else None
+    if not isinstance(evidence, Mapping) or not isinstance(evidence.get("graph"), Mapping):
+        return ["the evidence has no graph"]
+    block = evidence["graph"]
+    try:
+        stored = EvidenceGraph.from_dict({key: value for key, value in block.items() if key != "summary"})
+    except GraphError as error:
+        return [f"the graph is not well formed: {error}"]
+    problems: list[str] = []
+    rows = evidence.get("observations") or []
+    for obs in rows:
+        try:
+            rebuilt = Observation(
+                family=obs["family"], kind=obs["kind"], role=obs["role"], subject_id=obs["subject_id"], key=obs["key"],
+                match_ids=tuple(obs["match_ids"]), evidence=obs["evidence"], depends_on=tuple(obs["depends_on"]),
+                context=obs.get("context") or {}, source=obs["source"],
+            )
+        except (KeyError, TypeError, ValueError) as error:
+            problems.append(f"observation {obs.get('observation_id')}: {error}")
+            continue
+        if rebuilt.observation_id != obs.get("observation_id"):
+            problems.append(f"observation {obs.get('observation_id')} does not match its own contents")
+    if problems:
+        return problems
+    try:
+        expected = build_graph(case)
+        expected.check_acyclic()
+    except (GraphError, KeyError, TypeError) as error:
+        return [f"the case's evidence does not make a graph: {error!r}"]
+    if stored.digest() != expected.digest():
+        missing = {node.id for node in expected.nodes} - {node.id for node in stored.nodes}
+        extra = {node.id for node in stored.nodes} - {node.id for node in expected.nodes}
+        lost = {edge.key for edge in expected.edges} - {edge.key for edge in stored.edges}
+        added = {edge.key for edge in stored.edges} - {edge.key for edge in expected.edges}
+        problems.append(
+            f"the graph does not match the case's evidence: {len(missing)} nodes missing, {len(extra)} extra, "
+            f"{len(lost)} edges missing, {len(added)} extra, or attributes differ"
+        )
+    problems += _relationship_problems(case, stored)
+    if block.get("summary") != describe(stored):
+        problems.append("the graph's summary is not what its nodes and edges say")
+    return problems
+
+
+def _relationship_problems(case: Mapping, graph: EvidenceGraph) -> list[str]:
+    """Each relationship, checked against the evidence and provenance it stands for."""
+    problems = []
+    evidence = case["evidence"]
+    provenance = evidence.get("provenance") or {}
+    rows = {f"observation:{obs['observation_id']}": obs for obs in evidence["observations"]}
+    local = {node.id for node in graph.of_type("observation") if node.attributes.get("in_case")}
+    if local != set(rows):
+        problems.append("the graph's observations are not the case's")
+    for name, obs in rows.items():
+        targets = graph.out(name, "depends_on")
+        if targets != sorted(f"observation:{dependency}" for dependency in obs["depends_on"]):
+            problems.append(f"{name} depends_on does not match the observation")
+        partners = graph.out(name, "names_partner")
+        for target in targets:
+            if target in local:
+                if rows[target]["subject_id"] != obs["subject_id"]:
+                    problems.append(f"{name} depends on an observation about another player")
+            elif not partners or not set(graph.out(target, "about")) <= set(partners):
+                problems.append(f"{name} depends on another case's observation that is not its partner's")
+        derived = graph.out(name, "derived_from")
+        if obs["family"] == "challenge":
+            claim = obs["evidence"]["challenge"]
+            if derived != [f"challenge:{claim['challenge_id']}"]:
+                problems.append(f"{name} is not derived from its challenge")
+            else:
+                node = graph.get(derived[0]).attributes
+                if {key: node[key] for key in ("origin", "type", "version", "commitment", "plan", "window")} != {
+                    key: claim[key] for key in ("origin", "type", "version", "commitment", "plan", "window")
+                }:
+                    problems.append(f"{derived[0]} does not match the challenge evidence")
+        elif obs["family"] == "external":
+            claim = obs["evidence"]
+            if derived != [f"external_record:{claim['external_id']}"]:
+                problems.append(f"{name} is not derived from its external record")
+            else:
+                if graph.out(derived[0], "provided_by") != [f"provider_group:{claim['provider_group']}"]:
+                    problems.append(f"{derived[0]} names the wrong provider group")
+                if graph.out(derived[0], "uses_telemetry_domain") != [f"telemetry_domain:{claim['telemetry_domain']}"]:
+                    problems.append(f"{derived[0]} names the wrong telemetry domain")
+        elif derived:
+            problems.append(f"{name} claims to be derived from something its family never is")
+        if obs["family"] == "relationship" and partners != [f"player:{obs['evidence']['partner']}"]:
+            problems.append(f"{name} does not name its partner")
+        for target in partners:
+            if graph.get(target) is None:
+                problems.append(f"{name} names a partner that is not in the graph")
+    external = provenance.get("external") if isinstance(provenance.get("external"), Mapping) else None
+    records = graph.of_type("external_record")
+    if external is not None:
+        expected = 0 if external.get("mode") == "none" else external.get("records")
+        if len(records) != expected:
+            problems.append(f"the graph has {len(records)} external records, and provenance says {expected}")
+    for node in graph.of_type("cohort"):
+        if node.id != f"cohort:{(provenance.get('cohort') or {}).get('digest')}":
+            problems.append("the graph's cohort is not the one in provenance")
+    for node in graph.of_type("history"):
+        if node.id != f"history:{(provenance.get('history') or {}).get('digest')}":
+            problems.append("the graph's history is not the one in provenance")
+    return problems
+
+
+def verify_graphs(cases: Iterable[Mapping]) -> list[str]:
+    """Across one run's cases: every observation a case depends on from another case exists on that case,
+    about that player. A case alone cannot show this."""
+    by_player = {case.get("player_id"): case for case in cases}
+    known = {
+        pid: {obs["observation_id"] for obs in (case.get("evidence") or {}).get("observations") or []}
+        for pid, case in by_player.items()
+    }
+    problems = []
+    for pid, case in sorted(by_player.items(), key=lambda item: str(item[0])):
+        nodes = ((case.get("evidence") or {}).get("graph") or {}).get("nodes") or []
+        edges = ((case.get("evidence") or {}).get("graph") or {}).get("edges") or []
+        about = {}
+        for edge in edges:
+            if edge["relation"] == "about":
+                about.setdefault(edge["source"], []).append(edge["target"])
+        for node in nodes:
+            if node["type"] != "observation" or node["attributes"].get("in_case"):
+                continue
+            owners = [target[len("player:"):] for target in about.get(node["id"], [])]
+            if not owners or not all(node["id"][len("observation:"):] in known.get(owner, set()) for owner in owners):
+                problems.append(f"{pid}: {node['id']} is not on the case of the player it is said to be about")
+    return problems

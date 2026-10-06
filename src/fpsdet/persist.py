@@ -9,6 +9,7 @@ from pathlib import Path
 from .baseline import CohortTable
 from .evidence import evidence_block
 from .models import Case, Event, HistoryWindow, MetricView
+from .graph import graph_block
 from .provenance import check_cohort_seal, cohort_seal, packet_block
 
 
@@ -91,8 +92,10 @@ def load_reports(obj: dict) -> dict[str, int]:
 
 
 def case_to_dict(case: Case) -> dict:
-    """The case as JSON data. The evidence packet digest is computed from this same data, as a verifier would."""
+    """The case as JSON data. The evidence graph and the packet digest are computed from this same data,
+    as a verifier would."""
     row = _case_fields(case)
+    row["evidence"]["graph"] = graph_block(row)
     row["evidence"]["packet"] = packet_block(row)
     return row
 

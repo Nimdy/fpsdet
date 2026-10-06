@@ -37,7 +37,7 @@ What is proven, on every planted case, every case of the synthetic week (weekly 
 | `subject_id` | The player the case is about |
 | `key` | The weapon key, build key or declared-metric group, or `""` for the whole account |
 | `match_ids` | The matches the finding was measured on, sorted, when the detector knows them |
-| `depends_on` | Ids of observations, on this case or another, that this one rests on |
+| `depends_on` | Ids of observations, on this case or another, that this one rests on. The evidence graph turns each into a `depends_on` edge ([evidence-graph.md](evidence-graph.md)) |
 | `evidence` | The numbers and facts the detector compared: measurements, bounds, cohort lines, thresholds |
 | `context` | Explanation that did not drive the result, such as the sentence printed on the case |
 

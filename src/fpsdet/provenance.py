@@ -65,6 +65,7 @@ DETECTOR_MODULES = (
     "fpsdet.challenge",
     "fpsdet.evidence",
     "fpsdet.external",
+    "fpsdet.graph",
     "fpsdet.knowledge",
     "fpsdet.models",
     "fpsdet.parse",
@@ -96,7 +97,6 @@ NOT_DETECTOR = {
     "fpsdet.synthetic": "the planted demo players",
     "fpsdet.week": "the synthetic week",
     "fpsdet.challenge_plan": "plans challenges with the server secret; detection never imports it, so scoring never needs the secret",
-    "fpsdet.graph": "the evidence graph model; cases do not carry graphs yet",
 }
 # GameProfile fields the scorer never reads. Editing them changes no detection.
 PROFILE_NOT_MATERIAL = frozenset({"notes"})

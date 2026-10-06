@@ -179,6 +179,7 @@ def cmd_diff(args: argparse.Namespace) -> int:
 def verify(rows: dict[str, dict]) -> dict:
     """Does each case's structured evidence explain its decision, checks and reasons?"""
     from fpsdet.evidence import KINDS, implied_decision
+    from fpsdet.graph import verify_graph, verify_graphs
     from fpsdet.provenance import verify_packet
 
     result = {"cases": len(rows), "explained": 0, "problems": [], "quiet_watches": 0, "quiet_watches_explained": 0, "kinds": Counter(), "provenance": Counter(), "inputs": 0, "packets": Counter()}
@@ -192,6 +193,8 @@ def verify(rows: dict[str, dict]) -> dict:
         packet = block.get("packet") or {}
         result["packets"][packet.get("status", "missing")] += 1
         problems_in_packet = verify_packet(row)
+        if "graph" in block:
+            problems_in_packet += [problem for problem in verify_graph(row) if problem not in problems_in_packet]
         if packet.get("status") != "complete":
             problems_in_packet.append(f"packet is {packet.get('status', 'missing')}: {packet.get('missing')}")
         result["problems"] += [f"{pid}: {problem}" for problem in problems_in_packet]
@@ -221,6 +224,7 @@ def verify(rows: dict[str, dict]) -> dict:
             result["quiet_watches_explained"] += int(not problems)
         result["problems"] += problems
         result["explained"] += int(not problems)
+    result["problems"] += verify_graphs(rows.values())
     return result
 
 
@@ -319,6 +323,10 @@ def classify(old: dict, new: dict) -> list[str]:
         found.append("voice-lags-order-only" if same else "voice-lags-changed")
     if before.get("eligibility") != after.get("eligibility"):
         found.append("eligibility-changed")
+    if "graph" not in before and "graph" in after:
+        found.append("graph-added")
+    elif (before.get("graph") or {}).get("digest") != (after.get("graph") or {}).get("digest"):
+        found.append("graph-changed")
     if old.get("seal") != new.get("seal"):
         found.append("seal-from-reason-order" if _same_items(old.get("reasons") or [], new.get("reasons") or []) and "decision-change" not in found else "seal-changed")
     old_inputs = (before.get("provenance") or {}).get("inputs") or {}

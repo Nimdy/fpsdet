@@ -24,6 +24,118 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:5ed4fa94bd1ff4087e19fcef65cb778f8538eca00365c8573ed2440e81391c7f",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:account-changed",
+       "target": "player:account-changed"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-2e3c3b5ccce71b76c91d6003",
+       "target": "player:account-changed"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-2e3c3b5ccce71b76c91d6003",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-2e3c3b5ccce71b76c91d6003",
+       "target": "case:account-changed"
+      },
+      {
+       "attributes": {},
+       "relation": "uses_history",
+       "source": "observation:obs-2e3c3b5ccce71b76c91d6003",
+       "target": "history:sha256:bf33e1fb47b9768bdf52a49db1fc7c52aa17903af6ba97a615872db99b5896a3"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:account-changed",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "watch"
+       },
+       "id": "case:account-changed",
+       "type": "case"
+      },
+      {
+       "attributes": {
+        "mode": "external",
+        "recipe": "fpsdet.history/1",
+        "windows": 1
+       },
+       "id": "history:sha256:bf33e1fb47b9768bdf52a49db1fc7c52aa17903af6ba97a615872db99b5896a3",
+       "type": "history"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "account_history",
+        "in_case": true,
+        "kind": "account_jump",
+        "role": "account_change",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-2e3c3b5ccce71b76c91d6003",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:account-changed",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "account_history"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-2e3c3b5ccce71b76c91d6003": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "account_history",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
+    },
     "observations": [
      {
       "context": {
@@ -177,6 +289,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:ce1cb71cd1cec3d903c5c0467bf1198bd1cf58f0b37e03a255773e754863a5b9",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:adrenaline",
+       "target": "player:adrenaline"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:adrenaline",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:adrenaline",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:adrenaline",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -275,6 +436,55 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:8692bf8467a4b482091b2a30a5ab88868e8f3d26f016cb30075a8bf78b25072e",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:angle-holder",
+       "target": "player:angle-holder"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:angle-holder",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:angle-holder",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:angle-holder",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
     },
     "observations": [],
     "version": 1
@@ -393,6 +603,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:c2938e63e9816035096530cb9f61a6059a48c1618d9004e6de5c31e3c8ac3543",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:blasted",
+       "target": "player:blasted"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:blasted",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:blasted",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:blasted",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -494,6 +753,66 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:35ff21ab00d09213fb7c95d7dfcde9c3ef8a7ac8bc91901b4e2e74cf5f25e35b",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:callout-friend",
+       "target": "player:callout-friend"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:callout-friend",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:callout-friend",
+       "target": "match:radar-window"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:callout-friend",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "match:radar-window",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:callout-friend",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -592,6 +911,108 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:3f535799963f0003b5b6d14453074bd6ac77c91a04077891c0a823394dc6ad1d",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:clone-buyer",
+       "target": "player:clone-buyer"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-1436a54beaf57101259ffba1",
+       "target": "player:clone-buyer"
+      },
+      {
+       "attributes": {},
+       "relation": "names_partner",
+       "source": "observation:obs-1436a54beaf57101259ffba1",
+       "target": "player:clone-source"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-1436a54beaf57101259ffba1",
+       "target": "case:clone-buyer"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:clone-buyer",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "watch"
+       },
+       "id": "case:clone-buyer",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "relationship",
+        "in_case": true,
+        "kind": "leftover",
+        "role": "watch",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-1436a54beaf57101259ffba1",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:clone-buyer",
+       "type": "player"
+      },
+      {
+       "attributes": {},
+       "id": "player:clone-source",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "relationship"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-1436a54beaf57101259ffba1": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "relationship",
+        "origin": "native",
+        "partner": "player:clone-source",
+        "provider_group": null,
+        "relationship_derived": true,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -713,6 +1134,155 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:4a868153829af0c67744bd0a5307e9b893a7026236dd3f746288e38d7a61e7d7",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:clone-source",
+       "target": "player:clone-source"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-74200dd75ac0029d9e85e0f6",
+       "target": "player:clone-source"
+      },
+      {
+       "attributes": {},
+       "relation": "names_partner",
+       "source": "observation:obs-74200dd75ac0029d9e85e0f6",
+       "target": "player:clone-buyer"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-74200dd75ac0029d9e85e0f6",
+       "target": "case:clone-source"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-aeb0ac967e0713c570ece7c5",
+       "target": "player:clone-source"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-aeb0ac967e0713c570ece7c5",
+       "target": "case:clone-source"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:clone-source",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:clone-source",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "relationship",
+        "in_case": true,
+        "kind": "leftover",
+        "role": "watch",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-74200dd75ac0029d9e85e0f6",
+       "type": "observation"
+      },
+      {
+       "attributes": {
+        "family": "weapon_rules",
+        "in_case": true,
+        "kind": "mirror",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-aeb0ac967e0713c570ece7c5",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:clone-buyer",
+       "type": "player"
+      },
+      {
+       "attributes": {},
+       "id": "player:clone-source",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "relationship",
+        "weapon_rules"
+       ],
+       "provider_groups": [],
+       "supporting": 2,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-74200dd75ac0029d9e85e0f6": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "relationship",
+        "origin": "native",
+        "partner": "player:clone-buyer",
+        "provider_group": null,
+        "relationship_derived": true,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       },
+       "observation:obs-aeb0ac967e0713c570ece7c5": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "weapon_rules",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": [
+       {
+        "kind": "telemetry_domain",
+        "observations": [
+         "observation:obs-74200dd75ac0029d9e85e0f6",
+         "observation:obs-aeb0ac967e0713c570ece7c5"
+        ],
+        "value": "server_behavior"
+       }
+      ]
+     }
     },
     "observations": [
      {
@@ -865,6 +1435,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:81227075ea9bcee039e3299a672318714800083c2d8ebb58241117f0acd149c8",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:elite-human",
+       "target": "player:elite-human"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:elite-human",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:elite-human",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:elite-human",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -965,6 +1584,103 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:7ef37f0273afc6af6fa543e6c0c3d2c33f8789a6fce3297be6d9030d13ccf204",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:fire-rate",
+       "target": "player:fire-rate"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-899f4295064826dae9251425",
+       "target": "player:fire-rate"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-899f4295064826dae9251425",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-899f4295064826dae9251425",
+       "target": "case:fire-rate"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:fire-rate",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:fire-rate",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "weapon_rules",
+        "in_case": true,
+        "kind": "fire_rate",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-899f4295064826dae9251425",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:fire-rate",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "weapon_rules"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-899f4295064826dae9251425": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "weapon_rules",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -1097,6 +1813,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:630ddb21bee1acd23a9396845cc828c8cbe7c2c479e4d1c46ece6f050d2fd937",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:glitch",
+       "target": "player:glitch"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:glitch",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:glitch",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:glitch",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -1198,6 +1963,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:dca094f0be8dd8af16641e15bd993a75a2c6639fc66537fcb7f1d88863287734",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:late-compensate",
+       "target": "player:late-compensate"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:late-compensate",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:late-compensate",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:late-compensate",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -1286,6 +2100,55 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:871318b8d7108132129c02d8f14a6142e714bc641ff87a2d7bd95126e78318f5",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:legal-heavy",
+       "target": "player:legal-heavy"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:legal-heavy",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:legal-heavy",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:legal-heavy",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
     },
     "observations": [],
     "version": 1
@@ -1386,6 +2249,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:a2178aa5ea88eac2170ddf847df4be1c8090f72b9f1b1808401810da919e9375",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:listened",
+       "target": "player:listened"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:listened",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:listened",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:listened",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -1472,6 +2384,103 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:e2193e4b39b4141fbdbf6cfcc05ee4002dc1c760e10da60149e4514b111d76ee",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:metronome",
+       "target": "player:metronome"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-fd7e10149da2629f4b8c2bc1",
+       "target": "player:metronome"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-fd7e10149da2629f4b8c2bc1",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-fd7e10149da2629f4b8c2bc1",
+       "target": "case:metronome"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:metronome",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:metronome",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "weapon_rules",
+        "in_case": true,
+        "kind": "metronome",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-fd7e10149da2629f4b8c2bc1",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:metronome",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "weapon_rules"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-fd7e10149da2629f4b8c2bc1": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "weapon_rules",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -1603,6 +2612,97 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:f92e43a483a8da52cbe94f74c6fcc69d9c2456624ebdf0397abc43d1464d1f3c",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:mirror-script",
+       "target": "player:mirror-script"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-41dddecd64b938a0ecd60a9a",
+       "target": "player:mirror-script"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-41dddecd64b938a0ecd60a9a",
+       "target": "case:mirror-script"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:mirror-script",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:mirror-script",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "weapon_rules",
+        "in_case": true,
+        "kind": "mirror",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-41dddecd64b938a0ecd60a9a",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:mirror-script",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "weapon_rules"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-41dddecd64b938a0ecd60a9a": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "weapon_rules",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
+    },
     "observations": [
      {
       "context": {
@@ -1722,6 +2822,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:aa1a561fd52c8355274b6f72a202a21939a7d01fbfa3b5c898548dc9c65f3d94",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:modded-recoil",
+       "target": "player:modded-recoil"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:modded-recoil",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:modded-recoil",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:modded-recoil",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -1824,6 +2973,55 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:6f40c25b93bdabca87929115f841d843277d04379fe48090ba39ecbfec7f7690",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:new-gun",
+       "target": "player:new-gun"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:new-gun",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:new-gun",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:new-gun",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
     },
     "observations": [],
     "version": 1
@@ -1933,6 +3131,97 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:9a877f7dc4a3c25d37ee77cf72f18ba9812e911b34807850c7e9a07b1273963e",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:no-recoil",
+       "target": "player:no-recoil"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-7f5ef2312aa56e1dc5f4e81e",
+       "target": "player:no-recoil"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-7f5ef2312aa56e1dc5f4e81e",
+       "target": "case:no-recoil"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:no-recoil",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:no-recoil",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "weapon_rules",
+        "in_case": true,
+        "kind": "recoil_floor",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-7f5ef2312aa56e1dc5f4e81e",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:no-recoil",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "weapon_rules"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-7f5ef2312aa56e1dc5f4e81e": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "weapon_rules",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -2062,6 +3351,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:0ef1cca87e92c3d6604c3c4fe845243fee63eec28e169724f9d572215902c2c3",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:picture-track",
+       "target": "player:picture-track"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:picture-track",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:picture-track",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:picture-track",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -2148,6 +3486,103 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:a01bbfde434cbe84696bc904917400d5bb15e382b34966431b62ea1ba95405b4",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:quiet-radar",
+       "target": "player:quiet-radar"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-03237d8b034b71fa7da69eed",
+       "target": "player:quiet-radar"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-03237d8b034b71fa7da69eed",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-03237d8b034b71fa7da69eed",
+       "target": "case:quiet-radar"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:quiet-radar",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:quiet-radar",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "information",
+        "in_case": true,
+        "kind": "quiet_aim",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-03237d8b034b71fa7da69eed",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:quiet-radar",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "information"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-03237d8b034b71fa7da69eed": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "information",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -2266,6 +3701,135 @@
    "evidence": {
     "eligibility": {
      "compared": []
+    },
+    "graph": {
+     "digest": "sha256:bad65543300c6464a241c1f57d732364cfdbb45713b46c4aff0b2f80966801d1",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:radar-friend",
+       "target": "player:radar-friend"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-02fdbd7346a0b5e228029086",
+       "target": "player:wall-eye"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "player:radar-friend"
+      },
+      {
+       "attributes": {},
+       "relation": "depends_on",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "observation:obs-02fdbd7346a0b5e228029086"
+      },
+      {
+       "attributes": {},
+       "relation": "names_partner",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "player:wall-eye"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "match:radar-window"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-2c99ae537fbec3c732b00680",
+       "target": "case:radar-friend"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:radar-friend",
+       "target": "match:radar-window"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "watch"
+       },
+       "id": "case:radar-friend",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:radar-window",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "in_case": false
+       },
+       "id": "observation:obs-02fdbd7346a0b5e228029086",
+       "type": "observation"
+      },
+      {
+       "attributes": {
+        "family": "relationship",
+        "in_case": true,
+        "kind": "voice",
+        "role": "watch",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-2c99ae537fbec3c732b00680",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:radar-friend",
+       "type": "player"
+      },
+      {
+       "attributes": {},
+       "id": "player:wall-eye",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "relationship"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-2c99ae537fbec3c732b00680": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [
+         "observation:obs-02fdbd7346a0b5e228029086"
+        ],
+        "external_record": null,
+        "family": "relationship",
+        "origin": "native",
+        "partner": "player:wall-eye",
+        "provider_group": null,
+        "relationship_derived": true,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -2392,6 +3956,226 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:d7ebc6bd1cb698af7f468e176d5286da9836fa17e44cf6a1a62506fa34e593d7",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:rage",
+       "target": "player:rage"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-2b1c02e324c0ed46647de063",
+       "target": "player:rage"
+      },
+      {
+       "attributes": {},
+       "relation": "compared_against",
+       "source": "observation:obs-2b1c02e324c0ed46647de063",
+       "target": "cohort:sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-2b1c02e324c0ed46647de063",
+       "target": "match:raid-9"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-2b1c02e324c0ed46647de063",
+       "target": "case:rage"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-d21188ba9da6fa379f8b44fe",
+       "target": "player:rage"
+      },
+      {
+       "attributes": {},
+       "relation": "compared_against",
+       "source": "observation:obs-d21188ba9da6fa379f8b44fe",
+       "target": "cohort:sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-d21188ba9da6fa379f8b44fe",
+       "target": "match:raid-9"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-d21188ba9da6fa379f8b44fe",
+       "target": "case:rage"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-f58d7c9440704fa7a9c5958a",
+       "target": "player:rage"
+      },
+      {
+       "attributes": {},
+       "relation": "compared_against",
+       "source": "observation:obs-f58d7c9440704fa7a9c5958a",
+       "target": "cohort:sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-f58d7c9440704fa7a9c5958a",
+       "target": "match:raid-9"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-f58d7c9440704fa7a9c5958a",
+       "target": "case:rage"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:rage",
+       "target": "match:raid-9"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:rage",
+       "type": "case"
+      },
+      {
+       "attributes": {
+        "integrity": "unchecked",
+        "mode": "external",
+        "recipe": "fpsdet.cohort/1"
+       },
+       "id": "cohort:sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+       "type": "cohort"
+      },
+      {
+       "attributes": {},
+       "id": "match:raid-9",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "human_baseline",
+        "in_case": true,
+        "kind": "headshot_rate",
+        "role": "past_human",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-2b1c02e324c0ed46647de063",
+       "type": "observation"
+      },
+      {
+       "attributes": {
+        "family": "human_baseline",
+        "in_case": true,
+        "kind": "accuracy",
+        "role": "past_human",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-d21188ba9da6fa379f8b44fe",
+       "type": "observation"
+      },
+      {
+       "attributes": {
+        "family": "human_baseline",
+        "in_case": true,
+        "kind": "median_distance",
+        "role": "past_human",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-f58d7c9440704fa7a9c5958a",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:rage",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "human_baseline"
+       ],
+       "provider_groups": [],
+       "supporting": 3,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-2b1c02e324c0ed46647de063": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "human_baseline",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       },
+       "observation:obs-d21188ba9da6fa379f8b44fe": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "human_baseline",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       },
+       "observation:obs-f58d7c9440704fa7a9c5958a": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "human_baseline",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": [
+       {
+        "kind": "telemetry_domain",
+        "observations": [
+         "observation:obs-2b1c02e324c0ed46647de063",
+         "observation:obs-d21188ba9da6fa379f8b44fe",
+         "observation:obs-f58d7c9440704fa7a9c5958a"
+        ],
+        "value": "server_behavior"
+       }
+      ]
+     }
     },
     "observations": [
      {
@@ -2630,6 +4414,118 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:a4eb56239e2d12b9366fe3b5c338c80184fae91aa693c5aca6aa99d3419d84cc",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:rank-outlier",
+       "target": "player:rank-outlier"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-ccb8a15de08cdf49f7369948",
+       "target": "player:rank-outlier"
+      },
+      {
+       "attributes": {},
+       "relation": "compared_against",
+       "source": "observation:obs-ccb8a15de08cdf49f7369948",
+       "target": "cohort:sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-ccb8a15de08cdf49f7369948",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-ccb8a15de08cdf49f7369948",
+       "target": "case:rank-outlier"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:rank-outlier",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "watch"
+       },
+       "id": "case:rank-outlier",
+       "type": "case"
+      },
+      {
+       "attributes": {
+        "integrity": "unchecked",
+        "mode": "external",
+        "recipe": "fpsdet.cohort/1"
+       },
+       "id": "cohort:sha256:49b3f7e16bd4fc4b895aa1e65ffed3b38c70f38280f9be3666a82c4b4add1941",
+       "type": "cohort"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "human_baseline",
+        "in_case": true,
+        "kind": "rank_tail",
+        "role": "watch",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-ccb8a15de08cdf49f7369948",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:rank-outlier",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "human_baseline"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-ccb8a15de08cdf49f7369948": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "human_baseline",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
+    },
     "observations": [
      {
       "context": {
@@ -2774,6 +4670,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:453cfb53632e41510024a30a8a09f4ec0607a43f2134754c45f1b52afa534d69",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:real-fight",
+       "target": "player:real-fight"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:real-fight",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:real-fight",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:real-fight",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -2860,6 +4805,127 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:1e9eb25cffc92afe0e0447aef7d93e8809d9adab59c1210388ab6532b654934d",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:replay-lock",
+       "target": "player:replay-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "challenge:legacy_private_replay:rifle",
+       "target": "player:replay-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-d6b0a455423d666f8428468e",
+       "target": "player:replay-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "derived_from",
+       "source": "observation:obs-d6b0a455423d666f8428468e",
+       "target": "challenge:legacy_private_replay:rifle"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-d6b0a455423d666f8428468e",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-d6b0a455423d666f8428468e",
+       "target": "case:replay-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:replay-lock",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:replay-lock",
+       "type": "case"
+      },
+      {
+       "attributes": {
+        "commitment": null,
+        "origin": "legacy_private_replay",
+        "plan": null,
+        "type": "occluded_motion_replay",
+        "version": null,
+        "window": null
+       },
+       "id": "challenge:legacy_private_replay:rifle",
+       "type": "challenge"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "challenge",
+        "in_case": true,
+        "kind": "occluded_motion_replay",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-d6b0a455423d666f8428468e",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:replay-lock",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "challenge"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_challenge"
+       ]
+      },
+      "observations": {
+       "observation:obs-d6b0a455423d666f8428468e": {
+        "challenge": "challenge:legacy_private_replay:rifle",
+        "challenge_derived": true,
+        "depends_on": [],
+        "external_record": null,
+        "family": "challenge",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_challenge"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -3018,6 +5084,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:94a5a7cc24594479a97f0fb3c354dff546254612b8c33a559b003b7f2005a52d",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:reported-streamer",
+       "target": "player:reported-streamer"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:reported-streamer",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:reported-streamer",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:reported-streamer",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -3110,6 +5225,55 @@
     "eligibility": {
      "compared": []
     },
+    "graph": {
+     "digest": "sha256:09d6721cc3e6a740b2c7d2d128bf60cf34176c22d634c45a68006503e45e78fc",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:small-sample",
+       "target": "player:small-sample"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:small-sample",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "insufficient_data"
+       },
+       "id": "case:small-sample",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:small-sample",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -3167,6 +5331,55 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:05ffe16441e9012ddcae4b9b77024f0b8e90644bb65f162e4d7b118172c534e1",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:steady-hands",
+       "target": "player:steady-hands"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:steady-hands",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:steady-hands",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:steady-hands",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
     },
     "observations": [],
     "version": 1
@@ -3245,6 +5458,103 @@
    "evidence": {
     "eligibility": {
      "compared": []
+    },
+    "graph": {
+     "digest": "sha256:c86dedfc71852532834c3335f27ea900da963503ed9bf4cc53b33bef177578bd",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:wall-eye",
+       "target": "player:wall-eye"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-02fdbd7346a0b5e228029086",
+       "target": "player:wall-eye"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-02fdbd7346a0b5e228029086",
+       "target": "match:radar-window"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-02fdbd7346a0b5e228029086",
+       "target": "case:wall-eye"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:wall-eye",
+       "target": "match:radar-window"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:wall-eye",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:radar-window",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "information",
+        "in_case": true,
+        "kind": "hidden",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-02fdbd7346a0b5e228029086",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:wall-eye",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "information"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-02fdbd7346a0b5e228029086": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "information",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -3347,6 +5657,55 @@
       }
      ]
     },
+    "graph": {
+     "digest": "sha256:37ddf3e7410a3c90ca891f4f66bae05cba48b82812b7c27ba5d264aec9b9b589",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:weak-human",
+       "target": "player:weak-human"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:weak-human",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "clean"
+       },
+       "id": "case:weak-human",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {},
+       "id": "player:weak-human",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [],
+       "provider_groups": [],
+       "supporting": 0,
+       "telemetry_domains": []
+      },
+      "observations": {},
+      "shared": []
+     }
+    },
     "observations": [],
     "version": 1
    },
@@ -3437,6 +5796,103 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:d2915d2707648a3b14b499226e650b2546cbafd05bea0f43f24a141a463315ea",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:weight-cheat",
+       "target": "player:weight-cheat"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-f4f072f3c4b469c0e7f1fffd",
+       "target": "player:weight-cheat"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-f4f072f3c4b469c0e7f1fffd",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-f4f072f3c4b469c0e7f1fffd",
+       "target": "case:weight-cheat"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:weight-cheat",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:weight-cheat",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "physics",
+        "in_case": true,
+        "kind": "speed",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-f4f072f3c4b469c0e7f1fffd",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:weight-cheat",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "physics"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-f4f072f3c4b469c0e7f1fffd": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "physics",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {
@@ -3584,6 +6040,103 @@
        "metric": "median_distance"
       }
      ]
+    },
+    "graph": {
+     "digest": "sha256:2b99493c28a6cea68f127b4de5ce39b740b23b5c3fd8c91db2fcc73089992af6",
+     "edges": [
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "case:wire-lock",
+       "target": "player:wire-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "about",
+       "source": "observation:obs-7134f75357e8d6b6009e959c",
+       "target": "player:wire-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "occurred_in",
+       "source": "observation:obs-7134f75357e8d6b6009e959c",
+       "target": "match:m1"
+      },
+      {
+       "attributes": {},
+       "relation": "supports",
+       "source": "observation:obs-7134f75357e8d6b6009e959c",
+       "target": "case:wire-lock"
+      },
+      {
+       "attributes": {},
+       "relation": "played_in",
+       "source": "player:wire-lock",
+       "target": "match:m1"
+      }
+     ],
+     "nodes": [
+      {
+       "attributes": {
+        "decision": "review"
+       },
+       "id": "case:wire-lock",
+       "type": "case"
+      },
+      {
+       "attributes": {},
+       "id": "match:m1",
+       "type": "match"
+      },
+      {
+       "attributes": {
+        "family": "information",
+        "in_case": true,
+        "kind": "wire",
+        "role": "review",
+        "source": "fpsdet"
+       },
+       "id": "observation:obs-7134f75357e8d6b6009e959c",
+       "type": "observation"
+      },
+      {
+       "attributes": {},
+       "id": "player:wire-lock",
+       "type": "player"
+      }
+     ],
+     "recipe": "fpsdet.graph/1",
+     "summary": {
+      "independence": {
+       "context_only": 0,
+       "external_sources": [],
+       "native_families": [
+        "information"
+       ],
+       "provider_groups": [],
+       "supporting": 1,
+       "telemetry_domains": [
+        "server_behavior"
+       ]
+      },
+      "observations": {
+       "observation:obs-7134f75357e8d6b6009e959c": {
+        "challenge": null,
+        "challenge_derived": false,
+        "depends_on": [],
+        "external_record": null,
+        "family": "information",
+        "origin": "native",
+        "partner": null,
+        "provider_group": null,
+        "relationship_derived": false,
+        "server_authoritative": true,
+        "supports": true,
+        "telemetry_domain": "server_behavior"
+       }
+      },
+      "shared": []
+     }
     },
     "observations": [
      {

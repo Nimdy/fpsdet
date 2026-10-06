@@ -166,6 +166,8 @@ A signal that moved a case to watch writes its line in `reasons`, so the case sa
 
 ### Independence
 
+The evidence graph ([evidence-graph.md](evidence-graph.md)) makes these explicit: each external observation is `derived_from` its record, which is `provided_by` a provider group and `uses_telemetry_domain` a domain, and `evidence.graph.summary.shared` lists every group and domain two observations have in common.
+
 `fusion.provider_groups` and `fusion.telemetry_domains` list the groups and domains behind a case's signals. They are recorded so that a later rule can tell "fpsdet's server-side challenge evidence plus an endpoint-integrity signal from an unrelated vendor" from "one vendor's alert, seen twice". In this version they escalate nothing. Two different provider names are not assumed to be independent.
 
 ## In the case
