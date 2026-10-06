@@ -24,7 +24,8 @@ The code is `fpsdet.provenance`. It uses the standard library only.
 | The account-history windows the scorer could read for the subject | Implemented |
 | One identity over the material evidence and all of the above (the evidence packet) | Implemented |
 | Other players' events that a relationship observation used | Not yet (see "What the input digest does not cover") |
-| External evidence, challenge seeds | Not yet |
+| External evidence: the records about the player, the files read, the provider-key registry and the signature policy | Implemented (`provenance.external`; see External input) |
+| Challenge plans: each challenge observation carries its plan digest and commitment, so the packet binds the exact plan | Implemented (see Challenge plans). The server secret and realizations never are, by design |
 | Who produced the packet (authenticity) | Not yet; it needs a server-held signing key |
 | What a reviewer then did | Not yet; that stays in the studio's own review tool |
 

@@ -13,9 +13,10 @@ The model is `fpsdet.evidence`. It is data only and standard library only.
 | Case files (`cases/*.json`, `scan-index.json`, `review-index.json`) carry `evidence` | Implemented |
 | `ops.json`, the dashboard, the review desk and the AI brief read `evidence` | Not yet. They read what they read before, so none of them changed |
 | Provenance of the detector code, the parsed profile, the cohort, the player's events and history (`evidence.provenance`), and one evidence-packet digest over all of it (`evidence.packet`) | Implemented; see [provenance.md](provenance.md) |
-| A signature over the packet; knowledge state, challenges, external evidence, the evidence graph | Proposed in [architecture-v1.md](architecture-v1.md); none of them is here |
+| Knowledge state, challenges, external evidence and the evidence graph | Implemented; see [knowledge-engine.md](knowledge-engine.md), [challenges.md](challenges.md), [external-evidence.md](external-evidence.md) and [evidence-graph.md](evidence-graph.md) |
+| A signature over the packet | Not built: it needs a server-held signing key ([provenance.md](provenance.md)) |
 
-Decisions still come from `score.decide`. Nothing reads an observation back into a decision. The legacy fields stay authoritative.
+Native decisions still come from `score.decide`. After it, external records can move a case with no native finding to watch, by the fusion rules ([external-evidence.md](external-evidence.md)); they read the records and the native decision, not observations. Nothing reads an observation back into a decision. The legacy fields stay authoritative.
 
 What is proven, on every planted case, every case of the synthetic week (weekly and all seven nights), and the real CS2 (1,529) and TF2 (2,764) reruns:
 

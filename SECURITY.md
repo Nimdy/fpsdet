@@ -14,6 +14,9 @@ If that button is missing, open a public issue that says only "I need a private 
 - **A false case on purpose.** A way to make an innocent player come out as `review` or `watch`, for example through events, reports, party ids, or another account's data that the scorer trusts.
 - **Injection.** HTML or script that runs in a case page (`cases/*.html`) or the review desk (`board.html`), for example from a player id, weapon id, map id, or AI brief.
 - **A privacy leak.** A player id, party id, match id, or anything else that identifies a player reaching the AI endpoint, or any other place the docs say it does not go.
+- **A challenge leak.** A server secret, a challenge's realization, or anything that lets a client predict a planned challenge, reaching a plan file, a case, the desk, the public pages or any other output ([docs/challenges.md](docs/challenges.md) lists where they must never appear).
+- **A forged or misread signature.** An external record that verifies without its provider's registered key, or a revoked or unknown key that is read as verified ([docs/external-authentication.md](docs/external-authentication.md)).
+- **Code from data.** An external record, an adapter or a profile that makes fpsdet run code, read a file it was not given, or reach the network.
 
 Include the commit or version, the command, and the smallest input that shows the problem. Use made-up ids.
 

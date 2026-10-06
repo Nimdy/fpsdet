@@ -295,7 +295,7 @@ Rules:
 
 ### 10.2 Provenance
 
-*Partly implemented in P2.1 and P2.2: `profile`, the detector source (`scorer_source` below, written as `detector`), `cohort` (with its integrity stamp kept apart, and a `mode` of `external` or `in_file`) and `inputs`. `window` became the `events` and `matches` counts. P2.3 added `history` (the rows the scorer could read for the subject) and `evidence_id`, implemented as `evidence.packet`. Still proposed: game build, challenges, external sources, and a signature over the packet. [provenance.md](provenance.md) is the reference.*
+*Partly implemented in P2.1 and P2.2: `profile`, the detector source (`scorer_source` below, written as `detector`), `cohort` (with its integrity stamp kept apart, and a `mode` of `external` or `in_file`) and `inputs`. `window` became the `events` and `matches` counts. P2.3 added `history` (the rows the scorer could read for the subject) and `evidence_id`, implemented as `evidence.packet`. Added later: external sources (`provenance.external`, P5 and P7) and challenge plans, bound through each challenge observation's plan digest (P4). Still proposed: the game build, and a signature over the packet. [provenance.md](provenance.md) is the reference.*
 
 ```python
 @dataclass(frozen=True)
@@ -317,6 +317,8 @@ class Provenance:
 `evidence_id` = sha256 of the canonical `{provenance, sorted observation ids}`. Presentation modules are not hashed, so a dashboard change cannot move evidence identity. The v1 seal stays, unchanged, for compatibility.
 
 ### 10.3 KnowledgeState
+
+*Implemented, narrower than this sketch; [knowledge-engine.md](knowledge-engine.md) is the reference.* `fpsdet.knowledge` answers `known`, `unknowable` or `unknown`. Recent perception is a channel, `recent_perception` against `hidden_grace_ms`, not a fourth answer. The channels are `vision`, `audio` and `recent_perception`; `team_share`, `radar`, `objective`, `ability` and `spectator` can be declared, and nothing reports them yet. A channel that cannot carry the entity, as for a private replay body, is `not_applicable`.
 
 ```python
 CHANNELS = ("visible", "audible", "team_shared", "radar", "objective", "interp_visible")
