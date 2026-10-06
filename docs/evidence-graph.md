@@ -69,6 +69,19 @@ SHA-256 over `fpsdet.graph/1`, a zero byte, and the canonical JSON (sorted keys,
 
 with nodes sorted by id and edges by source, relation and target. Order of insertion never shows, and a duplicate edge is one edge. Any added, removed or changed node, edge or attribute moves it. A serialized graph is read back strictly: a known recipe, every node a known type with an id that starts with it, every edge a known relation between existing nodes of allowed types, nothing listed twice, no cycle in a derivation, and a digest that matches.
 
+### `fpsdet.graph/2`: provider keys
+
+New cases are written with `fpsdet.graph/2`: everything in `fpsdet.graph/1`, plus who signed an external record ([external-authentication.md](external-authentication.md)).
+
+| Addition | Meaning |
+| --- | --- |
+| `provider_key` node | A registered signing key, keyed `<provider>/<key id>`, with its algorithm, its status in the registry and the registry's digest. Only for a signature that verified |
+| `authenticated_by` | external record → provider key: that key signed the record |
+| `belongs_to` | provider key → provider group: the group the verified record, signed with that key, claims |
+| `authenticity` attribute | on each external record node: `verified`, `unsigned`, `not_checked` or `unknown_key` |
+
+The key and the group are separate nodes on purpose. A group is what a record says about who stands behind it. A key is who signed it. A verified record links the two, and two keys that sign for one group, or one key whose records claim two groups, show up as such. The summary adds `authentication`, the signature states of the supporting external evidence, and `authenticated_provider_groups`; `shared` adds keys that two observations have in common. `graph/1` is exactly what it was. A case written with it is rebuilt with it, and verifies, without any of this.
+
 ## How a case becomes a graph
 
 Every serialized case carries its graph in `evidence.graph`, built by `graph.build_graph` from the case itself: its observations, their evidence, and its provenance. It is built when the case is written, after the decision, from data the case already holds. It reads nothing else and changes nothing.
@@ -145,9 +158,9 @@ Nothing reads the graph to make a decision. No rule counts its edges, and no sum
 
 That is deliberate. Whether two pieces of evidence are independent enough to count separately is a question about real error rates and real correlations: how often a given client-integrity signal fires on honest players, and whether it fires on the same players as a server challenge. Those are calibration questions, and fpsdet has no calibration data for them. What the graph does now is make the question answerable later without guessing. Every shared provider group, telemetry domain, record, challenge and dependency is already named. A later rule can then say, for example, that a server challenge and an endpoint-memory signal from an unrelated provider group are two sources, while two records from one group are one. It can be checked against the graph, case by case. Independence is not solved here; it is only made visible.
 
-## In the packet: `fpsdet.packet/3`
+## In the packet: `fpsdet.packet/3` and `/4`
 
-`fpsdet.packet/3` binds everything `packet/2` binds, and the graph's recipe and digest. Every new case is written with it. Checking it runs `verify_graph`, so a packet/3 that verifies has a graph that matches its case. Packets written with `packet/1` or `packet/2` before the graph existed keep verifying with their own recipes. The graph adds no observation and changes no observation id, so the packet binds the same evidence it did, plus its structure.
+`fpsdet.packet/3` binds everything `packet/2` binds, and the graph's recipe and digest. `fpsdet.packet/4`, which every new case is written with, also binds the provider-key registry and signature policy the external records were read under ([provenance.md](provenance.md)). Checking it runs `verify_graph`, so a packet/3 that verifies has a graph that matches its case. Packets written with `packet/1` or `packet/2` before the graph existed keep verifying with their own recipes. The graph adds no observation and changes no observation id, so the packet binds the same evidence it did, plus its structure.
 
 ## What the graph holds, and what it never does
 

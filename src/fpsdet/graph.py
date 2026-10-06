@@ -23,7 +23,10 @@ from dataclasses import dataclass
 
 from .evidence import canonical_json
 
-GRAPH_RECIPE = "fpsdet.graph/1"
+GRAPH_V1 = "fpsdet.graph/1"
+# graph/1 plus provider keys: which registered key signed an external record (fpsdet.auth).
+GRAPH_V2 = "fpsdet.graph/2"
+GRAPH_RECIPE = GRAPH_V2  # what new cases are written with
 
 # Every node type, and what a node of it stands for.
 NODE_TYPES: dict[str, str] = {
@@ -52,6 +55,13 @@ RELATIONS: dict[str, tuple[frozenset[str], frozenset[str], str]] = {
     "compared_against": (frozenset({"observation"}), frozenset({"cohort"}), "the cohort its numbers were compared with"),
     "uses_history": (frozenset({"observation"}), frozenset({"history"}), "the account history it was compared with"),
 }
+# graph/1 is exactly the types and relations above; graph/2 adds a signing key and its two relations.
+NODE_TYPES_V1 = dict(NODE_TYPES)
+RELATIONS_V1 = dict(RELATIONS)
+NODE_TYPES["provider_key"] = "a provider's registered signing key, by provider and key id; only for a signature that verified"
+RELATIONS["authenticated_by"] = (frozenset({"external_record"}), frozenset({"provider_key"}), "the registered key that signed the record")
+RELATIONS["belongs_to"] = (frozenset({"provider_key"}), frozenset({"provider_group"}), "the provider group a verified record signed with this key claims")
+SCHEMAS = {GRAPH_V1: (NODE_TYPES_V1, RELATIONS_V1), GRAPH_V2: (NODE_TYPES, RELATIONS)}
 # Relations whose meaning forbids a cycle: nothing can rest on, or be made from, itself.
 ACYCLIC = frozenset({"depends_on", "derived_from"})
 
@@ -92,9 +102,9 @@ def _plain(value):
     return value
 
 
-def node_id(node_type: str, key: str) -> str:
+def node_id(node_type: str, key: str, recipe: str = GRAPH_RECIPE) -> str:
     """A node's id: its type, a colon, and its key. The type is fpsdet's; only the key comes from data."""
-    if node_type not in NODE_TYPES:
+    if node_type not in SCHEMAS[recipe][0]:
         raise GraphError(f"unknown node type {node_type!r}")
     if not isinstance(key, str) or not key:
         raise GraphError(f"a {node_type} node needs a non-empty string key")
@@ -129,7 +139,11 @@ class Edge:
 class EvidenceGraph:
     """Typed nodes and a set of typed edges. Order of insertion never matters."""
 
-    def __init__(self) -> None:
+    def __init__(self, recipe: str = GRAPH_RECIPE) -> None:
+        if recipe not in SCHEMAS:
+            raise GraphError(f"no graph recipe {recipe!r}")
+        self.recipe = recipe
+        self._types, self._relations = SCHEMAS[recipe]
         self._nodes: dict[str, Node] = {}
         self._edges: dict[tuple[str, str, str], Edge] = {}
         # Each edge indexed from both ends, so a lookup costs the node's degree, not the graph's size.
@@ -138,7 +152,7 @@ class EvidenceGraph:
 
     def node(self, node_type: str, key: str, **attributes) -> str:
         """Add a node, or find it. The same id with different attributes is a conflict, never a merge."""
-        identity = node_id(node_type, key)
+        identity = node_id(node_type, key, self.recipe)
         _check_value(attributes, identity)
         attributes = _plain(attributes)
         known = self._nodes.get(identity)
@@ -151,12 +165,12 @@ class EvidenceGraph:
 
     def edge(self, source: str, relation: str, target: str, **attributes) -> None:
         """Add an edge. The same source, relation and target is one edge; differing attributes are a conflict."""
-        if relation not in RELATIONS:
-            raise GraphError(f"unknown relation {relation!r}")
+        if relation not in self._relations:
+            raise GraphError(f"unknown relation {relation!r} in {self.recipe}")
         for end in (source, target):
             if end not in self._nodes:
                 raise GraphError(f"{relation} names {end}, which is not a node")
-        sources, targets, _meaning = RELATIONS[relation]
+        sources, targets, _meaning = self._relations[relation]
         if self._nodes[source].type not in sources or self._nodes[target].type not in targets:
             raise GraphError(f"{relation} cannot go from a {self._nodes[source].type} to a {self._nodes[target].type}")
         _check_value(attributes, f"{source} {relation} {target}")
@@ -215,7 +229,7 @@ class EvidenceGraph:
 
     def material(self) -> dict:
         return {
-            "recipe": GRAPH_RECIPE,
+            "recipe": self.recipe,
             "nodes": [node.to_dict() for node in self.nodes],
             "edges": [edge.to_dict() for edge in self.edges],
         }
@@ -224,7 +238,7 @@ class EvidenceGraph:
         """``fpsdet.graph/1``: SHA-256 over the recipe, a zero byte, and the canonical JSON of the nodes
         sorted by id and the edges sorted by source, relation and target."""
         body = canonical_json(self.material())
-        return "sha256:" + hashlib.sha256(GRAPH_RECIPE.encode("ascii") + b"\0" + body.encode("utf-8")).hexdigest()
+        return "sha256:" + hashlib.sha256(self.recipe.encode("ascii") + b"\0" + body.encode("utf-8")).hexdigest()
 
     def to_dict(self) -> dict:
         return {**self.material(), "digest": self.digest()}
@@ -233,12 +247,12 @@ class EvidenceGraph:
     def from_dict(cls, obj) -> EvidenceGraph:
         """A serialized graph, checked: its recipe, every node's type and id, every edge's relation and
         endpoints, no node or edge listed twice, no forbidden cycle, and its digest."""
-        if not isinstance(obj, Mapping) or obj.get("recipe") != GRAPH_RECIPE:
-            raise GraphError(f"not a {GRAPH_RECIPE} graph")
+        if not isinstance(obj, Mapping) or obj.get("recipe") not in SCHEMAS:
+            raise GraphError(f"not a graph of a known recipe ({', '.join(SCHEMAS)})")
         nodes, edges = obj.get("nodes"), obj.get("edges")
         if not isinstance(nodes, list) or not isinstance(edges, list):
             raise GraphError("nodes and edges must be lists")
-        graph = cls()
+        graph = cls(obj["recipe"])
         for row in nodes:
             if not isinstance(row, Mapping) or set(row) != {"id", "type", "attributes"} or not isinstance(row["attributes"], Mapping):
                 raise GraphError("a node is an id, a type and attributes")
@@ -261,14 +275,15 @@ class EvidenceGraph:
         return graph
 
 
-def schema() -> dict:
-    """The node types and relations, as data, for documentation and for a later reader."""
+def schema(recipe: str = GRAPH_RECIPE) -> dict:
+    """A recipe's node types and relations, as data, for documentation and for a later reader."""
+    types, relations = SCHEMAS[recipe]
     return {
-        "recipe": GRAPH_RECIPE,
-        "node_types": dict(NODE_TYPES),
+        "recipe": recipe,
+        "node_types": dict(types),
         "relations": {
             name: {"from": sorted(sources), "to": sorted(targets), "meaning": meaning, "acyclic": name in ACYCLIC}
-            for name, (sources, targets, meaning) in RELATIONS.items()
+            for name, (sources, targets, meaning) in relations.items()
         },
     }
 
@@ -285,9 +300,16 @@ SERVER_BEHAVIOR = "server_behavior"
 SERVER_CHALLENGE = "server_challenge"
 
 
-def build_graph(case: Mapping) -> EvidenceGraph:
-    """The evidence graph of one serialized case (``persist.case_to_dict``), without its graph block."""
-    graph = EvidenceGraph()
+def _authenticity(claim: Mapping) -> dict:
+    """An external observation's signature state as data; an observation from before signatures said a word."""
+    value = claim.get("authenticity")
+    return dict(value) if isinstance(value, Mapping) else {"status": str(value)}
+
+
+def build_graph(case: Mapping, recipe: str = GRAPH_RECIPE) -> EvidenceGraph:
+    """The evidence graph of one serialized case (``persist.case_to_dict``), without its graph block, built
+    by ``recipe``. A graph is rebuilt with the recipe it was written with, so an old one keeps its meaning."""
+    graph = EvidenceGraph(recipe)
     evidence = case["evidence"]
     provenance = evidence.get("provenance") or {}
     rows = evidence["observations"]
@@ -333,15 +355,26 @@ def build_graph(case: Mapping) -> EvidenceGraph:
                     graph.edge(challenge, "occurred_in", graph.node("match", match))
         elif obs["family"] == "external":
             claim = obs["evidence"]
-            record = graph.node(
-                "external_record", claim["external_id"], provider=claim["provider"], source_class=claim["source_class"], direction=claim["direction"],
-            )
+            attributes = dict(provider=claim["provider"], source_class=claim["source_class"], direction=claim["direction"])
+            auth = _authenticity(claim)
+            if recipe == GRAPH_V2:
+                attributes["authenticity"] = auth["status"]
+            record = graph.node("external_record", claim["external_id"], **attributes)
             graph.edge(node, "derived_from", record)
             graph.edge(record, "about", subject)
             if claim["scope"]["match_id"] is not None:
                 graph.edge(record, "occurred_in", graph.node("match", claim["scope"]["match_id"]))
-            graph.edge(record, "provided_by", graph.node("provider_group", claim["provider_group"]))
+            group = graph.node("provider_group", claim["provider_group"])
+            graph.edge(record, "provided_by", group)
             graph.edge(record, "uses_telemetry_domain", graph.node("telemetry_domain", claim["telemetry_domain"]))
+            if recipe == GRAPH_V2 and auth["status"] == "verified":
+                # The key is a separate node from the group: who signed is not the same fact as who the record says it is.
+                key = graph.node(
+                    "provider_key", f"{auth['provider']}/{auth['key_id']}", provider=auth["provider"], key_id=auth["key_id"],
+                    algorithm=auth["algorithm"], key_status=auth["key_status"], registry=auth["registry"],
+                )
+                graph.edge(record, "authenticated_by", key)
+                graph.edge(key, "belongs_to", group)
         elif obs["family"] == "human_baseline" and cohort and cohort.get("digest"):
             graph.edge(node, "compared_against", graph.node(
                 "cohort", cohort["digest"], mode=cohort.get("mode"), recipe=cohort.get("recipe"),
@@ -390,6 +423,9 @@ def describe(graph: EvidenceGraph) -> dict:
             "depends_on": graph.out(node.id, "depends_on"),
             "partner": (graph.out(node.id, "names_partner") or [None])[0],
         }
+        if graph.recipe == GRAPH_V2:
+            described[node.id]["authenticity"] = graph.get(record).attributes["authenticity"] if record else None
+            described[node.id]["provider_key"] = (graph.out(record, "authenticated_by") or [None])[0] if record else None
     supporting = [row for row in described.values() if row["supports"]]
     sources = sorted({graph.get(row["external_record"]).attributes["source_class"] for row in supporting if row["external_record"]})
 
@@ -404,28 +440,34 @@ def describe(graph: EvidenceGraph) -> dict:
     common = (
         shared("provider_group", "provider_group") + shared("telemetry_domain", "telemetry_domain") + shared("external_record", "external_record")
         + shared("challenge", "challenge") + shared("dependency", "depends_on") + shared("partner", "partner")
+        + (shared("provider_key", "provider_key") if graph.recipe == GRAPH_V2 else [])
     )
     for item in common:
         if item["kind"] == "provider_group":
             records = {described[name]["external_record"] for name in item["observations"]}
             item["providers"] = sorted({graph.get(record).attributes["provider"] for record in records})
-    return {
-        "observations": described,
-        "independence": {
-            "native_families": sorted({row["family"] for row in supporting if row["origin"] == "native"}),
-            "external_sources": sources,
-            "provider_groups": sorted({row["provider_group"] for row in supporting if row["provider_group"]}),
-            "telemetry_domains": sorted({row["telemetry_domain"] for row in supporting}),
-            "supporting": len(supporting),
-            "context_only": len(described) - len(supporting),
-        },
-        "shared": common,
+    independence = {
+        "native_families": sorted({row["family"] for row in supporting if row["origin"] == "native"}),
+        "external_sources": sources,
+        "provider_groups": sorted({row["provider_group"] for row in supporting if row["provider_group"]}),
+        "telemetry_domains": sorted({row["telemetry_domain"] for row in supporting}),
+        "supporting": len(supporting),
+        "context_only": len(described) - len(supporting),
     }
+    if graph.recipe == GRAPH_V2:
+        # Who signed the supporting external evidence. Facts, not weight: nothing here changes a decision.
+        states: dict[str, int] = {}
+        for row in supporting:
+            if row["authenticity"]:
+                states[row["authenticity"]] = states.get(row["authenticity"], 0) + 1
+        independence["authentication"] = dict(sorted(states.items()))
+        independence["authenticated_provider_groups"] = sorted({row["provider_group"] for row in supporting if row["authenticity"] == "verified"})
+    return {"observations": described, "independence": independence, "shared": common}
 
 
-def graph_block(case: Mapping) -> dict:
+def graph_block(case: Mapping, recipe: str = GRAPH_RECIPE) -> dict:
     """``case["evidence"]["graph"]``: the graph, its digest, and its description (not part of the digest)."""
-    graph = build_graph(case)
+    graph = build_graph(case, recipe)
     graph.check_acyclic()
     return {**graph.to_dict(), "summary": describe(graph)}
 
@@ -465,7 +507,7 @@ def verify_graph(case: Mapping) -> list[str]:
     if problems:
         return problems
     try:
-        expected = build_graph(case)
+        expected = build_graph(case, stored.recipe)
         expected.check_acyclic()
     except (GraphError, KeyError, TypeError) as error:
         return [f"the case's evidence does not make a graph: {error!r}"]
@@ -524,6 +566,16 @@ def _relationship_problems(case: Mapping, graph: EvidenceGraph) -> list[str]:
                     problems.append(f"{derived[0]} names the wrong provider group")
                 if graph.out(derived[0], "uses_telemetry_domain") != [f"telemetry_domain:{claim['telemetry_domain']}"]:
                     problems.append(f"{derived[0]} names the wrong telemetry domain")
+                if graph.recipe == GRAPH_V2:
+                    auth = _authenticity(claim)
+                    keys = graph.out(derived[0], "authenticated_by")
+                    if auth["status"] != "verified" and keys:
+                        problems.append(f"{derived[0]} is shown as signed, and its evidence says {auth['status']}")
+                    if auth["status"] == "verified":
+                        expected_key = f"provider_key:{auth['provider']}/{auth['key_id']}"
+                        node = graph.get(expected_key)
+                        if keys != [expected_key] or node is None or node.attributes.get("registry") != auth.get("registry"):
+                            problems.append(f"{derived[0]} is not authenticated by the key its evidence names")
         elif derived:
             problems.append(f"{name} claims to be derived from something its family never is")
         if obs["family"] == "relationship" and partners != [f"player:{obs['evidence']['partner']}"]:

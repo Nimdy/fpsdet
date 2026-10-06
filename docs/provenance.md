@@ -225,6 +225,10 @@ Canonical form, `fpsdet.history/1`:
 
 The history rows themselves are never written into a case. Cohort files carry stored digests, but history files do not yet; verifying a stored history digest on load can follow the same pattern later.
 
+## Provider-key registry
+
+`fpsdet.provider-registry/1` is the digest of the operator's provider-key registry: SHA-256 over the recipe, a zero byte, and the canonical JSON of every key (provider, key id, algorithm, public key, status), sorted by provider and key id ([external-authentication.md](external-authentication.md)). It identifies the trust configuration a run used. It is bound by `packet/4` through `provenance.external.registry`, and named in every verified external observation.
+
 ## External input
 
 When a run is given external records ([external-evidence.md](external-evidence.md)), each case's `provenance.external` binds the ones about its player: `fpsdet.external-input/1`, a SHA-256 over the recipe, the count, and each record's whole `fpsdet.external/1` digest, sorted. It also lists the run's sources: each file's SHA-256, how it was mapped (`fpsdet.external/1` or the adapter's digest), and its counts of records added, repeated and unreadable. A run with no external input says `{"mode": "none"}`, which is not the same as external input with no records about this player (`"records": 0`). Like every digest here, these identify the input. They do not show who wrote it.
@@ -243,7 +247,7 @@ The plan digest shows a record was not edited after it was digested. It is not a
 "packet": {"recipe": "fpsdet.packet/1", "status": "complete", "digest": "sha256:<64 hex>"}
 ```
 
-Every new case is written with `fpsdet.packet/3`. Packets written earlier with `fpsdet.packet/1` or `fpsdet.packet/2` keep verifying: `verify_packet` reads each packet with the recipe it names, and each recipe means exactly what it always did.
+Every new case is written with `fpsdet.packet/4`. Packets written earlier with `fpsdet.packet/1`, `/2` or `/3` keep verifying: `verify_packet` reads each packet with the recipe it names, and each recipe means exactly what it always did.
 
 **What `fpsdet.packet/1` binds**, as canonical JSON:
 
@@ -271,6 +275,8 @@ External observations are bound by both recipes the way every observation is, by
 
 **What `fpsdet.packet/3` adds:** the evidence graph's `recipe` and `digest` (`fpsdet.graph/1`, [evidence-graph.md](evidence-graph.md)). Checking a `packet/3` also checks the graph itself with `verify_graph`: rebuilt from the case and compared, every relationship against its evidence and provenance. A graph edited and given a fresh digest still fails. `packet/2` could not bind the graph without changing what it means, so the recipe moved again. Every new case uses `packet/3`, for the same reason it used `packet/2` before: one recipe for everything fpsdet writes now.
 
+**What `fpsdet.packet/4` adds:** `provenance.external.registry` (the recipe, digest and key count of the provider-key registry signatures were checked against, or null) and `provenance.external.policy` (`{"require_signed": …}`), so the packet says under which trust configuration its external records were read ([external-authentication.md](external-authentication.md)). Each external record's own signature state, key and registry digest are in its observation, and so already bound by id. `packet/3` lists a fixed set of external fields, and the registry and policy are not among them, so the recipe moved again rather than `packet/3` changing what it means. New cases also carry `fpsdet.graph/2`.
+
 **Why every new case used `packet/2`, external input or not.** One recipe for everything fpsdet writes now is simpler to check and to explain than two, chosen by whether a run happened to have external records. For a run without them, `packet/2` binds `{"mode": "none"}` and a null fusion, which is a true statement about that run. Every packet digest moved once, when this recipe arrived; nothing else in any case did.
 
 **What they leave out:**
@@ -293,12 +299,12 @@ External observations are bound by both recipes the way every observation is, by
 `fpsdet.provenance.verify_packet(case)` reads a serialized case and returns what does not hold together, or nothing.
 
 1. **Observation ids.** Each id is recomputed from the observation's own fields, and the model refuses a role the scorer never gives that kind. An edited value with its old id is caught here, before the packet is considered.
-2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest. Old recipes stay known: a packet written with `fpsdet.player-events/1` before event normalization still verifies (`tests/fixtures/historical-packets-p23.json`), and so do `packet/1` cases from the knowledge and challenge engines (`historical-packets-p3.json`, `historical-packets-p4.json`) and `packet/2` cases from external evidence (`historical-packets-p5.json`).
+2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest. Old recipes stay known: a packet written with `fpsdet.player-events/1` before event normalization still verifies (`tests/fixtures/historical-packets-p23.json`), and so do `packet/1` cases from the knowledge and challenge engines (`historical-packets-p3.json`, `historical-packets-p4.json`) `packet/2` cases from external evidence (`historical-packets-p5.json`), and `packet/3` cases with `fpsdet.graph/1` graphs from the evidence graph (`historical-packets-p6.json`).
 3. **The packet.** It is rebuilt, with the recipe it names, by the same code that built it, and compared. A recipe this version does not know is a problem, not a guess.
 
 It needs no events, cohort, profile or code, and it does not prove that those sources would produce the packet again. That second level, source reproduction, is a rerun: score the same events with the same detector, profile, cohort and history, and `tools/regress.py diff` the result. `tools/regress.py verify` runs `verify_packet` on every case of a snapshot.
 
-**Caught:** an edited observation value, an edited observation id, an observation with a recomputed id (the packet moves), a changed role, the decision, the eligibility, the subject or game, and any detector, profile, cohort, cohort mode, integrity, input or history digest. With `packet/2`, also: an edited or removed external record, the external input digest, mode, record count or any source's counts, and any field of the fusion state. With `packet/3`, also: any node, edge or attribute of the evidence graph, a graph that no longer matches the case, and a summary that no longer matches the graph.
+**Caught:** an edited observation value, an edited observation id, an observation with a recomputed id (the packet moves), a changed role, the decision, the eligibility, the subject or game, and any detector, profile, cohort, cohort mode, integrity, input or history digest. With `packet/2`, also: an edited or removed external record, the external input digest, mode, record count or any source's counts, and any field of the fusion state. With `packet/3`, also: any node, edge or attribute of the evidence graph, a graph that no longer matches the case, and a summary that no longer matches the graph. With `packet/4`, also: the registry and the signature policy.
 
 **Not caught, by design:** a reworded reason or context line, a new AI brief, a changed report count or queue rank, a different party note.
 

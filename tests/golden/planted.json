@@ -25,7 +25,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:33ec2898fc01386144d3a095e5ace47981f754c02bb455cef4b14ba5f12dd5ac",
+     "digest": "sha256:1542c86feceeeb89387b2e7d10e98c802ed78e3f1570ddc6a69d4572d356d0d9",
      "edges": [
       {
        "attributes": {},
@@ -97,9 +97,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -113,6 +115,7 @@
       },
       "observations": {
        "observation:obs-2e3c3b5ccce71b76c91d6003": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -121,6 +124,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -284,7 +288,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:1cbf854230e9acf56e541676ffbe90393ece849d76b420fa95f45ef77ddea97f",
+     "digest": "sha256:13e26aa0b128061830940cbd063b3f720f1373fde12bbe20b21b77e4e15fb432",
      "edges": [
       {
        "attributes": {},
@@ -307,9 +311,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -421,7 +427,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:d552b04aca56f9d48473de7aa94f2f4f8d0da7b534ff9ce8c289a83f1299f44d",
+     "digest": "sha256:8ae1a71888ef940a3b9ad0dc10eebd48f81d0d4c63ff1100e1f75a19c8001d9f",
      "edges": [
       {
        "attributes": {},
@@ -444,9 +450,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -576,7 +584,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:bfd0bb8348c4982c51e0311de8a5c8b39d2dd77d5f6d5651ba5184a24312d200",
+     "digest": "sha256:195f6d7966ebfe828b110a0f9faa531267e5c5c700848b97b7f03234fe2da1b0",
      "edges": [
       {
        "attributes": {},
@@ -599,9 +607,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -715,7 +725,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:148830b0bf18746a93cfc096419dd2de867f07d0d5a4a4ed05cdfa5007716743",
+     "digest": "sha256:091ab1e0953c9d48782b16068ffab5cb7907acda0ed9ac421d96ad914277f21e",
      "edges": [
       {
        "attributes": {},
@@ -738,9 +748,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -852,7 +864,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:66d72c01d4aadc5c0ef0babf38e875c09d12dd7c57e39ec72fae04c1a92b532b",
+     "digest": "sha256:fdcc513c5ab8c03d0cc28797311026da8ab1129214a1fae14b3a7badc8342234",
      "edges": [
       {
        "attributes": {},
@@ -909,9 +921,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -925,6 +939,7 @@
       },
       "observations": {
        "observation:obs-1436a54beaf57101259ffba1": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -933,6 +948,7 @@
         "origin": "native",
         "partner": "player:clone-source",
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": true,
         "server_authoritative": true,
         "supports": true,
@@ -1064,7 +1080,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:a351574fca22d24ea7015b4448a307419d6688dc68fe675c47d05bbfe96c2dc7",
+     "digest": "sha256:6b8ab6827e8e06bd8a2b02d6762626570072c5311221b9b11aa8ae68f9828017",
      "edges": [
       {
        "attributes": {},
@@ -1144,9 +1160,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -1161,6 +1179,7 @@
       },
       "observations": {
        "observation:obs-74200dd75ac0029d9e85e0f6": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -1169,12 +1188,14 @@
         "origin": "native",
         "partner": "player:clone-buyer",
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": true,
         "server_authoritative": true,
         "supports": true,
         "telemetry_domain": "server_behavior"
        },
        "observation:obs-aeb0ac967e0713c570ece7c5": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -1183,6 +1204,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -1353,7 +1375,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:6b7a083f4017fabb33d074e29a0a387ed31d864ba122ace922994b17d68fb873",
+     "digest": "sha256:d28939c92f6fac2b9cc2fcd368a25eacba1012ba637521a4f7d18c9a64f91168",
      "edges": [
       {
        "attributes": {},
@@ -1376,9 +1398,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -1492,7 +1516,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:a41a7f765724ba211a50f2c22e07eb417983adba9d52c7321672bf6fd1caefed",
+     "digest": "sha256:01cf4fb05d15a2a8117c3b5c43b398cfa507004716989c353ee0f20b86a6fa6c",
      "edges": [
       {
        "attributes": {},
@@ -1549,9 +1573,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -1565,6 +1591,7 @@
       },
       "observations": {
        "observation:obs-899f4295064826dae9251425": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -1573,6 +1600,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -1714,7 +1742,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:9019e0fc79df0e3c5f70ea113de59e43875b3b127056e0415add5d11aa6f489c",
+     "digest": "sha256:ff030887eb955c0df5f2d1734a2cf15aba3793b123ae6b634b49891ba6ebb0fe",
      "edges": [
       {
        "attributes": {},
@@ -1737,9 +1765,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -1853,7 +1883,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:c477edc1a864fc6711d4b081c9aab9f9cb6744699a69c2703454897a41d54984",
+     "digest": "sha256:7a53160ae498ea60975a495f05ca57a68ce4a8926624e0b06c4cca6f3c587754",
      "edges": [
       {
        "attributes": {},
@@ -1876,9 +1906,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -1980,7 +2012,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:bcb0f75e5fb43e9c6ef2607108b6d6b21034b9b7922e46ebb6dc46d90ec25198",
+     "digest": "sha256:a11ba1bab7ef8b860ede42eede6c48abad449f68a988aae45b3ec3d16406e90d",
      "edges": [
       {
        "attributes": {},
@@ -2003,9 +2035,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -2117,7 +2151,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:683ee3a8843a917195a5d80b3d9e5adaaac023b7cb4604619ac835a1a9588bbe",
+     "digest": "sha256:9a87693ea59a478f47317a935cb70528a0e03e8d2090ce55bd0e28fcd9c984a3",
      "edges": [
       {
        "attributes": {},
@@ -2140,9 +2174,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -2242,7 +2278,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:8fef1b3e8f767c25946f77326dc3a2cf9607ffd0e2f000295b36ecde1222b220",
+     "digest": "sha256:75270b1679f379d0e31c9451706042d9a78b95ed1c6f3fb1b62e2b471820414c",
      "edges": [
       {
        "attributes": {},
@@ -2299,9 +2335,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -2315,6 +2353,7 @@
       },
       "observations": {
        "observation:obs-fd7e10149da2629f4b8c2bc1": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -2323,6 +2362,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -2463,7 +2503,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:d70c7ae3738af70113de947eda8e9f4156b39f095713316c4bb35f466c8cf67e",
+     "digest": "sha256:5411f3bc38f1a4f1944e956273663755872d5b950b01883cf785ab1aee189b4f",
      "edges": [
       {
        "attributes": {},
@@ -2509,9 +2549,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -2525,6 +2567,7 @@
       },
       "observations": {
        "observation:obs-41dddecd64b938a0ecd60a9a": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -2533,6 +2576,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -2662,7 +2706,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:59a7f26cda80fb80c9156a9f8389b2fdd5cb6a4cee0c2a12806dee8b969d095d",
+     "digest": "sha256:ab3c9cc19bba817406b53acc59ba545984b4b1536bae1413295342c295603291",
      "edges": [
       {
        "attributes": {},
@@ -2685,9 +2729,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -2803,7 +2849,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:d1d543033cce4736812f6e0f4098fab6c4db321e74bc33b7ab0e379cda562a9d",
+     "digest": "sha256:42e3221a73f8ea65978fe6a1d2f5e8da47d8f806dcc9ad36365132f8707ca6da",
      "edges": [
       {
        "attributes": {},
@@ -2826,9 +2872,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -2950,7 +2998,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:d74b23c4fbd541cb3793a1f7acf5c256b209ffca05086c25b3fd4bdad87784f0",
+     "digest": "sha256:8e00dec98d30274bad4188046803068a3a1bb0d30c78a96105be5daa9afef9d8",
      "edges": [
       {
        "attributes": {},
@@ -2996,9 +3044,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -3012,6 +3062,7 @@
       },
       "observations": {
        "observation:obs-7f5ef2312aa56e1dc5f4e81e": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -3020,6 +3071,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -3158,7 +3210,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:dedc77d05ac6272b86eda3ceda0d4b1f37cddb6a6ed452a399edd90c13df14af",
+     "digest": "sha256:6bafb2f4c7d39958f068fe674717471555e18c2bce3c816687c08002d589e377",
      "edges": [
       {
        "attributes": {},
@@ -3181,9 +3233,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -3283,7 +3337,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:4f7a3a5d8b605befaae5e2160ab84bbd5ca03c175f6543832c635e4e074cd54b",
+     "digest": "sha256:21cf141c0f7fcc15b472a3a4d73d5bcc43e59b6a2f83a7d1f595b3386e434bea",
      "edges": [
       {
        "attributes": {},
@@ -3340,9 +3394,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -3356,6 +3412,7 @@
       },
       "observations": {
        "observation:obs-03237d8b034b71fa7da69eed": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -3364,6 +3421,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -3492,7 +3550,7 @@
      "compared": []
     },
     "graph": {
-     "digest": "sha256:f181b022f6fd5d8eeb5ccb2e7a5846aeb477a3d5f4e4dad195b73c089c3e8a59",
+     "digest": "sha256:c88b0f5ac47eb9fcd0d41e58dd259e0976b1a6b9c95f11497bc6f1422e1bc5f4",
      "edges": [
       {
        "attributes": {},
@@ -3579,9 +3637,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -3595,6 +3655,7 @@
       },
       "observations": {
        "observation:obs-2c99ae537fbec3c732b00680": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [
@@ -3605,6 +3666,7 @@
         "origin": "native",
         "partner": "player:wall-eye",
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": true,
         "server_authoritative": true,
         "supports": true,
@@ -3741,7 +3803,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:f16d8bed8a452687b71886b767f7b5ac18479379c9ca8e2bb1e99aa58376e5da",
+     "digest": "sha256:5b8f4d6ffc1cac9a1068cacaaf5e989d8a0d646d1eaec313f90bdaa7cee9c3bc",
      "edges": [
       {
        "attributes": {},
@@ -3883,9 +3945,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -3899,6 +3963,7 @@
       },
       "observations": {
        "observation:obs-2b1c02e324c0ed46647de063": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -3907,12 +3972,14 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
         "telemetry_domain": "server_behavior"
        },
        "observation:obs-d21188ba9da6fa379f8b44fe": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -3921,12 +3988,14 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
         "telemetry_domain": "server_behavior"
        },
        "observation:obs-f58d7c9440704fa7a9c5958a": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -3935,6 +4004,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -4192,7 +4262,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:4b2182758bbb5e95a7db8e548ad1b0f2a6758f3ca06eb0a22531292ee8cab057",
+     "digest": "sha256:ce802e5fd86cfc0797f0d2fe54a01adca1015a19e7a41951f4df33bd0fc1ba8d",
      "edges": [
       {
        "attributes": {},
@@ -4264,9 +4334,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -4280,6 +4352,7 @@
       },
       "observations": {
        "observation:obs-ccb8a15de08cdf49f7369948": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -4288,6 +4361,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -4442,7 +4516,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:c5b2abc6f6f3fba793865bb69431dc801136d42c7a563519791faa15fcb32d2d",
+     "digest": "sha256:2585a789ce0ff9ff728a6e651a61c6fef91f0d65ad1662dac3d457f0f5d6067a",
      "edges": [
       {
        "attributes": {},
@@ -4465,9 +4539,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -4567,7 +4643,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:564004920e35ca0a5bf813e5dd3a44003a1586efa6fffe590335a15b548dea97",
+     "digest": "sha256:8d97cc100eebb51044c3884683bbb7852f4c0fcde9f084d745bacaea2246c9da",
      "edges": [
       {
        "attributes": {},
@@ -4648,9 +4724,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -4664,6 +4742,7 @@
       },
       "observations": {
        "observation:obs-d6b0a455423d666f8428468e": {
+        "authenticity": null,
         "challenge": "challenge:legacy_private_replay:rifle",
         "challenge_derived": true,
         "depends_on": [],
@@ -4672,6 +4751,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -4839,7 +4919,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:cba9fd4b5906f0ddf09071accc9e43a3dbebb312c1314d1c9e4ffebec3a30532",
+     "digest": "sha256:fb7b042e3ceb8cc02c5ed435af7f0837f197772a14327de170ba9675aa3629a0",
      "edges": [
       {
        "attributes": {},
@@ -4862,9 +4942,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -4969,7 +5051,7 @@
      "compared": []
     },
     "graph": {
-     "digest": "sha256:54a860dea28d2831978d24d6848f337c3985790caf2cd342d19a4158ec00ff16",
+     "digest": "sha256:65a972fad811f9807c01516dfc50b40ad21b6ef36ce1c523e532834066db5d6f",
      "edges": [
       {
        "attributes": {},
@@ -4992,9 +5074,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -5065,7 +5149,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:b1f9032274f21c067ffc610de46f9c27202c6408972a607e1a58edc274502299",
+     "digest": "sha256:f717dd25c7cb94704ce443091a5d839018abb35355ff74b79f2ba88b63f56e59",
      "edges": [
       {
        "attributes": {},
@@ -5088,9 +5172,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -5181,7 +5267,7 @@
      "compared": []
     },
     "graph": {
-     "digest": "sha256:ea058bb73e6c6b2a9942a84411949c3be84ece7cd810572fc62149929f6f4da6",
+     "digest": "sha256:bf79abfb968f263e75653a27b3707c65f30f9711a972c94a0a74680d9bac9ad9",
      "edges": [
       {
        "attributes": {},
@@ -5238,9 +5324,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -5254,6 +5342,7 @@
       },
       "observations": {
        "observation:obs-02fdbd7346a0b5e228029086": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -5262,6 +5351,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -5373,7 +5463,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:f6235b0484bc89e42aa1935741c1e390803468c9c49894ff26454a191a7ffcd6",
+     "digest": "sha256:401e7be3846f14408cda99fb8dcbea75b04821ce969d7e30b93c64ba4fc997f3",
      "edges": [
       {
        "attributes": {},
@@ -5396,9 +5486,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [],
@@ -5502,7 +5594,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:93735a3971c166f842513fd22b8b0035f1dea67764d4b8bcb02796f491fcfe92",
+     "digest": "sha256:77bc9b27a97243b7ad51a7c80f354c7e32057d4189f45bf455da3827894cb55f",
      "edges": [
       {
        "attributes": {},
@@ -5559,9 +5651,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -5575,6 +5669,7 @@
       },
       "observations": {
        "observation:obs-f4f072f3c4b469c0e7f1fffd": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -5583,6 +5678,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,
@@ -5740,7 +5836,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:e27b1e6abc6fde13e921d82607a330d8679383a2c3447d8791df21fc99ba2d41",
+     "digest": "sha256:642aa4317df2cd76e8fc77d043dac0b609a8a6dcbe139a4dfd523384526b18f9",
      "edges": [
       {
        "attributes": {},
@@ -5797,9 +5893,11 @@
        "type": "player"
       }
      ],
-     "recipe": "fpsdet.graph/1",
+     "recipe": "fpsdet.graph/2",
      "summary": {
       "independence": {
+       "authenticated_provider_groups": [],
+       "authentication": {},
        "context_only": 0,
        "external_sources": [],
        "native_families": [
@@ -5813,6 +5911,7 @@
       },
       "observations": {
        "observation:obs-7134f75357e8d6b6009e959c": {
+        "authenticity": null,
         "challenge": null,
         "challenge_derived": false,
         "depends_on": [],
@@ -5821,6 +5920,7 @@
         "origin": "native",
         "partner": null,
         "provider_group": null,
+        "provider_key": null,
         "relationship_derived": false,
         "server_authoritative": true,
         "supports": true,

@@ -100,6 +100,12 @@ An unsigned record says `{"status": "unsigned"}`. Authentication is part of the 
 - `policy`: `{"require_signed": …}`;
 - for each source, `excluded` and `authentication`, a count of every readable line by signature state.
 
+## In the graph and the packet
+
+`fpsdet.graph/2` gives a verified record an `authenticated_by` edge to a `provider_key` node (provider, key id, algorithm, key status, registry digest), and that key a `belongs_to` edge to the provider group the record claims. The key and the group stay separate nodes: who signed is not the same fact as who the record says stands behind it. Unsigned, unchecked and unknown-key records have no key node, and their `authenticity` attribute says why ([evidence-graph.md](evidence-graph.md)).
+
+`fpsdet.packet/4` binds the registry digest and the signature policy, beside everything `packet/3` binds ([provenance.md](provenance.md)). With each observation's own `authenticity`, which is bound by its id, a packet says which records were verified, by which keys, under which registry, and whether unsigned records were allowed.
+
 ## Rotation and revocation
 
 - **`active`**: the provider signs with it now. Its signatures verify.

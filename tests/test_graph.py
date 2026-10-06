@@ -129,7 +129,7 @@ def small_graph(order: int = 0) -> EvidenceGraph:
     rng = random.Random(order)
     rng.shuffle(nodes)
     rng.shuffle(edges)
-    graph = EvidenceGraph()
+    graph = EvidenceGraph("fpsdet.graph/1")  # pinned below as graph/1; graph/2 adds provider keys and nothing else
     for node_type, key, attributes in nodes:
         graph.node(node_type, key, **attributes)
     for source, relation, target in edges:
@@ -546,7 +546,9 @@ class PacketV3Test(unittest.TestCase):
 
         for cases in (PLANTED, WEEKLY, FUSED):
             for pid, case in cases.items():
-                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/3", pid)
+                # packet/4 and graph/2 since authenticated external evidence (P7); both still bind and check the graph.
+                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/4", pid)
+                self.assertEqual(case["evidence"]["graph"]["recipe"], "fpsdet.graph/2", pid)
                 self.assertEqual(case["evidence"]["packet"]["status"], "complete", pid)
                 self.assertEqual(verify_packet(case), [], pid)
 
@@ -554,9 +556,9 @@ class PacketV3Test(unittest.TestCase):
         from fpsdet.provenance import packet_material
 
         case = PLANTED["radar-friend"]
-        material = packet_material(case)
+        material = packet_material(case, "fpsdet.packet/3")
         self.assertEqual(sorted(material), sorted([*packet_material(case, "fpsdet.packet/2"), "graph"]))
-        self.assertEqual(material["graph"], {"recipe": "fpsdet.graph/1", "digest": case["evidence"]["graph"]["digest"]})
+        self.assertEqual(material["graph"], {"recipe": "fpsdet.graph/2", "digest": case["evidence"]["graph"]["digest"]})
 
     def test_graph_edits_are_caught(self):
         from fpsdet.provenance import verify_packet
@@ -612,10 +614,10 @@ class PacketV3Test(unittest.TestCase):
         case = fixed_case()
         case["match_ids"] = ["m1"]
         case["evidence"]["provenance"]["external"] = {"mode": "none"}
-        self.assertEqual(packet_block(case), {"recipe": "fpsdet.packet/3", "status": "incomplete", "missing": ["graph"]})
-        case["evidence"]["graph"] = graph_block(case)
+        self.assertEqual(packet_block(case, "fpsdet.packet/3"), {"recipe": "fpsdet.packet/3", "status": "incomplete", "missing": ["graph"]})
+        case["evidence"]["graph"] = graph_block(case, "fpsdet.graph/1")  # what P6 wrote
         self.assertEqual(case["evidence"]["graph"]["digest"], "sha256:15a4b21a32b6673f571dc2d8e70b5b6f3c5e994c75738430bceb79025dd5994a")
-        self.assertEqual(packet_block(case)["digest"], "sha256:4fa7475f7d1d70460d94a45f88023ec20072b30504cc3e1eee13ad18c572243d")
+        self.assertEqual(packet_block(case, "fpsdet.packet/3")["digest"], "sha256:4fa7475f7d1d70460d94a45f88023ec20072b30504cc3e1eee13ad18c572243d")
 
 
 if __name__ == "__main__":

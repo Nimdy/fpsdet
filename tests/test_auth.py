@@ -61,17 +61,18 @@ class CurrentTrustModelTest(unittest.TestCase):
         self.assertEqual((len(loaded.records), len(loaded.errors)), (0, 1))
 
     def test_the_graph_has_no_notion_of_a_key(self):
-        from fpsdet.graph import NODE_TYPES, RELATIONS
+        from fpsdet.graph import NODE_TYPES_V1, RELATIONS_V1
 
-        self.assertNotIn("provider_key", NODE_TYPES)
-        graph = FUSED["blasted"]["evidence"]["graph"]
-        records = [node for node in graph["nodes"] if node["type"] == "external_record"]
-        self.assertEqual({tuple(sorted(node["attributes"])) for node in records}, {("direction", "provider", "source_class")})
-        self.assertEqual(graph["recipe"], "fpsdet.graph/1")
-        self.assertEqual(sorted(RELATIONS), sorted([
+        # graph/1 had none. P7 added graph/2, with provider keys; graph/1 is unchanged and still read.
+        self.assertNotIn("provider_key", NODE_TYPES_V1)
+        self.assertEqual(sorted(RELATIONS_V1), sorted([
             "about", "occurred_in", "supports", "depends_on", "derived_from", "names_partner", "provided_by",
             "uses_telemetry_domain", "compared_against", "uses_history",
         ]))
+        graph = json.loads((Path(__file__).resolve().parent / "fixtures" / "historical-packets-p6.json").read_text())["cases"][0]["evidence"]["graph"]
+        records = [node for node in graph["nodes"] if node["type"] == "external_record"]
+        self.assertEqual({tuple(sorted(node["attributes"])) for node in records}, {("direction", "provider", "source_class")})
+        self.assertEqual(graph["recipe"], "fpsdet.graph/1")
 
     def test_packet_3_binds_these_external_fields(self):
         self.assertEqual(PACKET_V2_PROVENANCE["external"], ("mode", "recipe", "digest", "records", "sources"))
@@ -502,6 +503,119 @@ class ExternalAuthCommandTest(unittest.TestCase):
         for name, text in surfaces.items():
             with self.subTest(name):
                 self.assertEqual(leaks(text, *SEEDS.values()), [])
+
+
+def graph_nodes(case: dict, node_type: str) -> list[dict]:
+    return [node for node in case["evidence"]["graph"]["nodes"] if node["type"] == node_type]
+
+
+def graph_edges(case: dict, relation: str) -> list[tuple[str, str]]:
+    return [(edge["source"], edge["target"]) for edge in case["evidence"]["graph"]["edges"] if edge["relation"] == relation]
+
+
+@unittest.skipUnless(HAVE_CRYPTO, "signature checking needs the optional cryptography package")
+class GraphV2Test(unittest.TestCase):
+    """fpsdet.graph/2: who signed is a node of its own, apart from the group the record claims."""
+
+    def cases(self):
+        rows = [envelope(native(subject_id="adrenaline", provider_record_id="a1")),
+                envelope(native(subject_id="adrenaline", provider_record_id="a2", kind="second")),
+                native(subject_id="glitch"),
+                envelope(native(subject_id="weak-human"), label="2027-01")]
+        return scored(read((rows, None)))
+
+    def test_a_verified_record_is_authenticated_by_its_key(self):
+        case = self.cases()["adrenaline"]
+        (key,) = graph_nodes(case, "provider_key")
+        self.assertEqual(key["id"], "provider_key:example-integrity/2026-01")
+        self.assertEqual(key["attributes"], {"provider": "example-integrity", "key_id": "2026-01", "algorithm": "ed25519",
+                                             "key_status": "active", "registry": registry().digest})
+        records = [node["id"] for node in graph_nodes(case, "external_record")]
+        self.assertEqual(sorted(graph_edges(case, "authenticated_by")), sorted((record, key["id"]) for record in records))
+        self.assertEqual(graph_edges(case, "belongs_to"), [(key["id"], "provider_group:example-integrity")])
+        self.assertEqual({node["attributes"]["authenticity"] for node in graph_nodes(case, "external_record")}, {"verified"})
+        summary = case["evidence"]["graph"]["summary"]
+        self.assertEqual(summary["independence"]["authentication"], {"verified": 2})
+        self.assertEqual(summary["independence"]["authenticated_provider_groups"], ["example-integrity"])
+        self.assertIn({"kind": "provider_key", "value": key["id"], "observations": sorted(f"observation:{o['observation_id']}" for o in external_obs(case))},
+                      summary["shared"])
+        from fpsdet.graph import verify_graph
+
+        self.assertEqual(verify_graph(case), [])
+
+    def test_an_unauthenticated_record_has_no_key(self):
+        cases = self.cases()
+        for pid, status in (("glitch", "unsigned"), ("weak-human", "unknown_key")):
+            with self.subTest(pid):
+                self.assertEqual(graph_nodes(cases[pid], "provider_key"), [])
+                (record,) = graph_nodes(cases[pid], "external_record")
+                self.assertEqual(record["attributes"]["authenticity"], status)
+                self.assertEqual(cases[pid]["evidence"]["graph"]["summary"]["independence"]["authenticated_provider_groups"], [])
+
+    def test_a_forged_key_in_the_graph_is_caught(self):
+        from fpsdet.graph import EvidenceGraph, describe, verify_graph
+
+        case = copy.deepcopy(self.cases()["glitch"])
+        stored = EvidenceGraph.from_dict({k: v for k, v in case["evidence"]["graph"].items() if k != "summary"})
+        forged = EvidenceGraph("fpsdet.graph/2")
+        for node in stored.nodes:
+            forged.node(node.type, node.id.split(":", 1)[1], **node.attributes)
+        for edge in stored.edges:
+            forged.edge(edge.source, edge.relation, edge.target)
+        (record,) = [node.id for node in stored.of_type("external_record")]
+        key = forged.node("provider_key", "example-integrity/2026-01", provider="example-integrity", key_id="2026-01", algorithm="ed25519",
+                          key_status="active", registry=registry().digest)
+        forged.edge(record, "authenticated_by", key)
+        case["evidence"]["graph"] = {**forged.to_dict(), "summary": describe(forged)}
+        problems = " ".join(verify_graph(case))
+        self.assertIn("does not match the case's evidence", problems)
+        self.assertIn("shown as signed", problems)
+
+    def test_older_graphs_and_packets_keep_their_meaning(self):
+        from fpsdet.provenance import verify_packet
+
+        expected = {"historical-packets-p23.json": ("fpsdet.packet/1", None), "historical-packets-p3.json": ("fpsdet.packet/1", None),
+                    "historical-packets-p4.json": ("fpsdet.packet/1", None), "historical-packets-p5.json": ("fpsdet.packet/2", None),
+                    "historical-packets-p6.json": ("fpsdet.packet/3", "fpsdet.graph/1")}
+        for name, (recipe, graph) in expected.items():
+            for case in json.loads((FIXTURES / name).read_text(encoding="utf-8"))["cases"]:
+                with self.subTest(name, player=case["player_id"]):
+                    self.assertEqual(case["evidence"]["packet"]["recipe"], recipe)
+                    self.assertEqual(case["evidence"].get("graph", {}).get("recipe"), graph)
+                    self.assertEqual(verify_packet(case), [])
+
+    def test_packet_4_binds_the_registry_and_the_policy(self):
+        from fpsdet.provenance import packet_block, packet_material, verify_packet
+
+        case = self.cases()["adrenaline"]
+        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/4")
+        external = packet_material(case)["provenance"]["external"]
+        self.assertEqual((external["registry"], external["policy"]), (registry().summary(), {"require_signed": False}))
+        for name, edit in {"the registry": lambda e: e.update(registry={**e["registry"], "digest": "sha256:" + "0" * 64}),
+                           "the policy": lambda e: e.update(policy={"require_signed": True})}.items():
+            with self.subTest(name):
+                edited = copy.deepcopy(case)
+                edit(edited["evidence"]["provenance"]["external"])
+                self.assertTrue(verify_packet(edited))
+                # packet/3 would not have noticed: that is why the recipe moved.
+                self.assertEqual(packet_block(edited, "fpsdet.packet/3")["digest"], packet_block(case, "fpsdet.packet/3")["digest"])
+
+    def test_a_v4_digest_is_the_same_on_every_python(self):
+        import sys
+
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from test_packet import fixed_case
+        from fpsdet.graph import graph_block
+        from fpsdet.provenance import packet_block
+
+        case = fixed_case()
+        case["match_ids"] = ["m1"]
+        case["evidence"]["provenance"]["external"] = {"mode": "none"}
+        case["evidence"]["graph"] = graph_block(case)
+        self.assertEqual((case["evidence"]["graph"]["recipe"], case["evidence"]["graph"]["digest"]),
+                         ("fpsdet.graph/2", "sha256:8e54e045e4129f2195f1229709d8b460d65865bbb1aa3ff42914d1258c1a1921"))
+        self.assertEqual(packet_block(case), {"recipe": "fpsdet.packet/4", "status": "complete",
+                                              "digest": "sha256:5e7d3aaec90bb28d5b2f2d1a029b9256e142ee0b3570318b502b7062c0ebea59"})
 
 
 if __name__ == "__main__":
