@@ -2178,9 +2178,42 @@ def addendum_problems(found: Mapping, root: Path = ROOT) -> list[str]:
     result = read_json(pilot) if pilot.exists() else {}
     if result.get("digest") != found["pilot"]["digest"]:
         problems.append("the pilot result it binds is not the committed one")
-    if found["pilot"]["as_expected"] != found["pilot"]["scenarios"]:
+    if "as_expected" in found["pilot"] and found["pilot"]["as_expected"] != found["pilot"]["scenarios"]:
         problems.append("not every pilot scenario came out as declared")
+    if HUMAN_CLASS in found.get("class", {}) and result.get("kind") != "human":
+        problems.append("a consented_human_pilot addendum must bind a result of people")
     return problems
+
+
+HUMAN_RESULT = Path("examples") / "human-pilot" / "result.json"
+HUMAN_CLASS = "consented_human_pilot"
+HUMAN_CLASS_TEXT = ("consented human pilot: a small group of consenting people playing the repository's own pilot honestly; a behavioural "
+                    "baseline with its counts, never a false-positive rate, a calibration or a validation")
+
+
+def human_addendum_from(result: Mapping, release_digest: str, path: str = HUMAN_RESULT.as_posix()) -> dict:
+    """benchmark/addenda/p13-consented-human-pilot.json from a fpsdet.human-pilot/1 result of people. A result
+    of machine stand-ins is refused: it qualifies instruments and is never evidence about people."""
+    if result.get("format") != "fpsdet.human-pilot/1" or result.get("kind") != "human":
+        raise BenchmarkError("only a fpsdet.human-pilot/1 result of people becomes the consented_human_pilot addendum; machine stand-ins never do")
+    review = result["review_grade"]
+    units = result["units"]
+    claims = [{"id": "human.review_grade", "class": HUMAN_CLASS, "source": {"path": path, "digest": result["digest"]}, "text": (
+        f"{len(review['participants'])} of {units['participants']} consenting participants, {review['sessions']} of {units['sessions']} sessions and "
+        f"{review['challenges']} of {units['challenges']} challenges produced review-grade challenge evidence while playing honestly. "
+        "Counts, with dependence between a participant's sessions; not a false-positive rate.")}]
+    body = {
+        "format": ADDENDUM,
+        "id": "p13-consented-human-pilot",
+        "extends": {"release": RELEASE_TITLE, "digest": release_digest},
+        "frozen": "Benchmark v1 is unchanged by this addendum.",
+        "class": {HUMAN_CLASS: HUMAN_CLASS_TEXT},
+        "pilot": {"path": path, "digest": result["digest"], "units": units},
+        "claims": claims,
+    }
+    body = json.loads(canonical_json(body))
+    body["digest"] = digest("addendum", body)
+    return body
 
 
 def generated(root: Path = ROOT) -> dict[Path, str]:
@@ -2197,6 +2230,9 @@ def generated(root: Path = ROOT) -> dict[Path, str]:
         root / "README.md": readme,
     }
     out[root / found_definition["release"]] = json.dumps(release(ctx, report, found_claims, root), indent=1, ensure_ascii=False) + "\n"
+    if (root / HUMAN_RESULT).exists():
+        human = human_addendum_from(read_json(root / HUMAN_RESULT), read_json(root / found_definition["release"])["digest"])
+        out[root / ADDENDA / f"{human['id']}.json"] = json.dumps(human, indent=1, ensure_ascii=False) + "\n"
     addendum = pilot_addendum(root)
     if addendum is not None:
         out[root / ADDENDA / f"{addendum['id']}.json"] = json.dumps(addendum, indent=1, ensure_ascii=False) + "\n"
