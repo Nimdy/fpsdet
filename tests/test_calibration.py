@@ -94,6 +94,16 @@ def demo_cases() -> list[dict]:
     return [case_to_dict(case) for case in demo().cases]
 
 
+def without_eligibility(cases: list[dict]) -> list[dict]:
+    """The same cases as fpsdet wrote them before cases recorded detector eligibility: packet/4, no block."""
+    from fpsdet.provenance import packet_block
+
+    for case in cases:
+        del case["evidence"]["detector_eligibility"]
+        case["evidence"]["packet"] = packet_block(case, "fpsdet.packet/4")
+    return cases
+
+
 def demo_telemetry() -> list[str]:
     found = set()
     for event in demo().events:
@@ -267,17 +277,39 @@ class HarnessTest(unittest.TestCase):
         self.assertNotIn("accuracy", small["evaluated"])
 
     def test_a_detector_the_cases_cannot_give_a_denominator_for_is_counted_not_rated(self):
-        hidden = next(entry for entry in self.artifact["statistics"]["detectors"] if entry["kind"] == "hidden")
+        """Cases written before detector eligibility: the hidden-mover check fired, but nobody can say on whom it could have."""
+        artifact = cal.evaluate(without_eligibility(demo_cases()), demo_labels(), demo_dataset(), demo().profile)
+        hidden = next(entry for entry in artifact["statistics"]["detectors"] if entry["kind"] == "hidden")
         self.assertEqual(hidden["status"], "not_observable")
+        self.assertEqual(hidden["observability"]["reasons"], ["eligibility_not_recorded"])
         self.assertEqual(hidden["fired_players"], {"planted": 1, "honest": 0})
         self.assertNotIn("rates", hidden)
+        self.assertEqual(artifact["inputs"]["eligibility"], {"recorded": 0, "inferred": len(artifact["rows"])})
+        accuracy = next(entry for entry in artifact["statistics"]["detectors"] if entry["kind"] == "accuracy")
+        self.assertEqual(set(accuracy["coverage"]["planted"]["by_status"]), {"not_recorded"})
 
-    def test_a_finding_on_an_uncompared_weapon_is_refused(self):
-        cases = demo_cases()
-        rage = next(case for case in cases if case["player_id"] == "rage")
-        rage["evidence"]["eligibility"]["compared"] = []
+    def test_recorded_eligibility_gives_every_detector_its_denominator(self):
+        self.assertEqual(self.artifact["inputs"]["eligibility"], {"recorded": len(self.artifact["rows"]), "inferred": 0})
+        by_kind = {entry["kind"]: entry for entry in self.artifact["statistics"]["detectors"]}
+        cases = {case["player_id"]: case for case in self.cases}
+        for kind in ("hidden", "wire", "quiet_aim", "mirror", "voice", "fire_rate"):
+            entry = by_kind[kind]
+            self.assertNotEqual(entry["status"], "not_observable", kind)
+            eligible = {pid for pid, case in cases.items() if case["evidence"]["detector_eligibility"]["detectors"][kind].get("eligible")}
+            self.assertEqual(sum(cell["denominator"] for cell in entry["rates"].values()), len(eligible), kind)
+            for label, cell in entry["coverage"].items():
+                self.assertEqual(cell["players"], cell["evaluated"] + sum(cell["by_status"].values()), (kind, label))
+
+    def test_a_finding_on_a_unit_that_could_not_run_is_refused(self):
+        rage = next(case for case in demo_cases() if case["player_id"] == "rage")
+        entry = rage["evidence"]["detector_eligibility"]["detectors"]["accuracy"]
+        entry["baseline_too_thin"] = entry.pop("eligible")
         with self.assertRaises(EvaluationError):
             cal.player_row(rage, "planted", demo().profile, {})
+        (old,) = without_eligibility([next(case for case in demo_cases() if case["player_id"] == "rage")])
+        old["evidence"]["eligibility"]["compared"] = []
+        with self.assertRaises(EvaluationError):
+            cal.player_row(old, "planted", demo().profile, {})
 
     def test_tampered_mixed_or_mislabelled_inputs_are_refused(self):
         cases = demo_cases()
@@ -304,7 +336,7 @@ class HarnessTest(unittest.TestCase):
 
     def test_the_artifact_binds_its_inputs_and_verifies(self):
         artifact = json.loads(cal.dumps(self.artifact))
-        self.assertEqual(artifact["schema"], "fpsdet.evaluation/1")
+        self.assertEqual(artifact["schema"], "fpsdet.evaluation/2")
         self.assertEqual(cal.verify_artifact(artifact), [])
         inputs = artifact["inputs"]
         for field in ("digest", "detector", "profile", "cohort"):

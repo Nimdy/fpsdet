@@ -1,4 +1,4 @@
-"""Measuring native detectors against a labelled population: ``fpsdet.evaluation/1``. Measurement only.
+"""Measuring native detectors against a labelled population: ``fpsdet.evaluation/2``. Measurement only.
 
 The question is narrow. On one labelled population, among the players a detector had enough evidence to
 run on, how often did it fire in the positive-labelled group, how often in the comparison group, and how
@@ -34,12 +34,19 @@ from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping
 from pathlib import Path
 
-from .evidence import KINDS, RETIRED_KINDS, SOURCE, canonical_json
+from .evidence import ELIGIBILITY, KINDS, RETIRED_KINDS, SOURCE, canonical_json, eligibility_unit, rollup
 from .models import GameProfile
 from .provenance import normalized_source, profile_digest
 from .statsutil import wilson_bound
 
-EVALUATION_SCHEMA = "fpsdet.evaluation/1"
+# /2 reads each detector's eligibility from the case (evidence.detector_eligibility) and counts coverage by
+# status; /1 inferred it from what P8's cases happened to record. Both are read; /2 is written.
+EVALUATION_V1 = "fpsdet.evaluation/1"
+EVALUATION_SCHEMA = "fpsdet.evaluation/2"
+READABLE = (EVALUATION_V1, EVALUATION_SCHEMA)
+# Coverage by why a detector could not run: the eligibility statuses, and not_recorded for a case written before
+# cases recorded eligibility.
+COVERAGE_STATUSES = (*ELIGIBILITY[1:], "not_recorded")
 DATASET_SCHEMA = "fpsdet.evaluation-dataset/1"
 FIXTURE_SCHEMA = "fpsdet.fixture-qualification/1"
 SPLIT_RECIPE = "fpsdet.evaluation-split/1"
@@ -229,9 +236,10 @@ def _missing_fields(fields: Iterable, telemetry: set[str]) -> list[str]:
     return missing
 
 
-def observability(profile: GameProfile, telemetry: Iterable[str], *, server_shot_timing: bool, history: bool) -> dict[str, dict]:
+def observability(profile: GameProfile, telemetry: Iterable[str], *, server_shot_timing: bool, history: bool, recorded: bool = False) -> dict[str, dict]:
     """Per native detector: can this dataset run it, and if not, what is missing. Machine-readable reasons:
-    missing_telemetry, no_server_shot_timing, profile_declares_none, no_history_input, eligibility_not_recorded."""
+    missing_telemetry, no_server_shot_timing, profile_declares_none, no_history_input, eligibility_not_recorded.
+    ``recorded``: every case carries its detector eligibility, so no detector lacks a denominator for that reason."""
     telemetry = set(telemetry)
     out: dict[str, dict] = {}
     for kind in NATIVE_KINDS:
@@ -250,7 +258,7 @@ def observability(profile: GameProfile, telemetry: Iterable[str], *, server_shot
             reasons.append("profile_declares_none")
         if need.get("history") and not history:
             reasons.append("no_history_input")
-        if not reasons and not need.get("case"):
+        if not reasons and not need.get("case") and not recorded:
             reasons.append("eligibility_not_recorded")
         row = {"observable": not reasons, "reasons": reasons, "missing_telemetry": missing}
         if need.get("profile"):
@@ -277,12 +285,6 @@ def split_of(player_id: str) -> str:
 def _kind(obs: Mapping) -> str:
     """A retired kind reads as the kind that replaced it, as tools/regress.py migrates it."""
     return "occluded_motion_replay" if obs["kind"] in RETIRED_KINDS else obs["kind"]
-
-
-def _unit(obs: Mapping) -> str:
-    if obs["kind"] in METRIC_KEYED:
-        return f"{obs['evidence']['metric']}:{obs['key']}"
-    return obs["key"]
 
 
 def _structure(case: Mapping, native: list[dict]) -> list[list]:
@@ -313,12 +315,31 @@ def _structure(case: Mapping, native: list[dict]) -> list[list]:
     return [[a, b, sorted(shared)] for (a, b), shared in sorted(found.items(), key=lambda item: (NATIVE_KINDS.index(item[0][0]), NATIVE_KINDS.index(item[0][1])))]
 
 
-def player_row(case: Mapping, label: str, profile: GameProfile, labels: Mapping[str, str]) -> dict:
-    """What one case says about which detectors could run on this player, and which fired."""
+def player_row(case: Mapping, label: str, profile: GameProfile, labels: Mapping[str, str], kinds: Iterable[str] = NATIVE_KINDS) -> dict:
+    """What one case says about which detectors could run on this player, and which fired.
+
+    ``evaluated`` is each detector's eligible units. ``not_evaluated`` is, for each detector in ``kinds`` (the
+    ones the dataset can run) with no eligible unit, why: the player-level rollup of its eligibility. A case
+    written before cases recorded eligibility has it inferred from what the case does record, as P8 did, and
+    its reason is ``not_recorded``.
+    """
+    block = case["evidence"]
+    recorded = block.get("detector_eligibility")
+    if isinstance(recorded, Mapping):
+        evaluated = {kind: set(entry.get("eligible", ())) for kind, entry in recorded["detectors"].items()}
+        not_evaluated = {kind: rollup(entry) for kind, entry in recorded["detectors"].items() if kind in kinds and not entry.get("eligible")}
+    else:
+        evaluated = _inferred(case, profile)
+        not_evaluated = {kind: "not_recorded" for kind in kinds if not evaluated.get(kind)}
+    return _row(case, label, labels, evaluated, not_evaluated, checked=recorded is not None)
+
+
+def _inferred(case: Mapping, profile: GameProfile) -> dict[str, set[str]]:
+    """P8's eligibility, for a case that does not record its own: compared metrics, metric rows that were not
+    skipped, and enough eligible movement samples."""
     block = case["evidence"]
     extras = {spec.name: spec.kind for spec in profile.extra_metrics}
     evaluated: dict[str, set[str]] = defaultdict(set)
-    partial: dict[str, set[str]] = defaultdict(set)
     for entry in block["eligibility"]["compared"]:
         metric, key = entry["metric"], entry["key"]
         if metric in PAST_HUMAN:
@@ -328,27 +349,17 @@ def player_row(case: Mapping, label: str, profile: GameProfile, labels: Mapping[
         if metric in extras:
             evaluated["extra" if extras[metric] == "primary" else "supporting_extra"].add(f"{metric}:{key}")
     for row in case["metrics"]:
-        name, key, skipped = row["name"], row["key"], row["skipped"]
-        if name in PAST_HUMAN and skipped:
-            partial[PAST_HUMAN[name]].add(key)
-            partial["rank_tail"].add(f"{name}:{key}")
         for kind, metric in ROW_KINDS.items():
-            if name == metric:
-                (partial if skipped else evaluated)[kind].add(key)
-    for entry in case.get("untrained") or []:
-        name, sep, _group = entry.partition(":")
-        if sep and name in extras:
-            partial["extra" if extras[name] == "primary" else "supporting_extra"].add(entry)
-            if extras[name] == "primary":
-                partial["rank_tail"].add(entry)
-        elif not sep:
-            partial["rank_tail"].add(f"recoil:{entry}")
+            if row["name"] == metric and not row["skipped"]:
+                evaluated[kind].add(row["key"])
     speed = case.get("speed") or {}
-    eligible = int(speed.get("eligible") or 0)
-    if eligible >= profile.speed_min_run:
+    if int(speed.get("eligible") or 0) >= profile.speed_min_run:
         evaluated["speed"].add("")
-    elif eligible:
-        partial["speed"].add("")
+    return evaluated
+
+
+def _row(case: Mapping, label: str, labels: Mapping[str, str], evaluated: Mapping[str, set[str]], not_evaluated: Mapping[str, str], *, checked: bool) -> dict:
+    block = case["evidence"]
     fired: dict[str, set[str]] = defaultdict(set)
     counts: Counter = Counter()
     partners: dict[str, set[str]] = defaultdict(set)
@@ -359,13 +370,13 @@ def player_row(case: Mapping, label: str, profile: GameProfile, labels: Mapping[
         native.append(obs)
         kind = _kind(obs)
         counts[kind] += 1
-        fired[kind].add(_unit(obs))
+        fired[kind].add(eligibility_unit(obs))
         if obs["family"] == "relationship" and obs["evidence"].get("partner"):
             partners[kind].add(obs["evidence"]["partner"])
     for kind, units in fired.items():
-        if NEEDS[kind].get("case") and not units <= evaluated[kind]:
+        if (checked or NEEDS[kind].get("case")) and not units <= set(evaluated.get(kind, ())):
             raise EvaluationError(
-                f"{case['player_id']}: {kind} fired on {sorted(units - evaluated[kind])}, which the case does not record as compared. "
+                f"{case['player_id']}: {kind} fired on {sorted(units - set(evaluated.get(kind, ())))}, which the case does not record as compared. "
                 "The eligibility rules here disagree with the scorer"
             )
     inputs = (block.get("provenance") or {}).get("inputs") or {}
@@ -377,7 +388,7 @@ def player_row(case: Mapping, label: str, profile: GameProfile, labels: Mapping[
         "matches": int(inputs.get("matches") or len(case.get("match_ids") or [])),
         "band": case["skill_band"],
         "evaluated": {kind: sorted(units) for kind, units in sorted(evaluated.items()) if units},
-        "partial": {kind: sorted(units - evaluated[kind]) for kind, units in sorted(partial.items()) if units - evaluated[kind]},
+        "not_evaluated": dict(sorted(not_evaluated.items())),
         "fired": {kind: sorted(units) for kind, units in sorted(fired.items())},
         "observations": dict(sorted(counts.items())),
     }
@@ -533,6 +544,28 @@ def _evidence_amount(rows: list[dict], dataset: Mapping) -> list[dict]:
 
 
 def _coverage(rows: list[dict], kinds: Iterable[str]) -> dict:
+    """Who a detector (or any of a family's) could run on, and why not for everyone else: each player counted once,
+    under the reason closest to running. A /1 artifact's rows carry P8's inferred breakdown instead."""
+    kinds = tuple(kinds)
+    if any("partial" in row for row in rows):
+        return _coverage_v1(rows, kinds)
+    players = len(rows)
+    why: Counter = Counter()
+    for row in rows:
+        if any(kind in row["evaluated"] for kind in kinds):
+            continue
+        reasons = [row["not_evaluated"].get(kind, "not_recorded") for kind in kinds]
+        why[min(reasons, key=COVERAGE_STATUSES.index)] += 1
+    evaluated = players - sum(why.values())
+    return {
+        "players": players,
+        "evaluated": evaluated,
+        "insufficient": players - evaluated,
+        "by_status": {status: why[status] for status in COVERAGE_STATUSES if why[status]},
+    }
+
+
+def _coverage_v1(rows: list[dict], kinds: tuple[str, ...]) -> dict:
     players = len(rows)
     evaluated = sum(any(kind in row["evaluated"] for kind in kinds) for row in rows)
     with_input = sum(any(kind in row["evaluated"] or kind in row["partial"] for kind in kinds) for row in rows)
@@ -710,6 +743,10 @@ def statistics(rows: list[dict], dataset: Mapping, observable: Mapping[str, Mapp
     for kind in NATIVE_KINDS:
         family, check, role = KINDS[kind]
         entry: dict = {"kind": kind, "family": family, "check": check, "role": role, "observability": dict(observable[kind])}
+        if family == "challenge":
+            # No public dataset carries planned challenges: whatever a run shows, it is never real-world calibration.
+            entry["real_world_calibration"] = "unavailable"
+            entry["controlled_fixture"] = "fpsdet evaluate fixtures: planted by construction, never a real-world rate"
         if not observable[kind]["observable"]:
             fired = Counter(row["label"] for row in labelled if kind in row["fired"])
             if fired and observable[kind]["reasons"] != ["eligibility_not_recorded"]:
@@ -718,9 +755,6 @@ def statistics(rows: list[dict], dataset: Mapping, observable: Mapping[str, Mapp
             if fired:
                 # Counts with no denominator: nobody can say who it could have fired on.
                 entry["fired_players"] = {group["label"]: fired[group["label"]] for group in groups}
-            if family == "challenge":
-                entry["real_world_calibration"] = "unavailable"
-                entry["controlled_fixture"] = "fpsdet evaluate fixtures: planted by construction, never a real-world rate"
             detectors.append(entry)
             continue
         entry.update(_measure(labelled, dataset, (kind,)))
@@ -802,7 +836,7 @@ def config() -> dict:
 
 def artifact_digest(artifact: Mapping) -> str:
     body = {key: value for key, value in artifact.items() if key != "digest"}
-    return _sha(EVALUATION_SCHEMA, canonical_json(body).encode("utf-8"))
+    return _sha(artifact.get("schema", EVALUATION_SCHEMA), canonical_json(body).encode("utf-8"))
 
 
 def _run_provenance(cases: list[dict]) -> dict:
@@ -868,12 +902,16 @@ def evaluate(cases: list[dict], labels: Mapping[str, str], dataset: Mapping, pro
         if problems:
             raise EvaluationError("the dataset's telemetry declaration does not match the events: " + "; ".join(problems))
     history = any(mode != "none" for mode in run["history"])
-    observable = observability(profile, dataset["telemetry"], server_shot_timing=dataset["server_shot_timing"], history=history)
+    recorded = sum(isinstance(case["evidence"].get("detector_eligibility"), Mapping) for case in cases)
+    observable = observability(
+        profile, dataset["telemetry"], server_shot_timing=dataset["server_shot_timing"], history=history, recorded=recorded == len(cases)
+    )
+    runnable = [kind for kind in NATIVE_KINDS if observable[kind]["observable"]]
     undefined = sorted(set(labels.values()) - {group["label"] for group in dataset["labels"]})
     if undefined:
         raise EvaluationError(f"the labels use {undefined}, which the dataset definition does not explain")
     rows = sorted(
-        (player_row(case, labels[case["player_id"]], profile, labels) for case in cases if case["player_id"] in labels),
+        (player_row(case, labels[case["player_id"]], profile, labels, runnable) for case in cases if case["player_id"] in labels),
         key=lambda row: row["player"],
     )
     unlabelled = sum(case["player_id"] not in labels for case in cases)
@@ -888,6 +926,8 @@ def evaluate(cases: list[dict], labels: Mapping[str, str], dataset: Mapping, pro
             "recipe": INPUTS_RECIPE,
             "digest": inputs_digest(cases),
             "packets_verified": len(cases),
+            # Where each case's detector eligibility came from: recorded by the scorer, or inferred as P8 did.
+            "eligibility": {"recorded": recorded, "inferred": len(cases) - recorded},
             **run,
         },
         "labels": {"recipe": LABELS_RECIPE, "digest": labels_digest(labels), "counts": label_counts},
@@ -908,8 +948,8 @@ def verify_artifact(artifact: Mapping) -> list[str]:
     """Is an evaluation artifact what it says? Empty when it is. The statistics are recomputed from its rows
     by this code; a different evaluator digest alone is not a problem when they come out the same."""
     problems = []
-    if artifact.get("schema") != EVALUATION_SCHEMA:
-        return [f"not {EVALUATION_SCHEMA}"]
+    if artifact.get("schema") not in READABLE:
+        return [f"not one of {', '.join(READABLE)}"]
     if artifact.get("digest") != artifact_digest(artifact):
         problems.append("the artifact digest does not match its contents")
     try:
@@ -971,6 +1011,10 @@ def _md(text: str) -> str:
 
 
 STRATUM_NAMES = {"matches": "matches", "key": "weapon or group", "skill_band": "skill band"}
+COVERAGE_NAMES = {
+    "baseline_too_thin": "Baseline too thin", "insufficient_samples": "Too few samples", "conflict": "Conflict",
+    "telemetry_unavailable": "No telemetry", "disabled": "Disabled", "not_applicable": "Not applicable", "not_recorded": "Not recorded",
+}
 
 
 def render_markdown(artifact: Mapping) -> str:
@@ -1098,16 +1142,27 @@ def render_markdown(artifact: Mapping) -> str:
     add("")
     add("## Coverage")
     add("")
-    add("Who each detector could run on. Below the sample minimum: too few shots or samples to compute its number. Thin baseline: the number was computed but the cohort to compare it with was too thin.")
-    add("")
-    add("| Detector | Group | Players | With input | Could run | Below sample minimum | Thin baseline |")
-    add("| --- | --- | ---: | ---: | ---: | ---: | ---: |")
+    v1 = artifact["schema"] == EVALUATION_V1
+    if v1:
+        add("Who each detector could run on. Below the sample minimum: too few shots or samples to compute its number. Thin baseline: the number was computed but the cohort to compare it with was too thin.")
+        add("")
+        add("| Detector | Group | Players | With input | Could run | Below sample minimum | Thin baseline |")
+        add("| --- | --- | ---: | ---: | ---: | ---: | ---: |")
+    else:
+        add("Who each detector could run on, and why not for everyone else, as each case records it (`evidence.detector_eligibility`). A player is counted once, under the reason closest to running.")
+        add("")
+        add("| Detector | Group | Players | Could run | " + " | ".join(COVERAGE_NAMES[status] for status in COVERAGE_STATUSES) + " |")
+        add("| --- | --- | ---: | ---: |" + " ---: |" * len(COVERAGE_STATUSES))
     for entry in stats["detectors"]:
         if entry["status"] == "not_observable":
             continue
         for label in (positive, *comparisons):
             cell = entry["coverage"][label]
-            add(f"| {entry['kind']} | {_md(names[label])} | {cell['players']:,} | {cell['with_input']:,} | {cell['evaluated']:,} | {cell['below_sample_minimum']:,} | {cell['thin_baseline']:,} |")
+            if v1:
+                add(f"| {entry['kind']} | {_md(names[label])} | {cell['players']:,} | {cell['with_input']:,} | {cell['evaluated']:,} | {cell['below_sample_minimum']:,} | {cell['thin_baseline']:,} |")
+            else:
+                why = cell["by_status"]
+                add(f"| {entry['kind']} | {_md(names[label])} | {cell['players']:,} | {cell['evaluated']:,} | " + " | ".join(f"{why.get(status, 0):,}" for status in COVERAGE_STATUSES) + " |")
     add("")
     add("**Observation level.** Units are a weapon, or a metric on a weapon, instead of a player. One player's units are not independent, so these are counts and plain shares with no interval.")
     add("")
@@ -1199,6 +1254,8 @@ def render_markdown(artifact: Mapping) -> str:
     add("")
     inputs = artifact["inputs"]
     add(f"- Cases: {inputs['cases']:,}, every evidence packet verified; input identity `{inputs['digest']}`")
+    if "eligibility" in inputs:
+        add(f"- Detector eligibility: recorded by the scorer on {inputs['eligibility']['recorded']:,} cases, inferred on {inputs['eligibility']['inferred']:,}")
     add(f"- Detector `{inputs['detector']}`, profile `{inputs['profile']}`, cohort `{inputs['cohort']}` ({inputs['cohort_mode']})")
     add(f"- Labels `{artifact['labels']['digest']}`")
     add(f"- Evaluator `{artifact['evaluator']['digest']}`")
