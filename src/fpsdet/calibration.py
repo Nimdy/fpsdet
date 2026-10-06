@@ -1320,15 +1320,15 @@ TWINS = {
 }
 
 
-def qualify_fixtures() -> dict:
+def qualify_fixtures(demo=None, world=None) -> dict:
     """Does each planted behaviour trip the detector built for it, and does each honest twin stay clean?
     Outcomes per fixture player, never a rate: these players are planted by construction. Two worlds: the
-    planted demo, and the controlled fixtures beside it (fpsdet.fixtures)."""
+    planted demo, and the controlled fixtures beside it (fpsdet.fixtures); pass them in if already built."""
     from . import fixtures as controlled
     from .synthetic import EXPECT, build_demo
 
-    demo = build_demo()
-    world = controlled.build_fixtures()
+    demo = demo or build_demo()
+    world = world or controlled.build_fixtures()
     fired = {("demo", case.player_id): {obs.kind for obs in case.evidence} for case in demo.cases}
     fired.update({("fixtures", case.player_id): {obs.kind for obs in case.evidence} for case in world.cases})
     plants = [("demo", player, kinds) for player, kinds in PLANTED.items()] + [("fixtures", player, kinds) for player, kinds in controlled.PLANTED.items()]

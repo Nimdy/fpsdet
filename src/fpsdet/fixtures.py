@@ -13,6 +13,7 @@ other player differs from a human in one way, on purpose. Standard library only,
 from __future__ import annotations
 
 import random
+from pathlib import Path
 from dataclasses import dataclass, field
 
 from .baseline import build_cohorts
@@ -327,3 +328,169 @@ def fixture_failures(fixtures: Fixtures) -> list[str]:
     humans_flagged = [pid for pid, case in by_id.items() if pid.startswith("fx-human-") and case.decision == "review"]
     failures += [f"{pid}: a background human went to review" for pid in humans_flagged]
     return failures
+
+
+# Challenge scenarios: event-level stand-ins for cheats that know challenges exist, against four
+# challenges in one match. Not cheat software: what each behaviour looks like to the server. The plan
+# uses a public key and nonce so the scenarios are the same on every run; never a real server's key.
+
+CHALLENGE_KEY = bytes(range(32))  # public, the same test vector tests/test_challenge.py pins
+CHALLENGE_NONCE = "0" * 32
+CHALLENGE_SCENARIOS = (
+    # (id, behaviour, expected)
+    ("naive_reader", "A naive packet or memory reader follows every challenge", "caught"),
+    ("first_probe_reader", "Follows the first probe, then ignores every later one", "caught"),
+    ("brief_reactions", "Reacts to every probe for about 300 ms, then lets go", "not_caught"),
+    ("delayed_reader", "Waits 3 s into the window before following", "caught"),
+    ("last_second_reader", "Waits until the last second of the window", "not_caught"),
+    ("every_second_challenge", "Follows every second challenge", "caught"),
+    ("visible_enemy_cover", "Follows probes only while a visible enemy is in the same aim cone", "not_caught"),
+    ("radar_declared", "The game declares a radar channel the challenge does not defeat", "abstained"),
+    ("team_share_declared", "The game declares teammate sharing the challenge does not defeat", "abstained"),
+    ("ability_declared", "The game declares an ability channel the challenge does not defeat", "abstained"),
+)
+
+
+def challenge_scenarios() -> list[dict]:
+    """Each scenario's outcome: caught (a followed challenge, a review), not_caught, or abstained (the
+    declared knowledge makes the challenge unjudgeable). Never a rate."""
+    import dataclasses
+
+    from .challenge import Budget, ChallengeRegistry
+    from .challenge_plan import ServerSecret, plan_match
+    from .persist import case_to_dict
+
+    profile = GameProfile(game_id="benchmark-challenge")
+    planned = plan_match(ServerSecret(CHALLENGE_KEY), profile, "m1", ["x"], Budget(to_ms=1_500_000, count=4), nonce=CHALLENGE_NONCE)
+    plans = list(planned.plans)
+    registry = ChallengeRegistry.from_files([planned])
+
+    def follow(plan, n: int = 20, every: int = 100, track: float | None = None, offset: int = 0, **fields) -> list[Event]:
+        return [
+            Event(game_id=profile.game_id, match_id=plan.match_id, player_id="x", t_ms=plan.start_ms + offset + index * every,
+                  event_type="shot", skill_band="average", weapon_class="rifle", weapon_id="ak", challenge_id=plan.challenge_id,
+                  challenge_track_ms=float(every if track is None else track), **fields)
+            for index in range(1, n + 1)
+        ]
+
+    def ignore(plan) -> list[Event]:
+        return follow(plan, track=0.0)
+
+    first = plans[0]
+    length = first.end_ms - first.start_ms
+    behaviours = {
+        "naive_reader": [e for plan in plans for e in follow(plan, n=40)],
+        "first_probe_reader": follow(first, n=40) + [e for plan in plans[1:] for e in ignore(plan)],
+        "brief_reactions": [e for plan in plans for e in follow(plan, n=3) + follow(plan, n=10, track=0.0, offset=300)],
+        "delayed_reader": follow(first, n=10, track=0.0) + follow(first, n=(length - 3_000) // 100 - 1, offset=3_000),
+        "last_second_reader": follow(first, n=(length - 900) // 100, track=0.0) + follow(first, n=8, offset=length - 900),
+        "every_second_challenge": [e for index, plan in enumerate(plans) for e in (follow(plan, n=40) if index % 2 == 0 else ignore(plan))],
+        "visible_enemy_cover": [e for plan in plans for e in follow(plan, n=40, enemy_id="e1", information_state="visible")],
+    }
+    channels = {"radar_declared": "radar", "team_share_declared": "team_share", "ability_declared": "ability"}
+    out = []
+    for scenario, behaviour, expected in CHALLENGE_SCENARIOS:
+        if scenario in channels:
+            declared = dataclasses.replace(profile, knowledge_channels=("vision", "audio", channels[scenario]))
+            events, scored_with = follow(first), declared
+        else:
+            events, scored_with = behaviours[scenario], profile
+        (case,) = [case_to_dict(case) for case in run_score(events, scored_with, challenges=registry) if case.player_id == "x"]
+        findings = [obs for obs in case["evidence"]["observations"] if obs["kind"] == "occluded_motion_replay"]
+        statuses: dict[str, int] = {}
+        for row in case["evidence"].get("challenges", []):
+            statuses[row["status"]] = statuses.get(row["status"], 0) + 1
+        observed = "caught" if findings else ("abstained" if statuses.get("abstained") else "not_caught")
+        out.append({
+            "scenario": scenario, "behaviour": behaviour, "expected": expected, "observed": observed,
+            "decision": case["decision"], "findings": len(findings), "challenges": dict(sorted(statuses.items())),
+            "as_expected": observed == expected,
+        })
+    return out
+
+
+# External-authentication scenarios: what fpsdet does with a provider's record under each signature state.
+# They prove protocol semantics, never a vendor detector's accuracy. They sign with the public test keys
+# (tests/fixtures/auth-test-keys.json), which belong to a fictional provider.
+
+AUTH_SCENARIOS = (
+    # (id, what, expected status, read as evidence?)
+    ("unsigned", "A record that only names its provider", "unsigned", True),
+    ("verified", "Signed by the provider's active key", "verified", True),
+    ("retired_key", "Signed by a retired key, before it retired", "verified", True),
+    ("invalid", "A signed claim edited after signing", "invalid", False),
+    ("revoked", "Signed by a revoked key", "revoked_key", False),
+    ("unsupported_algorithm", "A signature in an algorithm the registry does not use", "unsupported_algorithm", False),
+    ("unknown_key", "Signed by a key the registry does not hold", "unknown_key", True),
+    ("adapter_other_provider", "A valid signature read through another provider's adapter", "invalid", False),
+    ("adapter_changed_field", "A signed record whose mapped field was changed", "invalid", False),
+    ("self_vouching", "A record that carries its own public key to vouch for itself", "refused", False),
+)
+
+
+def auth_scenarios(root: Path | None = None) -> dict:
+    """Each scenario's signature state and whether the record was read. Needs the optional cryptography
+    package; without it the section says so and runs nothing."""
+    import json
+    import tempfile
+
+    try:
+        import cryptography  # noqa: F401
+    except ImportError:
+        return {"status": "not_run", "why": "the optional cryptography package is not installed (pip install 'fpsdet[auth]')", "scenarios": []}
+    from .auth import load_registry, sign
+    from .external import adapter_from_dict, load_adapter, read_external
+
+    root = root or Path(__file__).resolve().parents[2]
+    examples = root / "examples" / "external"
+    keys = json.loads((root / "tests" / "fixtures" / "auth-test-keys.json").read_text(encoding="utf-8"))
+    seeds = {key["key_id"]: bytes.fromhex(key["private_seed"]) for key in keys["keys"]}
+    registry = load_registry(examples / "registry.json")
+    adapter_doc = json.loads((examples / "example-integrity.adapter.json").read_text(encoding="utf-8"))
+    raw = json.loads((examples / "example-integrity.ndjson").read_text(encoding="utf-8").splitlines()[0])
+
+    def native(**values) -> dict:
+        record = {"format": "fpsdet.external/1", "provider": "example-integrity", "source_class": "client_integrity",
+                  "kind": "memory_integrity_anomaly", "direction": "adverse", "subject_id": "x", "match_id": "m1"}
+        record.update(values)
+        return record
+
+    def signed(claim: dict, key_id: str = "2026-01", label: str | None = None) -> dict:
+        return sign(claim, seeds[key_id], "example-integrity", label or key_id)
+
+    tampered = signed(native())
+    tampered["claim"]["kind"] = "something_else"
+    odd = signed(native())
+    odd["signature"]["algorithm"] = "rsa-pss"
+    changed = signed(raw)
+    changed["claim"]["detection"]["score"] = 99
+    with_key = signed(native())
+    with_key["signature"]["public_key"] = json.loads((examples / "registry.json").read_text())["providers"]["example-integrity"]["keys"][0]["public_key"]
+    other = adapter_from_dict({**adapter_doc, "provider": "another-vendor"})
+    rows = {
+        "unsigned": ([native()], None),
+        "verified": ([signed(native())], None),
+        "retired_key": ([signed(native(), "2025-07")], None),
+        "invalid": ([tampered], None),
+        "revoked": ([signed(native(), "2024-11")], None),
+        "unsupported_algorithm": ([odd], None),
+        "unknown_key": ([signed(native(), label="2027-01")], None),
+        "adapter_other_provider": ([signed(raw)], other),
+        "adapter_changed_field": ([changed], load_adapter(examples / "example-integrity.adapter.json")),
+        "self_vouching": ([with_key], None),
+    }
+    out = []
+    with tempfile.TemporaryDirectory() as folder:
+        for scenario, what, expected, read_as_evidence in AUTH_SCENARIOS:
+            lines, adapter = rows[scenario]
+            path = Path(folder) / f"{scenario}.ndjson"
+            path.write_text("".join(json.dumps(line) + "\n" for line in lines), encoding="utf-8")
+            loaded = read_external([(path, adapter)], registry=registry)
+            states = dict(sorted(loaded.sources[0].authentication.items()))
+            read = bool(loaded.records)
+            status = next(iter(loaded.records.values())).auth.status if read else (next(iter(states)) if states else "refused")
+            out.append({
+                "scenario": scenario, "what": what, "expected": expected, "observed": status, "read": read,
+                "as_expected": status == expected and read == read_as_evidence,
+            })
+    return {"status": "run", "scenarios": out}
