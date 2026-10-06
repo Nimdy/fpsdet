@@ -14,6 +14,7 @@ from .baseline import build_cohorts, screen_matches
 from .casefile import safe_name, write_case
 from .challenge import CURRENT, Budget, ChallengeError, ChallengeRegistry, case_problems, plan_file_from_dict
 from .challenge_plan import SECRET_ENV, SecretError, load_secret, new_secret_file, plan_match, reproduce
+from .external import ExternalError, load_adapter, read_external
 from .lake import ingest_lines, read_lines
 from .parse import iter_events, load_events, load_profile
 from .provenance import ProvenanceMismatch
@@ -258,10 +259,11 @@ def cmd_score(args: argparse.Namespace) -> int:
             challenges = ChallengeRegistry.from_files(plan_file_from_dict(read_json(path), path) for path in args.challenges)
         except ChallengeError as error:
             raise SystemExit(str(error))
+    external = _external_from_args(args)
     if args.reported_only:
         wanted = {pid for pid, count in reports.items() if count > 0}
         events = [event for event in events if event.player_id in wanted]
-    cases = run_score(events, profile, cohort, history, reports, challenges)
+    cases = run_score(events, profile, cohort, history, reports, challenges, external)
     _print_cases(cases)
     if args.out:
         table = cohort if cohort is not None else build_cohorts(summarize(events, profile), profile)
@@ -274,6 +276,24 @@ def cmd_score(args: argparse.Namespace) -> int:
             if case.ai_brief:
                 print(f"\n{case.player_id}: {case.ai_brief}")
     return 0
+
+
+def _external_from_args(args: argparse.Namespace):
+    """External records from --external (the native format) and --external-mapped (an adapter and its file),
+    or None when neither was given. Bad lines are reported and skipped unless --external-strict."""
+    sources = [(path, None) for path in args.external or []]
+    try:
+        sources += [(path, load_adapter(adapter)) for adapter, path in args.external_mapped or []]
+        if not sources:
+            return None
+        external = read_external(sources, strict=args.external_strict)
+    except ExternalError as error:
+        raise SystemExit(f"external evidence: {error}")
+    for error in external.errors[:50]:
+        print(f"external evidence: {error}", file=sys.stderr)
+    if len(external.errors) > 50:
+        print(f"external evidence: {len(external.errors) - 50} more lines not read", file=sys.stderr)
+    return external
 
 
 def cmd_dashboard(args: argparse.Namespace) -> int:
@@ -456,6 +476,12 @@ def build_parser() -> argparse.ArgumentParser:
     score.add_argument("--reports", help="JSON map of player_id to report count. Priority, not proof.")
     score.add_argument("--reported-only", action="store_true", help="Only score players who have reports")
     score.add_argument("--challenges", action="append", help="A public challenge plan file. Repeat for more matches")
+    score.add_argument("--external", action="append", help="External records in the fpsdet.external/1 format. Repeat for more files")
+    score.add_argument(
+        "--external-mapped", nargs=2, action="append", metavar=("ADAPTER", "RECORDS"),
+        help="A provider's records and the fpsdet.external-adapter/1 file that maps them. Repeat for more",
+    )
+    score.add_argument("--external-strict", action="store_true", help="Stop on the first external line that cannot be read")
     score.add_argument("--out")
     score.add_argument("--ai", action="store_true", help="Attach a brief from any OpenAI-compatible endpoint")
     score.set_defaults(func=cmd_score)

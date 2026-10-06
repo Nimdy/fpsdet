@@ -198,6 +198,7 @@ def verify(rows: dict[str, dict]) -> dict:
         stamp = dict(block.get("provenance") or {})
         inputs = stamp.pop("inputs", None)
         stamp.pop("history", None)  # per player, like the inputs
+        stamp.pop("external", None)  # per player too
         result["provenance"][json.dumps(stamp, sort_keys=True) if stamp else "none"] += 1
         if inputs and str(inputs.get("digest", "")).startswith("sha256:") and inputs.get("events", 0) > 0:
             result["inputs"] += 1
@@ -206,7 +207,12 @@ def verify(rows: dict[str, dict]) -> dict:
         problems = []
         if implied_decision(block) != row["decision"]:
             problems.append(f"{pid}: decision {row['decision']}, evidence implies {implied_decision(block)}")
-        if {KINDS[obs["kind"]][1] for obs in observations} != set(row["checks"]):
+        fusion = block.get("fusion")
+        if fusion is not None:
+            native = {**block, "observations": [obs for obs in observations if obs["family"] != "external"]}
+            if implied_decision(native) != fusion["native_decision"] or fusion["decision"] != row["decision"]:
+                problems.append(f"{pid}: the fusion block does not match the native and external evidence")
+        if {KINDS[obs["kind"]][1] for obs in observations} - {""} != set(row["checks"]):
             problems.append(f"{pid}: checks do not match the evidence")
         if sorted(obs["context"]["line"] for obs in observations if obs["context"]["printed_in"] == "reasons") != sorted(row["reasons"]):
             problems.append(f"{pid}: reasons do not match the evidence")

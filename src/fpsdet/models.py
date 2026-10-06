@@ -393,6 +393,8 @@ class Case:
     provenance: CaseProvenance | None = None
     # One result per challenge this player was given or named, followed or not (fpsdet.challenge.ChallengeResult).
     challenges: list = field(default_factory=list)
+    # How external records met the native decision (fpsdet.external.fuse); None when the run had no external input.
+    fusion: dict | None = None
     limits: str = (
         "This case is evidence for a person. It is not a ban. "
         "A sustained gear-rule break or a result past the best measured humans "

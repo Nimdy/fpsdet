@@ -47,6 +47,7 @@ INPUTS_RECIPE = "fpsdet.player-events/2"
 # carry it still verify; nothing writes it any more.
 ARRIVAL_INPUTS_RECIPE = "fpsdet.player-events/1"
 HISTORY_RECIPE = "fpsdet.history/1"
+EXTERNAL_INPUT_RECIPE = "fpsdet.external-input/1"
 PACKET_RECIPE = "fpsdet.packet/1"
 
 PACKAGE = "fpsdet"
@@ -60,6 +61,7 @@ DETECTOR_MODULES = (
     "fpsdet.baseline",
     "fpsdet.challenge",
     "fpsdet.evidence",
+    "fpsdet.external",
     "fpsdet.knowledge",
     "fpsdet.models",
     "fpsdet.parse",
@@ -91,7 +93,6 @@ NOT_DETECTOR = {
     "fpsdet.synthetic": "the planted demo players",
     "fpsdet.week": "the synthetic week",
     "fpsdet.challenge_plan": "plans challenges with the server secret; detection never imports it, so scoring never needs the secret",
-    "fpsdet.external": "external records and adapters; scoring does not read them yet",
 }
 # GameProfile fields the scorer never reads. Editing them changes no detection.
 PROFILE_NOT_MATERIAL = frozenset({"notes"})
@@ -403,6 +404,52 @@ def history_provenance(rows: list | None) -> HistoryProvenance:
 
 
 @dataclass(frozen=True)
+class ExternalProvenance:
+    """The external records a run attached to one player, and the files the run read them from.
+
+    ``none`` means the run was given no external input. ``supplied`` means it was, even when none of it
+    was about this player: then ``records`` is 0 and the digest is that of no records. The sources are the
+    run's, the same on every case: each file's SHA-256, its adapter, and how many records it added,
+    repeated, or could not be read.
+    """
+
+    mode: str
+    digest: str | None = None
+    records: int = 0
+    sources: tuple = ()
+
+    def to_dict(self) -> dict:
+        if self.mode == "none":
+            return {"mode": "none"}
+        return {
+            "mode": self.mode,
+            "recipe": EXTERNAL_INPUT_RECIPE,
+            "digest": self.digest,
+            "records": self.records,
+            "sources": [dict(source) for source in self.sources],
+        }
+
+
+def external_digest(record_digests: Iterable[str]) -> str:
+    """``fpsdet.external-input/1``: SHA-256 over the recipe, the record count, and each record's own whole
+    ``fpsdet.external/1`` digest, sorted, each followed by a zero byte. File order does not show; a changed
+    record, an added one or a removed one does."""
+    rows = sorted(record_digests)
+    hasher = hashlib.sha256(EXTERNAL_INPUT_RECIPE.encode("ascii") + b"\0" + str(len(rows)).encode("ascii") + b"\0")
+    for row in rows:
+        hasher.update(row.encode("ascii") + b"\0")
+    return "sha256:" + hasher.hexdigest()
+
+
+def external_provenance(external, subject_id: str) -> ExternalProvenance:
+    if external is None:
+        return ExternalProvenance("none")
+    records = external.for_subject(subject_id)
+    sources = tuple(source.to_dict() for source in external.sources)
+    return ExternalProvenance("supplied", external_digest(record.digest for record in records), len(records), sources)
+
+
+@dataclass(frozen=True)
 class RunProvenance:
     """What produced every case in one scoring run. One object, shared by every case."""
 
@@ -429,12 +476,14 @@ class CaseProvenance:
     run: RunProvenance
     inputs: PlayerInputs | None = None
     history: HistoryProvenance | None = None
+    external: ExternalProvenance | None = None
 
     def to_dict(self) -> dict:
         return {
             **self.run.to_dict(),
             "inputs": None if self.inputs is None else self.inputs.to_dict(),
             "history": None if self.history is None else self.history.to_dict(),
+            "external": None if self.external is None else self.external.to_dict(),
         }
 
 
@@ -452,11 +501,13 @@ def stamp(
     events: Iterable | None = None,
     timelines: Mapping[str, list] | None = None,
     history: Mapping[str, list] | None = None,
+    external=None,
 ) -> RunProvenance:
     """Give every case of one run its provenance. The run's part is computed once; inputs and history per player.
 
     ``history`` maps each player to the history rows the scorer could read for them (``score.history_for``),
-    or is None when the run was given no history.
+    or is None when the run was given no history. ``external`` is the run's external input
+    (fpsdet.external.ExternalInput), or None when it was given none.
     """
     run = run_provenance(profile, cohort, cohort_mode)
     if timelines is not None:
@@ -465,7 +516,7 @@ def stamp(
         inputs = {} if events is None else player_inputs(events)
     for case in cases:
         rows = None if history is None else history.get(case.player_id, [])
-        case.provenance = CaseProvenance(run, inputs.get(case.player_id), history_provenance(rows))
+        case.provenance = CaseProvenance(run, inputs.get(case.player_id), history_provenance(rows), external_provenance(external, case.player_id))
     return run
 
 

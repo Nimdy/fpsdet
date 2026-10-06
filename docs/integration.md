@@ -63,6 +63,8 @@ Required on every line: `game_id`, `match_id`, `player_id`, and `t_ms` (millisec
 
 `player_id` should be a stable pseudonym. Keep the map from pseudonym to account inside your own network.
 
+Records from other integrity systems, such as a client anti-cheat, an attestation service, a league's rulings or your own detector, are not events. Send them beside the events with `fpsdet score --external` in the `fpsdet.external/1` format, or through an adapter, using the same player pseudonym. [external-evidence.md](external-evidence.md) has the format and the rules: an external record can make a watch, never a review.
+
 ## Movement
 
 Send movement on a fixed cadence (10 Hz is enough). Shots can also carry speed, but a speedhack between shots is invisible if you only sample on the trigger.

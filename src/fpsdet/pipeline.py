@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .baseline import CohortTable, build_cohorts
 from .challenge import ChallengeRegistry
+from .external import ExternalInput, fuse
 from .models import Case, Event, GameProfile, HistoryWindow
 from .provenance import stamp
 from .score import annotate_batch, assess_player, history_for
@@ -23,6 +24,7 @@ def run_score(
     history: list[HistoryWindow] | None = None,
     reports: dict[str, int] | None = None,
     challenges: ChallengeRegistry | None = None,
+    external: ExternalInput | None = None,
 ) -> list[Case]:
     # One canonical timeline per player, built once: the scorer reads it and the input digest binds it.
     timelines = player_timelines(events)
@@ -44,6 +46,8 @@ def run_score(
             case.observations.append(IN_FILE_NOTE)
         cases.append(case)
     annotate_batch(cases, records, profile)
+    # External records last: every native decision, observation and relationship is already made.
+    fuse(cases, external)
     readable = {record.player_id: history_for(record, history) for record in records} if history else None
-    stamp(cases, profile, cohort=table, cohort_mode="in_file" if in_file else "external", timelines=timelines, history=readable)
+    stamp(cases, profile, cohort=table, cohort_mode="in_file" if in_file else "external", timelines=timelines, history=readable, external=external)
     return cases

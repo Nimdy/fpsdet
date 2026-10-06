@@ -30,8 +30,8 @@ What is proven, on every planted case, every case of the synthetic week (weekly 
 | Field | Meaning |
 | --- | --- |
 | `observation_id` | `obs-` and 24 hex digits; see Identity |
-| `source` | `fpsdet`: computed by fpsdet from events a game server wrote. The only source today |
-| `family` | Where the evidence comes from: `physics`, `weapon_rules`, `human_baseline`, `information`, `challenge`, `relationship`, `account_history` |
+| `source` | `fpsdet`: computed by fpsdet from events a game server wrote. `external`: another integrity system's record, carried as given ([external-evidence.md](external-evidence.md)) |
+| `family` | Where the evidence comes from: `physics`, `weapon_rules`, `human_baseline`, `information`, `challenge`, `relationship`, `account_history`, and `external` for external records only |
 | `kind` | The detector. Each kind fires one case check id |
 | `role` | The role the scorer gives it in the decision (below) |
 | `subject_id` | The player the case is about |
@@ -54,10 +54,12 @@ A role says what the scorer does with the finding. There is no confidence number
 | `account_change` | watch | with a `past_human`, a review |
 | `supporting` | nothing | two of different families are a watch; with a `past_human`, a review |
 | `watch` | watch | never part of a review |
+| `external_watch` | watch, when nothing native fired | never part of a review, never counted with a native role, and any number of them is still a watch |
+| `external_context` | nothing | nothing |
 
 "Different metrics" counts the same metric on several weapons once, and each declared metric as its own. "Different families" counts view snaps, acquire timing, and each supporting declared metric. These are the rules of `score.decide`, and the batch passes' rule that a shared leftover or a voice-speed teammate is a watch and never a review.
 
-Every kind has exactly one role, and the model refuses any other. Reports are not observations. They change queue order only.
+Every kind has exactly one role, and the model refuses any other. Reports are not observations. They change queue order only. External records are the two external kinds, `external_signal` (role `external_watch`) and `external_context` (role `external_context`); they add no case check id. Which one a record becomes is decided by the fusion rules.
 
 ## The evidence block
 

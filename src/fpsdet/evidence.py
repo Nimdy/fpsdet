@@ -31,8 +31,10 @@ EVIDENCE_VERSION = 1
 IDENTITY_VERSION = 1
 # Native observations: computed by fpsdet from events a game server wrote.
 SOURCE = "fpsdet"
+# External observations: another integrity system's records, carried as they were given (fpsdet.external).
+EXTERNAL = "external"
 
-FAMILIES = ("physics", "weapon_rules", "human_baseline", "information", "challenge", "relationship", "account_history")
+FAMILIES = ("physics", "weapon_rules", "human_baseline", "information", "challenge", "relationship", "account_history", "external")
 
 # The role the scorer gives a finding. Together these are exactly the inputs of score.decide,
 # plus the batch passes:
@@ -42,7 +44,10 @@ FAMILIES = ("physics", "weapon_rules", "human_baseline", "information", "challen
 #   account_change  a watch on its own; with a past_human, a review
 #   supporting      two from different families are a watch; with a past_human, a review
 #   watch           a watch on its own; never part of a review
-ROLES = ("review", "past_human", "account_change", "supporting", "watch")
+#   external_watch  an external signal: makes a case with no native finding a watch; never part of a review,
+#                   never counted with a native role, and any number of them is still a watch
+#   external_context  an external record that changes no decision
+ROLES = ("review", "past_human", "account_change", "supporting", "watch", "external_watch", "external_context")
 
 # kind -> (family, the case check id it fires, the role the scorer gives it)
 KINDS: dict[str, tuple[str, str, str]] = {
@@ -73,6 +78,9 @@ KINDS: dict[str, tuple[str, str, str]] = {
     "private_replay": ("information", "private_replay", "review"),
     "leftover": ("relationship", "leftover", "watch"),
     "voice": ("relationship", "voice", "watch"),
+    # External records are not fpsdet checks, so they add no case check id and dashboards do not list them.
+    "external_signal": ("external", "", "external_watch"),
+    "external_context": ("external", "", "external_context"),
 }
 
 # Kinds an earlier fpsdet wrote and this one does not. Still readable, never emitted.
@@ -144,8 +152,10 @@ class Observation:
             raise ValueError(f"{self.kind} belongs to {family}, not {self.family}")
         if self.role != role:
             raise ValueError(f"the scorer gives {self.kind} the role {role}, not {self.role}")
-        if self.source != SOURCE:
-            raise ValueError(f"only native fpsdet observations exist yet, not {self.source!r}")
+        if self.source not in (SOURCE, EXTERNAL):
+            raise ValueError(f"an observation comes from fpsdet or from external records, not {self.source!r}")
+        if (self.source == EXTERNAL) != (self.family == "external"):
+            raise ValueError("external records are the external family, and only they are")
         if not isinstance(self.subject_id, str) or not self.subject_id:
             raise ValueError("subject_id must be a non-empty string")
         if not isinstance(self.key, str):
@@ -206,6 +216,7 @@ def evidence_block(
     compared: Iterable[tuple[str, str]],
     provenance: Mapping | None = None,
     challenges: list | None = None,
+    fusion: Mapping | None = None,
 ) -> dict:
     """``case["evidence"]``. ``compared`` lists each (metric, key) the scorer measured against a thick cohort.
 
@@ -214,7 +225,8 @@ def evidence_block(
     ``provenance`` (fpsdet.provenance) names the detector code and parsed profile that produced the
     observations, or is null for a case scored outside a run. It is not part of any observation id.
     ``challenges`` is one result per challenge the player was given or named, followed or not
-    (fpsdet.challenge). The key is there only when there is one.
+    (fpsdet.challenge). The key is there only when there is one. ``fusion`` says how external records met
+    the native decision; it is there only when the run was given external input.
     """
     block = {
         "version": EVIDENCE_VERSION,
@@ -224,6 +236,8 @@ def evidence_block(
     }
     if challenges:
         block["challenges"] = [_clean(result, "challenges") for result in challenges]
+    if fusion is not None:
+        block["fusion"] = _clean(fusion, "fusion")
     return block
 
 
@@ -236,7 +250,9 @@ def _unit(obs: dict) -> str:
 
 
 def implied_decision(block: Mapping) -> str:
-    """The decision the roles in ``case["evidence"]`` imply, by the rules of ``score.decide``.
+    """The decision the roles in ``case["evidence"]`` imply, by the rules of ``score.decide`` and, for external
+    records, the fusion rules (fpsdet.external): an external signal makes a watch at most, and never
+    joins a native role. Leave the external observations out and it gives the native decision.
 
     A test helper and a consumer's check. The scorer does not call it.
     """
@@ -247,6 +263,6 @@ def implied_decision(block: Mapping) -> str:
     changed = bool(roles["account_change"])
     if roles["review"] or len(past) >= 2 or (past and (changed or supporting)):
         return "review"
-    if roles["watch"] or past or changed or len(supporting) >= 2:
+    if roles["watch"] or past or changed or len(supporting) >= 2 or roles["external_watch"]:
         return "watch"
     return "clean" if block["eligibility"]["compared"] else "insufficient_data"

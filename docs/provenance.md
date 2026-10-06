@@ -225,6 +225,10 @@ Canonical form, `fpsdet.history/1`:
 
 The history rows themselves are never written into a case. Cohort files carry stored digests, but history files do not yet; verifying a stored history digest on load can follow the same pattern later.
 
+## External input
+
+When a run is given external records ([external-evidence.md](external-evidence.md)), each case's `provenance.external` binds the ones about its player: `fpsdet.external-input/1`, a SHA-256 over the recipe, the count, and each record's whole `fpsdet.external/1` digest, sorted. It also lists the run's sources: each file's SHA-256, how it was mapped (`fpsdet.external/1` or the adapter's digest), and its counts of records added, repeated and unreadable. A run with no external input says `{"mode": "none"}`, which is not the same as external input with no records about this player (`"records": 0`). Like every digest here, these identify the input. They do not show who wrote it.
+
 ## Challenge plans
 
 A planned challenge has its own public record, digested with `fpsdet.challenge-plan/1`: SHA-256 of the recipe name, a zero byte, and the canonical JSON of its id, type, version, game, match, player, counter, nonce, window and commitment. A challenge observation carries that digest, the commitment and the window in its evidence, so its observation id, and through it the packet, binds the exact plan it was judged against. Neither the secret nor any realization is in it. `fpsdet challenge verify --cases` checks a case's challenge findings against the plan files ([challenges.md](challenges.md)).

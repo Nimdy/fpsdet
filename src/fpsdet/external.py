@@ -28,7 +28,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .evidence import canonical_json
+from .evidence import FLOAT_DIGITS, FORBIDDEN_KEYS, canonical_json
 
 # The native record format, and the recipe of a record's identity.
 RECORD_RECIPE = "fpsdet.external/1"
@@ -146,6 +146,9 @@ def _ms(value, name: str) -> int | None:
 def _number(value, name: str) -> int | float:
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or abs(value) > MAX_NUMBER:
         raise ExternalError(f"{name} must be a finite number no larger than {MAX_NUMBER:g}")
+    if isinstance(value, float) and float(f"{value:.{FLOAT_DIGITS}g}") != value:
+        # Evidence keeps 12 significant digits. A value it would round is refused, never silently changed.
+        raise ExternalError(f"{name} has more than {FLOAT_DIGITS} significant digits")
     return value
 
 
@@ -195,6 +198,8 @@ def _metadata(value) -> tuple[tuple[str, object], ...]:
     for key, item in value.items():
         if not isinstance(key, str) or not KEY.fullmatch(key):
             raise ExternalError("metadata keys must be 1 to 64 letters, digits or underscores, starting with a letter")
+        if key in FORBIDDEN_KEYS:
+            raise ExternalError("metadata cannot carry an action on an account")
         if isinstance(item, str):
             item = _text(item, f"metadata.{key}", MAX_TEXT, required=True)
         elif item is not None and not isinstance(item, bool):
@@ -226,10 +231,12 @@ class ExternalRecord:
     confidence_meaning: str | None
     provider_record_id: str | None  # the provider's own id for the record, when it has one
     metadata: tuple[tuple[str, object], ...] = ()
-    external_id: str = field(default="", init=False)
+    digest: str = field(default="", init=False)  # the whole SHA-256 of the claim
+    external_id: str = field(default="", init=False)  # its first 24 hex digits, as the record's name
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "external_id", external_id(self.material()))
+        object.__setattr__(self, "digest", record_digest(self.material()))
+        object.__setattr__(self, "external_id", "ext-" + self.digest[len("sha256:"):][:24])
 
     def material(self) -> dict:
         """Everything the record claims. Its identity covers all of it, and nothing about where or in what
@@ -249,11 +256,10 @@ class ExternalRecord:
         }
 
 
-def external_id(material: Mapping) -> str:
-    """``fpsdet.external/1``: ``ext-`` and the first 24 hex digits of SHA-256 over the recipe, a zero byte,
-    and the canonical JSON of the record's material."""
-    digest = hashlib.sha256(RECORD_RECIPE.encode("ascii") + b"\0" + canonical_json(dict(material)).encode("utf-8")).hexdigest()
-    return f"ext-{digest[:24]}"
+def record_digest(material: Mapping) -> str:
+    """``fpsdet.external/1``: SHA-256 over the recipe, a zero byte, and the canonical JSON of the record's
+    material. The record's id is ``ext-`` and the first 24 hex digits of it."""
+    return _sha256(RECORD_RECIPE.encode("ascii") + b"\0" + canonical_json(dict(material)).encode("utf-8"))
 
 
 def build_record(values: Mapping) -> ExternalRecord:
@@ -408,6 +414,8 @@ def adapter_from_dict(obj) -> Adapter:
     for key in metadata:
         if not isinstance(key, str) or not KEY.fullmatch(key):
             raise ExternalError("metadata keys must be 1 to 64 letters, digits or underscores, starting with a letter")
+        if key in FORBIDDEN_KEYS:
+            raise ExternalError("metadata cannot carry an action on an account")
     for key, value in constants.items():
         if key == "direction":
             _choice(value, "direction", DIRECTIONS)
@@ -606,3 +614,122 @@ def read_external(
         source.artifact = "sha256:" + hasher.hexdigest()
     return out.finish()
 
+
+
+# Fusion: external evidence next to fpsdet's own, by explicit rules. No score, no weights.
+#
+#   native clean or insufficient_data + a qualifying external signal -> watch     (rule A)
+#   native watch                      + external                     -> watch     (rule B)
+#   native review                     + external                     -> review    (rule C)
+#
+# Any number of signals from any number of providers is still at most a watch (rules D and E). Account
+# status is never a signal (rule F). A person's finding outside fpsdet is kept as theirs, never relabelled
+# as fpsdet's review (rule G). Reports are never read.
+
+FUSION_POLICY = "fpsdet.fusion/1"
+# Classes whose adverse record, scoped to a match fpsdet scored, can make a watch. Account status is about
+# the account's past, not these matches, so it is context only.
+SIGNAL_CLASSES = frozenset({"client_integrity", "platform_attestation", "tournament_finding", "human_review", "custom_detector"})
+ADJUDICATION_CLASSES = frozenset({"tournament_finding", "human_review"})
+NO_FINDING = ("clean", "insufficient_data")
+
+
+def context_reason(record: ExternalRecord, match_ids: set[str]) -> str:
+    """Why a record cannot change a decision, or "" when it is a qualifying signal."""
+    if record.source_class not in SIGNAL_CLASSES:
+        return record.source_class  # account_status
+    if record.direction != "adverse":
+        return record.direction  # favorable or context
+    if record.match_id is None:
+        return "no_match"
+    if record.match_id not in match_ids:
+        return "other_match"
+    return ""
+
+
+def _line(record: ExternalRecord, why: str) -> str:
+    """fpsdet's own sentence about a record. It names the record's id and class, never a provider string, so
+    nothing the provider wrote reaches the case text, the command line or an AI prompt."""
+    name = f"External {record.source_class} record {record.external_id}"
+    if not why:
+        if record.source_class in ADJUDICATION_CLASSES:
+            return f"{name} is a person's finding about a scored match, made outside fpsdet. It is theirs, not an fpsdet review. External evidence can make a watch, never a review."
+        return f"{name} reports something wrong in a scored match. fpsdet did not verify it. External evidence can make a watch, never a review."
+    return {
+        "account_status": f"{name} is about the account's history, not these matches. It does not change the decision.",
+        "favorable": f"{name} reports a check that passed. It does not change the decision.",
+        "context": f"{name} is context. It does not change the decision.",
+        "no_match": f"{name} names no match. It does not change the decision.",
+        "other_match": f"{name} is about a match outside this window. It does not change the decision.",
+    }[why]
+
+
+def observation_for(record: ExternalRecord, subject_id: str, match_ids: set[str], printed_in: str):
+    """One record as an observation of the external family, with its source and every claim kept."""
+    from .evidence import Observation
+
+    why = context_reason(record, match_ids)
+    return Observation(
+        family="external",
+        kind="external_context" if why else "external_signal",
+        role="external_context" if why else "external_watch",
+        subject_id=subject_id,
+        key=record.external_id,
+        match_ids=(record.match_id,) if record.match_id else (),
+        evidence={
+            "external_id": record.external_id,
+            "provider": record.provider,
+            "provider_group": record.provider_group,
+            "source_class": record.source_class,
+            "telemetry_domain": record.telemetry_domain,
+            "kind": record.kind,
+            "direction": record.direction,
+            "scope": {"match_id": record.match_id, "started_ms": record.started_ms, "ended_ms": record.ended_ms, "observed_at": record.observed_at},
+            "confidence": {"value": record.confidence, "scale": record.confidence_scale, "meaning": record.confidence_meaning},
+            "provider_record_id": record.provider_record_id,
+            "metadata": dict(record.metadata),
+            "authenticity": UNVERIFIED,
+            "decision_effect": "watch_at_most" if not why else "none",
+            "context_because": why or None,
+        },
+        context={"line": _line(record, why), "printed_in": printed_in},
+        source="external",
+    )
+
+
+def fuse(cases: Iterable, external: ExternalInput | None) -> None:
+    """Add each player's external records to their case, by the rules above. Runs after every native pass,
+    and reads only the case's decision and matches: never its reports. Without external input it does nothing."""
+    if external is None:
+        return
+    from .models import ACTIONS
+    from .signals import evidence_seal
+
+    for case in cases:
+        native = case.decision
+        matches = set(case.match_ids)
+        records = external.for_subject(case.player_id)
+        signals = [record for record in records if not context_reason(record, matches)]
+        decision = "watch" if signals and native in NO_FINDING else native
+        rule = "none" if not signals else {"watch": "B", "review": "C"}.get(native, "A")
+        for record in records:
+            signal = not context_reason(record, matches)
+            printed_in = "reasons" if signal and decision != native else "observations"
+            observation = observation_for(record, case.player_id, matches, printed_in)
+            case.evidence.append(observation)
+            (case.reasons if printed_in == "reasons" else case.observations).append(observation.context["line"])
+        case.fusion = {
+            "policy": FUSION_POLICY,
+            "native_decision": native,
+            "decision": decision,
+            "rule": rule,
+            "signals": len(signals),
+            "context": len(records) - len(signals),
+            # Recorded for later independence rules. Nothing escalates on them yet.
+            "provider_groups": sorted({record.provider_group for record in signals}),
+            "telemetry_domains": sorted({record.telemetry_domain for record in signals}),
+        }
+        if decision != native:
+            case.decision = decision
+            case.recommended_action = ACTIONS[decision]
+            case.seal = evidence_seal(case)

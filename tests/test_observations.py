@@ -157,7 +157,9 @@ class ImpliedDecisionTest(unittest.TestCase):
         self.assertEqual(implied_decision(block(self.obs("leftover"), compared=())), "watch")
 
     def test_every_case_check_has_a_kind(self):
-        self.assertEqual({check for _, check, _ in KINDS.values()}, set(CHECKS))
+        self.assertEqual({check for _, check, _ in KINDS.values() if check}, set(CHECKS))
+        # External records are not fpsdet checks: they add no case check id.
+        self.assertEqual({kind for kind, (_, check, _) in KINDS.items() if not check}, {"external_signal", "external_context"})
 
 
 def linked(case) -> list[str]:
@@ -168,7 +170,7 @@ def linked(case) -> list[str]:
     implied = implied_decision(block)
     if implied != case.decision:
         problems.append(f"{case.player_id}: decision {case.decision}, evidence implies {implied}")
-    if {KINDS[obs["kind"]][1] for obs in observations} != set(case.checks):
+    if {KINDS[obs["kind"]][1] for obs in observations} - {""} != set(case.checks):
         problems.append(f"{case.player_id}: checks {case.checks}, evidence fires {sorted({KINDS[o['kind']][1] for o in observations})}")
     printed = sorted(obs["context"]["line"] for obs in observations if obs["context"]["printed_in"] == "reasons")
     if printed != sorted(case.reasons):

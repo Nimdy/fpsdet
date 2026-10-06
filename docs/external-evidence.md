@@ -129,6 +129,82 @@ Each record's id is `ext-` and the first 24 hex digits of SHA-256 over `fpsdet.e
 
 A digest is an identity, not a signature. It shows that a record has not changed since it was digested. It does not show who wrote it. Nothing in `fpsdet.external/1` is signed, and fpsdet does not pretend otherwise: every external observation says `authenticity: unverified`. A verified state will exist only when a format carries a signature fpsdet checks.
 
+## Scoring with external records
+
+```bash
+fpsdet score events.ndjson --profile profiles/your-game.json \
+    --external studio-records.ndjson \
+    --external-mapped examples/external/example-integrity.adapter.json vendor-records.ndjson
+```
+
+- `--external FILE` reads `fpsdet.external/1` records. It needs no adapter, and every line must say its format.
+- `--external-mapped ADAPTER FILE` reads a provider's own records through its adapter. A provider format is never guessed from its contents.
+- Both repeat. A record read twice, from one file or two, counts once.
+- `--external-strict` stops on the first line that cannot be read. Without it, such lines are skipped and named on standard error, and the run goes on: external evidence is optional, and a bad file must not stop native scoring.
+
+## Fusion: how external records meet fpsdet's decision
+
+fpsdet makes every native decision first, from its own evidence, with every batch pass. Then each player's external records are added to their case by these rules, and nothing else:
+
+| | Native decision | With a qualifying external signal |
+| --- | --- | --- |
+| A | `clean` or `insufficient_data` | `watch` |
+| B | `watch` | `watch` |
+| C | `review` | `review` |
+
+- **A qualifying signal** is a record that is `adverse`, from any class but `account_status`, and scoped to a match fpsdet scored for that player. Everything else is context and changes nothing: a `favorable` or `context` record, a record with no match, a record about a match outside the window, and every `account_status` record.
+- **D: one provider is one provider.** Two records from one provider are two observations, and still one provider. It makes no difference to the decision, because nothing external goes past a watch.
+- **E: several providers are still a watch.** No number of providers, signals or domains makes a review in this version. Escalation needs calibration and an independence analysis that do not exist yet.
+- **F: account status is history.** A ban on an account's record, however recent, is not evidence about these matches. It is kept as context and never moves a decision.
+- **G: a person's finding stays theirs.** A `tournament_finding` or `human_review` signal can make a watch like any other. Its line says it is someone else's adjudication, never an fpsdet review, and it adds no fpsdet check.
+- **No score.** Nothing is weighted or summed. A provider's confidence is kept and shown, and no rule reads it.
+- **No reports.** The rules read the case's decision and its matches. They never read a report count.
+- **Native evidence is untouched.** No native observation, id, eligibility or challenge result changes, and the native decision is recorded beside the final one.
+
+A signal that moved a case to watch writes its line in `reasons`, so the case says why it is a watch; the seal moves with the decision. Every other external line goes in `observations`, and the reasons and seal stay as they were. `automated_action` is always `none`.
+
+### Independence
+
+`fusion.provider_groups` and `fusion.telemetry_domains` list the groups and domains behind a case's signals. They are recorded so that a later rule can tell "fpsdet's server-side challenge evidence plus an endpoint-integrity signal from an unrelated vendor" from "one vendor's alert, seen twice". In this version they escalate nothing. Two different provider names are not assumed to be independent.
+
+## In the case
+
+Each record becomes one observation, with `source: "external"` and family `external`:
+
+| Field | Value |
+| --- | --- |
+| `kind`, `role` | `external_signal`, `external_watch` for a qualifying signal; `external_context`, `external_context` for the rest |
+| `key` | the record's `external_id` |
+| `match_ids` | the record's match, when it has one |
+| `evidence` | the record id; the provider, group, class, domain, kind and direction; the scope; the confidence with its scale and meaning; the provider's record id; the metadata; `authenticity: "unverified"`; `decision_effect` (`watch_at_most` or `none`); and, for context, `context_because` (`account_status`, `favorable`, `context`, `no_match` or `other_match`) |
+| `context.line` | fpsdet's own sentence about the record |
+
+External records add no id to `checks`, so the dashboards and their filters are as they were.
+
+When the run was given external input, `evidence.fusion` says how the decision was reached:
+
+```json
+"fusion": {"policy": "fpsdet.fusion/1", "native_decision": "clean", "decision": "watch", "rule": "A",
+           "signals": 2, "context": 0, "provider_groups": ["example-integrity"], "telemetry_domains": ["endpoint_memory"]}
+```
+
+`implied_decision` rebuilds the final decision from the roles. Without the external observations it rebuilds `native_decision`. `tools/regress.py verify` checks both on every case.
+
+## Where provider text goes, and where it never goes
+
+- **Into the evidence, as data.** The provider's kind, confidence meaning, record id and metadata are kept in the observation exactly as given, including HTML or text that reads like an instruction.
+- **Never into a sentence.** An external line names the record's class and id, both checked by fpsdet, and nothing a provider wrote. So no provider string reaches `reasons`, `observations`, the command line, the case page, `ops.json`, the dashboard or an AI prompt.
+- **Not to the AI.** The brief is sent the case without its evidence block, as before. It sees fpsdet's sentence about a record, and never the record. Tests send script tags and an injection attempt through every free-text field and look for them on each of those surfaces.
+
+## Provenance
+
+Each case's `evidence.provenance.external` says what external input the run had:
+
+- `{"mode": "none"}`: the run was given no external input.
+- `{"mode": "supplied", "recipe": "fpsdet.external-input/1", "digest": ..., "records": n, "sources": [...]}`: the run was given external input. `records` is how many of the run's records are about this player, and may be 0.
+
+The digest is SHA-256 over the recipe, the record count, and each of this player's records' whole `fpsdet.external/1` digests, sorted. File order does not move it; a changed, added or removed record does. `sources` is the run's: for each file, the SHA-256 of its bytes, `fpsdet.external/1` or the adapter's digest and name, and how many records it added, repeated, or could not read. No timestamp is recorded: a run's provenance does not depend on when it ran.
+
 ## Before external evidence: where it could enter
 
 This audit was written at `ce00ac6`, before anything changed. `tests/test_external.py` (`NativeFusionSurfacesTest`) pins what it describes.

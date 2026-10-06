@@ -76,6 +76,8 @@ Count the kinds of number that are past every human (accuracy, headshot rate, me
 | At least one metric was actually compared, and nothing above fired | clean |
 | Nothing was comparable (short sample, thin cohort, no cap) | insufficient_data |
 
+Those are the native decisions. Then, only when the run was given external records, they meet fpsdet's own decision by explicit rules ([external-evidence.md](external-evidence.md)): a qualifying external signal makes a clean or `insufficient_data` case a watch; a watch stays a watch; a review stays a review. External evidence never makes a review, and reports never take part.
+
 An account-history break is the same weapon and the same rank band: Wilson lower bound of this window (with its design effect) minus Wilson upper bound of the player's own earlier windows is at least `self_jump_gap` (default 0.10), and both windows have at least `min_shots`. A rank change does not count, because the band no longer matches.
 
 ## Speed
@@ -204,6 +206,8 @@ A watch fires when at least `inherit_min_events` (default 4) of those lags are a
 After the per-player reasons are final, the case gets `seal`, the SHA-256 of canonical JSON `{v:1, player_id, game_id, decision, reasons}`. A later batch pass that appends a watch reason reseals that case. An observation on someone who is already a review does not. Observations, reports, party notes, and the brief are not in the hash. The same case hashes the same. Edit a reason and the hash changes. It identifies the packet a reviewer saw. It is not a ban.
 
 ## Reports and parties
+
+Reports are not external evidence and never meet it: the fusion rules read no report count.
 
 `reports.json` is either `{"player-id": 4}` or `{"players": {"player-id": {"reports": 4}}}`. The count is copied onto the case and used only for sort order. Scan order is reported players first, highest count first, then a higher `queue_rank`, then player id. Review order is review, then watch, then clean, then insufficient, and within a decision the higher report count comes first. `queue_rank` does not change review order.
 
