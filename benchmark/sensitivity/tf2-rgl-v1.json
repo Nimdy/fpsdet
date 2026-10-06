@@ -1,0 +1,249 @@
+{
+ "dataset": "tf2-rgl-v1",
+ "draws": [
+  {
+   "draw": "curator",
+   "summary": {
+    "comparison": {
+     "compared": 1605,
+     "flagged": 30,
+     "rate": 0.018692
+    },
+    "equal_evidence_comparison_rate": 0.026316,
+    "positive": {
+     "compared": 182,
+     "flagged": 51,
+     "rate": 0.28022
+    },
+    "queue": {
+     "positive": 51,
+     "size": 97
+    },
+    "ratio": 14.991758,
+    "strength": {
+     "accuracy": {
+      "ratio": 99.0,
+      "stability": "replicated"
+     },
+     "extra": {
+      "ratio": 25.625,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "ratio": 6.99275,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "ratio": 14.3334,
+      "stability": "replicated"
+     }
+    }
+   }
+  },
+  {
+   "draw": 1,
+   "result": "sha256:9126a20c02fc2f500345b99dd8efb3e97443cc4eb50b04af4dc9bea043189adb",
+   "summary": {
+    "comparison": {
+     "compared": 1604,
+     "flagged": 35,
+     "rate": 0.02182
+    },
+    "equal_evidence_comparison_rate": 0.028807,
+    "positive": {
+     "compared": 182,
+     "flagged": 52,
+     "rate": 0.285714
+    },
+    "queue": {
+     "positive": 52,
+     "size": 107
+    },
+    "ratio": 13.093878,
+    "strength": {
+     "accuracy": {
+      "ratio": 123.655,
+      "stability": "replicated"
+     },
+     "extra": {
+      "ratio": 4.68291,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "ratio": 4.65116,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "ratio": 12.5969,
+      "stability": "replicated"
+     }
+    }
+   }
+  },
+  {
+   "draw": 2,
+   "result": "sha256:a14a3937ebf1808d49fe8205ff226a3816c6defb3356996132efca4295a3e785",
+   "summary": {
+    "comparison": {
+     "compared": 1604,
+     "flagged": 36,
+     "rate": 0.022444
+    },
+    "equal_evidence_comparison_rate": 0.048035,
+    "positive": {
+     "compared": 182,
+     "flagged": 51,
+     "rate": 0.28022
+    },
+    "queue": {
+     "positive": 51,
+     "size": 102
+    },
+    "ratio": 12.485348,
+    "strength": {
+     "accuracy": {
+      "ratio": 35.5754,
+      "stability": "replicated"
+     },
+     "extra": {
+      "ratio": 23.9189,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "ratio": 22.0455,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "ratio": 10.3284,
+      "stability": "replicated"
+     }
+    }
+   }
+  },
+  {
+   "draw": 3,
+   "result": "sha256:d719bee4018af3b5b552378197a53eb2405de0abf7f6d3c9aacb6e9dc13c9de3",
+   "summary": {
+    "comparison": {
+     "compared": 1557,
+     "flagged": 45,
+     "rate": 0.028902
+    },
+    "equal_evidence_comparison_rate": 0.048458,
+    "positive": {
+     "compared": 182,
+     "flagged": 52,
+     "rate": 0.285714
+    },
+    "queue": {
+     "positive": 52,
+     "size": 121
+    },
+    "ratio": 9.885714,
+    "strength": {
+     "accuracy": {
+      "ratio": 34.2153,
+      "stability": "replicated"
+     },
+     "extra": {
+      "ratio": 10.7917,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "ratio": 19.5745,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "ratio": 7.89583,
+      "stability": "replicated"
+     }
+    }
+   }
+  },
+  {
+   "draw": 4,
+   "result": "sha256:421fced367cc197ef401c810ef353a3de65714b5c553070015628b006822987c",
+   "summary": {
+    "comparison": {
+     "compared": 1521,
+     "flagged": 33,
+     "rate": 0.021696
+    },
+    "equal_evidence_comparison_rate": 0.042553,
+    "positive": {
+     "compared": 182,
+     "flagged": 52,
+     "rate": 0.285714
+    },
+    "queue": {
+     "positive": 52,
+     "size": 106
+    },
+    "ratio": 13.168831,
+    "strength": {
+     "accuracy": {
+      "ratio": 23.1959,
+      "stability": "unstable"
+     },
+     "extra": {
+      "ratio": 12.0667,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "ratio": 19.4898,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "ratio": 11.9979,
+      "stability": "replicated"
+     }
+    }
+   }
+  },
+  {
+   "draw": 5,
+   "result": "sha256:67b7fe49af444ad708629e4b82d2e643e1b93510809fded89e34fa5e0770b3e7",
+   "summary": {
+    "comparison": {
+     "compared": 1553,
+     "flagged": 37,
+     "rate": 0.023825
+    },
+    "equal_evidence_comparison_rate": 0.037657,
+    "positive": {
+     "compared": 182,
+     "flagged": 52,
+     "rate": 0.285714
+    },
+    "queue": {
+     "positive": 52,
+     "size": 108
+    },
+    "ratio": 11.992278,
+    "strength": {
+     "accuracy": {
+      "ratio": 30.1415,
+      "stability": "replicated"
+     },
+     "extra": {
+      "ratio": 28.3111,
+      "stability": "unsupported"
+     },
+     "headshot_rate": {
+      "ratio": 20.102,
+      "stability": "unsupported"
+     },
+     "rank_tail": {
+      "ratio": 11.5929,
+      "stability": "replicated"
+     }
+    }
+   }
+  }
+ ],
+ "format": "fpsdet.benchmark-sensitivity/1",
+ "key_recipe": "SHA-256 of fpsdet.benchmark-alternative-pseudonym-key/{n}, as hex, for draw n",
+ "manifest": "sha256:b7b094a2863b2033fe855cbd298cfcc3e1609b8259eb32140e7d66d4267c121b",
+ "question": "How much does the result depend on which random half of the never-banned players builds the baseline?",
+ "digest": "sha256:2a0680dc4136f3bd3cbd33ad58ab9a774d3c94ded3821bcee9e694bf2d0c8b40"
+}

@@ -67,6 +67,8 @@ Run on 2026-10-04: 4,567 RGL bans, of which 314 accounts banned for cheating. 22
 
 **What fpsdet added.** From the servers' shot and hit counts alone, without the labels, fpsdet picked 97 of the 2,764 scored players for a person to look at: 3 to review and 94 to watch. 51 of the 97 are banned cheaters (53%). 97 players picked at random would hold about 7, so its picks were nearly 8 times better than chance. All 3 reviews were banned cheaters, and none of the 1,746 never-banned players went to review. Every decision, reason, bound and baseline line here is fpsdet's; the shot counts are the servers', and the labels are RGL's.
 
+**One draw of a random split.** Which half of the never-banned players builds the baseline is decided by the pseudonym key. The benchmark rebuilds five other draws from the same downloads, with public keys ([docs/benchmark.md](../../docs/benchmark.md)): the labelled accounts flagged hardly move, but more never-banned players are flagged in every other draw, and the ratio between the groups is lower. The numbers here are reproducible exactly, and they are the most favourable of the six draws.
+
 | | Review | Watch | Clean | Held for too little data | Flagged |
 | --- | --- | --- | --- | --- | --- |
 | Banned for cheating (189 with aimed shots) | 3 | 48 | 131 | 7 | 27% |

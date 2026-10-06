@@ -35,6 +35,7 @@ A labelled player with no scored case had no aimed-weapon shots in their kept ma
 
 **Known uncertainty.**
 - **Exposure is unequal.** Most never-banned players appear in only a few matches; labelled accounts have up to 20. Rates are therefore also reported at equal evidence.
+- **The baseline is one random draw.** A bit of each pseudonym decides which never-banned players build the baseline and which are scored. The benchmark rebuilds five other draws with public keys ([benchmark.md](benchmark.md)). The labelled group barely moves, but the published draw flags the fewest never-banned players of the six, so its ratios are the most favourable.
 - **The positive label is about an account, not a match.** A labelled account may have played clean in some, or most, of its scored matches.
 - **The comparison is not proven clean.**
 - **What the data can show.** Per-match totals only: shots, hits and sniper headshots per weapon, kills per minute. No timing, positions, view angles or movement. Every detector that needs those is not observable here.

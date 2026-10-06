@@ -48,6 +48,10 @@ DATASET = "fpsdet.benchmark-dataset/1"
 RESULT = "fpsdet.benchmark-result/1"
 EXPECTED = "fpsdet.benchmark-expected/1"
 SPLIT = "fpsdet.benchmark-split/1"
+SENSITIVITY = "fpsdet.benchmark-sensitivity/1"
+# Alternative pseudonym keys for the baseline-draw check: public on purpose, so anyone with the same downloads
+# rebuilds the same draws. Only aggregate numbers from them are ever published.
+ALTERNATIVE_KEY = "fpsdet.benchmark-alternative-pseudonym-key/{n}"
 CAPABILITIES = "fpsdet.benchmark-capabilities/1"
 KEY_COMMITMENT = "fpsdet.pseudonym-key-commitment/1"
 ROOT = Path(__file__).resolve().parents[2]
@@ -586,6 +590,71 @@ def run_real(found: Mapping, data: Path, out: Path) -> tuple[dict, dict]:
     return result, {"evaluation": evaluation, "strength": estimated, "split": split, "reports": reports}
 
 
+# How much a real result depends on its random baseline draw.
+
+
+def draw_summary(evaluation: Mapping, estimated: Mapping) -> dict:
+    """The numbers a draw changes: who was flagged in each main group, the queue, the ratio, equal evidence,
+    and each strength estimate's ratio and stability."""
+    stats = evaluation["statistics"]
+    positive, comparison = stats["population"]["positive"], stats["population"]["primary_comparison"]
+    groups = stats["decisions"]["by_group"]
+    queue = stats["decisions"]["queues"]["review_or_watch"]
+    equal = next((cell for cell in stats["evidence_amount"] if cell["matches"] == "15-20"), None)
+    flagged = lambda label: {"flagged": groups[label]["counts"]["review"] + groups[label]["counts"]["watch"], "compared": groups[label]["evaluated"],
+                             "rate": groups[label]["of_evaluated"]["review_or_watch"]["rate"]}
+    return {
+        "positive": flagged(positive),
+        "comparison": flagged(comparison),
+        "queue": {"size": queue["size"], "positive": queue["by_label"].get(positive, 0)},
+        "ratio": stats["decisions"]["enrichment"][comparison]["review_or_watch"]["ratio"],
+        "equal_evidence_comparison_rate": None if equal is None else equal["groups"][comparison]["review_or_watch"]["rate"],
+        "strength": {entry["kind"]: {"ratio": entry["development"]["evidence_ratio"]["ratio"], "stability": entry["evaluation"]["stability"]}
+                     for entry in estimated["detectors"] if "evidence_ratio" in entry.get("development", {})},
+    }
+
+
+def sensitivity(found: Mapping, data: Path, draws: int, python: str, curator: Mapping | None = None) -> dict:
+    """Rebuild a keyed dataset under ``draws`` public alternative pseudonym keys, from the same downloads in
+    ``data``, and summarise each. Every other choice is the manifest's; only the random draw of which
+    never-banned half builds the baseline (and every id) changes. Network-free, and about two minutes a draw."""
+    import shutil
+
+    key_file = found["pseudonymization"].get("key_file")
+    if not key_file:
+        raise BenchmarkError(f"{found['id']} has no pseudonym key, so its baseline draw is fixed")
+    outputs = set(found["prepare"]["outputs"].values()) | {key_file, "benchmark", "draws"}
+    out: dict = {
+        "format": SENSITIVITY,
+        "dataset": found["id"],
+        "manifest": manifest_digest(found),
+        "question": "How much does the result depend on which random half of the never-banned players builds the baseline?",
+        "key_recipe": "SHA-256 of " + ALTERNATIVE_KEY + ", as hex, for draw n",
+        "draws": [],
+    }
+    if curator:
+        out["draws"].append({"draw": "curator", "summary": curator})
+    for n in range(1, draws + 1):
+        place = data / "draws" / str(n)
+        if place.exists():
+            shutil.rmtree(place)
+        place.mkdir(parents=True)
+        for item in data.iterdir():
+            if item.name not in outputs:
+                (place / item.name).symlink_to(item.resolve(), target_is_directory=item.is_dir())
+        (place / key_file).write_text(hashlib.sha256(ALTERNATIVE_KEY.format(n=n).encode("ascii")).hexdigest(), encoding="utf-8")
+        run_steps(found["prepare"]["steps"], place, python)
+        result, artifacts = run_real(found, place, place / "benchmark")
+        out["draws"].append({"draw": n, "result": result["digest"], "summary": draw_summary(artifacts["evaluation"], artifacts["strength"])})
+        for name in set(found["prepare"]["outputs"].values()) | {"benchmark/cases.jsonl"}:
+            target = place / name
+            if target.exists() and target.stat().st_size > 10_000_000:
+                target.unlink()  # the large rebuilt files; the result binds their digests
+    out = json.loads(canonical_json(out))
+    out["digest"] = digest("sensitivity", out)
+    return out
+
+
 # The result, and its comparison with what was pinned.
 
 
@@ -798,6 +867,14 @@ def verify(root: Path = ROOT, data: Mapping[str, Path] | None = None) -> list[di
         if result["chain"]["inputs"]["events"].get("events", counts["events"]) != counts["events"]:
             problems.append("the scored event count is not the manifest's")
         check(f"{entry['id']}: counts", problems)
+        sensitivity_path = found_definition.get("sensitivity", {}).get(found["id"])
+        if sensitivity_path and (root / sensitivity_path).exists():
+            draws = read_json(root / sensitivity_path)
+            problems = [] if draws.get("digest") == digest("sensitivity", {key: value for key, value in draws.items() if key != "digest"}) else ["the sensitivity digest does not match its contents"]
+            curator = next((row for row in draws["draws"] if row["draw"] == "curator"), None)
+            if curator is None or curator["summary"] != draw_summary(evaluation, estimated):
+                problems.append("the curator's draw is not the committed evaluation")
+            check(f"{entry['id']}: baseline draws", problems)
         place = (data or {}).get(found["id"])
         if place:
             cases_path = Path(place) / "cases.jsonl"
@@ -1090,6 +1167,30 @@ def render_report(ctx: Mapping) -> str:
             add("At equal evidence (15–20 matches): " + "; ".join(f"{names[label]} {_pct(cell['review_or_watch'])}" for label, cell in equal.items() if cell["scored"]) + ".")
         else:
             add("Every player is one match, so there is no equal-evidence comparison to make here.")
+        add("")
+    for dataset_id_, found in manifests.items():
+        path = found_definition.get("sensitivity", {}).get(dataset_id_)
+        if not path or not (ROOT / path).exists():
+            continue
+        draws = read_json(ROOT / path)
+        evaluation = ctx["evaluations"][dataset_id_]
+        names = {group["label"]: group["name"] for group in evaluation["dataset"]["labels"]}
+        positive, comparison = evaluation["statistics"]["population"]["positive"], evaluation["statistics"]["population"]["primary_comparison"]
+        add(f"**How much {evaluation['dataset']['title']} depends on its baseline draw.** {draws['question']} The curator's draw is the published one; each other draw uses a public alternative key ({draws['key_recipe']}), so anyone with the same downloads rebuilds it. Only the draw changes.")
+        add("")
+        kinds = sorted({kind for row in draws["draws"] for kind in row["summary"]["strength"]}, key=NATIVE_KINDS.index)
+        add(f"| Draw | {_md(names[positive])} flagged | {_md(names[comparison])} flagged | Queue ({_md(names[positive])}) | Ratio | Equal evidence, {_md(names[comparison])} | " + " | ".join(f"{kind} strength" for kind in kinds) + " |")
+        add("| --- | --- | --- | --- | ---: | ---: |" + " --- |" * len(kinds))
+        for row in draws["draws"]:
+            summary = row["summary"]
+            strength_cells = [f"{summary['strength'][kind]['ratio']:.3g} ({summary['strength'][kind]['stability']})" if kind in summary["strength"] else "-" for kind in kinds]
+            equal = summary["equal_evidence_comparison_rate"]
+            add(f"| {row['draw']} | {summary['positive']['flagged']}/{summary['positive']['compared']} = {summary['positive']['rate']:.1%} | {summary['comparison']['flagged']}/{summary['comparison']['compared']:,} = {summary['comparison']['rate']:.1%} | {summary['queue']['size']} ({summary['queue']['positive']}) | {summary['ratio']:.1f}x | {'-' if equal is None else f'{equal:.1%}'} | " + " | ".join(strength_cells) + " |")
+        ratios = [row["summary"]["ratio"] for row in draws["draws"]]
+        published = next(row for row in draws["draws"] if row["draw"] == "curator")["summary"]["ratio"]
+        rank = sorted(ratios, reverse=True).index(published) + 1
+        add("")
+        add(f"The published draw's ratio, {published:.1f}x, ranks {rank} of {len(ratios)} draws (from {min(ratios):.1f}x to {max(ratios):.1f}x). Its numbers are reproducible exactly; they are one draw of a random split, not a fixed property of fpsdet.")
         add("")
     add("## 5. Eligibility and coverage")
     add("")

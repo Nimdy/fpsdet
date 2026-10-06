@@ -663,6 +663,30 @@ def cmd_benchmark_run(args: argparse.Namespace) -> int:
     return worst
 
 
+def cmd_benchmark_sensitivity(args: argparse.Namespace) -> int:
+    """Rebuild a keyed dataset under public alternative keys and write how much its result depends on the draw."""
+    from .benchmark import ROOT, BenchmarkError, definition, draw_summary, manifest, read_json, sensitivity, write_json
+
+    found = manifest(args.dataset)
+    curator = None
+    if "evaluation" in found["artifacts"]:
+        curator = draw_summary(read_json(ROOT / found["artifacts"]["evaluation"]), read_json(ROOT / found["artifacts"]["strength"]))
+    try:
+        out = sensitivity(found, Path(args.data).expanduser(), args.draws, args.python or sys.executable, curator)
+    except BenchmarkError as error:
+        raise SystemExit(f"benchmark sensitivity: {error}")
+    default = definition().get("sensitivity", {}).get(found["id"])
+    if not (args.out or default):
+        raise SystemExit(f"benchmark sensitivity: give --out; the benchmark names no sensitivity file for {found['id']}")
+    target = Path(args.out) if args.out else ROOT / default
+    write_json(target, out)
+    for row in out["draws"]:
+        summary = row["summary"]
+        print(f"draw {row['draw']}: comparison flagged {summary['comparison']['rate']:.1%}, ratio {summary['ratio']:.1f}x")
+    print(f"Wrote {target}: {out['digest']}")
+    return 0
+
+
 def cmd_benchmark_verify(args: argparse.Namespace) -> int:
     from .benchmark import verify
 
@@ -856,6 +880,13 @@ def build_parser() -> argparse.ArgumentParser:
     bench_run.add_argument("--pin", action="store_true", help="Record these results as the expectation (a curator's act)")
     bench_run.add_argument("--show", type=int, default=20)
     bench_run.set_defaults(func=cmd_benchmark_run)
+    bench_sensitivity = benchmark_actions.add_parser("sensitivity", help="Rebuild a keyed dataset under public alternative keys: how much does its result depend on the baseline draw?")
+    bench_sensitivity.add_argument("--dataset", required=True)
+    bench_sensitivity.add_argument("--data", required=True, help="The folder of the downloaded sources (and the curator's prepared inputs)")
+    bench_sensitivity.add_argument("--draws", type=int, default=5)
+    bench_sensitivity.add_argument("--python")
+    bench_sensitivity.add_argument("--out", help="Default: the manifest's sensitivity artifact")
+    bench_sensitivity.set_defaults(func=cmd_benchmark_sensitivity)
     bench_verify = benchmark_actions.add_parser("verify", help="Check every committed artifact and its chain, without scoring")
     bench_verify.add_argument("--data", action="append", help="DATASET=FOLDER of a run, to check its case packets too")
     bench_verify.add_argument("--show", type=int, default=10)

@@ -3,12 +3,24 @@
   "version": 1,
   "title": "fpsdet benchmark v1",
   "datasets": [
-    {"id": "synthetic-v1", "manifest": "benchmark/datasets/synthetic-v1.json"},
-    {"id": "tf2-rgl-v1", "manifest": "benchmark/datasets/tf2-rgl-v1.json"},
-    {"id": "cs2cd-v1", "manifest": "benchmark/datasets/cs2cd-v1.json"}
+    {
+      "id": "synthetic-v1",
+      "manifest": "benchmark/datasets/synthetic-v1.json"
+    },
+    {
+      "id": "tf2-rgl-v1",
+      "manifest": "benchmark/datasets/tf2-rgl-v1.json"
+    },
+    {
+      "id": "cs2cd-v1",
+      "manifest": "benchmark/datasets/cs2cd-v1.json"
+    }
   ],
   "capabilities": "benchmark/capabilities.json",
   "expected": "benchmark/expected.json",
+  "sensitivity": {
+    "tf2-rgl-v1": "benchmark/sensitivity/tf2-rgl-v1.json"
+  },
   "report": "docs/benchmark.md",
   "can_prove": [
     "That the committed numbers follow from the committed artifacts: every evaluation, strength estimate, split and result verifies by digest, and its statistics recompute, without re-scoring anything.",
@@ -20,6 +32,7 @@
   "cannot_prove": [
     "How well fpsdet detects cheating in general. Each real dataset is one population with someone else's labels: RGL's bans and the CS2CD authors' judgement, neither of them ground truth.",
     "Anything about a detector a dataset cannot observe. On TF2 and CS2 most detectors are not observable at all; that is a gap in the data, not a zero.",
+    "That a real-data number is a fixed property of fpsdet. TF2's baseline is one random draw of never-banned players; the sensitivity table shows how far other draws of the same data move it.",
     "That synthetic fixtures resemble real cheats. They are planted by construction and qualify code, never a rate.",
     "That fpsdet is better or worse than any other system. Nothing else is evaluated here.",
     "That TF2 can be rebuilt by a third party with the same player ids: its pseudonym key never leaves the curator's machine, and the RGL ban list and logs.tf match lists change over time. A third party gets an exact report of what differs."

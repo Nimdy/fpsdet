@@ -277,6 +277,19 @@ class PublishedBenchmarkTest(unittest.TestCase):
             for label, counts in dataset["published"]["decisions"].items():
                 self.assertEqual(pinned["decisions"][label], counts, (name, label))
 
+    def test_the_published_tf2_draw_is_the_most_favourable_and_the_docs_say_so(self):
+        draws = json.loads((ROOT / "benchmark" / "sensitivity" / "tf2-rgl-v1.json").read_text(encoding="utf-8"))
+        summaries = {row["draw"]: row["summary"] for row in draws["draws"]}
+        published = summaries.pop("curator")
+        self.assertEqual(sorted(summaries), [1, 2, 3, 4, 5])
+        # "The labelled accounts flagged hardly move": within two points in every draw.
+        self.assertTrue(all(abs(published["positive"]["rate"] - other["positive"]["rate"]) < 0.02 for other in summaries.values()))
+        # "More never-banned players are flagged in every other draw, and the ratio is lower."
+        self.assertTrue(all(other["comparison"]["rate"] > published["comparison"]["rate"] for other in summaries.values()))
+        self.assertTrue(all(other["ratio"] < published["ratio"] for other in summaries.values()))
+        self.assertIn("most favourable of the six draws", (ROOT / "examples" / "tf2" / "README.md").read_text(encoding="utf-8"))
+        self.assertIn("ranks 1 of 6 draws", (ROOT / "docs" / "benchmark.md").read_text(encoding="utf-8"))
+
     def test_capability_evidence_is_worked_out_not_declared(self):
         rows = {row["id"]: row for row in bm.capability_matrix(bm.context())[0]}
         self.assertEqual(rows["hidden_target_tracking"]["evidence"], "controlled only")
