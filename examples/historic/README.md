@@ -58,7 +58,7 @@ PYTHONPATH=src python3 -m fpsdet score events.ndjson --profile examples/historic
 
 Run on the sample, this gives one review: a player held 7.0 m/s against the server's own 5.6 m/s cap for 30 samples. The player who moved just as fast because an explosion moved them is not a case.
 
-**A fairer baseline.** For a fairer comparison with your best players, build the baseline from an earlier window you trust, then score a later one:
+**First look only.** Without `--cohort`, the human baseline is fitted on the same file it scores, so one cheater-heavy lobby in it raises the ceiling and hides the next cheater. For real use, freeze a baseline from an earlier window you trust, then score later weeks against it:
 
 ```bash
 PYTHONPATH=src python3 -m fpsdet baseline last-month.ndjson --profile my-profile.json --out baseline.json --screen-matches
