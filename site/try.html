@@ -48,6 +48,14 @@
 
 <div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
 
+  <figure id="quest" class="m-0 mb-16">
+    <picture>
+      <source media="(max-width: 767px)" srcset="img/setup-quest-tall.svg" width="600" height="1974">
+      <img class="block h-auto w-full" src="img/setup-quest.svg" width="1200" height="700" alt="The setup as a game quest. HUD: prod HP 100 of 100, players banned 0, network offline. Level 1, loot the repo: git clone and the demo. Level 2, export a week of your logs. Level 3, go incognito: convert.py drops names and addresses and salts the ids. Level 4, score it: one line, offline. Level 5, read the cases in dashboard.html: a human reviews, nobody gets banned. Achievement unlocked: touched the logs, not prod.">
+    </picture>
+    <figcaption class="m-0 mt-3 max-w-3xl text-sm text-muted">The whole setup, as a quest. The jokes are cheesy; the facts in them are not: nothing is installed on your servers or your players' PCs, scoring sends nothing anywhere, names and addresses are dropped, and every case says <code class="font-mono text-[0.92em]">automated_action: none</code>.</figcaption>
+  </figure>
+
   <section aria-labelledby="safe-title">
     <p class="zb-kicker">Why it cannot touch production</p>
     <h2 id="safe-title" class="m-0 mt-4 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">A copy of your logs, and nothing else.</h2>
@@ -158,7 +166,7 @@ PYTHONPATH=src python3 -m fpsdet demo</code></pre>
       <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">After that</p>
       <h2 class="m-0 mt-2 font-mono text-[1.6rem] font-semibold leading-[1.15] tracking-tight text-white">Run a live test with us.</h2>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">No studio runs fpsdet today. The checks that need it most have only run on planted fixtures and one Godot pilot: hidden-mover tracking, quiet aim, the wire against the picture, and planned challenges. If you run a dedicated server and can tell your players what is logged, we will help you wire the fields. The Godot reference server shows every one of them.</p>
-      <p class="m-0 mt-5"><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=question.yml">Offer a server</a></p>
+      <p class="m-0 mt-5"><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=live_test.yml">Offer a server</a></p>
     </div>
   </section>
 </div>

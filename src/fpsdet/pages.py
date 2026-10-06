@@ -37,14 +37,15 @@ def write_pages(demo: Demo, dest: str | Path | None = None) -> Path:
     if not css.is_file():
         raise FileNotFoundError(css)
     (target / css.name).write_bytes(css.read_bytes())
-    fonts = SITE / "fonts"
-    if not fonts.is_dir():
-        raise FileNotFoundError(fonts)
-    for path in fonts.iterdir():
-        if path.is_file():
-            folder = target / "fonts"
-            folder.mkdir(exist_ok=True)
-            (folder / path.name).write_bytes(path.read_bytes())
+    for name in ("fonts", "img"):  # the type, and the images the pages show (site/build_quest.py draws them)
+        source = SITE / name
+        if not source.is_dir():
+            raise FileNotFoundError(source)
+        for path in source.iterdir():
+            if path.is_file():
+                folder = target / name
+                folder.mkdir(exist_ok=True)
+                (folder / path.name).write_bytes(path.read_bytes())
     board = write_board(demo, target / "board.html")
     text = board.read_text(encoding="utf-8").replace(LOCAL_SITE, 'href="')
     if LOCAL_SITE in text or 'href="scoring.html"' not in text:

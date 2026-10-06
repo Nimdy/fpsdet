@@ -2471,5 +2471,43 @@ class TryItTest(unittest.TestCase):
                    if re.search(r"^\s*(import|from)\s+(urllib|socket|http\.client|requests)\b", path.read_text(encoding="utf-8"), re.M)]
         self.assertEqual(network, ["ai_triage.py"])
 
+    def test_the_setup_quest_is_drawn_by_its_script_and_jokes_only_about_facts(self):
+        import re
+        from fpsdet.pages import write_pages
+
+        spec = importlib.util.spec_from_file_location("build_quest", ROOT / "site" / "build_quest.py")
+        quest = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(quest)
+        images = {"setup-quest.svg": quest.wide(), "setup-quest-tall.svg": quest.tall()}
+        for name, drawn in images.items():
+            committed = (ROOT / "site" / "img" / name).read_text(encoding="utf-8")
+            self.assertEqual(committed, drawn, f"{name}: run python site/build_quest.py")
+            # Plain SVG: nothing runs, nothing loads.
+            self.assertNotIn("<script", committed)
+            self.assertNotIn("<image", committed)
+            self.assertNotIn("url(", committed)
+            self.assertEqual(re.findall(r"https?://[^\s\"']+", committed), ["http://www.w3.org/2000/svg"])
+        # Every command and file a level names is real.
+        self.assertTrue((self.HERE / "convert.py").is_file())
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "cases"
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(cli_main(["score", str(ROOT / "examples" / "shot.jsonl"), "--profile", str(PROFILE_PATH), "--out", str(out)]), 0)
+            self.assertTrue((out / "dashboard.html").is_file())
+            cases = [json.loads(path.read_text(encoding="utf-8")) for path in out.glob("*.json") if path.name not in ("ops.json", "scan-index.json", "review-index.json")]
+            self.assertTrue(cases)
+            self.assertEqual({case["automated_action"] for case in cases}, {"none"})  # "Players banned: 0"
+            dest = write_pages(build_demo(), Path(tmp) / "site")
+            for name in images:
+                self.assertTrue((dest / "img" / name).is_file(), name)
+            try_page = (dest / "try.html").read_text(encoding="utf-8")
+            index = (dest / "index.html").read_text(encoding="utf-8")
+        tall_height = re.search(r'viewBox="0 0 600 (\d+)"', images["setup-quest-tall.svg"]).group(1)
+        for page in (try_page, index):
+            self.assertIn(f'srcset="img/setup-quest-tall.svg" width="600" height="{tall_height}"', page)
+            self.assertIn('src="img/setup-quest.svg" width="1200" height="700" alt="The setup as a game quest.', page)
+        self.assertIn("template=live_test.yml", try_page)
+        self.assertNotIn("template=question.yml", try_page)
+
 if __name__ == "__main__":
     unittest.main()

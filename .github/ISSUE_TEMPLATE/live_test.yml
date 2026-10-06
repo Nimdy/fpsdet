@@ -1,0 +1,77 @@
+name: Offer a server for a live test
+description: You run a dedicated game server and would try fpsdet live, with your players told what is logged.
+title: "[live test] "
+labels: ["live-test"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. No studio runs fpsdet today. The checks that need a live server most have only run on planted fixtures and one Godot pilot: hidden-mover tracking, quiet aim, the wire against the picture, and planned challenges. A live test is how they meet real players.
+
+        **What a live test is.** Your dedicated server writes one JSON line per shot and per movement sample, from its own accept path. fpsdet scores those lines offline, on a copy. Nothing goes on your players' PCs, and nobody is banned: every case is a file for a person to open. We help you wire the fields, starting with the ones you already compute.
+
+        **Keep this public issue free of personal data.** No player ids, names, match ids or addresses. A public handle, or "reply here", is enough to reach you. If you would rather talk privately first, say so and we will find a way.
+
+        Not ready for a live test? Try it on logs you already have first: [the Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html).
+
+  - type: input
+    id: game
+    attributes:
+      label: The game and its engine
+      placeholder: "An arena shooter on Unity, a community server for a Source game, our own engine, ..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: server
+    attributes:
+      label: Who decides hits
+      description: fpsdet needs a dedicated server that decides hits itself. A listen server, or client-side hit detection, can forge every field.
+      options:
+        - A dedicated server we run decides every hit
+        - A dedicated server decides most hits; some are client-side
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: players
+    attributes:
+      label: Players in a typical week
+      options:
+        - Under 50
+        - 50 to 500
+        - 500 to 5,000
+        - Over 5,000
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: fields
+    attributes:
+      label: What your server can log today
+      description: Tick what it already computes. Anything else can come later; a missing field just turns its check off.
+      options:
+        - label: Match, player and server time on every event
+        - label: Shots, hits and weapon per shot
+        - label: Ground speed, and the speed cap the server applied
+        - label: Why a body moved when the player did not (blast, vehicle, ladder)
+        - label: The recoil kick applied, and the player's view command, per tick
+        - label: Line-of-sight and audio checks between players
+        - label: The interpolation delay, and where the client draws each player
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: How you would like to run it, what you are worried about, what you would need from us.
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Before you submit
+      options:
+        - label: Our players would be told, in general terms, what the server logs (docs/players.md has wording).
+          required: true
+        - label: This issue holds no player ids, names, match ids or addresses.
+          required: true
