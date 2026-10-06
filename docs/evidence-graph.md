@@ -114,7 +114,7 @@ A case alone cannot show that a dependency on another case exists. `graph.verify
 
 ## What changed when it arrived
 
-Every existing data set was scored again and compared with external evidence (`2913fa3`) by `tools/regress.py migrate`:
+Every existing data set was scored again and compared with external evidence (`078b61c`) by `tools/regress.py migrate`:
 
 | | Cases | Decisions | Reasons | Observations | Observation ids | Seals | Graphs added | Packets |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -158,7 +158,7 @@ That is deliberate. Whether two pieces of evidence are independent enough to cou
 
 ## Before the graph: where relationships live
 
-This inventory was written at `2913fa3`, before the graph existed. `tests/test_graph.py` (`CurrentRelationshipsTest`) pins it.
+This inventory was written at `078b61c`, before the graph existed. `tests/test_graph.py` (`CurrentRelationshipsTest`) pins it.
 
 | Relationship | Where it is today | Explicit or implicit |
 | --- | --- | --- |

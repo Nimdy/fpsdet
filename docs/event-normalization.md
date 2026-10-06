@@ -4,7 +4,7 @@ Until this change, fpsdet read the order events arrived in as if it were game st
 
 ## What depended on arrival order
 
-`tests/test_event_order.py` was first committed (d45c0be) as a characterisation. Each test fed the same parsed events in two orders and showed what the order decided:
+`tests/test_event_order.py` was first committed (9935878) as a characterisation. Each test fed the same parsed events in two orders and showed what the order decided:
 
 | What | Effect |
 | --- | --- |
@@ -127,7 +127,7 @@ On real data: TF2 (4,139,445 events, 20,092 groups of simultaneous shots) scored
 
 ## Migration
 
-Every case was compared from before normalization (P2.3, `d5f1961`) to after all of it (`tools/regress.py migrate`):
+Every case was compared from before normalization (P2.3, `a8e8a0d`) to after all of it (`tools/regress.py migrate`):
 
 - the planted demo;
 - the synthetic week, weekly and nightly;

@@ -139,7 +139,7 @@ Context is not part of an observation's identity, so adding it moved no observat
 
 ## What changed when the engine arrived
 
-Every case was compared from just before the engine (event normalization, `eea40de`) to after it (`tools/regress.py migrate`). The data sets were the planted demo, the synthetic week (weekly and nightly), and the real CS2 and TF2 reruns.
+Every case was compared from just before the engine (event normalization, `7ef9c1b`) to after it (`tools/regress.py migrate`). The data sets were the planted demo, the synthetic week (weekly and nightly), and the real CS2 and TF2 reruns.
 
 | | Cases | Decisions | Reviews | Watches | Reasons | Context lines | Observation ids | Seals | Observation context | Packets |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -159,7 +159,7 @@ All 1,529 CS2 and 2,764 TF2 packets verify.
 
 **The one deliberate change:** a shot labelled `visible` that also carries hidden-mover time is no longer counted. It contradicts itself, and a visible enemy is known. No case in any data set had one.
 
-**Cost**, measured back to back against `eea40de` on one machine:
+**Cost**, measured back to back against `7ef9c1b` on one machine:
 
 - On the synthetic week (178,020 events, most of them labelled), summarizing went from 0.37 s to 0.43 s. Each distinct combination of labels is worked out once and shared.
 - Scoring the real runs, which carry no labels, did not change beyond run-to-run noise.

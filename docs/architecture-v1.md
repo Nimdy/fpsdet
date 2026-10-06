@@ -1,6 +1,6 @@
 # Architecture v1: where fpsdet is, and where it is going
 
-This is the engineering map for the move from "anti-cheat detector" to an evidence engine that sits beside VAC, EAC, BattlEye, Vanguard, a studio's own tools, human reviewers and downstream AI. It records the code as it is at `0.3.0+` (commit `26acb77`), then the target and the order of work.
+This is the engineering map for the move from "anti-cheat detector" to an evidence engine that sits beside VAC, EAC, BattlEye, Vanguard, a studio's own tools, human reviewers and downstream AI. It records the code as it is at `0.3.0+` (commit `5547741`), then the target and the order of work.
 
 Every statement is marked:
 
@@ -201,7 +201,7 @@ Every flagged case names what fired. A rank-tail watch carries its explanation o
 
 The scorer never sees a label. The adapters join labels to decisions after scoring (`report`, `desk`).
 
-**Reproduction, checked for this audit.** Re-scoring the local CS2 and TF2 inputs at `26acb77` reproduces both committed desks player for player: 0 mismatches out of 1,529 and 2,764. Loading takes about 42 s per run; scoring takes 4 s (CS2) and 7 s (TF2).
+**Reproduction, checked for this audit.** Re-scoring the local CS2 and TF2 inputs at `5547741` reproduces both committed desks player for player: 0 mismatches out of 1,529 and 2,764. Loading takes about 42 s per run; scoring takes 4 s (CS2) and 7 s (TF2).
 
 **Regression procedure.** The inputs are too large to commit, so the check runs where the data is:
 

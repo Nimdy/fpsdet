@@ -547,5 +547,5 @@
    "version": 1
   }
  ],
- "note": "Written by fpsdet at ce00ac6 (P4, the challenge engine), before external evidence: the planted replay-lock (a legacy challenge observation), elite-human (clean) and clone-buyer (a batch watch). Their packets use fpsdet.packet/1 and must keep verifying after fpsdet.packet/2."
+ "note": "Written by fpsdet at ebf5701 (P4, the challenge engine), before external evidence: the planted replay-lock (a legacy challenge observation), elite-human (clean) and clone-buyer (a batch watch). Their packets use fpsdet.packet/1 and must keep verifying after fpsdet.packet/2."
 }

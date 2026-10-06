@@ -1,6 +1,6 @@
 """Event order: arrival order is not game state.
 
-Before event normalization (commit d45c0be) each of these fixtures showed the order events arrived in
+Before event normalization (commit 9935878) each of these fixtures showed the order events arrived in
 changing a case. Each now shows it does not, down to the player-events/2 digest and the evidence packet.
 Where events are simultaneous on the server's clock and a check reads sequence, the test pins what
 simultaneity means to that check.

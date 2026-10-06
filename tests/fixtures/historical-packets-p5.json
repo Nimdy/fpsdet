@@ -734,5 +734,5 @@
    "version": 1
   }
  ],
- "note": "Written by fpsdet at 2913fa3 (P5, external evidence), before the evidence graph: adrenaline (clean made a watch by an external signal), radar-friend (a voice watch depending on another case) and elite-human (clean, with context-only external records). Their packets use fpsdet.packet/2 and must keep verifying after fpsdet.packet/3."
+ "note": "Written by fpsdet at 078b61c (P5, external evidence), before the evidence graph: adrenaline (clean made a watch by an external signal), radar-friend (a voice watch depending on another case) and elite-human (clean, with context-only external records). Their packets use fpsdet.packet/2 and must keep verifying after fpsdet.packet/3."
 }

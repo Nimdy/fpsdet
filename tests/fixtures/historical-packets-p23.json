@@ -365,5 +365,5 @@
    "version": 1
   }
  ],
- "note": "Serialized cases written by fpsdet at d5f1961 (P2.3), before event normalization. Their packets use fpsdet.player-events/1 and must keep verifying."
+ "note": "Serialized cases written by fpsdet at a8e8a0d (P2.3), before event normalization. Their packets use fpsdet.player-events/1 and must keep verifying."
 }

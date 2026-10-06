@@ -185,5 +185,5 @@
    "version": 1
   }
  ],
- "note": "Written by fpsdet at eabd87c (P3, the client knowledge engine), before the challenge engine: the planted replay-lock case, whose private replay was an information observation of kind private_replay. Its packet must keep verifying after the private replay moved to the challenge family."
+ "note": "Written by fpsdet at c74749f (P3, the client knowledge engine), before the challenge engine: the planted replay-lock case, whose private replay was an information observation of kind private_replay. Its packet must keep verifying after the private replay moved to the challenge family."
 }

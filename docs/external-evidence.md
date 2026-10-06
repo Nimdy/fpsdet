@@ -235,7 +235,7 @@ A record about a player with no case attaches to no one, and the same record lis
 
 ## What changed when it arrived
 
-Every existing data set was scored again with no external input and compared with the challenge engine (`ce00ac6`) by `tools/regress.py migrate`:
+Every existing data set was scored again with no external input and compared with the challenge engine (`ebf5701`) by `tools/regress.py migrate`:
 
 | | Cases | Decisions | Reasons | Observations | Observation ids | Seals | Packets |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -274,7 +274,7 @@ Records are indexed by player as they are read, so each case reads only its own.
 
 ## Before external evidence: where it could enter
 
-This audit was written at `ce00ac6`, before anything changed. `tests/test_external.py` (`NativeFusionSurfacesTest`) pins what it describes.
+This audit was written at `ebf5701`, before anything changed. `tests/test_external.py` (`NativeFusionSurfacesTest`) pins what it describes.
 
 ### What a decision is made of
 

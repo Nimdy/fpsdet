@@ -340,7 +340,7 @@ fpsdet cannot check any of these. It never runs inside a game.
 
 ## What changed when the engine arrived
 
-Every case was compared from the knowledge engine (`eabd87c`) to the challenge engine with `tools/regress.py migrate`, which names this move `observation-migrated-to-challenge` and checks that the migrated finding kept its role, matches, sample count, total and reason line.
+Every case was compared from the knowledge engine (`c74749f`) to the challenge engine with `tools/regress.py migrate`, which names this move `observation-migrated-to-challenge` and checks that the migrated finding kept its role, matches, sample count, total and reason line.
 
 | | Cases | Decisions | Reasons | Seals | Observations migrated | Other observations | Observation ids moved | Input digests | Packets |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -356,7 +356,7 @@ Every case was compared from the knowledge engine (`eabd87c`) to the challenge e
 - **The golden lock** was re-recorded for exactly the six migrated findings.
 - **Python 3.11 and 3.12** give the same packet digests and the same plans.
 
-**Cost**, measured back to back against `eabd87c` on one machine:
+**Cost**, measured back to back against `c74749f` on one machine:
 
 | | Before | After |
 | --- | --- | --- |
@@ -372,7 +372,7 @@ Events without challenge fields pay one check each; nothing is built for them.
 
 ## Before the challenge engine: the private replay
 
-This is the private replay as it stood at `eabd87c`, written down before anything about it changed. `tests/test_challenge.py` (`LegacyPrivateReplaySemanticsTest`) pins it.
+This is the private replay as it stood at `c74749f`, written down before anything about it changed. `tests/test_challenge.py` (`LegacyPrivateReplaySemanticsTest`) pins it.
 
 ### The field
 

@@ -1,6 +1,6 @@
 """Client knowledge: what this client could lawfully know about a target at the time of a shot.
 
-CurrentInformationSemanticsTest was written before the knowledge engine (commit f60fbd2) to pin exactly
+CurrentInformationSemanticsTest was written before the knowledge engine (commit 8570474) to pin exactly
 which samples each information check received. The engine reproduces every one of them but one: a shot
 labelled visible that also carries hidden time contradicts itself, and is no longer counted.
 """
