@@ -1,0 +1,23 @@
+; The fpsdet challenge pilot: one arena, an authoritative dedicated server and stock clients.
+; Run it with examples/pilot/pilot.py, which passes everything after "--" (see main.gd).
+
+config_version=5
+
+[application]
+
+config/name="fpsdet-challenge-pilot"
+run/main_scene="res://main.tscn"
+
+[physics]
+
+common/physics_ticks_per_second=60
+common/max_physics_steps_per_frame=8
+
+[debug]
+
+file_logging/enable_file_logging=false
+
+[display]
+
+window/size/viewport_width=640
+window/size/viewport_height=360
