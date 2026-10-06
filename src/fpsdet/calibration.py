@@ -661,8 +661,6 @@ def _co_occurrence(rows: list[dict], dataset: Mapping, kinds: list[str]) -> dict
             for name in shared:
                 entry[name] += 1
             entry["none_recorded"] += int(not shared)
-    order = {f"{a} + {b}": (NATIVE_KINDS.index(a), NATIVE_KINDS.index(b)) for a in NATIVE_KINDS for b in NATIVE_KINDS}
-    structure = dict(sorted(structure.items(), key=lambda item: order[item[0]]))
     return {"detectors": kinds, "by_group": by_group, "graph_structure": structure}
 
 
@@ -1017,20 +1015,22 @@ def render_markdown(artifact: Mapping) -> str:
     add("")
     add("| Group | Review | Watch | Clean | Insufficient | Review or watch, of compared | Of all scored |")
     add("| --- | ---: | ---: | ---: | ---: | --- | --- |")
-    for label, cell in decisions["by_group"].items():
+    for label in names:
+        cell = decisions["by_group"][label]
         counts = cell["counts"]
         add(f"| {_md(names[label])} | {counts['review']} | {counts['watch']} | {counts['clean']:,} | {counts['insufficient_data']:,} | {_pct(cell['of_evaluated']['review_or_watch'])} | {_pct(cell['of_scored']['review_or_watch'])} |")
     add("")
     add(f"Ratio of {names[positive]} to comparison, review or watch among compared players:")
     add("")
-    for comparison, cell in decisions["enrichment"].items():
-        add(f"- against {names[comparison]}: {_ratio(cell['review_or_watch'])}")
+    for comparison in comparisons:
+        add(f"- against {names[comparison]}: {_ratio(decisions['enrichment'][comparison]['review_or_watch'])}")
     add("")
     add("**Queue composition.** Who the queues hold, against the share of label-positive players among those fpsdet could compare (the chance level).")
     add("")
     add(f"| Queue | Players | {_md(names[positive])} | Share (95% CI) | Chance level | Expected by chance | Share over chance |")
     add("| --- | ---: | ---: | --- | ---: | ---: | ---: |")
-    for name, queue in decisions["queues"].items():
+    for name in ("review", "watch", "review_or_watch"):
+        queue = decisions["queues"][name]
         expected = queue["expected_positive_at_prevalence"]
         over = queue["share_over_prevalence"]
         add(
@@ -1109,6 +1109,16 @@ def render_markdown(artifact: Mapping) -> str:
             cell = entry["coverage"][label]
             add(f"| {entry['kind']} | {_md(names[label])} | {cell['players']:,} | {cell['with_input']:,} | {cell['evaluated']:,} | {cell['below_sample_minimum']:,} | {cell['thin_baseline']:,} |")
     add("")
+    add("**Observation level.** Units are a weapon, or a metric on a weapon, instead of a player. One player's units are not independent, so these are counts and plain shares with no interval.")
+    add("")
+    add(f"| Detector | {_md(names[positive])}: fired / units | {_md(names[primary])}: fired / units |")
+    add("| --- | --- | --- |")
+    for entry in stats["detectors"]:
+        if entry["status"] == "not_observable":
+            continue
+        cells = [entry["observation_level"][label] for label in (positive, primary)]
+        add(f"| {entry['kind']} | " + " | ".join(f"{cell['units_fired']} / {cell['units_evaluated']:,}" for cell in cells) + " |")
+    add("")
     add("## Families")
     add("")
     add("Any finding in the family, among players at least one of its detectors could run on.")
@@ -1140,7 +1150,9 @@ def render_markdown(artifact: Mapping) -> str:
         add("")
         add("| Pair | Players | Same cohort | Same match | Same weapon or group key | Dependency | Same partner | Nothing recorded |")
         add("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
-        for pair, cell in co["graph_structure"].items():
+        order = {f"{a} + {b}": (NATIVE_KINDS.index(a), NATIVE_KINDS.index(b)) for a in NATIVE_KINDS for b in NATIVE_KINDS}
+        for pair in sorted(co["graph_structure"], key=order.__getitem__):
+            cell = co["graph_structure"][pair]
             add(f"| {pair} | {cell['players']} | {cell['cohort']} | {cell['match']} | {cell['key']} | {cell['dependency']} | {cell['partner']} | {cell['none_recorded']} |")
         add("")
         add("Every native finding is server behaviour, one telemetry domain. Two findings measured against the same cohort move together if that cohort is off.")
@@ -1171,7 +1183,8 @@ def render_markdown(artifact: Mapping) -> str:
     add("| --- | --- | --- | --- |")
     for split in ("dev", "eval"):
         add(f"| review or watch | {split} | {_pct(splits['decisions'][split][positive])} | {_pct(splits['decisions'][split][primary])} |")
-    for kind, halves in splits["detectors"].items():
+    for kind in (kind for kind in NATIVE_KINDS if kind in splits["detectors"]):
+        halves = splits["detectors"][kind]
         for split in ("dev", "eval"):
             add(f"| {kind} | {split} | {_pct(halves[split][positive])} | {_pct(halves[split][primary])} |")
     add("")
@@ -1179,7 +1192,7 @@ def render_markdown(artifact: Mapping) -> str:
     add("")
     add(f"- Unit: {dataset['unit']}")
     add(f"- Match level: {dataset['match_level']}")
-    add("- Observation-level counts (per weapon or metric) are in the JSON without intervals: one player's weapons are not independent.")
+    add("- Observation-level counts (per weapon or metric) have no intervals: one player's weapons are not independent.")
     add("- A rate here describes this population, labelled this way. It is not the rate on another game, league or season, and it is not a probability that any one player cheated.")
     add("")
     add("## Provenance")

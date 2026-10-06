@@ -48,6 +48,11 @@ PYTHONPATH=src python -m fpsdet score scored.ndjson --profile examples/cs2/cs2.j
 $PY labels ~/cs2cd --out labels.json
 $PY report cs2-cases/ --labels labels.json
 
+# Optional: measure each detector against the labels (writes examples/cs2/evaluation.json and .md).
+PYTHONPATH=src python -m fpsdet evaluate run cs2-cases/review-index.json --labels labels.json \
+    --dataset examples/cs2/evaluation.dataset.json --profile examples/cs2/cs2.json --events scored.ndjson \
+    --out examples/cs2/evaluation.json --report examples/cs2/evaluation.md
+
 # Optional: rebuild the desk's CS2 page from your run, then regenerate the desk.
 $PY desk cs2-cases/ --labels labels.json
 PYTHONPATH=src python -m fpsdet demo
@@ -122,6 +127,15 @@ Halving the per-player minimums (20 shots, 12 hits for headshot rate) as an expe
 ### What this shows
 
 On real CS2 play, fpsdet framed no one, said "not enough data" when one match was all it had, and found the cheaters hiding in its own baseline. The labelled cheaters differ from clean players by a wide margin on exactly the numbers fpsdet scores. What one match per account cannot show is detection: fpsdet is built to judge an account over a week of play, and CS2CD cannot link a player across matches.
+
+## Detector by detector
+
+`fpsdet evaluate` measures each detector on this run, among the players it could run on. The full report is [evaluation.md](evaluation.md); [docs/calibration.md](../../docs/calibration.md) explains the method. It changes no threshold.
+- **Speed** could run on all 1,529 players and fired on none of them, labelled or not.
+- **The rank tail** fired on 12 of 106 hand-labelled cheaters fpsdet could compare (11.3%, 95% CI 6.6–18.8%) and on none of 302 hand-reviewed players (0.0%, 0.0–1.3%).
+- **The watch queue** held 18 players, 14 of them hand-labelled cheaters. 18 is too few for a rated share: the 95% interval runs from 55% to 91%.
+- **Too few to measure:** distance and shots through walls could run on only 11 hand-labelled cheaters each.
+- **Not observable here:** 15 detectors, reported that way, never as 0%.
 
 ## Limits
 

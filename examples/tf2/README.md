@@ -29,6 +29,11 @@ PYTHONPATH=src python -m fpsdet baseline $DATA/baseline.ndjson --profile example
 PYTHONPATH=src python -m fpsdet score $DATA/scored.ndjson --profile examples/tf2/tf2.json --cohort $DATA/cohort.json --out $DATA/cases
 python examples/tf2/tf2logs.py report $DATA/cases --labels $DATA/labels.json
 
+# Optional: measure each detector against the labels (writes examples/tf2/evaluation.json and .md).
+PYTHONPATH=src python -m fpsdet evaluate run $DATA/cases/review-index.json --labels $DATA/labels.json \
+    --dataset examples/tf2/evaluation.dataset.json --profile examples/tf2/tf2.json --events $DATA/scored.ndjson \
+    --out examples/tf2/evaluation.json --report examples/tf2/evaluation.md
+
 # Optional: rebuild the desk's TF2 page from your run, then regenerate the desk.
 python examples/tf2/tf2logs.py desk $DATA/cases --labels $DATA/labels.json
 PYTHONPATH=src python -m fpsdet demo
@@ -83,6 +88,18 @@ Most never-banned players appear in only a few of these matches, and fewer match
 **Kills per minute helps a little.** Across classes, kills per minute and, for snipers, headshot kills per minute rank cheaters above honest players far more often than not (83% of the time for snipers). Declared as extra numbers, they added one review and two watches, all banned cheaters, and moved no honest player. They add little because fpsdet flags a number only past the best human measured, and most cheaters, though better than average, stay inside that range. Better than average is not evidence fpsdet acts on; that is what keeps honest players out of review.
 
 **What this shows.** With many server-logged matches per player, fpsdet does what it says on real play: it flags banned cheaters at about 14 times the rate of never-banned players with the same evidence, and keeps review for the confident cases. It is not a complete detector. On these logs it sees hit rates and kill rates only, so it catches cheaters whose aim is better than every human's, and it waits for two kinds of evidence before asking a person to review.
+
+## Detector by detector
+
+`fpsdet evaluate` measures each detector on this run, among the accounts it could run on. The full report is [evaluation.md](evaluation.md); [docs/calibration.md](../../docs/calibration.md) explains the method. It changes no threshold.
+
+| Detector | RGL cheating-ban labelled | Never-banned comparison |
+| --- | --- | --- |
+| rank tail (above the rank's range) | 44 of 182 (24.2%, 95% CI 18.5–30.9%) | 28 of 1,605 (1.7%, 1.2–2.5%) |
+| accuracy past every human | 11 of 182 (6.0%, 3.4–10.5%) | 0 of 1,605 (0.0%, 0.0–0.2%) |
+| headshot rate past every human | 5 of 101 (5.0%, 2.1–11.1%) | 2 of 407 (0.5%, 0.1–1.8%) |
+
+Kills per minute and headshot kills per minute fired too rarely to measure, so they are descriptive only. The other 17 detectors are not observable on per-match totals: no timing, positions, view angles, movement or visibility. They are reported that way, never as 0%.
 
 ## Limits
 

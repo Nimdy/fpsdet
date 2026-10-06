@@ -49,6 +49,7 @@ These hold before, during and after the work below. A change that breaks one sto
 | AI | `ai_triage.py` | 135 | Redaction and one chat call per case a person might open. |
 | View | `ops.py` | 423 | The operations payload (`ops.json`) and merging nightly runs. |
 | View | `opsview.py`, `board.py`, `pages.py` | 992, 2,024, 53 | The dashboard, the review desk (Python, HTML, CSS and JS in one file), the public site. |
+| Measure | `calibration.py` | — | *Added in P8.* `fpsdet evaluate`: each detector's firing rate in a labelled run's groups, among the players it could run on, with intervals, coverage, overlap and strata (`fpsdet.evaluation/1`). Never imported by detection. See [calibration.md](calibration.md). |
 | Synthetic | `synthetic.py`, `week.py` | 796, 526 | The 32 planted players with their expected decisions, and the 400-player synthetic week. |
 | Real data | `examples/cs2/cs2cd.py`, `examples/tf2/tf2logs.py` | 444, 510 | Converters from CS2CD and logs.tf to events, label joins, reports, desk pages. |
 
@@ -200,6 +201,8 @@ Every flagged case names what fired. A rank-tail watch carries its explanation o
 | Committed | `examples/cs2/desk.json` | `examples/tf2/desk.json` |
 
 The scorer never sees a label. The adapters join labels to decisions after scoring (`report`, `desk`).
+
+**Detector by detector (P8).** `fpsdet evaluate` measures each detector against each run's labels. It counts only players the detector could run on and reports a detector the data cannot feed as not observable. The committed `examples/*/evaluation.json` carry one row per player and every statistic; `tests/test_calibration.py` recomputes them and ties every published number to them. See [calibration.md](calibration.md).
 
 **Reproduction, checked for this audit.** Re-scoring the local CS2 and TF2 inputs at `5547741` reproduces both committed desks player for player: 0 mismatches out of 1,529 and 2,764. Loading takes about 42 s per run; scoring takes 4 s (CS2) and 7 s (TF2).
 
@@ -424,6 +427,8 @@ Each box is a module with one job and a test file of its own. The decision stays
 | No field a consumer reads moves on planted or synthetic cases | `tests/test_golden.py` (every case field; weekly and nightly) |
 | The committed desk is what the scorer writes | CI `git diff --exit-code demo/board.html` |
 | Real TF2 and CS2 results do not move | `RealDataContractTest` on the committed desks; `tools/regress.py diff` on a local rerun |
+| Published numbers follow from the evaluation | `PublishedEvaluationTest` (P8): each committed evaluation verifies, its rows match the desk player for player, and the README, example and docs numbers are recomputed from it |
+| Evaluation never reaches scoring | `SplitTest` (P8): no detection module imports `fpsdet.calibration`; `HarnessTest`: an evaluation changes no case, decision, seal or packet |
 | `automated_action` stays `none` | `GoldenPlantedTest`, `GoldenWeekTest` |
 | Reports never change evidence | `RecordedFindingsTest.test_reports_change_no_evidence` (P1) |
 | Evidence identity ignores UI changes | `DetectorFingerprintTest` (P2.1): editing any presentation module, or a static page, leaves the detector digest unchanged |

@@ -21,6 +21,7 @@ from fpsdet import calibration as cal
 from fpsdet.calibration import EvaluationError, PublishedMismatch
 from fpsdet.parse import load_profile
 from fpsdet.persist import case_to_dict, event_to_dict
+from fpsdet.provenance import profile_digest
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -390,6 +391,147 @@ class FixtureTest(unittest.TestCase):
 
         self.assertFalse({"rate", "rates", "ci95", "ratio"} & set(keys(result)))
         self.assertIn("never a real-world rate", result["what"])
+
+
+# How each desk names a raw label.
+DESK_NAMES = {
+    "tf2": {"cheater": "banned for cheating", "not banned": "never banned", "other ban": "banned for something else", "vac": "VAC ban, mirrored by RGL"},
+    "cs2": {"cheater": "cheater", "clean, reviewed match": "clean, reviewed match", "clean, unreviewed match": "clean, unreviewed match"},
+}
+
+
+def evaluation(name: str) -> dict:
+    return json.loads((ROOT / "examples" / name / "evaluation.json").read_text(encoding="utf-8"))
+
+
+def text(*parts: str) -> str:
+    return (ROOT.joinpath(*parts)).read_text(encoding="utf-8")
+
+
+def plain(cell: dict, ci: bool = False) -> str:
+    """A rate the way the READMEs write it: 44 of 182 (24.2%, 95% CI 18.5–30.9%)."""
+    lo, hi = cell["ci95"]
+    return f"{cell['count']} of {cell['denominator']:,} ({cell['rate']:.1%}, {'95% CI ' if ci else ''}{lo * 100:.1f}–{hi * 100:.1f}%)"
+
+
+def detector(artifact: dict, kind: str) -> dict:
+    return next(entry for entry in artifact["statistics"]["detectors"] if entry["kind"] == kind)
+
+
+class PublishedEvaluationTest(unittest.TestCase):
+    """C9, C25-C27: the committed evaluations verify, match the desks player for player, and every number the
+    READMEs and docs publish is recomputed from them. A published number that drifts from its artifact fails."""
+
+    def test_each_evaluation_verifies_and_its_report_is_current(self):
+        for name in ("tf2", "cs2"):
+            artifact = evaluation(name)
+            self.assertEqual(cal.verify_artifact(artifact), [], name)
+            self.assertEqual(text("examples", name, "evaluation.md"), cal.render_markdown(artifact), name)
+            self.assertEqual(artifact["dataset"], cal.load_dataset(ROOT / "examples" / name / "evaluation.dataset.json"))
+            self.assertTrue(artifact["published"]["reproduced"])
+            self.assertEqual(cal.check_census(artifact["dataset"]["telemetry"], artifact["telemetry"]["census"]), [])
+            self.assertEqual(artifact["inputs"]["packets_verified"], artifact["inputs"]["cases"])
+            self.assertEqual(artifact["inputs"]["profile"], profile_digest(load_profile(ROOT / "examples" / name / f"{name}.json")))
+
+    def test_rows_match_the_desk_player_for_player(self):
+        for name in ("tf2", "cs2"):
+            rows = {row["player"]: row for row in evaluation(name)["rows"]}
+            desk_rows = {row["id"]: row for row in desk(name)}
+            self.assertEqual(set(rows), set(desk_rows), name)
+            for player, row in rows.items():
+                self.assertEqual(row["decision"], desk_rows[player]["decision"], player)
+                self.assertEqual(DESK_NAMES[name][row["label"]], desk_rows[player]["truth"], player)
+
+    def test_the_published_decisions_are_the_evaluation_s(self):
+        for name in ("tf2", "cs2"):
+            artifact = evaluation(name)
+            by_group = artifact["statistics"]["decisions"]["by_group"]
+            for label, counts in artifact["dataset"]["published"]["decisions"].items():
+                self.assertEqual(by_group[label]["counts"], counts)
+                self.assertEqual(dict(decisions(desk(name))[DESK_NAMES[name][label]]), {d: n for d, n in counts.items() if n})
+
+    def test_the_tf2_numbers_follow_from_the_evaluation(self):
+        stats = evaluation("tf2")["statistics"]
+        queue = stats["decisions"]["queues"]["review_or_watch"]
+        at_random = queue["size"] * queue["scored_prevalence"]
+        self.assertEqual((queue["size"], queue["by_label"]["cheater"], queue["scored_pool"]), (97, 51, 2764))
+        self.assertEqual(round(51 / 97 * 100), 53)
+        self.assertEqual(round(at_random), 7)
+        self.assertEqual(round(51 / at_random, 1), 7.7)  # "nearly 8 times better than chance"
+        equal = next(cell for cell in stats["evidence_amount"] if cell["matches"] == "15-20")["groups"]
+        tf2 = text("examples", "tf2", "README.md")
+        self.assertEqual([equal[label]["scored"] for label in ("cheater", "not banned", "other ban")], [80, 228, 61])
+        for label, title in (("cheater", "Banned for cheating"), ("not banned", "Never banned"), ("other ban", "Banned for something else")):
+            cell = equal[label]
+            self.assertEqual(cell["scored"], cell["evaluated"])
+            self.assertIn(f"| {title} | {cell['scored']} | {cell['review_or_watch']['rate']:.1%} | {cell['review']} |", tf2)
+        self.assertEqual(round(equal["cheater"]["review_or_watch"]["rate"] / equal["not banned"]["review_or_watch"]["rate"]), 14)  # "about 14 times"
+        readme = text("README.md")
+        self.assertIn("With the same evidence per player, it flagged 37.5% of banned cheaters and 2.6% of never-banned players.", readme)
+        rank = detector(evaluation("tf2"), "rank_tail")["rates"]
+        self.assertIn(f"it fired on 44 of 182 RGL cheating-ban labelled accounts ({rank['cheater']['rate']:.1%}, 18.5–30.9%) and 28 of 1,605 never-banned ones ({rank['not banned']['rate']:.1%}, 1.2–2.5%)", readme)
+        self.assertEqual(plain(rank["cheater"]), "44 of 182 (24.2%, 18.5–30.9%)")
+        self.assertEqual(plain(rank["not banned"]), "28 of 1,605 (1.7%, 1.2–2.5%)")
+        unseen = [entry for entry in stats["detectors"] if entry["status"] == "not_observable"]
+        self.assertIn(f"{len(unseen)} of {len(stats['detectors'])} detectors cannot be observed", readme)
+        for kind, name, ci in (("rank_tail", "rank tail (above the rank's range)", True), ("accuracy", "accuracy past every human", False), ("headshot_rate", "headshot rate past every human", False)):
+            rates = detector(evaluation("tf2"), kind)["rates"]
+            first = plain(rates["cheater"], ci)
+            self.assertIn(f"| {name} | {first} | {plain(rates['not banned'])} |", tf2)
+        self.assertEqual({entry["kind"] for entry in stats["detectors"] if entry["status"] == "descriptive_only"}, {"extra", "supporting_extra"})
+        self.assertIn(f"The other {len(unseen)} detectors are not observable on per-match totals", tf2)
+
+    def test_the_cs2_numbers_follow_from_the_evaluation(self):
+        artifact = evaluation("cs2")
+        stats = artifact["statistics"]
+        cs2 = text("examples", "cs2", "README.md")
+        speed = detector(artifact, "speed")
+        everyone = sum(cell["denominator"] for cell in speed["rates"].values())
+        self.assertEqual((everyone, sum(cell["count"] for cell in speed["rates"].values())), (1529, 0))
+        self.assertIn(f"could run on all {everyone:,} players and fired on none of them", cs2)
+        rank = detector(artifact, "rank_tail")["rates"]
+        self.assertIn(f"fired on {rank['cheater']['count']} of {rank['cheater']['denominator']} hand-labelled cheaters fpsdet could compare ({rank['cheater']['rate']:.1%}, 95% CI 6.6–18.8%)", cs2)
+        self.assertEqual(plain(rank["cheater"], True), "12 of 106 (11.3%, 95% CI 6.6–18.8%)")
+        self.assertEqual(plain(rank["clean, reviewed match"]), "0 of 302 (0.0%, 0.0–1.3%)")
+        queue = stats["decisions"]["queues"]["review_or_watch"]
+        self.assertEqual((queue["size"], queue["by_label"]["cheater"]), (18, 14))
+        self.assertIsNone(queue["positive_share"]["rate"])  # under 20: not a rated share
+        self.assertEqual(round(14 / 18 * 100), 78)
+        lo, hi = wilson(14, 18)
+        self.assertIn(f"the 95% interval runs from {lo:.0%} to {hi:.0%}", cs2)
+        self.assertIn(f"could run on only {detector(artifact, 'median_distance')['rates']['cheater']['denominator']} hand-labelled cheaters each", cs2)
+        unseen = [entry for entry in stats["detectors"] if entry["status"] == "not_observable"]
+        self.assertIn(f"**Not observable here:** {len(unseen)} detectors", cs2)
+
+    def test_the_results_in_the_docs_are_the_evaluation_s(self):
+        doc = text("docs", "calibration.md")
+        for name in ("tf2", "cs2"):
+            artifact = evaluation(name)
+            stats = artifact["statistics"]
+            positive, primary = stats["population"]["positive"], stats["population"]["primary_comparison"]
+            for entry in stats["detectors"]:
+                if entry["status"] == "not_observable":
+                    continue
+                row = f"| {entry['kind']} | {entry['status']} | {cal._pct(entry['rates'][positive])} | {cal._pct(entry['rates'][primary])} | {cal._ratio(entry['enrichment'][primary])} |"
+                self.assertIn(row, doc)
+            unseen = [entry["kind"] for entry in stats["detectors"] if entry["status"] == "not_observable"]
+            self.assertIn(f"**Not observable here ({len(unseen)}).** " + ", ".join(unseen[:-1]) + f" and {unseen[-1]}.", doc)
+            self.assertIn(artifact["inputs"]["detector"][:15], doc)
+        tf2 = evaluation("tf2")["statistics"]["decisions"]
+        self.assertIn(f"RGL cheating-ban labelled: {cal._pct(tf2['by_group']['cheater']['of_evaluated']['review_or_watch'])}", doc)
+        self.assertIn(f"never-banned comparison: {cal._pct(tf2['by_group']['not banned']['of_evaluated']['review_or_watch'])}", doc)
+        self.assertIn(f"ratio: {cal._ratio(tf2['enrichment']['not banned']['review_or_watch'])}", doc)
+        self.assertIn(f"51/97 = 52.6% (42.7%–62.2%), against a chance level of {tf2['queues']['review_or_watch']['prevalence']:.1%}", doc)
+        cs2 = evaluation("cs2")["statistics"]["decisions"]["by_group"]
+        self.assertIn(f"{cal._pct(cs2['cheater']['of_evaluated']['review_or_watch'])} of hand-labelled cheaters went to watch", doc)
+
+    def test_the_fixture_table_in_the_docs(self):
+        doc = text("docs", "calibration.md")
+        result = cal.qualify_fixtures()
+        for outcome in ("passes_controlled_fixture", "no_controlled_fixture"):
+            kinds = [entry["kind"] for entry in result["detectors"] if entry["outcome"] == outcome]
+            self.assertIn(f"| {outcome} | {', '.join(kinds)} |", doc)
+        self.assertIn(f"All {len(result['honest_fixtures_clean'])} honest fixtures have no finding at all.", doc)
 
 
 if __name__ == "__main__":

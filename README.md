@@ -44,6 +44,13 @@ Run it yourself, on more matches or on your own server's logs, and share what yo
 
 [examples/tf2](examples/tf2/README.md) scores players banned for cheating by RGL, a competitive TF2 league, on their server-logged matches from logs.tf, beside the honest players from the same lobbies. From the servers' shot counts alone, fpsdet picked 97 of 2,764 players for a person to look at, and 51 of them (53%) are banned cheaters: nearly 8 times better than picking at random. With the same evidence per player, it flagged 37.5% of banned cheaters and 2.6% of never-banned players. Every review it opened was a banned cheater, and none of 1,746 never-banned players went to review. Standard library only. The scored run is in the desk as **D · Real TF2 matches**.
 
+## How each detector measures up
+
+`fpsdet evaluate` measures each detector against a real-data run's labels. It counts only the players the detector could run on, gives every rate with its 95% interval, and changes no threshold.
+- **The rank tail on TF2:** it fired on 44 of 182 RGL cheating-ban labelled accounts (24.2%, 18.5–30.9%) and 28 of 1,605 never-banned ones (1.7%, 1.2–2.5%).
+- **What per-match totals cannot show:** 17 of 22 detectors cannot be observed on them at all, and are reported that way, never as 0%.
+- **Labels are not ground truth:** RGL's bans and the CS2 dataset's hand labels are labels. [docs/calibration.md](docs/calibration.md) says what each one means before any number. The full reports are [examples/tf2/evaluation.md](examples/tf2/evaluation.md) and [examples/cs2/evaluation.md](examples/cs2/evaluation.md).
+
 ## Run the whole pipeline on a sample week
 
 ```bash
@@ -230,6 +237,7 @@ Every pair of accounts on a weapon is compared for shared leftovers. That is fin
 - [docs/challenges.md](docs/challenges.md): active challenges, the server secret, and what they do not catch
 - [docs/external-evidence.md](docs/external-evidence.md): records from other integrity systems, and the rules that keep them a watch at most
 - [docs/external-authentication.md](docs/external-authentication.md): provider signatures, the key registry, and what "verified" does not mean
+- [docs/calibration.md](docs/calibration.md): what the real-data labels mean, and each detector measured against them
 - [docs/culling.md](docs/culling.md): server-side culling, and how it fits
 - [docs/games.md](docs/games.md): mapping the fields onto well-known games
 - [docs/operations.md](docs/operations.md): lake, priority, AI, privacy, appeals
