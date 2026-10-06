@@ -1,6 +1,8 @@
 # Running the consented honest-human pilot
 
-This is the operator's checklist for the study in [docs/human-pilot.md](../../docs/human-pilot.md). The design is fixed in `design.json`; change it only by creating a new study version.
+This is the operator's checklist for the study in [docs/human-pilot.md](../../docs/human-pilot.md). The design is fixed in `design.json`, and `amendment-1.json` adds the collection rules below. Change either only by creating a new study version.
+
+Do not edit, pull or switch the repository between the first session and the analysis: each session records the study code it ran.
 
 ## Before anyone plays
 
@@ -16,7 +18,17 @@ This is the operator's checklist for the study in [docs/human-pilot.md](../../do
    python examples/human-pilot/study.py dry-run --data /tmp/dry --godot ~/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64
    ```
 
-3. Choose where the data lives, outside the repository, for example `~/fpsdet-study`. It holds secrets while a session runs and raw telemetry until publication.
+3. Check the human client's controls on the machine participants will use. No person is needed: the check presses the keys and moves the mouse itself, in a virtual display.
+
+   ```bash
+   python examples/human-pilot/study.py controls-check --godot ~/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64
+   ```
+
+   Every line must say `ok`.
+
+4. Choose two folders outside the repository:
+   - **the study's data,** for example `~/fpsdet-study`, which holds secrets while a session runs and raw telemetry until publication;
+   - **practice,** for example `~/fpsdet-practice`, separate and never analysed.
 
 ## For each participant
 
@@ -29,15 +41,27 @@ This is the operator's checklist for the study in [docs/human-pilot.md](../../do
 
    This prints their random id and their session order. Write nothing else down.
 
-3. Run their seven sessions in that order:
+   The first 4 participants finish all seven sessions before a fifth is enrolled, and the study never takes more than 12; `enroll` refuses otherwise.
+
+3. Run their practice: 90 seconds, no challenge.
+
+   ```bash
+   python examples/human-pilot/study.py practice --data ~/fpsdet-practice --study ~/fpsdet-study --participant hp-... --godot ~/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64
+   ```
+
+   They press Y, look with the mouse and with the arrow keys, walk, and shoot a bot. Then ask them what the terminal asks.
+   - **Under 30 frames a second:** do not run the study on that machine.
+   - **Mouse not captured:** they play with the arrow keys.
+
+4. Run their seven sessions in that order:
 
    ```bash
    python examples/human-pilot/study.py session --data ~/fpsdet-study --participant hp-... --mode free --godot ~/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64
    ```
 
-   A game window opens. The participant presses Y, plays for four minutes, and the window closes. Read them the four questions the terminal shows and type their answers. Allow a break between sessions; they may stop at any time.
+   A game window opens. The participant presses Y, plays for four minutes, and the window closes. Read them the five questions the terminal shows and type their answers. A short comment is optional; it stays in the session's private folder. Allow a break between sessions; they may stop at any time.
 
-4. **On another machine on the same private network:** add `--bind 192.168.x.y --remote`. Run the printed client command there, from a copy of `examples/pilot/godot` and the same Godot build. The server never binds a public address.
+5. **On another machine on the same private network:** add `--bind 192.168.x.y --remote`. Run the printed client command there, from a copy of `examples/pilot/godot` and the same Godot build. The server never binds a public address.
 
 ## If the study stops
 
@@ -49,6 +73,12 @@ This is the operator's checklist for the study in [docs/human-pilot.md](../../do
   python examples/human-pilot/study.py clear-stop --data ~/fpsdet-study --reason "what was found and why it is safe to continue"
   ```
 
+- **Review-grade evidence on an honest session ends collection.** `clear-stop` refuses it. Keep the session folder as it is, and report it. The investigation is:
+  1. replay the session offline;
+  2. verify its packet and graph;
+  3. inspect its overlap episodes;
+  4. classify what the participant was doing.
+- **A participant who saw or heard something they could not explain** stops the study until the server's verdicts, the placement and the knowledge state are inspected.
 - **Rules:** no threshold changes. An honest crossing of the bar is a finding to report.
 
 ## After the last session

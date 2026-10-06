@@ -1,6 +1,6 @@
 # The consented honest-human pilot
 
-**Status: designed, instrumented and dry-run with machines. No person has played yet, and there are no human results.** Everything below that is a number comes from machine stand-ins and says so.
+**Status: designed, instrumented, dry-run with machines, and amended once before collection. No person has played yet, and there are no human results.** Everything below that is a number comes from machine stand-ins and says so.
 
 **The question:** when honest people play the repository's own Godot pilot ([pilot.md](pilot.md)), normally and aggressively, how often and for how long does their aim behave like challenge tracking? How close do they come to producing challenge evidence?
 
@@ -46,6 +46,8 @@ Fixed in [examples/human-pilot/design.json](../examples/human-pilot/design.json)
 | Placement | secret-derived: one of four sealed probe rooms, tagged by what players aim at nearby: `door_edge`, `corner`, `chokepoint`, and `long_wall` as the control. Nothing is placed by hand, and nothing avoids or seeks a crosshair |
 | Frozen | the P12 pilot's thresholds (8 moments and 1,200 ms per challenge), its aim cone (2° plus the body's angular radius) and its knowledge rules; a 250 ms episode gap |
 
+Amendment 1 ([below](#amendment-1)) adds instruments and collection rules, and changes none of this.
+
 The probe rooms are sealed and 4 m tall, and no one can jump. So a probe's inside is never in anyone's line of sight. The server still checks that for every tick, as in P12, and would end a challenge whose body became perceivable.
 
 ## What is measured
@@ -64,6 +66,23 @@ For every challenge, from the server's own per-tick study telemetry and fpsdet's
 | turn rate | the aim's angular speed during overlap: median and 95th percentile |
 | enemy separation | the angle between the body and the nearest visible bot, during overlap |
 
+Amendment 1 adds, for analysis only:
+
+| Metric | Meaning |
+| --- | --- |
+| probe distance | from the eye to the body's chest, each tick |
+| probe ground speed | the body's ground speed, in m/s |
+| probe and aim motion | in the world: how fast the body, and the point the aim passes at the body's distance, moved over the last 250 ms, as angles at that distance |
+| overlap, split four ways | **both still** (each under 2°/s); **holding**: the aim point still while the body moved; **following**: both moving, the aim point within 45° of the body's direction of motion; **otherwise**: the aim point moving in any other way |
+
+**How the motion is measured:**
+
+- **In the world, not as seen from the eye:** a player's own movement turns the aim and the body's direction together, which would look like following.
+- **Over 250 ms, the episode gap:** per tick, a hand's jitter hides where the aim went.
+- **The 2°/s line:** under it, the aim point moves less than 0.5° in that window, a quarter of the cone's 2° margin.
+
+Two earlier drafts were replaced after machine smoke runs, before any person played. Per-tick motion hid the follower's tracking. Motion as seen from the eye made a strafing, pre-aiming stand-in look like it followed the probe.
+
 The primary outcome is review-grade challenge findings on honest sessions. They are counted at three levels, because one person's sessions and challenges are not independent:
 
 - **Participants:** the primary unit.
@@ -80,21 +99,47 @@ The study stops on:
 - a packet or graph that does not verify;
 - review-grade evidence on an honest session.
 
-A stop needs an investigation, recorded with `study.py clear-stop`, before anyone plays again.
+A stop needs an investigation, recorded with `study.py clear-stop`, before anyone plays again. A stop for review-grade evidence on an honest session cannot be cleared: collection ends there (amendment 1).
+
+## Amendment 1
+
+Declared in [examples/human-pilot/amendment-1.json](../examples/human-pilot/amendment-1.json) on 2026-10-06, after the machine dry run and before any human session. It binds `design.json` by digest.
+
+**Unchanged:** the participants, sessions, modes, challenges, schedule, rooms, the bar, the cone, the episode gap, placement, scoring, the analysis and the stop conditions.
+
+**Added:**
+
+- **Staging:** the first 4 participants finish all seven sessions before anyone else is enrolled. Collection continues toward 8, at most 12, only if none of them has an unexplained review-grade finding. `study.py enroll` enforces the order and the maximum.
+- **On the first such finding:**
+  1. Stop at once.
+  2. Preserve the session and replay it offline.
+  3. Verify its packet and graph, and inspect its overlap episodes.
+  4. Classify the honest behaviour that produced it.
+  5. Change no threshold, and propose a separate discrimination research phase.
+- **Controls check:** before any participant, `study.py controls-check` drives the unchanged human client with injected keyboard and mouse events under a virtual display. It checks the consent key, mouse look, the arrow keys, W and the fire button, and that the server saw the player move and fire.
+- **Practice:** 90 seconds per participant, in free mode with no challenge, in a data folder of its own that is never analysed. It confirms the controls and a client frame rate of at least 30. If the mouse cannot be captured, the participant plays with the arrow keys.
+- **A fifth question,** "Did the controls behave normally?". Each answer may carry an optional short comment, kept only in the session's private folder.
+- **Motion metrics** (above) and closeness:
+  - per participant, whether they ever reached any overlap, 500 ms counted, 1,200 ms counted, or review-grade;
+  - per session, any overlap, repeated overlap, and review-grade.
+- **Build binding:** each session records the engine binary's SHA-256 and the study code's identity.
+- **The regression fixture:** the angle-holding case below is kept permanently as a false-positive control. Any future challenge detector must show that it is no longer review-grade, and why.
+- **The dry run stays as it is:** bound to the study code it was made with (commit `68a6fa3`) and never rewritten. Since then, only two files have changed: the server, which writes the new telemetry rows, and `study.py`.
 
 ## Running it
 
 Follow the operator's checklist in [examples/human-pilot/README.md](../examples/human-pilot/README.md):
 
-1. Enroll each participant.
-2. Run their seven sessions.
-3. Analyze.
+1. Check the controls on the machine participants will use.
+2. Enroll each participant, and run their practice.
+3. Run their seven sessions: the first 4 participants first.
+4. Analyze.
 
 Each session:
 
 - plans with the real planner;
 - runs the study scene (`res://study.tscn` in the P12 project; P12's own files are untouched);
-- asks four yes-or-no questions;
+- asks five yes-or-no questions, each with an optional comment kept private;
 - scores the telemetry live and offline and checks every packet and graph;
 - reproduces the realization with the secret, then deletes the secret;
 - scans for leaks and personal data, and checks the stop conditions.

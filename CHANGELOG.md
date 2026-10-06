@@ -19,6 +19,17 @@
 
 ### Added
 
+- **Amendment 1 to the human pilot, before any person plays** ([examples/human-pilot/amendment-1.json](examples/human-pilot/amendment-1.json)). It changes nothing that decides a challenge: the bar, the cone, the episode gap, placement and scoring are as pre-registered.
+  - **Staging:** the first 4 participants finish before anyone else is enrolled. Review-grade evidence on an honest session ends collection, and `clear-stop` refuses it.
+  - **Before the sessions:**
+    - `study.py controls-check` drives the unchanged human client with injected keyboard and mouse events;
+    - `study.py practice` runs 90 seconds without challenges, in a folder that is never analysed.
+  - **Questions and comments:** a fifth question asks whether the controls behaved normally. Optional comments stay in the session's private folder.
+  - **Measured:**
+    - the probe's distance and motion, and whether the aim held still or moved with it, as study telemetry only;
+    - per-participant and per-session closeness to the bar;
+    - each session's engine binary and code identity.
+  - **The machine dry run stays as committed,** bound to the code that made it. Its angle-holding case is now a permanent regression fixture: under the current rule it is review-grade.
 - **The consented honest-human pilot: designed, instrumented, dry-run; not yet played by people** ([docs/human-pilot.md](docs/human-pilot.md)). It asks how often, and for how long, honest players' aim behaves like challenge tracking in the repository's own Godot pilot.
   - **Pre-registered** in `examples/human-pilot/design.json` before any session:
     - 8 participants, seven 4-minute sessions each across honest-play modes up to an aggressive pre-aim stress session;
