@@ -22,7 +22,7 @@ These hold before, during and after the work below. A change that breaks one sto
 3. A server measurement beats a client claim, and a server's statement about what a client could know beats a guess.
 4. Reports set queue order. They never enter a decision or a seal.
 5. AI runs after the decision, on the finished case, and cannot change it.
-6. Standard library only at runtime.
+6. Standard library only at runtime. Since P7 the one exception is optional: checking external records' signatures uses the `cryptography` package (`fpsdet[auth]`).
 7. A new check ships with a planted cheater and a planted honest twin.
 
 ## 2. Runtime map (implemented)
@@ -160,7 +160,7 @@ Every flagged case names what fired. A rank-tail watch carries its explanation o
 | 7 | Cases → people | Rendered text. | `casefile` escapes everything. The dashboards build the DOM with `textContent`, and the embedded JSON escapes `<`. | Dashboard links (`links`, `home`) come from the operator's payload unchecked. Only fpsdet's own scripts write them today. |
 | 8 | Cases → AI | The aggregated case. | Every player id the case names is aliased; party ids, match ids and the seal are dropped; the brief is stored apart and is not in the seal. | Event-derived strings (weapon ids, build keys, metric names) reach the model inside free text. The prompt does not mark the case as untrusted data, and nothing bounds its size. |
 | 9 | Public data → examples | Public APIs and the CS2CD files. | TF2 ids are pseudonymised with an HMAC key kept beside the data. CS2 uses the dataset's own placeholders. Only scored summaries are committed. | — |
-| 10 | Other integrity systems → external records (P5) | Nothing: every record is `unverified`. A provider's claim is kept as its claim. | Strict JSON with bounds on files, lines, strings, metadata and records; data-only adapters; errors that never quote the input; external lines that never carry a provider string; a separate family, source and roles; a watch at most. | No signatures, so a forged record is indistinguishable from a real one. It can make a watch, and nothing more. |
+| 10 | Other integrity systems → external records (P5, P7) | A record's claim, as the provider's claim. Since P7, `verified` when a key in the operator's registry signed it: who made the claim, not that it is true. | Strict JSON with bounds on files, lines, strings, metadata and records; data-only adapters; signatures checked before mapping; errors that never quote the input; external lines that never carry a provider string; a separate family, source and roles; a watch at most. | Unsigned records are still read by default, so a forged unsigned record can still make a watch; `--require-signed-external` closes that. A provider's own key compromise is the operator's to revoke. |
 
 ## 6. Provenance and the seal today (implemented)
 
@@ -457,6 +457,7 @@ Each step is one commit, run against the full suite, the demo, the board diff an
 | 4 Challenge engine | done | `challenge.py` (types, public plans and their digest, budget, linkage, per-challenge results, evidence) and `challenge_plan.py` (the only module that reads the secret: keyed derivation, commitment, schedule without repeats); `fpsdet challenge keygen`, `plan`, `verify`, `types`; `fpsdet score --challenges`; event `challenge_id`, `challenge_track_ms`; the `challenge` family; the legacy private replay kept as `legacy_private_replay`; leak, false-positive and attacker tests in `tests/test_challenge.py`; [challenges.md](challenges.md) |
 | 5 External evidence and fusion | done | `external.py` (the record, `fpsdet.external/1`, data-only adapters, bounds, identity, fusion rules A to G); the `external` family and source, roles `external_watch` and `external_context`; `evidence.fusion`; `fpsdet.external-input/1`; `fpsdet.packet/2`; `fpsdet score --external`, `--external-mapped`, `--external-strict`; `tests/test_external.py`; [external-evidence.md](external-evidence.md). Not used to escalate yet: provider groups and telemetry domains |
 | 6 Evidence graph | done | `graph.py` (closed node types and relations, a set of edges, `fpsdet.graph/1`, `build_graph` from the serialized case, the descriptive summary of shared sources, `verify_graph`, `verify_graphs`); `evidence.graph` on every case; `fpsdet.packet/3`; `tests/test_graph.py`; [evidence-graph.md](evidence-graph.md). Not used for any decision |
+| 7 Authenticated external evidence | done | `auth.py` (the provider-key registry and its digest, `fpsdet.external-signed/1` envelopes, Ed25519 verification through the optional `cryptography` extra, seven authentication states); verification before adapter mapping in `external.py`; `fpsdet.graph/2` (`provider_key`, `authenticated_by`, `belongs_to`); `fpsdet.packet/4`; `fpsdet score --external-registry`, `--require-signed-external`; `fpsdet external verify`; `tests/test_auth.py`; [external-authentication.md](external-authentication.md). Fusion unchanged |
 
 ### P1
 

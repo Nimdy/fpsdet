@@ -5,7 +5,7 @@
 - It runs on the server's logs. Nothing is installed on a player's PC.
 - It never bans. Every case has `automated_action: "none"`; a person decides.
 - It needs a dedicated server that decides hits itself. A listen server or client-side hit detection can forge every field.
-- It is plain Python 3.11+ with no dependencies.
+- It is plain Python 3.11+ with no dependencies. Checking providers' signatures on external records is the one optional extra (`pip install 'fpsdet[auth]'`).
 
 It is for indie and small studios, community server operators, and anyone who wants to check how a server can see a cheat that left the PC.
 
@@ -147,7 +147,7 @@ Statistics catch a cheater who is past every human. A careful one stays inside t
 
 ## Next to your other integrity systems
 
-fpsdet does not replace client anti-cheat, platform attestation, league administration or your reviewers. It can carry what they say, beside its own server evidence, without pretending it is its own. Send their records with `fpsdet score --external`, in the `fpsdet.external/1` format or through a data-only adapter. Each record keeps its provider, its class and its confidence exactly as given. An external signal can move a clean case to watch; it never makes a review, however many providers agree, and an account's ban history is context only. No adapter for any commercial anti-cheat exists: one can be written when a provider supports a record schema. See [docs/external-evidence.md](docs/external-evidence.md).
+fpsdet does not replace client anti-cheat, platform attestation, league administration or your reviewers. It can carry what they say, beside its own server evidence, without pretending it is its own. Send their records with `fpsdet score --external`, in the `fpsdet.external/1` format or through a data-only adapter. Each record keeps its provider, its class and its confidence exactly as given. An external signal can move a clean case to watch; it never makes a review, however many providers agree, and an account's ban history is context only. A provider can sign its records with Ed25519, and fpsdet checks them against the operator's registry of provider keys. A verified record is known to come from that provider's key, not known to be true, and it still makes a watch at most. No adapter or signing key for any commercial anti-cheat exists: one can be added when a provider supports it. See [docs/external-evidence.md](docs/external-evidence.md) and [docs/external-authentication.md](docs/external-authentication.md).
 
 ## Wire it to your game
 
@@ -218,6 +218,7 @@ Every pair of accounts on a weapon is compared for shared leftovers. That is fin
 | private replay | A body the server plays only where this client cannot see or hear it |
 | challenge | A private replay the server planned with a secret: one player, one match, one window, one id. See [docs/challenges.md](docs/challenges.md) |
 | external record | A claim another integrity system made about a player, carried as given. It can make a watch, never a review. See [docs/external-evidence.md](docs/external-evidence.md) |
+| verified | An external record signed by a key the operator registered for its provider. Signed, not true. See [docs/external-authentication.md](docs/external-authentication.md) |
 | `displacement_cause` | Why the body moved, when the player did not move it: `explosion`, `vehicle`, `ladder`, … |
 | seal | SHA-256 of the player, game, decision, and reasons. It identifies the packet a reviewer saw |
 | tape | A worked example on the review desk |
@@ -228,6 +229,7 @@ Every pair of accounts on a weapon is compared for shared leftovers. That is fin
 - [docs/integration.md](docs/integration.md): the event fields and engine emitters
 - [docs/challenges.md](docs/challenges.md): active challenges, the server secret, and what they do not catch
 - [docs/external-evidence.md](docs/external-evidence.md): records from other integrity systems, and the rules that keep them a watch at most
+- [docs/external-authentication.md](docs/external-authentication.md): provider signatures, the key registry, and what "verified" does not mean
 - [docs/culling.md](docs/culling.md): server-side culling, and how it fits
 - [docs/games.md](docs/games.md): mapping the fields onto well-known games
 - [docs/operations.md](docs/operations.md): lake, priority, AI, privacy, appeals

@@ -114,6 +114,53 @@ An unsigned record says `{"status": "unsigned"}`. Authentication is part of the 
 - **No validity windows.** A record's own `observed_at` is optional, and nothing says it was signed at that time, so fpsdet does not pretend to check key expiry against it. Revocation is the operator's lever.
 - **No PKI.** No certificates, chains or online checks. The registry is the trust anchor, and changing trust means changing the registry, which moves its digest.
 
+## What it is for, and what it is not
+
+Authentication is a prerequisite, not a policy. Any future rule that lets external evidence count for more has to know which records really came from which provider. "Two independent providers agree" means nothing if anyone can type two provider names. The graph already says which records share a provider group or a telemetry domain; now it also says which records a registered key signed, and which key. A later, calibrated rule can require both: verified sources, and groups and domains that are actually different. This change does not add that rule. A verified record makes exactly the watch an unsigned one makes, and never a review.
+
+What it does not do:
+
+- **Prove a claim.** A provider can sign a wrong record. `verified` is about who, never about whether.
+- **Vouch for an adapter.** The signature covers the provider's record. How an adapter reads it is the operator's configuration, bound by the adapter's digest.
+- **Stop unsigned records by default.** Unsigned records are still read, so a forged unsigned record can still make a watch. `--require-signed-external` is the switch.
+- **Detect a stolen key.** If a provider's private key leaks, records signed with it verify until the operator marks it `revoked`.
+- **Exist for any real anti-cheat.** No VAC, EAC, BattlEye or Vanguard signing key is in any registry here. A provider that signs its records can be added to an operator's registry.
+
+## What changed when it arrived
+
+Every existing data set was scored again with no external input and compared with the evidence graph (`ac5dfab`):
+
+| | Cases | Decisions | Reasons | Observations | Observation ids | Seals | Graphs | Packets |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Planted | 32 | 0 | 0 | 0 | 0 | 0 | 32 | 32 |
+| Synthetic weekly | 400 | 0 | 0 | 0 | 0 | 0 | 400 | 400 |
+| Synthetic nightly | 2,669 | 0 | 0 | 0 | 0 | 0 | 2,669 | 2,669 |
+| CS2 | 1,529 | 0 | 0 | 0 | 0 | 0 | 1,529 | 1,529 |
+| TF2 | 2,764 | 0 | 0 | 0 | 0 | 0 | 2,764 | 2,764 |
+
+- **Graphs:** every graph moved from `fpsdet.graph/1` to `fpsdet.graph/2` with identical nodes and edges. Only the recipe and two empty summary fields changed.
+- **Packets:** every packet moved from `fpsdet.packet/3` to `fpsdet.packet/4`.
+- **Verification:** every case verifies.
+- **The external fixtures,** scored with the same records before and after:
+  - every decision, reason, seal, fusion block, native observation id and record id is the same;
+  - all 19 external observations moved id, because their `authenticity` now says `{"status": "unsigned"}` instead of `"unverified"`.
+- **Without the package:** on a Python without `cryptography`, the demo and every test but the 39 that need it pass.
+
+**Cost**, measured on one machine:
+
+| | Before | After |
+| --- | --- | --- |
+| Scoring with no external input: synthetic week, CS2, TF2 | 1.25 s, 12.3 s, 13.7 s | 1.25 s, 11.9 s, 13.6 s |
+| Writing the week's 400 cases | 0.027 s, 2.01 MB | 0.029 s, 2.04 MB |
+
+| Records read | Unsigned | Signed, checked | Signed, no registry | One signature repeated |
+| --- | --- | --- | --- | --- |
+| 1,000 | 0.02 s | 0.10 s | 0.03 s | 0.03 s |
+| 10,000 | 0.21 s | 0.98 s | 0.32 s | 0.28 s |
+| 100,000 | 2.2 s | 10.3 s | 3.6 s | 2.8 s |
+
+Checking a signature costs about 80 µs, almost all of it Ed25519. Each one is checked once per run: the same signature over the same bytes is not checked again. Keys are looked up by provider and key id.
+
 ## Before authentication: what fpsdet trusted
 
 This is the external trust model at `58f1f50`, before signatures. `tests/test_auth.py` (`CurrentTrustModelTest`) pins it.

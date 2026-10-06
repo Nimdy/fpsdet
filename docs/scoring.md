@@ -76,7 +76,7 @@ Count the kinds of number that are past every human (accuracy, headshot rate, me
 | At least one metric was actually compared, and nothing above fired | clean |
 | Nothing was comparable (short sample, thin cohort, no cap) | insufficient_data |
 
-Those are the native decisions. Then, only when the run was given external records, they meet fpsdet's own decision by explicit rules ([external-evidence.md](external-evidence.md)): a qualifying external signal makes a clean or `insufficient_data` case a watch; a watch stays a watch; a review stays a review. External evidence never makes a review, and reports never take part.
+Those are the native decisions. Then, only when the run was given external records, they meet fpsdet's own decision by explicit rules ([external-evidence.md](external-evidence.md)): a qualifying external signal makes a clean or `insufficient_data` case a watch; a watch stays a watch; a review stays a review. External evidence never makes a review, and reports never take part. A record signed by a registered provider key ([external-authentication.md](external-authentication.md)) is treated exactly like an unsigned one by these rules: a signature says who made the claim, not that it is true.
 
 Every case also carries an evidence graph ([evidence-graph.md](evidence-graph.md)): what each observation depends on and what sources observations share. It is built after the decision, from the finished case, and nothing reads it to decide anything.
 
