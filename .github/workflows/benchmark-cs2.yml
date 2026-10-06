@@ -1,0 +1,50 @@
+# Rebuilds the CS2 dataset of FPSDET Benchmark v1 (cs2cd-v2) from an empty cache, by hand only.
+#
+# It fetches the one pinned Hugging Face revision (about 4.3 GB; the fetcher stops rather than take the
+# latest), rebuilds the prepared inputs, scores them, and checks the run against the committed expectation.
+# A pass means a stranger with a clean machine gets the committed inputs and outputs exactly.
+#
+# It is not run on every pull request: the download is large and the score needs several GB of memory.
+# TF2 (tf2-rgl-v2) has no workflow: rebuilding it takes about 11,000 requests to logs.tf, whose robots.txt
+# asks crawlers to stay off its API, so it is fetched rarely, slowly and by a person, never from shared CI.
+
+name: Benchmark CS2 rebuild
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cs2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: CS2 requirements
+        run: pip install -r examples/cs2/requirements.txt
+      - name: Fetch the pinned revision into an empty folder
+        run: PYTHONPATH=src python -m fpsdet benchmark fetch --dataset cs2 --data "$RUNNER_TEMP/cs2"
+      - name: Prepare, and compare the inputs with the manifest
+        run: PYTHONPATH=src python -m fpsdet benchmark prepare --dataset cs2 --data "$RUNNER_TEMP/cs2"
+      - name: Run, and compare with the pinned result
+        run: PYTHONPATH=src python -m fpsdet benchmark run --dataset cs2 --data cs2="$RUNNER_TEMP/cs2" --out "$RUNNER_TEMP/out"
+      - name: Committed artifacts verify, with this run's case packets
+        run: PYTHONPATH=src python -m fpsdet benchmark verify --data cs2="$RUNNER_TEMP/out/cs2cd-v2"
+      - name: Benchmark report is current
+        run: PYTHONPATH=src python -m fpsdet benchmark report --check
+      - name: Keep the result and the fetch receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cs2cd-v2-rebuild
+          path: |
+            ${{ runner.temp }}/out/cs2cd-v2/result.json
+            ${{ runner.temp }}/cs2/receipts/*.json
+          if-no-files-found: warn
