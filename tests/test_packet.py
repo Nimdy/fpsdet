@@ -11,7 +11,7 @@ from fpsdet.evidence import Observation
 from fpsdet.models import HistoryWindow
 from fpsdet.persist import case_to_dict
 from fpsdet.pipeline import run_score
-from fpsdet.provenance import PACKET_RECIPE, history_digest, packet_block, verify_packet
+from fpsdet.provenance import PACKET_RECIPE, PACKET_V1, history_digest, packet_block, verify_packet
 from fpsdet.score import assess_player, history_for
 from fpsdet.signals import evidence_seal
 from fpsdet.summarize import summarize
@@ -124,7 +124,7 @@ def fixed_case() -> dict:
             },
         },
     }
-    case["evidence"]["packet"] = packet_block(case)
+    case["evidence"]["packet"] = packet_block(case, PACKET_V1)  # a pinned packet/1 digest
     return case
 
 

@@ -2,7 +2,8 @@
 
 NativeFusionSurfacesTest was written before external evidence (P5, phase E0) to pin the places it could
 reach: what the AI brief is sent, how a batch watch moves a decision, that reports move nothing, what
-packet/1 binds, and that a packet written before P5 verifies.
+packet/1 binds, and that a packet written before P5 verifies. P5 changed one thing it pinned, on purpose:
+new cases are written with fpsdet.packet/2.
 """
 
 from __future__ import annotations
@@ -81,10 +82,12 @@ class NativeFusionSurfacesTest(unittest.TestCase):
 
     def test_what_packet_1_binds(self):
         case = case_to_dict(next(c for c in DEMO.cases if c.player_id == "elite-human"))
-        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/1")
-        self.assertEqual(sorted(packet_material(case)), [
+        # P5 writes fpsdet.packet/2 for every new case (it was packet/1 here before). packet/1 is unchanged.
+        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/2")
+        self.assertEqual(sorted(packet_material(case, "fpsdet.packet/1")), [
             "decision", "eligibility", "evidence_version", "game", "observations", "provenance", "provenance_version", "recipe", "subject",
         ])
+        self.assertEqual(sorted(packet_material(case, "fpsdet.packet/1")["provenance"]), ["cohort", "detector", "history", "inputs", "profile"])
         self.assertEqual(PACKET_PROVENANCE, {
             "detector": ("recipe", "digest", "modules"),
             "profile": ("recipe", "digest"),
@@ -701,6 +704,103 @@ class FalsePositiveTest(unittest.TestCase):
     def test_a_number_fpsdet_would_round_is_refused(self):
         loaded, _ = self.run_with([native(confidence=0.12345678901234, confidence_scale="score")])
         self.assertEqual(len(loaded.errors), 1)
+
+
+class PacketV2Test(unittest.TestCase):
+    """fpsdet.packet/2: packet/1, the external input and the fusion state. Every new case is written with it."""
+
+    def adrenaline(self) -> dict:
+        return copy.deepcopy(FUSED["adrenaline"])
+
+    def test_every_new_packet_is_v2_complete_and_verifies(self):
+        for cases in (FUSED, NATIVE, {c.player_id: case_to_dict(c) for c in DEMO.cases}):
+            for pid, case in cases.items():
+                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/2", pid)
+                self.assertEqual(case["evidence"]["packet"]["status"], "complete", pid)
+                self.assertEqual(verify_packet(case), [], pid)
+
+    def test_what_it_binds(self):
+        case = self.adrenaline()
+        material = packet_material(case)
+        self.assertEqual(sorted(material), sorted([*packet_material(case, "fpsdet.packet/1"), "fusion"]))
+        self.assertEqual(sorted(material["provenance"]), ["cohort", "detector", "external", "history", "inputs", "profile"])
+        self.assertEqual(material["fusion"]["rule"], "A")
+        self.assertEqual(sorted(material["provenance"]["external"]), ["digest", "mode", "recipe", "records", "sources"])
+        none = packet_material(NATIVE["adrenaline"])
+        self.assertEqual((none["fusion"], none["provenance"]["external"]["mode"]), (None, "none"))
+
+    def test_external_edits_are_caught(self):
+        def edit_external(field, value):
+            def run(case):
+                case["evidence"]["provenance"]["external"][field] = value
+            return run
+
+        def edit_source(case):
+            case["evidence"]["provenance"]["external"]["sources"][0]["errors"] += 1
+
+        def edit_fusion(field, value):
+            def run(case):
+                case["evidence"]["fusion"][field] = value
+            return run
+
+        def edit_record(case):
+            (obs,) = external_obs(case)
+            obs["evidence"]["confidence"]["value"] = 12
+
+        def drop_record(case):
+            case["evidence"]["observations"] = [obs for obs in case["evidence"]["observations"] if obs["family"] != "external"]
+
+        def drop_fusion(case):
+            del case["evidence"]["fusion"]
+
+        edits = {
+            "external digest": edit_external("digest", "sha256:" + "1" * 64),
+            "external record count": edit_external("records", 7),
+            "external mode": edit_external("mode", "none"),
+            "a source's error count": edit_source,
+            "the fusion rule": edit_fusion("rule", "none"),
+            "the native decision": edit_fusion("native_decision", "watch"),
+            "the fusion block": drop_fusion,
+            "an external record's confidence": edit_record,
+            "an external record": drop_record,
+        }
+        for name, edit in edits.items():
+            with self.subTest(name):
+                case = self.adrenaline()
+                edit(case)
+                self.assertTrue(verify_packet(case), name)
+
+    def test_wording_is_not_evidence(self):
+        case = self.adrenaline()
+        case["reasons"] = ["reworded"]
+        external_obs(case)[0]["context"]["line"] = "reworded"
+        self.assertEqual(verify_packet(case), [])
+
+    def test_packet_1_keeps_its_meaning(self):
+        for name in ("historical-packets-p23.json", "historical-packets-p3.json", "historical-packets-p4.json"):
+            for case in json.loads((FIXTURES / name).read_text(encoding="utf-8"))["cases"]:
+                with self.subTest(name, player=case["player_id"]):
+                    self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/1")
+                    self.assertEqual(verify_packet(case), [])
+        relabelled = self.adrenaline()
+        relabelled["evidence"]["packet"]["recipe"] = "fpsdet.packet/1"
+        self.assertTrue(verify_packet(relabelled))
+        unknown = self.adrenaline()
+        unknown["evidence"]["packet"]["recipe"] = "fpsdet.packet/9"
+        self.assertIn("not one of", " ".join(verify_packet(unknown)))
+
+    def test_a_v2_digest_is_the_same_on_every_python(self):
+        import sys
+
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from test_packet import fixed_case
+        from fpsdet.provenance import packet_block
+
+        case = fixed_case()
+        case["evidence"]["provenance"]["external"] = {"mode": "none"}
+        self.assertEqual(packet_block(case)["digest"], "sha256:9df323bafdd263d6e75e2ed8965c244390479725f5f543ff826c7098ece1ff1f")
+        del case["evidence"]["provenance"]["external"]
+        self.assertEqual(packet_block(case), {"recipe": "fpsdet.packet/2", "status": "incomplete", "missing": ["external"]})
 
 
 class ExternalCommandTest(unittest.TestCase):

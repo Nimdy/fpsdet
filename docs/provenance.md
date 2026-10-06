@@ -243,7 +243,9 @@ The plan digest shows a record was not edited after it was digested. It is not a
 "packet": {"recipe": "fpsdet.packet/1", "status": "complete", "digest": "sha256:<64 hex>"}
 ```
 
-**What it binds** (`fpsdet.packet/1`), as canonical JSON:
+Every new case is written with `fpsdet.packet/2`. Packets written earlier with `fpsdet.packet/1` keep verifying: `verify_packet` reads each packet with the recipe it names, and `packet/1` means exactly what it always did.
+
+**What `fpsdet.packet/1` binds**, as canonical JSON:
 
 | Field | From |
 | --- | --- |
@@ -258,7 +260,18 @@ The plan digest shows a record was not edited after it was digested. It is not a
 | `provenance.inputs` | recipe, digest, events, matches |
 | `provenance.history` | mode, recipe, digest, windows |
 
-**What it leaves out:**
+**What `fpsdet.packet/2` adds:**
+
+| Field | From |
+| --- | --- |
+| `provenance.external` | mode, recipe, digest, records, sources: the external records about this player and the files the run read (see External input). `{"mode": "none"}` when the run had none |
+| `fusion` | `evidence.fusion`: the native decision, the final one, the rule, and the providers and domains behind the signals. Null when the run had no external input |
+
+External observations are bound by both recipes the way every observation is, by id in `observations`. `packet/1` could not bind the external input or the fusion state: its provenance parts are fixed, and a part added later is not in it. So the recipe moved instead of `packet/1` changing what it means.
+
+**Why every new case uses `packet/2`, external input or not.** One recipe for everything fpsdet writes now is simpler to check and to explain than two, chosen by whether a run happened to have external records. For a run without them, `packet/2` binds `{"mode": "none"}` and a null fusion, which is a true statement about that run. Every packet digest moved once, when this recipe arrived; nothing else in any case did.
+
+**What they leave out:**
 
 - The reason sentences and the context lines, since rewording is not new evidence.
 - `observations[].context`.
@@ -278,12 +291,12 @@ The plan digest shows a record was not edited after it was digested. It is not a
 `fpsdet.provenance.verify_packet(case)` reads a serialized case and returns what does not hold together, or nothing.
 
 1. **Observation ids.** Each id is recomputed from the observation's own fields, and the model refuses a role the scorer never gives that kind. An edited value with its old id is caught here, before the packet is considered.
-2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest. Old recipes stay known: a packet written with `fpsdet.player-events/1` before event normalization still verifies (`tests/fixtures/historical-packets-p23.json`).
-3. **The packet.** It is rebuilt with the same code that built it and compared.
+2. **Recipes.** Each provenance part names a recipe this version knows, with a well-formed digest. Old recipes stay known: a packet written with `fpsdet.player-events/1` before event normalization still verifies (`tests/fixtures/historical-packets-p23.json`), and so do `packet/1` cases from the knowledge and challenge engines (`historical-packets-p3.json`, `historical-packets-p4.json`).
+3. **The packet.** It is rebuilt, with the recipe it names, by the same code that built it, and compared. A recipe this version does not know is a problem, not a guess.
 
 It needs no events, cohort, profile or code, and it does not prove that those sources would produce the packet again. That second level, source reproduction, is a rerun: score the same events with the same detector, profile, cohort and history, and `tools/regress.py diff` the result. `tools/regress.py verify` runs `verify_packet` on every case of a snapshot.
 
-**Caught:** an edited observation value, an edited observation id, an observation with a recomputed id (the packet moves), a changed role, the decision, the eligibility, the subject or game, and any detector, profile, cohort, cohort mode, integrity, input or history digest.
+**Caught:** an edited observation value, an edited observation id, an observation with a recomputed id (the packet moves), a changed role, the decision, the eligibility, the subject or game, and any detector, profile, cohort, cohort mode, integrity, input or history digest. With `packet/2`, also: an edited or removed external record, the external input digest, mode, record count or any source's counts, and any field of the fusion state.
 
 **Not caught, by design:** a reworded reason or context line, a new AI brief, a changed report count or queue rank, a different party note.
 

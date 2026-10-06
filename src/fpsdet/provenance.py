@@ -48,7 +48,10 @@ INPUTS_RECIPE = "fpsdet.player-events/2"
 ARRIVAL_INPUTS_RECIPE = "fpsdet.player-events/1"
 HISTORY_RECIPE = "fpsdet.history/1"
 EXTERNAL_INPUT_RECIPE = "fpsdet.external-input/1"
-PACKET_RECIPE = "fpsdet.packet/1"
+PACKET_V1 = "fpsdet.packet/1"
+# packet/1 plus the external input and the fusion state. Every new case is written with it.
+PACKET_V2 = "fpsdet.packet/2"
+PACKET_RECIPE = PACKET_V2
 
 PACKAGE = "fpsdet"
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -523,7 +526,8 @@ def stamp(
 # The evidence packet. One digest over what the evidence is and what produced it, read from the
 # serialized case, so building it and checking it are the same code.
 
-# The provenance fields the packet binds, by part. A key added to a part later is not bound by packet/1.
+# The provenance fields packet/1 binds, by part. A key added to a part later is not bound by packet/1;
+# packet/2 binds the same, and the external input.
 PACKET_PROVENANCE = {
     "detector": ("recipe", "digest", "modules"),
     "profile": ("recipe", "digest"),
@@ -531,6 +535,8 @@ PACKET_PROVENANCE = {
     "inputs": ("recipe", "digest", "events", "matches"),
     "history": ("mode", "recipe", "digest", "windows"),
 }
+PACKET_V2_PROVENANCE = {**PACKET_PROVENANCE, "external": ("mode", "recipe", "digest", "records", "sources")}
+PACKET_PARTS = {PACKET_V1: PACKET_PROVENANCE, PACKET_V2: PACKET_V2_PROVENANCE}
 # The recipes this fpsdet can read in a packet, by part. Old ones stay: a recipe never changes meaning.
 RECIPES = {
     "detector": (DETECTOR_RECIPE,),
@@ -538,27 +544,33 @@ RECIPES = {
     "cohort": (COHORT_RECIPE,),
     "inputs": (INPUTS_RECIPE, ARRIVAL_INPUTS_RECIPE),
     "history": (HISTORY_RECIPE,),
+    "external": (EXTERNAL_INPUT_RECIPE,),
 }
 _DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 
 
-def _missing(provenance) -> list[str]:
+def _missing(provenance, recipe: str = PACKET_RECIPE) -> list[str]:
     """What a complete packet needs and this case's provenance lacks."""
     if not isinstance(provenance, Mapping):
         return ["provenance"]
-    missing = [part for part in PACKET_PROVENANCE if not isinstance(provenance.get(part), Mapping)]
+    missing = [part for part in PACKET_PARTS[recipe] if not isinstance(provenance.get(part), Mapping)]
     detector = provenance.get("detector")
     if isinstance(detector, Mapping) and detector.get("digest") is None:
         missing.append("detector source")
     return missing
 
 
-def packet_material(case: Mapping) -> dict:
-    """The canonical content of the evidence packet. Reason text, context, reports and the brief are not in it."""
+def packet_material(case: Mapping, recipe: str = PACKET_RECIPE) -> dict:
+    """The canonical content of the evidence packet. Reason text, context, reports and the brief are not in it.
+
+    ``fpsdet.packet/1`` is exactly what it always was. ``fpsdet.packet/2`` adds the external input's
+    provenance and ``evidence.fusion`` (null when the run had no external input). External observations
+    are bound in both, as every observation is, by id.
+    """
     evidence = case["evidence"]
     provenance = evidence["provenance"]
-    return {
-        "recipe": PACKET_RECIPE,
+    material = {
+        "recipe": recipe,
         "evidence_version": evidence["version"],
         "provenance_version": provenance["version"],
         "subject": case["player_id"],
@@ -567,18 +579,22 @@ def packet_material(case: Mapping) -> dict:
         "eligibility": evidence["eligibility"],
         "observations": sorted(obs["observation_id"] for obs in evidence["observations"]),
         "provenance": {
-            part: {key: provenance[part].get(key) for key in keys} for part, keys in PACKET_PROVENANCE.items()
+            part: {key: provenance[part].get(key) for key in keys} for part, keys in PACKET_PARTS[recipe].items()
         },
     }
+    if recipe == PACKET_V2:
+        material["fusion"] = evidence.get("fusion")
+    return material
 
 
-def packet_block(case: Mapping) -> dict:
-    """``case["evidence"]["packet"]``: the digest of a complete packet, or what keeps it from being complete."""
-    missing = _missing(case["evidence"].get("provenance"))
+def packet_block(case: Mapping, recipe: str = PACKET_RECIPE) -> dict:
+    """``case["evidence"]["packet"]``: the digest of a complete packet, or what keeps it from being complete.
+    New cases are written with ``fpsdet.packet/2``; a packet is checked with the recipe it names."""
+    missing = _missing(case["evidence"].get("provenance"), recipe)
     if missing:
-        return {"recipe": PACKET_RECIPE, "status": "incomplete", "missing": missing}
-    digest = _sha256(_json(packet_material(case)).encode("utf-8"))
-    return {"recipe": PACKET_RECIPE, "status": "complete", "digest": digest}
+        return {"recipe": recipe, "status": "incomplete", "missing": missing}
+    digest = _sha256(_json(packet_material(case, recipe)).encode("utf-8"))
+    return {"recipe": recipe, "status": "complete", "digest": digest}
 
 
 def verify_packet(case: Mapping) -> list[str]:
@@ -623,7 +639,7 @@ def verify_packet(case: Mapping) -> list[str]:
     if isinstance(provenance, Mapping):
         for part, recipes in RECIPES.items():
             block = provenance.get(part)
-            if not isinstance(block, Mapping) or (part == "history" and block.get("mode") == "none"):
+            if not isinstance(block, Mapping) or (part in ("history", "external") and block.get("mode") == "none"):
                 continue
             if block.get("recipe") not in recipes:
                 problems.append(f"provenance {part} uses recipe {block.get('recipe')!r}, not one of {', '.join(recipes)}")
@@ -632,8 +648,10 @@ def verify_packet(case: Mapping) -> list[str]:
     packet = evidence.get("packet")
     if not isinstance(packet, Mapping):
         return problems + ["the evidence has no packet"]
+    if packet.get("recipe") not in PACKET_PARTS:
+        return problems + [f"the packet uses recipe {packet.get('recipe')!r}, not one of {', '.join(PACKET_PARTS)}"]
     try:
-        expected = packet_block(case)
+        expected = packet_block(case, packet["recipe"])
     except (KeyError, TypeError) as error:
         return problems + [f"the packet cannot be rebuilt: {error!r}"]
     if packet.get("status") != expected["status"]:

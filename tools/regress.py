@@ -327,6 +327,8 @@ def classify(old: dict, new: dict) -> list[str]:
         found.append(f"input-recipe {old_inputs.get('recipe')} -> {new_inputs.get('recipe')}")
     elif old_inputs.get("digest") != new_inputs.get("digest"):
         found.append("input-digest-changed")
+    if (before.get("packet") or {}).get("recipe") != (after.get("packet") or {}).get("recipe"):
+        found.append(f"packet-recipe {(before.get('packet') or {}).get('recipe')} -> {(after.get('packet') or {}).get('recipe')}")
     if (before.get("packet") or {}).get("digest") != (after.get("packet") or {}).get("digest"):
         found.append("packet-changed")
     for field in ("party_note", "vendor_twin", "vendor_r", "queue_rank", "speed", "recommended_action", "automated_action", "skill_band"):
