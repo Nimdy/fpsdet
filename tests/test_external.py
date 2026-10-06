@@ -673,7 +673,7 @@ class FalsePositiveTest(unittest.TestCase):
         self.assertEqual(obs["evidence"]["metadata"]["note"], HOSTILE)  # kept, as data
         self.assertEqual(case["decision"], "watch")
         visible = json.dumps({key: case[key] for key in ("reasons", "observations", "checks")})
-        self.assertNotIn("script", visible)
+        self.assertNotIn("<script", visible)
         self.assertNotIn("Ignore all previous", visible)
         sent: list[dict] = []
         triage_case(case, lambda body: sent.append(body) or "brief", known_ids=list(cases))
@@ -814,7 +814,8 @@ class ExternalCommandTest(unittest.TestCase):
             folder = Path(folder)
             events = folder / "events.ndjson"
             events.write_text("".join(json.dumps(event_to_dict(e)) + "\n" for e in DEMO.population + EVENTS))
-            bad = write_lines(folder, "bad.ndjson", [native(subject_id="adrenaline"), "{nope"])
+            bad = write_lines(folder, "bad.ndjson", [native(subject_id="adrenaline", kind=HOSTILE[:128], metadata={"note": HOSTILE}), "{nope",
+                                                     native(subject_id="glitch", kind=HOSTILE, confidence=2.0, confidence_scale="probability")])
             argv = ["score", str(events), "--profile", str(Path(__file__).resolve().parents[1] / "profiles" / "example-loadout.json"),
                     "--external", str(EXAMPLES / "native.ndjson"),
                     "--external-mapped", str(EXAMPLES / "example-integrity.adapter.json"), str(EXAMPLES / "example-integrity.ndjson"),
@@ -823,6 +824,10 @@ class ExternalCommandTest(unittest.TestCase):
             with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
                 self.assertEqual(main(argv), 0)
             self.assertIn("bad.ndjson line 2", err.getvalue())
+            self.assertIn("bad.ndjson line 3", err.getvalue())
+            for text in (out.getvalue(), err.getvalue()):
+                self.assertNotIn("<script", text)
+                self.assertNotIn("Ignore all previous", text)
             index = json.loads((folder / "out" / "review-index.json").read_text())
             adrenaline = next(row for row in index["cases"] if row["player_id"] == "adrenaline")
             self.assertEqual(adrenaline["evidence"]["fusion"]["rule"], "A")

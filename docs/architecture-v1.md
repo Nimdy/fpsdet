@@ -160,6 +160,7 @@ Every flagged case names what fired. A rank-tail watch carries its explanation o
 | 7 | Cases → people | Rendered text. | `casefile` escapes everything. The dashboards build the DOM with `textContent`, and the embedded JSON escapes `<`. | Dashboard links (`links`, `home`) come from the operator's payload unchecked. Only fpsdet's own scripts write them today. |
 | 8 | Cases → AI | The aggregated case. | Every player id the case names is aliased; party ids, match ids and the seal are dropped; the brief is stored apart and is not in the seal. | Event-derived strings (weapon ids, build keys, metric names) reach the model inside free text. The prompt does not mark the case as untrusted data, and nothing bounds its size. |
 | 9 | Public data → examples | Public APIs and the CS2CD files. | TF2 ids are pseudonymised with an HMAC key kept beside the data. CS2 uses the dataset's own placeholders. Only scored summaries are committed. | — |
+| 10 | Other integrity systems → external records (P5) | Nothing: every record is `unverified`. A provider's claim is kept as its claim. | Strict JSON with bounds on files, lines, strings, metadata and records; data-only adapters; errors that never quote the input; external lines that never carry a provider string; a separate family, source and roles; a watch at most. | No signatures, so a forged record is indistinguishable from a real one. It can make a watch, and nothing more. |
 
 ## 6. Provenance and the seal today (implemented)
 
@@ -375,6 +376,8 @@ class ExternalObservation:
 
 It becomes an `Observation` with `family="external"` and `grade="context"`. It never feeds `decide()` and is never merged into a native family. Adapters parse JSON only; nothing is imported or executed.
 
+*Implemented in P5, with a stronger policy than this sketch; [external-evidence.md](external-evidence.md) is the reference.* The record is `external.ExternalRecord`: the classes are `client_integrity`, `platform_attestation`, `account_status`, `tournament_finding`, `human_review` and `custom_detector`; it adds a provider group, a telemetry domain, a direction, a match window, and a confidence scale beside the value and its meaning, and a confidence may be a word. Its identity is the SHA-256 of its normalized claim, not of the bytes received; the file's bytes are hashed separately, in provenance. Records are not all context: an adverse signal in a scored match can move a case with no native finding to watch, through its own role, `external_watch`, which never joins a native role. `decide()` is still untouched; fusion runs after it.
+
 ### 10.6 EvidenceGraph
 
 ```json
@@ -450,13 +453,13 @@ Each step is one commit, run against the full suite, the demo, the board diff an
 | Deterministic event normalization | done | `fpsdet.timeline`; simultaneous-event rules per check; key-ordered output; `math.fsum`; deterministic partner selection; `fpsdet.player-events/2`; [event-normalization.md](event-normalization.md). The plan was: 1. Characterise every place scoring depends on a player's event arrival order (weapon, build and declared-metric first appearance; equal-time ties; float sums). 2. Define a canonical per-player order. 3. Fix a deterministic tie-break for equal timestamps. 4. Prove which decision and output changes are intended, case by case. 5. Rerun CS2 and TF2. 6. Only then, if what the scorer reads changes, introduce a new input recipe beside `fpsdet.player-events/1`. |
 | 3.1 Knowledge engine | done | `knowledge.py` (known, unknown, unknowable; channels known, absent, unchecked, not applicable); profile `knowledge_channels`; event `vision_state`, `audio_state`; hidden mover, private replay, quiet aim and teammate contacts read it; knowledge context on information findings; contradiction notes; `tests/test_knowledge.py`; [knowledge-engine.md](knowledge-engine.md) |
 | 4 Challenge engine | done | `challenge.py` (types, public plans and their digest, budget, linkage, per-challenge results, evidence) and `challenge_plan.py` (the only module that reads the secret: keyed derivation, commitment, schedule without repeats); `fpsdet challenge keygen`, `plan`, `verify`, `types`; `fpsdet score --challenges`; event `challenge_id`, `challenge_track_ms`; the `challenge` family; the legacy private replay kept as `legacy_private_replay`; leak, false-positive and attacker tests in `tests/test_challenge.py`; [challenges.md](challenges.md) |
+| 5 External evidence and fusion | done | `external.py` (the record, `fpsdet.external/1`, data-only adapters, bounds, identity, fusion rules A to G); the `external` family and source, roles `external_watch` and `external_context`; `evidence.fusion`; `fpsdet.external-input/1`; `fpsdet.packet/2`; `fpsdet score --external`, `--external-mapped`, `--external-strict`; `tests/test_external.py`; [external-evidence.md](external-evidence.md). Not used to escalate yet: provider groups and telemetry domains |
 
 ### P1
 
 | Step | Files |
 | --- | --- |
 | 5 Alternatives | `evidence.py` `Alternative`; the explanations already computed (audio, grace, emitter missing, thin cohort) become explicit `ruled_out` or `unknown` entries; nothing becomes stronger because an alternative was not checked |
-| 6 External evidence | new `external.py` (validation, size limits, attribution); `fpsdet score --external records.ndjson`; `docs/external-evidence.md` |
 | 7 Evidence graph | new `graph.py`; `docs/evidence-graph.md` |
 
 P2 (calibration, enrichment metrics, red-team harness, AI contract) and P3 (watermarking research, test split, capability matrix, API cleanup) follow, in the order the brief sets.

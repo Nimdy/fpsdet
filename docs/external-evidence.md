@@ -115,8 +115,8 @@ External input is untrusted, so every limit is enforced while reading:
 | JSON | UTF-8; no repeated keys; no `NaN` or `Infinity`; nested at most 8 levels |
 | Ids, kinds, labels | 128 characters; providers and groups 64, lowercase |
 | Free text | 256 characters; no control characters or bidirectional overrides |
-| Metadata | 16 flat fields, 4 KB |
-| Numbers | Finite, at most 10¹² in size; match times 0 to 10¹⁰ ms |
+| Metadata | 16 flat fields, 4 KB. A key that names an action on an account (`action`, `automated_action`, `recommended_action`) is refused: evidence never carries an instruction |
+| Numbers | Finite, at most 10¹² in size; match times 0 to 10¹⁰ ms. A float with more than 12 significant digits is refused, because evidence keeps 12 and would otherwise round it silently |
 | Records | 64 per player and 1,000,000 per run, after duplicates |
 
 A line fpsdet will not read is skipped, and named by file, line and reason. The error never quotes the value, so a hostile string cannot reach a terminal or a log through it. The source's error count goes into the run's provenance. Native scoring is never affected. `--external-strict` makes the first bad line stop the run instead.
@@ -160,6 +160,7 @@ fpsdet makes every native decision first, from its own evidence, with every batc
 - **No score.** Nothing is weighted or summed. A provider's confidence is kept and shown, and no rule reads it.
 - **No reports.** The rules read the case's decision and its matches. They never read a report count.
 - **Native evidence is untouched.** No native observation, id, eligibility or challenge result changes, and the native decision is recorded beside the final one.
+- **After the batch passes.** The shared-leftover and teammate checks, and the party notes, read native decisions only. A teammate made a watch by an external record is not named in a party note, and an external record never helps select a relationship partner.
 
 A signal that moved a case to watch writes its line in `reasons`, so the case says why it is a watch; the seal moves with the decision. Every other external line goes in `observations`, and the reasons and seal stay as they were. `automated_action` is always `none`.
 
@@ -204,6 +205,70 @@ Each case's `evidence.provenance.external` says what external input the run had:
 - `{"mode": "supplied", "recipe": "fpsdet.external-input/1", "digest": ..., "records": n, "sources": [...]}`: the run was given external input. `records` is how many of the run's records are about this player, and may be 0.
 
 The digest is SHA-256 over the recipe, the record count, and each of this player's records' whole `fpsdet.external/1` digests, sorted. File order does not move it; a changed, added or removed record does. `sources` is the run's: for each file, the SHA-256 of its bytes, `fpsdet.external/1` or the adapter's digest and name, and how many records it added, repeated, or could not read. No timestamp is recorded: a run's provenance does not depend on when it ran.
+
+## The example records, scored
+
+`tests/test_external.py` scores the planted demo through `run_score`, plus one player whose only native finding is accuracy past every human, with every example in `examples/external/`:
+
+| Player | Native | Final | Rule | External records |
+| --- | --- | --- | --- | --- |
+| adrenaline | clean | watch | A | one `client_integrity` anomaly |
+| blasted | clean | watch | A | two anomalies from one provider: two observations, one provider |
+| angle-holder | clean | watch | A | an anomaly and a failed attestation: two providers, still a watch |
+| weak-human | clean | watch | A | a studio detector's `custom_detector` record |
+| glitch | clean | watch | A | a reviewer's `human_review` finding |
+| listened | clean | watch | A | a league's `confirmed_cheating` ruling, kept as theirs |
+| reported-streamer | clean | watch | A | one anomaly; its 25 reports play no part, and with none it is the same |
+| account-changed | watch (account history) | watch | B | one anomaly |
+| one-past | watch (one past-human metric) | watch | B | one anomaly. Not a review: an external signal never joins a native role |
+| replay-lock | review (challenge) | review | C | one anomaly |
+| weight-cheat | review (physics) | review | C | one anomaly |
+| legal-heavy | clean | clean | none | an old `game_ban` on the account: history, context only |
+| steady-hands | clean | clean | none | a `trade_restriction`: context only |
+| late-compensate | clean | clean | none | a league ruling of `cleared`: favorable, context only |
+| picture-track | clean | clean | none | an `integrity_ok`: favorable, context only |
+| elite-human | clean | clean | none | a passed attestation, and an anomaly about a match outside the window |
+
+A record about a player with no case attaches to no one, and the same record listed twice counts once. No external record made a review.
+
+## What changed when it arrived
+
+Every existing data set was scored again with no external input and compared with the challenge engine (`ce00ac6`) by `tools/regress.py migrate`:
+
+| | Cases | Decisions | Reasons | Observations | Observation ids | Seals | Packets |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Planted | 32 | 0 | 0 | 0 | 0 | 0 | 32 |
+| Synthetic weekly | 400 | 0 | 0 | 0 | 0 | 0 | 400 |
+| Synthetic nightly | 2,669 | 0 | 0 | 0 | 0 | 0 | 2,669 |
+| CS2 | 1,529 | 0 | 0 | 0 | 0 | 0 | 1,529 |
+| TF2 | 2,764 | 0 | 0 | 0 | 0 | 0 | 2,764 |
+
+Every packet moved, and only for one reason: every new case is written with `fpsdet.packet/2`, which also binds `provenance.external: {"mode": "none"}` and a null fusion. The detector digest moved too, because `fpsdet.external` is now a detector module. No case gained a fusion block, since none was given external input. All 1,529 CS2 and 2,764 TF2 packets verify, as do the historical `packet/1` ones. The golden lock did not move.
+
+**Cost**, measured back to back on one machine:
+
+| | Without external input, before | After |
+| --- | --- | --- |
+| Synthetic week, full scoring (178,020 events) | 1.25 to 1.26 s | 1.25 to 1.27 s |
+| CS2 scoring (4.07 M events) | 12.6 s, 5.89 GB peak | 12.3 s, 5.89 GB peak |
+| TF2 scoring (4.14 M events) | 14.1 s, 5.74 GB peak | 13.5 s, 5.74 GB peak |
+
+| External records | File | Reading them | Peak while reading | Scoring a run of 5 shots per player, without / with them |
+| --- | --- | --- | --- | --- |
+| 1,000 (100 players) | 0.3 MB | 0.02 s | 1.2 MB | 0.003 s / 0.019 s |
+| 10,000 (1,000 players) | 3.4 MB | 0.20 s | 12 MB | 0.04 s / 0.23 s |
+| 100,000 (2,000 players) | 34 MB | 2.1 s | 119 MB | 0.13 s / 2.2 s |
+
+Records are indexed by player as they are read, so each case reads only its own. The cost with records is building one observation per record: about 20 µs each.
+
+## What this version does not do
+
+- **Make a review.** Not from one provider, not from many, not with a native watch. A rule that lets independent external evidence join native evidence for a review needs calibration against providers' real error rates, and an independence analysis. Neither exists.
+- **Authenticate.** No record is signed or checked; `unverified` is the only state. A forged record can make a watch.
+- **Read a provider's confidence.** It is shown, not used. A low-confidence adverse signal makes the same watch as a high one; the adapter, which the operator controls, is where a provider's weak signals can be mapped to `context`.
+- **Integrate a real anti-cheat.** There is no VAC, EAC, BattlEye or Vanguard adapter, and none is implied.
+- **Show external records in the dashboards.** They are in the case and its evidence; the dashboards group on fpsdet's own checks.
+- **Lower a decision.** A favorable record never clears a native finding.
 
 ## Before external evidence: where it could enter
 
