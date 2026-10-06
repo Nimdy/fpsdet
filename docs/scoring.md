@@ -78,6 +78,8 @@ Count the kinds of number that are past every human (accuracy, headshot rate, me
 
 Those are the native decisions. Then, only when the run was given external records, they meet fpsdet's own decision by explicit rules ([external-evidence.md](external-evidence.md)): a qualifying external signal makes a clean or `insufficient_data` case a watch; a watch stays a watch; a review stays a review. External evidence never makes a review, and reports never take part.
 
+Every case also carries an evidence graph ([evidence-graph.md](evidence-graph.md)): what each observation depends on and what sources observations share. It is built after the decision, from the finished case, and nothing reads it to decide anything.
+
 An account-history break is the same weapon and the same rank band: Wilson lower bound of this window (with its design effect) minus Wilson upper bound of the player's own earlier windows is at least `self_jump_gap` (default 0.10), and both windows have at least `min_shots`. A rank change does not count, because the band no longer matches.
 
 ## Speed

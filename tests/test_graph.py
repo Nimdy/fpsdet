@@ -121,7 +121,7 @@ def small_graph(order: int = 0) -> EvidenceGraph:
         ("observation", "obs-voice", {"kind": "voice"}), ("observation", "obs-hidden", {"kind": "hidden", "in_case": False}),
     ]
     edges = [
-        ("case:x", "about", "player:x"), ("player:x", "played_in", "match:m1"), ("observation:obs-voice", "about", "player:x"),
+        ("case:x", "about", "player:x"), ("observation:obs-voice", "about", "player:x"),
         ("observation:obs-voice", "supports", "case:x"), ("observation:obs-voice", "names_partner", "player:y"),
         ("observation:obs-voice", "depends_on", "observation:obs-hidden"), ("observation:obs-hidden", "about", "player:y"),
         ("observation:obs-voice", "occurred_in", "match:m1"),
@@ -143,7 +143,7 @@ class GraphModelTest(unittest.TestCase):
     def test_insertion_order_never_shows(self):
         digests = {small_graph(order).digest() for order in range(20)}
         self.assertEqual(len(digests), 1)
-        self.assertEqual(digests.pop(), "sha256:e3acabebb13a75269c914f81e5aec1470cbc92985c3a1c0008887a84c93b1447")
+        self.assertEqual(digests.pop(), "sha256:3156333854fc96838acfbe60a9ada1751e117730178abc019f1a3bd8a238f439")
 
     def test_a_material_change_moves_the_identity(self):
         base = small_graph().digest()
@@ -338,7 +338,7 @@ class CaseGraphTest(unittest.TestCase):
         quiet = copy.deepcopy(case)
         quiet["reports"] = 0
         self.assertEqual(regraph(quiet)["evidence"]["graph"], case["evidence"]["graph"])
-        self.assertEqual(sorted({node.type for node in graph_of(case).nodes}), ["case", "match", "player"])
+        self.assertEqual(sorted({node.type for node in graph_of(case).nodes}), ["case", "player"])
 
 
 class GraphTamperTest(unittest.TestCase):
@@ -614,8 +614,8 @@ class PacketV3Test(unittest.TestCase):
         case["evidence"]["provenance"]["external"] = {"mode": "none"}
         self.assertEqual(packet_block(case), {"recipe": "fpsdet.packet/3", "status": "incomplete", "missing": ["graph"]})
         case["evidence"]["graph"] = graph_block(case)
-        self.assertEqual(case["evidence"]["graph"]["digest"], "sha256:aeb1c9c4fbd62d237771d7d03d1652e08ee28a54c08d12d2afdb1318ff78692e")
-        self.assertEqual(packet_block(case)["digest"], "sha256:2c54ef58f1ffa2ba78a3a7e5392b3cfa56aa9622423920f8a31dbedd12e55114")
+        self.assertEqual(case["evidence"]["graph"]["digest"], "sha256:15a4b21a32b6673f571dc2d8e70b5b6f3c5e994c75738430bceb79025dd5994a")
+        self.assertEqual(packet_block(case)["digest"], "sha256:4fa7475f7d1d70460d94a45f88023ec20072b30504cc3e1eee13ad18c572243d")
 
 
 if __name__ == "__main__":

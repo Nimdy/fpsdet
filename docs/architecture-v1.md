@@ -390,6 +390,8 @@ It becomes an `Observation` with `family="external"` and `grade="context"`. It n
 
 Built from the observations and the provenance, not stored separately. Node types: player, match, observation, target entity, challenge, external signal, report, account history, teammate, baseline. Edge types: supports, depends_on, contradicts, occurred_during, targeted, shared_with, derived_from, correlated_with.
 
+*Implemented in P6, narrower than this sketch; [evidence-graph.md](evidence-graph.md) is the reference.* It is built from the serialized case and stored in it, as `evidence.graph`, so `packet/3` can bind its digest and `verify_graph` can rebuild and compare it. Only types with data behind them exist: case, player (subject and partner together), match, observation, challenge, external record, provider group, telemetry domain, cohort and history. There is no target entity (no event names one consistently), report (reports are not evidence), or separate teammate type (a partner is a player). Relations are the ten in that document; `contradicts`, `shared_with` and `correlated_with` are not edges. What two observations share is derived in the graph's summary instead, and nothing is called correlated or contradictory without a measurement behind it.
+
 ## 11. Target
 
 ```text
@@ -454,13 +456,13 @@ Each step is one commit, run against the full suite, the demo, the board diff an
 | 3.1 Knowledge engine | done | `knowledge.py` (known, unknown, unknowable; channels known, absent, unchecked, not applicable); profile `knowledge_channels`; event `vision_state`, `audio_state`; hidden mover, private replay, quiet aim and teammate contacts read it; knowledge context on information findings; contradiction notes; `tests/test_knowledge.py`; [knowledge-engine.md](knowledge-engine.md) |
 | 4 Challenge engine | done | `challenge.py` (types, public plans and their digest, budget, linkage, per-challenge results, evidence) and `challenge_plan.py` (the only module that reads the secret: keyed derivation, commitment, schedule without repeats); `fpsdet challenge keygen`, `plan`, `verify`, `types`; `fpsdet score --challenges`; event `challenge_id`, `challenge_track_ms`; the `challenge` family; the legacy private replay kept as `legacy_private_replay`; leak, false-positive and attacker tests in `tests/test_challenge.py`; [challenges.md](challenges.md) |
 | 5 External evidence and fusion | done | `external.py` (the record, `fpsdet.external/1`, data-only adapters, bounds, identity, fusion rules A to G); the `external` family and source, roles `external_watch` and `external_context`; `evidence.fusion`; `fpsdet.external-input/1`; `fpsdet.packet/2`; `fpsdet score --external`, `--external-mapped`, `--external-strict`; `tests/test_external.py`; [external-evidence.md](external-evidence.md). Not used to escalate yet: provider groups and telemetry domains |
+| 6 Evidence graph | done | `graph.py` (closed node types and relations, a set of edges, `fpsdet.graph/1`, `build_graph` from the serialized case, the descriptive summary of shared sources, `verify_graph`, `verify_graphs`); `evidence.graph` on every case; `fpsdet.packet/3`; `tests/test_graph.py`; [evidence-graph.md](evidence-graph.md). Not used for any decision |
 
 ### P1
 
 | Step | Files |
 | --- | --- |
 | 5 Alternatives | `evidence.py` `Alternative`; the explanations already computed (audio, grace, emitter missing, thin cohort) become explicit `ruled_out` or `unknown` entries; nothing becomes stronger because an alternative was not checked |
-| 7 Evidence graph | new `graph.py`; `docs/evidence-graph.md` |
 
 P2 (calibration, enrichment metrics, red-team harness, AI contract) and P3 (watermarking research, test split, capability matrix, API cleanup) follow, in the order the brief sets.
 

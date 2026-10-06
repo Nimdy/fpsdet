@@ -29,7 +29,7 @@ GRAPH_RECIPE = "fpsdet.graph/1"
 NODE_TYPES: dict[str, str] = {
     "case": "the case: one player's evidence and decision in one run",
     "player": "a player pseudonym: the case's subject, or a partner a relationship names",
-    "match": "a match id",
+    "match": "a match some evidence was measured in or scoped to",
     "observation": "an observation: one on this case, or one on another case that this case depends on",
     "challenge": "a challenge's public identity: id, type, version, plan digest, commitment, window",
     "external_record": "one external record, by its fpsdet.external/1 id",
@@ -42,7 +42,6 @@ NODE_TYPES: dict[str, str] = {
 # Every relation: which node types it goes from and to, and what it means, read source → target.
 RELATIONS: dict[str, tuple[frozenset[str], frozenset[str], str]] = {
     "about": (frozenset({"case", "observation", "challenge", "external_record"}), frozenset({"player"}), "the player it is about"),
-    "played_in": (frozenset({"player"}), frozenset({"match"}), "a match the case's player played in the scored window"),
     "occurred_in": (frozenset({"observation", "challenge", "external_record"}), frozenset({"match"}), "a match it was measured in or scoped to"),
     "supports": (frozenset({"observation"}), frozenset({"case"}), "it has a role in the case's decision"),
     "depends_on": (frozenset({"observation"}), frozenset({"observation"}), "it rests on that observation (Observation.depends_on)"),
@@ -294,9 +293,9 @@ def build_graph(case: Mapping) -> EvidenceGraph:
     rows = evidence["observations"]
     subject = graph.node("player", case["player_id"])
     case_node = graph.node("case", case["player_id"], decision=case["decision"])
+    # The case's matches stay in case.match_ids. A match is a node only where evidence occurred in it, so a
+    # graph grows with the evidence, not with how many matches the player played.
     graph.edge(case_node, "about", subject)
-    for match in case["match_ids"]:
-        graph.edge(subject, "played_in", graph.node("match", match))
     cohort = provenance.get("cohort") if isinstance(provenance.get("cohort"), Mapping) else None
     history = provenance.get("history") if isinstance(provenance.get("history"), Mapping) else None
     # Every observation of this case first, so a dependency between two of them finds its target.

@@ -29,7 +29,7 @@ It records facts. It decides nothing and weighs nothing. It does not claim that 
 | --- | --- | --- |
 | `case` | One player's evidence and decision in one run | the player |
 | `player` | A player pseudonym: the case's subject, or a partner a relationship names | the pseudonym |
-| `match` | A match | the match id |
+| `match` | A match some evidence was measured in or scoped to | the match id |
 | `observation` | An observation on this case, or one on another case that this case depends on | the observation id |
 | `challenge` | A challenge's public identity: id, type, version, plan digest, commitment, window | the challenge id |
 | `external_record` | One external record | its `ext-` id |
@@ -45,7 +45,6 @@ Each reads source → target.
 | Relation | From | To | Meaning |
 | --- | --- | --- | --- |
 | `about` | case, observation, challenge, external record | player | The player it is about |
-| `played_in` | player | match | A match the case's player played in the scored window |
 | `occurred_in` | observation, challenge, external record | match | A match it was measured in or scoped to |
 | `supports` | observation | case | It has a role in the case's decision. An external record that is context only does not |
 | `depends_on` | observation | observation | It rests on that observation: exactly `Observation.depends_on` |
@@ -74,7 +73,7 @@ with nodes sorted by id and edges by source, relation and target. Order of inser
 
 Every serialized case carries its graph in `evidence.graph`, built by `graph.build_graph` from the case itself: its observations, their evidence, and its provenance. It is built when the case is written, after the decision, from data the case already holds. It reads nothing else and changes nothing.
 
-- **The case and its player.** A `case` node (its decision), `about` the `player`. The player `played_in` each match of the case.
+- **The case and its player.** A `case` node (its decision), `about` the `player`. The case's matches stay in `case.match_ids`: a match is a node only where some evidence occurred in it, so a graph grows with the evidence, not with how many matches the player played.
 - **Each observation.** An `observation` node (`in_case: true`, with its source, family, kind and role), `about` its player, `occurred_in` each of its matches. If its role takes part in the decision it `supports` the case. An external record that is context only does not.
 - **Dependencies.** Each id in `Observation.depends_on` becomes a `depends_on` edge, and nothing else does. A dependency on this case points to that observation's node. A dependency on another case, which is how a voice-speed watch rests on its partner's hidden mover, points to an `observation` node marked `in_case: false`, `about` the partner the depending observation names. The graph keeps one meaning of dependency: the one `depends_on` already has.
 - **Partners.** A shared-leftover or voice-speed observation `names_partner` the other player, by the pseudonym already in its evidence.
@@ -112,6 +111,39 @@ Every serialized case carries its graph in `evidence.graph`, built by `graph.bui
 5. **The summary** is what the nodes and edges say.
 
 A case alone cannot show that a dependency on another case exists. `graph.verify_graphs(cases)` checks that across one run: each such observation is on the case of the player it is about. `tools/regress.py verify` runs both on every case of a snapshot.
+
+## What changed when it arrived
+
+Every existing data set was scored again and compared with external evidence (`2913fa3`) by `tools/regress.py migrate`:
+
+| | Cases | Decisions | Reasons | Observations | Observation ids | Seals | Graphs added | Packets |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Planted | 32 | 0 | 0 | 0 | 0 | 0 | 32 | 32 |
+| Synthetic weekly | 400 | 0 | 0 | 0 | 0 | 0 | 400 | 400 |
+| Synthetic nightly | 2,669 | 0 | 0 | 0 | 0 | 0 | 2,669 | 2,669 |
+| CS2 | 1,529 | 0 | 0 | 0 | 0 | 0 | 1,529 | 1,529 |
+| TF2 | 2,764 | 0 | 0 | 0 | 0 | 0 | 2,764 | 2,764 |
+
+Every case gained its graph, and every packet moved once, to `fpsdet.packet/3`. Nothing else moved. Every graph verifies, every cross-case dependency resolves, and every packet verifies. The golden lock was re-recorded with each case's graph added; outside the graphs it is byte for byte what it was.
+
+**Cost**, measured back to back on one machine:
+
+| | Before | After |
+| --- | --- | --- |
+| Scoring: synthetic week, CS2, TF2 | 1.26 s, 12.5 s, 14.0 s | 1.25 s, 12.4 s, 14.3 s |
+| Building one case's graph | — | 0.015 to 0.017 ms |
+| Verifying one case's graph | — | 0.04 ms |
+| Writing the week's 400 cases as JSON | 0.017 s | 0.028 s |
+| Serialized cases: week, CS2, TF2 | 1.73, 4.80, 9.63 MB | 2.01, 5.68, 11.48 MB (+16%, +18%, +19%) |
+| Graph size, mean (largest) | — | 2 nodes and 1 edge, about 0.6 KB (26 nodes, 50 edges) |
+
+A graph grows with the evidence: a case with no findings has two nodes and one edge. Qualification found that an earlier draft also added a node and an edge for every match the player played. That made a graph grow with match count, not evidence, and grew serialized cases by up to 59%. That edge was dropped before this commit. A case's matches stay in `case.match_ids`.
+
+## What it is not used for, yet
+
+Nothing reads the graph to make a decision. No rule counts its edges, and no summary field is a score. External evidence still makes a watch at most, whatever the graph says about how independent it looks.
+
+That is deliberate. Whether two pieces of evidence are independent enough to count separately is a question about real error rates and real correlations: how often a given client-integrity signal fires on honest players, and whether it fires on the same players as a server challenge. Those are calibration questions, and fpsdet has no calibration data for them. What the graph does now is make the question answerable later without guessing. Every shared provider group, telemetry domain, record, challenge and dependency is already named. A later rule can then say, for example, that a server challenge and an endpoint-memory signal from an unrelated provider group are two sources, while two records from one group are one. It can be checked against the graph, case by case. Independence is not solved here; it is only made visible.
 
 ## In the packet: `fpsdet.packet/3`
 

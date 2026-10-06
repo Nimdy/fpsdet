@@ -25,7 +25,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:5ed4fa94bd1ff4087e19fcef65cb778f8538eca00365c8573ed2440e81391c7f",
+     "digest": "sha256:33ec2898fc01386144d3a095e5ace47981f754c02bb455cef4b14ba5f12dd5ac",
      "edges": [
       {
        "attributes": {},
@@ -56,12 +56,6 @@
        "relation": "uses_history",
        "source": "observation:obs-2e3c3b5ccce71b76c91d6003",
        "target": "history:sha256:bf33e1fb47b9768bdf52a49db1fc7c52aa17903af6ba97a615872db99b5896a3"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:account-changed",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -290,19 +284,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:ce1cb71cd1cec3d903c5c0467bf1198bd1cf58f0b37e03a255773e754863a5b9",
+     "digest": "sha256:1cbf854230e9acf56e541676ffbe90393ece849d76b420fa95f45ef77ddea97f",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:adrenaline",
        "target": "player:adrenaline"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:adrenaline",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -312,11 +300,6 @@
        },
        "id": "case:adrenaline",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -438,19 +421,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:8692bf8467a4b482091b2a30a5ab88868e8f3d26f016cb30075a8bf78b25072e",
+     "digest": "sha256:d552b04aca56f9d48473de7aa94f2f4f8d0da7b534ff9ce8c289a83f1299f44d",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:angle-holder",
        "target": "player:angle-holder"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:angle-holder",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -460,11 +437,6 @@
        },
        "id": "case:angle-holder",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -604,19 +576,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:c2938e63e9816035096530cb9f61a6059a48c1618d9004e6de5c31e3c8ac3543",
+     "digest": "sha256:bfd0bb8348c4982c51e0311de8a5c8b39d2dd77d5f6d5651ba5184a24312d200",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:blasted",
        "target": "player:blasted"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:blasted",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -626,11 +592,6 @@
        },
        "id": "case:blasted",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -754,25 +715,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:35ff21ab00d09213fb7c95d7dfcde9c3ef8a7ac8bc91901b4e2e74cf5f25e35b",
+     "digest": "sha256:148830b0bf18746a93cfc096419dd2de867f07d0d5a4a4ed05cdfa5007716743",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:callout-friend",
        "target": "player:callout-friend"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:callout-friend",
-       "target": "match:m1"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:callout-friend",
-       "target": "match:radar-window"
       }
      ],
      "nodes": [
@@ -782,16 +731,6 @@
        },
        "id": "case:callout-friend",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
-      },
-      {
-       "attributes": {},
-       "id": "match:radar-window",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -913,7 +852,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:3f535799963f0003b5b6d14453074bd6ac77c91a04077891c0a823394dc6ad1d",
+     "digest": "sha256:66d72c01d4aadc5c0ef0babf38e875c09d12dd7c57e39ec72fae04c1a92b532b",
      "edges": [
       {
        "attributes": {},
@@ -938,12 +877,6 @@
        "relation": "supports",
        "source": "observation:obs-1436a54beaf57101259ffba1",
        "target": "case:clone-buyer"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:clone-buyer",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -953,11 +886,6 @@
        },
        "id": "case:clone-buyer",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {
@@ -1136,7 +1064,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:4a868153829af0c67744bd0a5307e9b893a7026236dd3f746288e38d7a61e7d7",
+     "digest": "sha256:a351574fca22d24ea7015b4448a307419d6688dc68fe675c47d05bbfe96c2dc7",
      "edges": [
       {
        "attributes": {},
@@ -1173,12 +1101,6 @@
        "relation": "supports",
        "source": "observation:obs-aeb0ac967e0713c570ece7c5",
        "target": "case:clone-source"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:clone-source",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -1188,11 +1110,6 @@
        },
        "id": "case:clone-source",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {
@@ -1436,19 +1353,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:81227075ea9bcee039e3299a672318714800083c2d8ebb58241117f0acd149c8",
+     "digest": "sha256:6b7a083f4017fabb33d074e29a0a387ed31d864ba122ace922994b17d68fb873",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:elite-human",
        "target": "player:elite-human"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:elite-human",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -1458,11 +1369,6 @@
        },
        "id": "case:elite-human",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -1586,7 +1492,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:7ef37f0273afc6af6fa543e6c0c3d2c33f8789a6fce3297be6d9030d13ccf204",
+     "digest": "sha256:a41a7f765724ba211a50f2c22e07eb417983adba9d52c7321672bf6fd1caefed",
      "edges": [
       {
        "attributes": {},
@@ -1611,12 +1517,6 @@
        "relation": "supports",
        "source": "observation:obs-899f4295064826dae9251425",
        "target": "case:fire-rate"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:fire-rate",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -1814,19 +1714,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:630ddb21bee1acd23a9396845cc828c8cbe7c2c479e4d1c46ece6f050d2fd937",
+     "digest": "sha256:9019e0fc79df0e3c5f70ea113de59e43875b3b127056e0415add5d11aa6f489c",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:glitch",
        "target": "player:glitch"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:glitch",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -1836,11 +1730,6 @@
        },
        "id": "case:glitch",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -1964,19 +1853,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:dca094f0be8dd8af16641e15bd993a75a2c6639fc66537fcb7f1d88863287734",
+     "digest": "sha256:c477edc1a864fc6711d4b081c9aab9f9cb6744699a69c2703454897a41d54984",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:late-compensate",
        "target": "player:late-compensate"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:late-compensate",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -1986,11 +1869,6 @@
        },
        "id": "case:late-compensate",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -2102,19 +1980,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:871318b8d7108132129c02d8f14a6142e714bc641ff87a2d7bd95126e78318f5",
+     "digest": "sha256:bcb0f75e5fb43e9c6ef2607108b6d6b21034b9b7922e46ebb6dc46d90ec25198",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:legal-heavy",
        "target": "player:legal-heavy"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:legal-heavy",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -2124,11 +1996,6 @@
        },
        "id": "case:legal-heavy",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -2250,19 +2117,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:a2178aa5ea88eac2170ddf847df4be1c8090f72b9f1b1808401810da919e9375",
+     "digest": "sha256:683ee3a8843a917195a5d80b3d9e5adaaac023b7cb4604619ac835a1a9588bbe",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:listened",
        "target": "player:listened"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:listened",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -2272,11 +2133,6 @@
        },
        "id": "case:listened",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -2386,7 +2242,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:e2193e4b39b4141fbdbf6cfcc05ee4002dc1c760e10da60149e4514b111d76ee",
+     "digest": "sha256:8fef1b3e8f767c25946f77326dc3a2cf9607ffd0e2f000295b36ecde1222b220",
      "edges": [
       {
        "attributes": {},
@@ -2411,12 +2267,6 @@
        "relation": "supports",
        "source": "observation:obs-fd7e10149da2629f4b8c2bc1",
        "target": "case:metronome"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:metronome",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -2613,7 +2463,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:f92e43a483a8da52cbe94f74c6fcc69d9c2456624ebdf0397abc43d1464d1f3c",
+     "digest": "sha256:d70c7ae3738af70113de947eda8e9f4156b39f095713316c4bb35f466c8cf67e",
      "edges": [
       {
        "attributes": {},
@@ -2632,12 +2482,6 @@
        "relation": "supports",
        "source": "observation:obs-41dddecd64b938a0ecd60a9a",
        "target": "case:mirror-script"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:mirror-script",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -2647,11 +2491,6 @@
        },
        "id": "case:mirror-script",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {
@@ -2823,19 +2662,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:aa1a561fd52c8355274b6f72a202a21939a7d01fbfa3b5c898548dc9c65f3d94",
+     "digest": "sha256:59a7f26cda80fb80c9156a9f8389b2fdd5cb6a4cee0c2a12806dee8b969d095d",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:modded-recoil",
        "target": "player:modded-recoil"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:modded-recoil",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -2845,11 +2678,6 @@
        },
        "id": "case:modded-recoil",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -2975,19 +2803,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:6f40c25b93bdabca87929115f841d843277d04379fe48090ba39ecbfec7f7690",
+     "digest": "sha256:d1d543033cce4736812f6e0f4098fab6c4db321e74bc33b7ab0e379cda562a9d",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:new-gun",
        "target": "player:new-gun"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:new-gun",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -2997,11 +2819,6 @@
        },
        "id": "case:new-gun",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -3133,7 +2950,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:9a877f7dc4a3c25d37ee77cf72f18ba9812e911b34807850c7e9a07b1273963e",
+     "digest": "sha256:d74b23c4fbd541cb3793a1f7acf5c256b209ffca05086c25b3fd4bdad87784f0",
      "edges": [
       {
        "attributes": {},
@@ -3152,12 +2969,6 @@
        "relation": "supports",
        "source": "observation:obs-7f5ef2312aa56e1dc5f4e81e",
        "target": "case:no-recoil"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:no-recoil",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -3167,11 +2978,6 @@
        },
        "id": "case:no-recoil",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {
@@ -3352,19 +3158,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:0ef1cca87e92c3d6604c3c4fe845243fee63eec28e169724f9d572215902c2c3",
+     "digest": "sha256:dedc77d05ac6272b86eda3ceda0d4b1f37cddb6a6ed452a399edd90c13df14af",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:picture-track",
        "target": "player:picture-track"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:picture-track",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -3374,11 +3174,6 @@
        },
        "id": "case:picture-track",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -3488,7 +3283,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:a01bbfde434cbe84696bc904917400d5bb15e382b34966431b62ea1ba95405b4",
+     "digest": "sha256:4f7a3a5d8b605befaae5e2160ab84bbd5ca03c175f6543832c635e4e074cd54b",
      "edges": [
       {
        "attributes": {},
@@ -3513,12 +3308,6 @@
        "relation": "supports",
        "source": "observation:obs-03237d8b034b71fa7da69eed",
        "target": "case:quiet-radar"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:quiet-radar",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -3703,7 +3492,7 @@
      "compared": []
     },
     "graph": {
-     "digest": "sha256:bad65543300c6464a241c1f57d732364cfdbb45713b46c4aff0b2f80966801d1",
+     "digest": "sha256:f181b022f6fd5d8eeb5ccb2e7a5846aeb477a3d5f4e4dad195b73c089c3e8a59",
      "edges": [
       {
        "attributes": {},
@@ -3746,12 +3535,6 @@
        "relation": "supports",
        "source": "observation:obs-2c99ae537fbec3c732b00680",
        "target": "case:radar-friend"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:radar-friend",
-       "target": "match:radar-window"
       }
      ],
      "nodes": [
@@ -3958,7 +3741,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:d7ebc6bd1cb698af7f468e176d5286da9836fa17e44cf6a1a62506fa34e593d7",
+     "digest": "sha256:f16d8bed8a452687b71886b767f7b5ac18479379c9ca8e2bb1e99aa58376e5da",
      "edges": [
       {
        "attributes": {},
@@ -4037,12 +3820,6 @@
        "relation": "supports",
        "source": "observation:obs-f58d7c9440704fa7a9c5958a",
        "target": "case:rage"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:rage",
-       "target": "match:raid-9"
       }
      ],
      "nodes": [
@@ -4415,7 +4192,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:a4eb56239e2d12b9366fe3b5c338c80184fae91aa693c5aca6aa99d3419d84cc",
+     "digest": "sha256:4b2182758bbb5e95a7db8e548ad1b0f2a6758f3ca06eb0a22531292ee8cab057",
      "edges": [
       {
        "attributes": {},
@@ -4446,12 +4223,6 @@
        "relation": "supports",
        "source": "observation:obs-ccb8a15de08cdf49f7369948",
        "target": "case:rank-outlier"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:rank-outlier",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -4671,19 +4442,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:453cfb53632e41510024a30a8a09f4ec0607a43f2134754c45f1b52afa534d69",
+     "digest": "sha256:c5b2abc6f6f3fba793865bb69431dc801136d42c7a563519791faa15fcb32d2d",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:real-fight",
        "target": "player:real-fight"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:real-fight",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -4693,11 +4458,6 @@
        },
        "id": "case:real-fight",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -4807,7 +4567,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:1e9eb25cffc92afe0e0447aef7d93e8809d9adab59c1210388ab6532b654934d",
+     "digest": "sha256:564004920e35ca0a5bf813e5dd3a44003a1586efa6fffe590335a15b548dea97",
      "edges": [
       {
        "attributes": {},
@@ -4844,12 +4604,6 @@
        "relation": "supports",
        "source": "observation:obs-d6b0a455423d666f8428468e",
        "target": "case:replay-lock"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:replay-lock",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -5085,19 +4839,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:94a5a7cc24594479a97f0fb3c354dff546254612b8c33a559b003b7f2005a52d",
+     "digest": "sha256:cba9fd4b5906f0ddf09071accc9e43a3dbebb312c1314d1c9e4ffebec3a30532",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:reported-streamer",
        "target": "player:reported-streamer"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:reported-streamer",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -5107,11 +4855,6 @@
        },
        "id": "case:reported-streamer",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -5226,19 +4969,13 @@
      "compared": []
     },
     "graph": {
-     "digest": "sha256:09d6721cc3e6a740b2c7d2d128bf60cf34176c22d634c45a68006503e45e78fc",
+     "digest": "sha256:54a860dea28d2831978d24d6848f337c3985790caf2cd342d19a4158ec00ff16",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:small-sample",
        "target": "player:small-sample"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:small-sample",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -5248,11 +4985,6 @@
        },
        "id": "case:small-sample",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -5333,19 +5065,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:05ffe16441e9012ddcae4b9b77024f0b8e90644bb65f162e4d7b118172c534e1",
+     "digest": "sha256:b1f9032274f21c067ffc610de46f9c27202c6408972a607e1a58edc274502299",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:steady-hands",
        "target": "player:steady-hands"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:steady-hands",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -5355,11 +5081,6 @@
        },
        "id": "case:steady-hands",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -5460,7 +5181,7 @@
      "compared": []
     },
     "graph": {
-     "digest": "sha256:c86dedfc71852532834c3335f27ea900da963503ed9bf4cc53b33bef177578bd",
+     "digest": "sha256:ea058bb73e6c6b2a9942a84411949c3be84ece7cd810572fc62149929f6f4da6",
      "edges": [
       {
        "attributes": {},
@@ -5485,12 +5206,6 @@
        "relation": "supports",
        "source": "observation:obs-02fdbd7346a0b5e228029086",
        "target": "case:wall-eye"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:wall-eye",
-       "target": "match:radar-window"
       }
      ],
      "nodes": [
@@ -5658,19 +5373,13 @@
      ]
     },
     "graph": {
-     "digest": "sha256:37ddf3e7410a3c90ca891f4f66bae05cba48b82812b7c27ba5d264aec9b9b589",
+     "digest": "sha256:f6235b0484bc89e42aa1935741c1e390803468c9c49894ff26454a191a7ffcd6",
      "edges": [
       {
        "attributes": {},
        "relation": "about",
        "source": "case:weak-human",
        "target": "player:weak-human"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:weak-human",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -5680,11 +5389,6 @@
        },
        "id": "case:weak-human",
        "type": "case"
-      },
-      {
-       "attributes": {},
-       "id": "match:m1",
-       "type": "match"
       },
       {
        "attributes": {},
@@ -5798,7 +5502,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:d2915d2707648a3b14b499226e650b2546cbafd05bea0f43f24a141a463315ea",
+     "digest": "sha256:93735a3971c166f842513fd22b8b0035f1dea67764d4b8bcb02796f491fcfe92",
      "edges": [
       {
        "attributes": {},
@@ -5823,12 +5527,6 @@
        "relation": "supports",
        "source": "observation:obs-f4f072f3c4b469c0e7f1fffd",
        "target": "case:weight-cheat"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:weight-cheat",
-       "target": "match:m1"
       }
      ],
      "nodes": [
@@ -6042,7 +5740,7 @@
      ]
     },
     "graph": {
-     "digest": "sha256:2b99493c28a6cea68f127b4de5ce39b740b23b5c3fd8c91db2fcc73089992af6",
+     "digest": "sha256:e27b1e6abc6fde13e921d82607a330d8679383a2c3447d8791df21fc99ba2d41",
      "edges": [
       {
        "attributes": {},
@@ -6067,12 +5765,6 @@
        "relation": "supports",
        "source": "observation:obs-7134f75357e8d6b6009e959c",
        "target": "case:wire-lock"
-      },
-      {
-       "attributes": {},
-       "relation": "played_in",
-       "source": "player:wire-lock",
-       "target": "match:m1"
       }
      ],
      "nodes": [
