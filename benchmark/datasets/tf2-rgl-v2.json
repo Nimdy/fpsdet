@@ -1,0 +1,217 @@
+{
+ "format": "fpsdet.benchmark-dataset/1",
+ "id": "tf2-rgl-v2",
+ "class": "real",
+ "title": "TF2 league matches with RGL ban labels",
+ "question": "Among RGL accounts fpsdet could compare, how often did each detector fire on cheating-ban labelled accounts against never-banned ones, and how much does that depend on which never-banned players build the baseline?",
+ "supersedes": {
+  "id": "tf2-rgl-v1",
+  "why": "tf2-rgl-v1 can only be rebuilt with the curator's private pseudonym key, which also chose its one baseline draw. tf2-rgl-v2 is selected by public rules, so anyone rebuilds the same data, and it is run under nine fixed public baseline draws. tf2-rgl-v1 stays as a historical, verifiable record."
+ },
+ "source": {
+  "origins": [
+   {
+    "name": "logs.tf",
+    "url": "https://logs.tf",
+    "content": "match logs that TF2 community servers upload: each player's shots and hits per weapon, sniper headshots, and kills per minute"
+   },
+   {
+    "name": "RGL",
+    "url": "https://rgl.gg",
+    "content": "the competitive league's public ban list, with a reason for each ban"
+   }
+  ],
+  "fetched": "2026-10-04",
+  "freeze": "2026-10-03",
+  "mutable": "RGL's ban list grows and its reasons can be edited, and a player's logs.tf match list grows with every match. The selection reads only bans dated on or before the freeze and matches played on or before it, so a later download selects the same accounts and matches, unless upstream changed what it already held: an edited or removed ban, or a removed or re-uploaded log. prepare reports that as SOURCE_CHANGED, with the digest it expected and the one it found, and never builds on it silently.",
+  "identity": {
+   "recipe": "fpsdet.tf2-sources/1",
+   "file": "sources.json",
+   "what": "the frozen bans, the labelled accounts' and the extra players' match selections, and every selected log, as digests and counts; tf2bench.py sources writes it, and it names nobody"
+  }
+ },
+ "license": {
+  "terms": "Neither site publishes terms for its data. logs.tf's robots.txt asks crawlers to stay off its API, so the fetcher asks for a bounded sample, one or two requests at a time with a pause after each, names this project in its User-Agent, and caches every response.",
+  "committed": "Nothing downloaded is committed, and nothing per player: this dataset's ids are public hashes of SteamIDs, so only aggregate numbers and digests are published. No log, ban, SteamID, name, match id, per-player row, case or split list.",
+  "attribution": "Data: logs.tf match logs and RGL's public bans. Not affiliated with Valve, logs.tf or RGL.",
+  "archival": "manifest and digests only: neither logs.tf nor RGL grants redistribution, so a rebuild must fetch from upstream. The digests say exactly whether it got the same data."
+ },
+ "pseudonymization": {
+  "method": "None, on purpose. Each SteamID3 becomes tfb- and the first 12 hex digits of SHA-256(\"fpsdet.tf2-benchmark-identity/1\", NUL, SteamID3). Anyone can compute it, so a third party's rebuild has the same ids and the same baseline draws without any key. Because anyone holding a SteamID can also find its id, nothing keyed by it is published.",
+  "key_file": null,
+  "identity_recipe": "fpsdet.tf2-benchmark-identity/1",
+  "not_for_production": "A benchmark identity is not pseudonymization. A deployment that stores or shares player ids should use a keyed hash under a secret key, as tf2logs.py does, never this public one.",
+  "original_ids": "never committed"
+ },
+ "label_semantics": {
+  "definition": "examples/tf2/evaluation-v2.dataset.json",
+  "positive": "RGL cheating-ban labelled",
+  "comparison": "never-banned comparison",
+  "statement": "RGL's bans are labels, not ground truth: a cheating ban is a league decision about an account, not proof of cheating in any scored match, and never-banned is not proven honest.",
+  "digest": "sha256:4b671d8abfe874f0749ca2764a54bc61284257cc0fbe02ef78df12da6e6fbf0f"
+ },
+ "acquisition": {
+  "script": "examples/tf2/tf2bench.py",
+  "network": true,
+  "rate_limit": "a 0.6 s pause after each request, at most two in flight, and every response cached",
+  "steps": [
+   {
+    "run": [
+     "{python}",
+     "examples/tf2/tf2logs.py",
+     "cohort",
+     "--out",
+     "{data}"
+    ]
+   },
+   {
+    "run": [
+     "{python}",
+     "examples/tf2/tf2bench.py",
+     "select",
+     "--out",
+     "{data}",
+     "--freeze",
+     "2026-10-03",
+     "--per-account",
+     "20",
+     "--min-logs",
+     "20",
+     "--players",
+     "300"
+    ]
+   }
+  ],
+  "note": "About 11,000 requests: the ban list, a match list per labelled account and per extra-player candidate, and every selected log. At the polite rate that is several hours, which is why no hosted CI runs it."
+ },
+ "selection": {
+  "recipe": "fpsdet.benchmark-selection/tf2-rgl/2",
+  "code": {
+   "examples/tf2/tf2bench.py": "sha256:e2cee0b3184aa80efc9e5242cd6c571ca3c4cb0e9487e76e72acf6457c1335bc",
+   "examples/tf2/tf2logs.py": "sha256:8c47359f6386d2eb4a2f3a720525c923304687b4cfcd2148db90c233acaf19aa"
+  },
+  "parameters": {
+   "freeze": "2026-10-03",
+   "labels_fetched": [
+    "cheater"
+   ],
+   "min_logs_before_ban": 20,
+   "per_account": 20,
+   "extra_never_banned": 300,
+   "extra_min_appearances": 3,
+   "extra_per_account": 20,
+   "extra_order": "fpsdet.tf2-honest-order/1",
+   "identity": "fpsdet.tf2-benchmark-identity/1",
+   "min_matches_never_banned": 8,
+   "max_matches_kept": 20,
+   "min_players_per_match": 12,
+   "aimed_weapons_only": true
+  },
+  "rules": [
+   "Freeze: RGL bans dated after 2026-10-03 are not bans here, and no match played after it is selected.",
+   "Labelled accounts: accounts RGL banned for cheating (not for assisting, distributing or developing cheats) with at least 20 team matches on logs.tf before the ban; their 20 latest team matches before the ban.",
+   "Extra never-banned players: everyone seen at least 3 times in those matches whom RGL had not banned, taken in the order of SHA-256(\"fpsdet.tf2-honest-order/1\", NUL, benchmark identity) until 300 have at least 20 team matches up to the freeze; their 20 latest.",
+   "Comparison: every never-banned player with at least 8 matches among the selected ones, which includes the 300 extra players.",
+   "Equal evidence: every player keeps at most their 20 latest selected matches; a banned account's only before its ban.",
+   "A team match has 12 or more players. Only aimed, hitscan weapons are converted.",
+   "No private key is read anywhere: the ids, the extra players and every baseline draw follow from public hashes."
+  ]
+ },
+ "draws": {
+  "recipe": "fpsdet.tf2-baseline-draw/1",
+  "rule": "In draw k, a never-banned player builds the baseline when the first byte of SHA-256(\"fpsdet.tf2-baseline-draw/1\", NUL, k, NUL, benchmark identity) is under 128, and is scored otherwise. A banned account is always scored. Each draw builds its own baseline cohort from its own baseline half.",
+  "ids": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8
+  ],
+  "why": "Nine draws, fixed before any was run. In expectation the range of n independent draws spans the middle (n-1)/(n+1) of the draw-to-draw distribution, 80% for nine, and an odd count makes the median one actual draw.",
+  "headline": "The median over all nine draws with the lowest and highest, and every draw listed beside it. No draw is preferred, none is dropped, and none is chosen for its numbers.",
+  "fixed": "2026-10-06, before any draw of this dataset was run",
+  "folder": "draws/draw-{draw}"
+ },
+ "prepare": {
+  "steps": [
+   {
+    "run": [
+     "{python}",
+     "examples/tf2/tf2bench.py",
+     "sources",
+     "{data}",
+     "--freeze",
+     "2026-10-03",
+     "--out",
+     "{data}/sources.json"
+    ]
+   }
+  ],
+  "draw_steps": [
+   {
+    "run": [
+     "{python}",
+     "examples/tf2/tf2bench.py",
+     "convert",
+     "{data}",
+     "--draw",
+     "{draw}",
+     "--freeze",
+     "2026-10-03",
+     "--min-matches",
+     "8",
+     "--max-matches",
+     "20",
+     "--out",
+     "{prepared}"
+    ]
+   },
+   {
+    "run": [
+     "{fpsdet}",
+     "baseline",
+     "{prepared}/baseline.ndjson",
+     "--profile",
+     "examples/tf2/tf2.json",
+     "--screen-matches",
+     "--out",
+     "{prepared}/cohort.json"
+    ]
+   }
+  ],
+  "outputs": {
+   "events": "scored.ndjson",
+   "baseline": "baseline.ndjson",
+   "labels": "labels.json",
+   "cohort": "cohort.json"
+  }
+ },
+ "profile": {
+  "path": "examples/tf2/tf2.json",
+  "digest": "sha256:2f4232e7c3338fb7500e4a9b18173baf365022c9be2bdaf0ee17bf8126a4dd5e"
+ },
+ "inputs": null,
+ "split": {
+  "recipe": "fpsdet.calibration-split/1",
+  "unit": "player",
+  "memberships": [
+   "development",
+   "evaluation",
+   "baseline_only",
+   "not_scored"
+  ]
+ },
+ "publish": {
+  "per_player": false,
+  "why": "Benchmark ids are public hashes of SteamIDs. A per-player row would let anyone holding a SteamID read that account's label and fpsdet's decision, so only aggregates and digests are committed. A rebuild has every row locally, and the digests say whether its rows are these."
+ },
+ "artifacts": {
+  "draw": "benchmark/results/tf2-rgl-v2/draw-{draw}",
+  "sensitivity": "benchmark/sensitivity/tf2-rgl-v2.json"
+ },
+ "expected_counts": null
+}
