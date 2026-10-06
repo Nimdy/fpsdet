@@ -578,6 +578,132 @@ def cmd_evaluate_fixtures(args: argparse.Namespace) -> int:
     return 1 if failed or result["demo_failures"] or result["fixture_failures"] or not all(result["honest_fixtures_clean"].values()) else 0
 
 
+def _benchmark_data(pairs: list[str] | None) -> dict:
+    """--data tf2=DIR --data cs2=DIR, by dataset id."""
+    from .benchmark import dataset_id
+
+    out = {}
+    for pair in pairs or []:
+        name, sep, folder = pair.partition("=")
+        if not sep:
+            raise SystemExit(f"--data takes DATASET=FOLDER, such as tf2=~/fpsdet-data/tf2, not {pair!r}")
+        out[dataset_id(name)] = Path(folder).expanduser()
+    return out
+
+
+def _benchmark_datasets(args: argparse.Namespace) -> list[str]:
+    from .benchmark import dataset_id, definition
+
+    if args.all or not args.dataset:
+        return [entry["id"] for entry in definition()["datasets"]]
+    return [dataset_id(name) for name in args.dataset]
+
+
+def cmd_benchmark_fetch(args: argparse.Namespace) -> int:
+    from .benchmark import BenchmarkError, fetch, manifest
+
+    try:
+        for line in fetch(manifest(args.dataset), Path(args.data).expanduser(), args.python or sys.executable):
+            print(line)
+    except BenchmarkError as error:
+        raise SystemExit(f"benchmark fetch: {error}")
+    return 0
+
+
+def cmd_benchmark_prepare(args: argparse.Namespace) -> int:
+    from .benchmark import BenchmarkError, manifest, prepare
+
+    try:
+        report = prepare(manifest(args.dataset), Path(args.data).expanduser(), args.python or sys.executable)
+    except BenchmarkError as error:
+        raise SystemExit(f"benchmark prepare: {error}")
+    for line in report["log"]:
+        print(line)
+    print(f"{report['dataset']}: {report['status']}")
+    for change in report["changes"]:
+        print(f"  {change['category']}: {change['input']}: {change['detail']}")
+    return 0 if report["status"] == "MATCH" else 2
+
+
+def cmd_benchmark_run(args: argparse.Namespace) -> int:
+    """Run the benchmark offline: the synthetic class always, a real dataset where its prepared data is given."""
+    from .benchmark import BenchmarkError, compare, load_expected, manifest, pin, run_real, run_synthetic, write_json
+
+    data = _benchmark_data(args.data)
+    expected = load_expected()
+    results, worst = [], 0
+    for name in _benchmark_datasets(args):
+        found = manifest(name)
+        if found["class"] == "synthetic":
+            result = run_synthetic(found)
+            if args.out:
+                write_json(Path(args.out).expanduser() / name / "result.json", result)
+        elif name not in data:
+            print(f"{name}: NOT_RUN (no prepared data: --data {name.split('-')[0]}=FOLDER, after fpsdet benchmark fetch and prepare)")
+            continue
+        else:
+            out = Path(args.out).expanduser() / name if args.out else data[name] / "benchmark"
+            try:
+                result, _artifacts = run_real(found, data[name], out)
+            except BenchmarkError as error:
+                raise SystemExit(f"benchmark run: {error}")
+        comparison = compare(result, expected["datasets"].get(name))
+        result["comparison"] = comparison
+        results.append(result)
+        print(f"{name}: {comparison['status']}" + (f" ({', '.join(comparison['categories'])})" if comparison["categories"] else "") + f"  result {result['digest']}")
+        for change in comparison["changes"][: args.show]:
+            print(f"  {change.get('category', 'environment')}: {change.get('field', '')} {change.get('detail', '')}".rstrip())
+        timing = ", ".join(f"{key} {value:g}s" for key, value in result["timings_s"].items())
+        print(f"  {timing}")
+        code = {"MATCH": 0, "ENVIRONMENT_ONLY": 0, "PROVENANCE_ONLY": 3, "PRESENTATION_ONLY": 3, "DRIFT": 1, "INPUT_CHANGED": 2}.get(comparison["status"], 0)
+        worst = max(worst, code) if code != 3 or worst == 0 else worst
+    if args.pin:
+        pin(results)
+        print(f"Pinned {len(results)} results in benchmark/expected.json")
+    return worst
+
+
+def cmd_benchmark_verify(args: argparse.Namespace) -> int:
+    from .benchmark import verify
+
+    checks = verify(data=_benchmark_data(args.data))
+    failed = [check for check in checks if not check["ok"]]
+    for check in checks:
+        print(f"{'ok  ' if check['ok'] else 'FAIL'} {check['check']}")
+        for problem in check["problems"][: args.show]:
+            print(f"       {problem}")
+    print(f"{len(checks) - len(failed)} of {len(checks)} checks pass")
+    return 1 if failed else 0
+
+
+def cmd_benchmark_report(args: argparse.Namespace) -> int:
+    """Write docs/benchmark.md and the README's generated block from the committed artifacts, or check them."""
+    from .benchmark import README_BEGIN, README_END, ROOT, capability_matrix, context, definition, readme_block, render_report
+
+    ctx = context()
+    _rows, problems = capability_matrix(ctx)
+    if problems:
+        for problem in problems:
+            print(f"capability matrix: {problem}")
+        return 1
+    report_path = ROOT / definition()["report"]
+    report = render_report(ctx)
+    readme_path = ROOT / "README.md"
+    readme = readme_path.read_text(encoding="utf-8")
+    start, end = readme.index(README_BEGIN), readme.index(README_END) + len(README_END)
+    updated = readme[:start] + readme_block(ctx) + readme[end:]
+    if args.check:
+        stale = [str(path.relative_to(ROOT)) for path, text in ((report_path, report), (readme_path, updated))
+                 if not path.exists() or path.read_text(encoding="utf-8") != text]
+        for name in stale:
+            print(f"{name} is not what the committed artifacts generate; run fpsdet benchmark report")
+        return 1 if stale else 0
+    report_path.write_text(report, encoding="utf-8")
+    readme_path.write_text(updated, encoding="utf-8")
+    print(f"Wrote {report_path.relative_to(ROOT)} and the README's generated block")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="fpsdet", description="Human-play and gear-rule baselines for FPS servers.")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -710,6 +836,34 @@ def build_parser() -> argparse.ArgumentParser:
     strength_verify.add_argument("strength")
     strength_verify.add_argument("--evaluation", required=True)
     strength_verify.set_defaults(func=cmd_evaluate_strength_verify)
+    benchmark = sub.add_parser("benchmark", help="The reproducible benchmark: fetch, prepare, run, verify, report. Scores nothing live")
+    benchmark_actions = benchmark.add_subparsers(dest="action", required=True)
+    bench_fetch = benchmark_actions.add_parser("fetch", help="Download a real dataset's public sources with the manifest's exact parameters (network)")
+    bench_fetch.add_argument("--dataset", required=True, help="tf2 or cs2")
+    bench_fetch.add_argument("--data", required=True, help="The folder to keep the download in")
+    bench_fetch.add_argument("--python", help="The Python to run the converter with (the CS2 converter needs its requirements)")
+    bench_fetch.set_defaults(func=cmd_benchmark_fetch)
+    bench_prepare = benchmark_actions.add_parser("prepare", help="Rebuild the scorer-ready inputs from the download, offline, and compare them with the manifest")
+    bench_prepare.add_argument("--dataset", required=True)
+    bench_prepare.add_argument("--data", required=True)
+    bench_prepare.add_argument("--python")
+    bench_prepare.set_defaults(func=cmd_benchmark_prepare)
+    bench_run = benchmark_actions.add_parser("run", help="Run the benchmark offline and compare with what is pinned")
+    bench_run.add_argument("--dataset", action="append", help="synthetic, tf2 or cs2. Repeatable")
+    bench_run.add_argument("--all", action="store_true", help="Every dataset; real ones only where --data names their prepared folder")
+    bench_run.add_argument("--data", action="append", help="DATASET=FOLDER of prepared inputs, such as tf2=~/fpsdet-data/tf2. Repeatable")
+    bench_run.add_argument("--out", help="Where to write each dataset's artifacts (default: FOLDER/benchmark)")
+    bench_run.add_argument("--pin", action="store_true", help="Record these results as the expectation (a curator's act)")
+    bench_run.add_argument("--show", type=int, default=20)
+    bench_run.set_defaults(func=cmd_benchmark_run)
+    bench_verify = benchmark_actions.add_parser("verify", help="Check every committed artifact and its chain, without scoring")
+    bench_verify.add_argument("--data", action="append", help="DATASET=FOLDER of a run, to check its case packets too")
+    bench_verify.add_argument("--show", type=int, default=10)
+    bench_verify.set_defaults(func=cmd_benchmark_verify)
+    bench_report = benchmark_actions.add_parser("report", help="Generate docs/benchmark.md and the README's limits from the committed artifacts")
+    bench_report.add_argument("--check", action="store_true", help="Only check they are current")
+    bench_report.set_defaults(func=cmd_benchmark_report)
+
     fixtures = evaluate_actions.add_parser("fixtures", help="Controlled-fixture qualification on the planted demo and the controlled fixtures. Never a real-world rate")
     fixtures.add_argument("--out", help="Also write the result as JSON")
     fixtures.set_defaults(func=cmd_evaluate_fixtures)

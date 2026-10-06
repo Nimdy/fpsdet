@@ -1,0 +1,213 @@
+{
+ "format": "fpsdet.benchmark-dataset/1",
+ "id": "tf2-rgl-v1",
+ "class": "real",
+ "title": "TF2 league matches with RGL ban labels",
+ "question": "Among RGL accounts fpsdet could compare, how often did each detector fire on cheating-ban labelled accounts against never-banned ones?",
+ "source": {
+  "origins": [
+   {
+    "name": "logs.tf",
+    "url": "https://logs.tf",
+    "content": "match logs that TF2 community servers upload: each player's shots and hits per weapon, sniper headshots, and kills per minute"
+   },
+   {
+    "name": "RGL",
+    "url": "https://rgl.gg",
+    "content": "the competitive league's public ban list, with a reason for each ban"
+   }
+  ],
+  "fetched": "2026-10-04",
+  "mutable": "RGL's ban list grows and its reasons can be edited, and a player's logs.tf match list grows with every match, so a later fetch selects different matches; an uploaded log does not change. prepare reports a different download as INPUT_CHANGED.",
+  "identity": {
+   "files": [
+    "bans.json",
+    "chosen.json",
+    "honest.json",
+    "logs/*.json"
+   ],
+   "what": "the ban list, the matches chosen for each labelled account and each extra honest player, and every downloaded log"
+  }
+ },
+ "license": {
+  "terms": "Neither site publishes terms for its data. logs.tf's robots.txt asks crawlers to stay off its API, so the fetcher asks for a bounded sample, one or two requests at a time with a pause after each, names this project in its User-Agent, and caches every response.",
+  "committed": "Nothing downloaded is committed: no log, ban, SteamID, name or match id. Only pseudonymous per-player evaluation rows and aggregate numbers are.",
+  "attribution": "Data: logs.tf match logs and RGL's public bans. Not affiliated with Valve, logs.tf or RGL."
+ },
+ "pseudonymization": {
+  "method": "Each SteamID becomes tf- and the first 10 hex digits of its HMAC-SHA256 under a 32-byte key the converter creates on the curator's machine (pseudonym.key). The key never leaves it, so published results name nobody. A rebuild with another key gets other ids, and another half of the never-banned players builds the baseline; the key commitment below lets it say so exactly.",
+  "key_file": "pseudonym.key",
+  "original_ids": "never committed"
+ },
+ "label_semantics": {
+  "definition": "examples/tf2/evaluation.dataset.json",
+  "positive": "RGL cheating-ban labelled",
+  "comparison": "never-banned comparison",
+  "statement": "RGL's bans are labels, not ground truth: a cheating ban is a league decision about an account, not proof of cheating in any scored match, and never-banned is not proven honest.",
+  "digest": "sha256:3963c4ce1024cfb4c8d7de114767a9bb45ea8d8d18f65ce14bed7b1f6839bb38"
+ },
+ "acquisition": {
+  "script": "examples/tf2/tf2logs.py",
+  "network": true,
+  "rate_limit": "a 0.6 s pause after each request, at most two in flight, and every response cached",
+  "steps": [
+   {
+    "run": [
+     "{python}",
+     "examples/tf2/tf2logs.py",
+     "cohort",
+     "--out",
+     "{data}"
+    ]
+   },
+   {
+    "run": [
+     "{python}",
+     "examples/tf2/tf2logs.py",
+     "fetch",
+     "--out",
+     "{data}",
+     "--per-account",
+     "20",
+     "--min-logs",
+     "20",
+     "--labels",
+     "cheater"
+    ]
+   },
+   {
+    "run": [
+     "{python}",
+     "examples/tf2/tf2logs.py",
+     "honest",
+     "--out",
+     "{data}",
+     "--players",
+     "150",
+     "--per-account",
+     "20"
+    ]
+   }
+  ],
+  "note": "The published run fetched 20 matches per labelled account. The fetcher's default is 40, which the README's command used to rely on; the benchmark passes 20 explicitly."
+ },
+ "selection": {
+  "recipe": "fpsdet.benchmark-selection/tf2-rgl/1",
+  "code": {
+   "examples/tf2/tf2logs.py": "sha256:8c47359f6386d2eb4a2f3a720525c923304687b4cfcd2148db90c233acaf19aa"
+  },
+  "parameters": {
+   "labels_fetched": [
+    "cheater"
+   ],
+   "min_logs_before_ban": 20,
+   "per_account": 20,
+   "honest_players_per_half": 150,
+   "honest_per_account": 20,
+   "min_matches_never_banned": 8,
+   "max_matches_kept": 20,
+   "min_players_per_match": 12,
+   "aimed_weapons_only": true
+  },
+  "rules": [
+   "Labelled accounts: RGL accounts banned for cheating (not for assisting, distributing or developing cheats) with at least 20 team matches on logs.tf before the ban; their 20 latest team matches before the ban.",
+   "Comparison: everyone in those lobbies RGL never banned, with at least 8 matches in the fetched logs, plus 150 never-banned players per half with their own 20 latest team matches.",
+   "Equal evidence: every player keeps at most their 20 latest matches; a banned account's only before its ban.",
+   "A team match has 12 or more players. Only aimed, hitscan weapons are converted.",
+   "A fixed bit of each pseudonym sends never-banned players to the baseline or to be scored, so nobody is judged against a baseline that includes them."
+  ]
+ },
+ "prepare": {
+  "steps": [
+   {
+    "run": [
+     "{python}",
+     "examples/tf2/tf2logs.py",
+     "convert",
+     "{data}",
+     "--min-matches",
+     "8",
+     "--max-matches",
+     "20"
+    ]
+   },
+   {
+    "run": [
+     "{fpsdet}",
+     "baseline",
+     "{data}/baseline.ndjson",
+     "--profile",
+     "examples/tf2/tf2.json",
+     "--screen-matches",
+     "--out",
+     "{data}/cohort.json"
+    ]
+   }
+  ],
+  "outputs": {
+   "events": "scored.ndjson",
+   "baseline": "baseline.ndjson",
+   "labels": "labels.json",
+   "cohort": "cohort.json"
+  }
+ },
+ "profile": {
+  "path": "examples/tf2/tf2.json",
+  "digest": "sha256:2f4232e7c3338fb7500e4a9b18173baf365022c9be2bdaf0ee17bf8126a4dd5e"
+ },
+ "inputs": {
+  "events": {
+   "sha256": "sha256:27d43fa684f92948b97c0a8d44b83b5cb157f005a634343951f14f0ac3350af1",
+   "events": 4139445
+  },
+  "baseline": {
+   "sha256": "sha256:d6f6878349d849d0cf7b8ad4f212116cebe3ffa21bac0c95d5cdb9f1cbec1621"
+  },
+  "labels": {
+   "sha256": "sha256:14f19f5f1fa26a7f1c7379da369b004a9d176a0823729c70d1a4e245af68c71c",
+   "digest": "sha256:1981f3c068cc5f8b64afde3f8bbdfa17ee3cff9035250ed8fb76045011e7c3ec",
+   "count": 3590
+  },
+  "cohort": {
+   "digest": "sha256:fc38c02f30b9ccda4b922d8806e9ab0fb50569ebd020ea653a8582e06017fd35",
+   "players": 1566
+  },
+  "key": "sha256:bcba8fdc9e1a4636f5fc17a2dd1d32408965fd7ed168d26f8f8e4530dacfb730",
+  "source": {
+   "files": 10221,
+   "digest": "sha256:4cdf61eeb1a60f2478f4fe5aeb11ea1a07239f8c1d63236c5fda0304aa1658a7"
+  }
+ },
+ "split": {
+  "recipe": "fpsdet.calibration-split/1",
+  "unit": "player",
+  "memberships": [
+   "development",
+   "evaluation",
+   "baseline_only",
+   "not_scored"
+  ]
+ },
+ "artifacts": {
+  "evaluation": "examples/tf2/evaluation.json",
+  "strength": "examples/tf2/strength.json",
+  "split": "benchmark/splits/tf2-rgl-v1.json",
+  "result": "benchmark/results/tf2-rgl-v1.json",
+  "reports": [
+   "examples/tf2/evaluation.md",
+   "examples/tf2/strength.md"
+  ]
+ },
+ "expected_counts": {
+  "downloaded_logs": 10218,
+  "events": 4139445,
+  "scored_players": 2764,
+  "baseline_players": 1566,
+  "labelled": {
+   "cheater": 228,
+   "not banned": 2158,
+   "other ban": 1184,
+   "vac": 20
+  }
+ }
+}

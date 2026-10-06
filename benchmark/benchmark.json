@@ -1,0 +1,54 @@
+{
+  "format": "fpsdet.benchmark/1",
+  "version": 1,
+  "title": "fpsdet benchmark v1",
+  "datasets": [
+    {"id": "synthetic-v1", "manifest": "benchmark/datasets/synthetic-v1.json"},
+    {"id": "tf2-rgl-v1", "manifest": "benchmark/datasets/tf2-rgl-v1.json"},
+    {"id": "cs2cd-v1", "manifest": "benchmark/datasets/cs2cd-v1.json"}
+  ],
+  "capabilities": "benchmark/capabilities.json",
+  "expected": "benchmark/expected.json",
+  "report": "docs/benchmark.md",
+  "can_prove": [
+    "That the committed numbers follow from the committed artifacts: every evaluation, strength estimate, split and result verifies by digest, and its statistics recompute, without re-scoring anything.",
+    "That fpsdet's decisions on the published TF2 and CS2 runs follow from the prepared inputs: the same events, labels, cohort and profile give the same cases, packets, eligibility, evaluation and strength, on Python 3.11 and 3.12.",
+    "That the prepared inputs follow from the downloaded sources by the frozen selection: the converters rebuild them byte for byte from the same downloads.",
+    "That every native detector trips on a behaviour planted for it and stays quiet on an honest twin, and that the challenge and external-signature protocols behave as documented, in controlled synthetic fixtures.",
+    "Exactly what changed when anything moves: inputs, labels, selection code, profile, cohort, detector code, decisions, findings, eligibility, statistics, strength or only presentation."
+  ],
+  "cannot_prove": [
+    "How well fpsdet detects cheating in general. Each real dataset is one population with someone else's labels: RGL's bans and the CS2CD authors' judgement, neither of them ground truth.",
+    "Anything about a detector a dataset cannot observe. On TF2 and CS2 most detectors are not observable at all; that is a gap in the data, not a zero.",
+    "That synthetic fixtures resemble real cheats. They are planted by construction and qualify code, never a rate.",
+    "That fpsdet is better or worse than any other system. Nothing else is evaluated here.",
+    "That TF2 can be rebuilt by a third party with the same player ids: its pseudonym key never leaves the curator's machine, and the RGL ban list and logs.tf match lists change over time. A third party gets an exact report of what differs."
+  ],
+  "reproduce": [
+    "Everything below runs from a clone of the repository with standard-library Python 3.11 or 3.12. The CS2 converter also needs `pip install -r examples/cs2/requirements.txt`; the external-signature scenarios need `pip install 'fpsdet[auth]'`.",
+    "",
+    "```bash",
+    "# Check every committed artifact, offline, without scoring (what CI runs):",
+    "PYTHONPATH=src python -m fpsdet benchmark verify",
+    "# Rebuild and qualify every controlled fixture and scenario (seconds, no data):",
+    "PYTHONPATH=src python -m fpsdet benchmark run --dataset synthetic",
+    "# Real data: download the public sources (network, rate-limited), rebuild the inputs (offline), run (offline):",
+    "PYTHONPATH=src python -m fpsdet benchmark fetch --dataset cs2 --data ~/fpsdet-data/cs2 --python <a Python with the CS2 requirements>",
+    "PYTHONPATH=src python -m fpsdet benchmark prepare --dataset cs2 --data ~/fpsdet-data/cs2 --python <the same>",
+    "PYTHONPATH=src python -m fpsdet benchmark run --dataset cs2 --data cs2=~/fpsdet-data/cs2",
+    "# Or every dataset whose prepared data is on this machine:",
+    "PYTHONPATH=src python -m fpsdet benchmark run --all --data tf2=~/fpsdet-data/tf2 --data cs2=~/fpsdet-data/cs2",
+    "```",
+    "",
+    "Each run prints MATCH, ENVIRONMENT_ONLY, PROVENANCE_ONLY, PRESENTATION_ONLY, DRIFT, INPUT_CHANGED or NOT_RUN per dataset, with the categories that explain it, and writes `result.json` with every artifact beside it. After `prepare`, everything runs offline. A full real-data run reads millions of events and is not part of ordinary CI; `benchmark verify` and the synthetic run are."
+  ],
+  "third_party": [
+    "Nothing but fpsdet is evaluated here. A future version can evaluate another system on the same frozen populations without forcing it into fpsdet's schema. It would take one neutral record per subject:",
+    "",
+    "```json",
+    "{\"format\": \"fpsdet.benchmark-submission/1\", \"dataset\": \"tf2-rgl-v1\", \"subject\": \"tf-0a1b2c3d4e\", \"decision\": \"flag | no_flag | abstain\", \"observation_kinds\": [\"optional, the system's own names\"], \"confidence\": null}",
+    "```",
+    "",
+    "It would be scored with the same label semantics, splits, eligibility rules (abstain is not a miss) and intervals, and never folded into one number. Not implemented: the immediate goal is that fpsdet itself can be reproduced and checked."
+  ]
+}

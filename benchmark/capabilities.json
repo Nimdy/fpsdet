@@ -1,0 +1,194 @@
+{
+  "format": "fpsdet.benchmark-capabilities/1",
+  "note": "Each technique is a cheat behaviour as the server sees it. A claim is tied to controlled fixtures or scenarios that must behave as stated, tests that must exist, real datasets that must observe the named detectors, or an explicit architecture statement. fpsdet benchmark verify checks every reference, and works out what kind of evidence stands behind each claim; nothing here is assumed because a detector exists.",
+  "claims": {
+    "detectable": "a controlled fixture of the behaviour is caught, and its honest twins are not",
+    "partially_detectable": "some forms are caught in controlled fixtures; the named forms get through",
+    "not_detectable": "no fpsdet check can see it, by an explicit architecture statement or a controlled scenario that gets through"
+  },
+  "techniques": [
+    {
+      "id": "speed_hack",
+      "name": "Speed hack",
+      "behaviour": "Moving faster on the ground than the gear allows, for longer than a glitch or a blast",
+      "claim": "detectable",
+      "detectors": ["speed"],
+      "requires": ["speed_mps and on_ground on movement samples", "a ground-speed cap: expected_max_ground_speed_mps, or weight classes in the profile"],
+      "caught": ["demo:weight-cheat"],
+      "quiet": ["demo:legal-heavy", "demo:blasted", "demo:glitch", "demo:adrenaline"],
+      "tests": ["tests/test_fpsdet.py::GearTest", "tests/test_fpsdet.py::InnocentTwinTest"]
+    },
+    {
+      "id": "fire_rate_modification",
+      "name": "Fire-rate modification",
+      "behaviour": "Firing faster than the weapon cycles",
+      "claim": "detectable",
+      "detectors": ["fire_rate"],
+      "requires": ["shot times from the server, not a converter", "a weapon rule with its minimum shot interval"],
+      "caught": ["demo:fire-rate"],
+      "quiet": ["fixtures:fx-trigger-twin", "fixtures:fx-held-trigger"],
+      "tests": ["tests/test_fpsdet.py::GearTest", "tests/test_fpsdet.py::CadenceTest"]
+    },
+    {
+      "id": "trigger_macro",
+      "name": "Trigger macro",
+      "behaviour": "Legal fire intervals with no human variation",
+      "claim": "detectable",
+      "detectors": ["metronome"],
+      "requires": ["shot times from the server", "a weapon rule that is not server-paced"],
+      "caught": ["demo:metronome"],
+      "quiet": ["fixtures:fx-steady-twin", "fixtures:fx-held-trigger"],
+      "tests": ["tests/test_fpsdet.py::CadenceTest"]
+    },
+    {
+      "id": "recoil_macro",
+      "name": "Recoil macro",
+      "behaviour": "Recoil held far under what the build kicks, or under every human measured on it",
+      "claim": "detectable",
+      "detectors": ["recoil_floor", "recoil_learned"],
+      "requires": ["recoil_pitch_deg and spray_index on shots", "a recoil floor, or enough humans measured on the build"],
+      "caught": ["demo:no-recoil", "fixtures:fx-recoil"],
+      "quiet": ["demo:modded-recoil", "fixtures:fx-recoil-twin"],
+      "tests": ["tests/test_fpsdet.py::GearTest"]
+    },
+    {
+      "id": "humanized_recoil",
+      "name": "Humanized recoil script",
+      "behaviour": "Software that reads each kick and cancels it, or a humanizer table shared between accounts",
+      "claim": "partially_detectable",
+      "detectors": ["mirror", "leftover"],
+      "requires": ["applied_recoil_pitch_deg and compensation_pitch_deg on shots", "spray_index"],
+      "caught": ["demo:mirror-script", "demo:clone-source", "demo:clone-buyer"],
+      "quiet": ["demo:late-compensate"],
+      "tests": ["tests/test_fpsdet.py::SignalTest", "tests/test_fpsdet.py::VendorAlignmentTest", "tests/test_fpsdet.py::HonestLeftoverTest"],
+      "gets_through": "An assist that copies human timing, human noise and human lag."
+    },
+    {
+      "id": "statistical_aimbot",
+      "name": "Statistical aimbot",
+      "behaviour": "Aim help that raises hit rates, headshots, reach, snaps or reaction past what humans do",
+      "claim": "partially_detectable",
+      "detectors": ["accuracy", "headshot_rate", "median_distance", "geometry_rate", "rank_tail", "view_snaps", "acquire_timing", "extra", "supporting_extra"],
+      "requires": ["hits, and per metric: hitbox, distance, geometry, view turn, acquire time or a declared number", "enough humans measured per weapon and rank"],
+      "caught": ["demo:rage", "demo:rank-outlier", "fixtures:fx-geometry", "fixtures:fx-snaps", "fixtures:fx-acquire", "fixtures:fx-kills", "fixtures:fx-reaction"],
+      "quiet": ["demo:elite-human", "demo:weak-human", "fixtures:fx-geometry-twin", "fixtures:fx-snaps-twin", "fixtures:fx-acquire-twin", "fixtures:fx-kills-twin", "fixtures:fx-reaction-twin"],
+      "tests": ["tests/test_fpsdet.py::AimCeilingTest", "tests/test_eligibility.py::EveryDetectorEveryStatusTest"],
+      "gets_through": "An aim assist tuned to stay inside the best humans measured: past every human is a finding, better than average is not."
+    },
+    {
+      "id": "hidden_target_tracking",
+      "name": "Hidden-target tracking",
+      "behaviour": "A wallhack that aims at, or steadies on, enemies this client could not know about",
+      "claim": "detectable",
+      "detectors": ["hidden", "quiet_aim"],
+      "requires": ["what each client could see or hear: hidden_track_ms, information_state or vision_state", "aim_jitter_deg for quiet aim"],
+      "caught": ["demo:wall-eye", "demo:quiet-radar"],
+      "quiet": ["demo:angle-holder", "demo:listened", "demo:steady-hands", "demo:real-fight"],
+      "tests": ["tests/test_knowledge.py::HiddenMoverControlsTest", "tests/test_knowledge.py::QuietAimControlsTest"]
+    },
+    {
+      "id": "packet_reader",
+      "name": "Packet or memory reader",
+      "behaviour": "Aim on what the server sent but the client never drew: the wire snapshot, or a planned challenge's occluded target",
+      "claim": "detectable",
+      "detectors": ["wire", "occluded_motion_replay"],
+      "requires": ["wire_error_deg, picture_error_deg and interp_delay_ms on shots", "server-planned challenges and challenge_track_ms"],
+      "caught": ["demo:wire-lock", "demo:replay-lock", "challenge:naive_reader", "challenge:delayed_reader"],
+      "quiet": ["demo:picture-track", "demo:real-fight"],
+      "tests": ["tests/test_knowledge.py::WireControlsTest", "tests/test_challenge.py::ChallengeScoringTest"]
+    },
+    {
+      "id": "challenge_aware_cheat",
+      "name": "Challenge-aware cheat",
+      "behaviour": "A reader that knows challenges exist and tries to avoid following them",
+      "claim": "partially_detectable",
+      "detectors": ["occluded_motion_replay"],
+      "requires": ["server-planned challenges and challenge_track_ms"],
+      "caught": ["challenge:first_probe_reader", "challenge:every_second_challenge"],
+      "through": ["challenge:brief_reactions", "challenge:last_second_reader", "challenge:visible_enemy_cover"],
+      "tests": ["tests/test_challenge.py::AttackerAwareTest"],
+      "gets_through": "A reader that follows each challenge only briefly, only in the last second of its window, or only beside an enemy the client can see."
+    },
+    {
+      "id": "interpolation_waiter",
+      "name": "Interpolation waiter",
+      "behaviour": "A reader that waits out the interpolation delay and aims where the client already draws the enemy",
+      "claim": "not_detectable",
+      "detectors": ["wire"],
+      "requires": [],
+      "architecture": "The wire check scores aim that leads the drawn picture by the interpolation delay. Aim that waits for the picture is aim on the picture, which any player can see.",
+      "tests": ["tests/test_knowledge.py::WireControlsTest"],
+      "gets_through": "A cheat that waits out the interpolation delay."
+    },
+    {
+      "id": "pixel_aimbot",
+      "name": "Pixel aimbot",
+      "behaviour": "A capture-card or screen-reading aimbot: it sees only what the client draws",
+      "claim": "partially_detectable",
+      "detectors": ["accuracy", "headshot_rate", "rank_tail"],
+      "requires": ["hits and hitboxes"],
+      "caught": ["demo:rage"],
+      "quiet": ["demo:elite-human"],
+      "architecture": "It never knows anything the client could not, so no information check or challenge can see it. Only the statistical aim checks can, and only if its results go past every human measured.",
+      "gets_through": "A capture-card aimbot looking at pixels."
+    },
+    {
+      "id": "dma_frame_reader",
+      "name": "DMA frame reader",
+      "behaviour": "Hardware that reads the frame the game actually drew",
+      "claim": "partially_detectable",
+      "detectors": ["accuracy", "headshot_rate", "rank_tail"],
+      "requires": ["hits and hitboxes"],
+      "caught": ["demo:rage"],
+      "quiet": ["demo:elite-human"],
+      "architecture": "The drawn frame holds only what a person could see, so it defeats every information check. Only aim results past every human can show it.",
+      "gets_through": "A DMA read of the frame the game actually drew."
+    },
+    {
+      "id": "no_behavior_wallhack",
+      "name": "Wallhack that never aims at hidden enemies",
+      "behaviour": "ESP used for positioning and timing, with no aim on an enemy the client could not know",
+      "claim": "not_detectable",
+      "detectors": ["hidden", "quiet_aim"],
+      "requires": [],
+      "architecture": "Every information check reads aim on an enemy this client could not know about. Knowledge used only to choose where to stand leaves no such aim.",
+      "tests": ["tests/test_knowledge.py::HiddenMoverControlsTest"],
+      "gets_through": "A wallhack that never aims at a hidden enemy."
+    },
+    {
+      "id": "external_radar_sharing",
+      "name": "External radar sharing",
+      "behaviour": "A teammate acts on a hidden enemy's position faster than a voice callout could carry it",
+      "claim": "partially_detectable",
+      "detectors": ["voice"],
+      "requires": ["party_id", "enemy_id with what each client could see", "a teammate already in review for tracking hidden movers"],
+      "caught": ["demo:radar-friend"],
+      "quiet": ["demo:callout-friend"],
+      "tests": ["tests/test_knowledge.py::TeammateControlsTest"],
+      "gets_through": "Shared positions acted on no faster than a voice could carry them, or shared by a player who is not in review."
+    },
+    {
+      "id": "account_change",
+      "name": "Account sharing or boosting",
+      "behaviour": "An account that suddenly aims far better than its own history",
+      "claim": "detectable",
+      "detectors": ["account_jump"],
+      "requires": ["the account's own history on the same weapon and rank"],
+      "caught": ["demo:account-changed"],
+      "quiet": ["fixtures:fx-improved"],
+      "tests": ["tests/test_fpsdet.py::DemoTest"]
+    }
+  ],
+  "limits": [
+    {
+      "id": "emitter_mislabel",
+      "text": "A server that labels a visible enemy as hidden manufactures cases. That is an emitter bug, and the docs call it out field by field.",
+      "reference": "docs/integration.md"
+    },
+    {
+      "id": "unverified_external",
+      "text": "External records are read unsigned by default, and a verified signature proves who signed a record, not that its finding is true.",
+      "reference": "docs/external-authentication.md"
+    }
+  ]
+}
