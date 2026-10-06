@@ -82,8 +82,8 @@ class NativeFusionSurfacesTest(unittest.TestCase):
 
     def test_what_packet_1_binds(self):
         case = case_to_dict(next(c for c in DEMO.cases if c.player_id == "elite-human"))
-        # P5 writes fpsdet.packet/2 for every new case (it was packet/1 here before). packet/1 is unchanged.
-        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/2")
+        # P5 wrote fpsdet.packet/2 for every new case, and P6 packet/3 (it was packet/1 here before). packet/1 is unchanged.
+        self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/3")
         self.assertEqual(sorted(packet_material(case, "fpsdet.packet/1")), [
             "decision", "eligibility", "evidence_version", "game", "observations", "provenance", "provenance_version", "recipe", "subject",
         ])
@@ -712,21 +712,25 @@ class PacketV2Test(unittest.TestCase):
     def adrenaline(self) -> dict:
         return copy.deepcopy(FUSED["adrenaline"])
 
-    def test_every_new_packet_is_v2_complete_and_verifies(self):
+    def test_every_new_packet_is_complete_and_verifies(self):
+        from fpsdet.provenance import packet_block
+
         for cases in (FUSED, NATIVE, {c.player_id: case_to_dict(c) for c in DEMO.cases}):
             for pid, case in cases.items():
-                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/2", pid)
+                # New cases are written with packet/3 since the evidence graph (P6); packet/2 is still computed exactly.
+                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/3", pid)
                 self.assertEqual(case["evidence"]["packet"]["status"], "complete", pid)
                 self.assertEqual(verify_packet(case), [], pid)
+                self.assertEqual(packet_block(case, "fpsdet.packet/2")["status"], "complete", pid)
 
     def test_what_it_binds(self):
         case = self.adrenaline()
-        material = packet_material(case)
+        material = packet_material(case, "fpsdet.packet/2")
         self.assertEqual(sorted(material), sorted([*packet_material(case, "fpsdet.packet/1"), "fusion"]))
         self.assertEqual(sorted(material["provenance"]), ["cohort", "detector", "external", "history", "inputs", "profile"])
         self.assertEqual(material["fusion"]["rule"], "A")
         self.assertEqual(sorted(material["provenance"]["external"]), ["digest", "mode", "recipe", "records", "sources"])
-        none = packet_material(NATIVE["adrenaline"])
+        none = packet_material(NATIVE["adrenaline"], "fpsdet.packet/2")
         self.assertEqual((none["fusion"], none["provenance"]["external"]["mode"]), (None, "none"))
 
     def test_external_edits_are_caught(self):
@@ -798,9 +802,9 @@ class PacketV2Test(unittest.TestCase):
 
         case = fixed_case()
         case["evidence"]["provenance"]["external"] = {"mode": "none"}
-        self.assertEqual(packet_block(case)["digest"], "sha256:9df323bafdd263d6e75e2ed8965c244390479725f5f543ff826c7098ece1ff1f")
+        self.assertEqual(packet_block(case, "fpsdet.packet/2")["digest"], "sha256:9df323bafdd263d6e75e2ed8965c244390479725f5f543ff826c7098ece1ff1f")
         del case["evidence"]["provenance"]["external"]
-        self.assertEqual(packet_block(case), {"recipe": "fpsdet.packet/2", "status": "incomplete", "missing": ["external"]})
+        self.assertEqual(packet_block(case, "fpsdet.packet/2"), {"recipe": "fpsdet.packet/2", "status": "incomplete", "missing": ["external"]})
 
 
 class ExternalCommandTest(unittest.TestCase):

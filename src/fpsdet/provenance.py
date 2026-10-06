@@ -49,9 +49,11 @@ ARRIVAL_INPUTS_RECIPE = "fpsdet.player-events/1"
 HISTORY_RECIPE = "fpsdet.history/1"
 EXTERNAL_INPUT_RECIPE = "fpsdet.external-input/1"
 PACKET_V1 = "fpsdet.packet/1"
-# packet/1 plus the external input and the fusion state. Every new case is written with it.
+# packet/1 plus the external input and the fusion state.
 PACKET_V2 = "fpsdet.packet/2"
-PACKET_RECIPE = PACKET_V2
+# packet/2 plus the evidence graph's recipe and digest. Every new case is written with it.
+PACKET_V3 = "fpsdet.packet/3"
+PACKET_RECIPE = PACKET_V3
 
 PACKAGE = "fpsdet"
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -537,7 +539,7 @@ PACKET_PROVENANCE = {
     "history": ("mode", "recipe", "digest", "windows"),
 }
 PACKET_V2_PROVENANCE = {**PACKET_PROVENANCE, "external": ("mode", "recipe", "digest", "records", "sources")}
-PACKET_PARTS = {PACKET_V1: PACKET_PROVENANCE, PACKET_V2: PACKET_V2_PROVENANCE}
+PACKET_PARTS = {PACKET_V1: PACKET_PROVENANCE, PACKET_V2: PACKET_V2_PROVENANCE, PACKET_V3: PACKET_V2_PROVENANCE}
 # The recipes this fpsdet can read in a packet, by part. Old ones stay: a recipe never changes meaning.
 RECIPES = {
     "detector": (DETECTOR_RECIPE,),
@@ -550,8 +552,10 @@ RECIPES = {
 _DIGEST = re.compile(r"sha256:[0-9a-f]{64}")
 
 
-def _missing(provenance, recipe: str = PACKET_RECIPE) -> list[str]:
-    """What a complete packet needs and this case's provenance lacks."""
+def _missing(provenance, recipe: str = PACKET_RECIPE, evidence: Mapping | None = None) -> list[str]:
+    """What a complete packet needs and this case's provenance, or for packet/3 its graph, lacks."""
+    if recipe == PACKET_V3 and evidence is not None and not isinstance(evidence.get("graph"), Mapping):
+        return ["graph"] + ([] if isinstance(provenance, Mapping) else ["provenance"])
     if not isinstance(provenance, Mapping):
         return ["provenance"]
     missing = [part for part in PACKET_PARTS[recipe] if not isinstance(provenance.get(part), Mapping)]
@@ -566,7 +570,8 @@ def packet_material(case: Mapping, recipe: str = PACKET_RECIPE) -> dict:
 
     ``fpsdet.packet/1`` is exactly what it always was. ``fpsdet.packet/2`` adds the external input's
     provenance and ``evidence.fusion`` (null when the run had no external input). External observations
-    are bound in both, as every observation is, by id.
+    are bound in both, as every observation is, by id. ``fpsdet.packet/3`` adds the evidence graph's
+    recipe and digest; ``verify_packet`` checks the graph itself (fpsdet.graph.verify_graph).
     """
     evidence = case["evidence"]
     provenance = evidence["provenance"]
@@ -583,15 +588,18 @@ def packet_material(case: Mapping, recipe: str = PACKET_RECIPE) -> dict:
             part: {key: provenance[part].get(key) for key in keys} for part, keys in PACKET_PARTS[recipe].items()
         },
     }
-    if recipe == PACKET_V2:
+    if recipe in (PACKET_V2, PACKET_V3):
         material["fusion"] = evidence.get("fusion")
+    if recipe == PACKET_V3:
+        graph = evidence["graph"]
+        material["graph"] = {"recipe": graph["recipe"], "digest": graph["digest"]}
     return material
 
 
 def packet_block(case: Mapping, recipe: str = PACKET_RECIPE) -> dict:
     """``case["evidence"]["packet"]``: the digest of a complete packet, or what keeps it from being complete.
     New cases are written with ``fpsdet.packet/2``; a packet is checked with the recipe it names."""
-    missing = _missing(case["evidence"].get("provenance"), recipe)
+    missing = _missing(case["evidence"].get("provenance"), recipe, case["evidence"])
     if missing:
         return {"recipe": recipe, "status": "incomplete", "missing": missing}
     digest = _sha256(_json(packet_material(case, recipe)).encode("utf-8"))
@@ -655,6 +663,10 @@ def verify_packet(case: Mapping) -> list[str]:
         expected = packet_block(case, packet["recipe"])
     except (KeyError, TypeError) as error:
         return problems + [f"the packet cannot be rebuilt: {error!r}"]
+    if packet["recipe"] == PACKET_V3 and isinstance(evidence.get("graph"), Mapping):
+        from .graph import verify_graph
+
+        problems += [f"graph: {problem}" for problem in verify_graph(case)]
     if packet.get("status") != expected["status"]:
         problems.append(f"the packet says {packet.get('status')!r} but its provenance makes it {expected['status']!r}")
     elif expected["status"] == "complete" and packet.get("digest") != expected["digest"]:

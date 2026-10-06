@@ -534,5 +534,89 @@ class IndependenceReadinessTest(unittest.TestCase):
         self.assertEqual(shared["partner"]["value"], "player:cheater")
 
 
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
+
+
+class PacketV3Test(unittest.TestCase):
+    """fpsdet.packet/3: packet/2 and the evidence graph. Every new case is written with it."""
+
+    def test_every_new_packet_is_v3_and_verifies(self):
+        from fpsdet.provenance import verify_packet
+        from tests.test_external import FUSED
+
+        for cases in (PLANTED, WEEKLY, FUSED):
+            for pid, case in cases.items():
+                self.assertEqual(case["evidence"]["packet"]["recipe"], "fpsdet.packet/3", pid)
+                self.assertEqual(case["evidence"]["packet"]["status"], "complete", pid)
+                self.assertEqual(verify_packet(case), [], pid)
+
+    def test_what_it_binds(self):
+        from fpsdet.provenance import packet_material
+
+        case = PLANTED["radar-friend"]
+        material = packet_material(case)
+        self.assertEqual(sorted(material), sorted([*packet_material(case, "fpsdet.packet/2"), "graph"]))
+        self.assertEqual(material["graph"], {"recipe": "fpsdet.graph/1", "digest": case["evidence"]["graph"]["digest"]})
+
+    def test_graph_edits_are_caught(self):
+        from fpsdet.provenance import verify_packet
+
+        def drop_edge(case):
+            case["evidence"]["graph"]["edges"] = [e for e in case["evidence"]["graph"]["edges"] if e["relation"] != "depends_on"]
+
+        def reseal_graph(case):
+            drop_edge(case)
+            graph = case["evidence"]["graph"]
+            graph["digest"] = EvidenceGraph.from_dict({k: v for k, v in graph.items() if k not in ("summary", "digest")}).digest()
+
+        def drop_graph(case):
+            del case["evidence"]["graph"]
+
+        def edit_summary(case):
+            case["evidence"]["graph"]["summary"]["shared"].append({"kind": "partner", "value": "player:x", "observations": []})
+
+        for name, edit in {"a dropped edge": drop_edge, "a dropped edge with a fresh digest": reseal_graph,
+                           "no graph": drop_graph, "an edited summary": edit_summary}.items():
+            with self.subTest(name):
+                case = copy.deepcopy(PLANTED["radar-friend"])
+                edit(case)
+                self.assertTrue(verify_packet(case))
+
+    def test_wording_is_still_not_evidence(self):
+        from fpsdet.provenance import verify_packet
+
+        case = copy.deepcopy(PLANTED["radar-friend"])
+        case["reasons"] = ["reworded"]
+        observations(case)[0]["context"]["line"] = "reworded"
+        self.assertEqual(verify_packet(case), [])
+
+    def test_older_packets_keep_their_meaning(self):
+        from fpsdet.provenance import verify_packet
+
+        expected = {"historical-packets-p23.json": "fpsdet.packet/1", "historical-packets-p3.json": "fpsdet.packet/1",
+                    "historical-packets-p4.json": "fpsdet.packet/1", "historical-packets-p5.json": "fpsdet.packet/2"}
+        for name, recipe in expected.items():
+            for case in json.loads((FIXTURES / name).read_text(encoding="utf-8"))["cases"]:
+                with self.subTest(name, player=case["player_id"]):
+                    self.assertEqual(case["evidence"]["packet"]["recipe"], recipe)
+                    self.assertNotIn("graph", case["evidence"])
+                    self.assertEqual(verify_packet(case), [])
+
+    def test_a_v3_digest_is_the_same_on_every_python(self):
+        import sys
+
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from test_packet import fixed_case
+        from fpsdet.provenance import packet_block
+
+        case = fixed_case()
+        case["match_ids"] = ["m1"]
+        case["evidence"]["provenance"]["external"] = {"mode": "none"}
+        self.assertEqual(packet_block(case), {"recipe": "fpsdet.packet/3", "status": "incomplete", "missing": ["graph"]})
+        case["evidence"]["graph"] = graph_block(case)
+        self.assertEqual(case["evidence"]["graph"]["digest"], "sha256:aeb1c9c4fbd62d237771d7d03d1652e08ee28a54c08d12d2afdb1318ff78692e")
+        self.assertEqual(packet_block(case)["digest"], "sha256:2c54ef58f1ffa2ba78a3a7e5392b3cfa56aa9622423920f8a31dbedd12e55114")
+
+
 if __name__ == "__main__":
     unittest.main()

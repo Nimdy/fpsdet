@@ -113,6 +113,10 @@ Every serialized case carries its graph in `evidence.graph`, built by `graph.bui
 
 A case alone cannot show that a dependency on another case exists. `graph.verify_graphs(cases)` checks that across one run: each such observation is on the case of the player it is about. `tools/regress.py verify` runs both on every case of a snapshot.
 
+## In the packet: `fpsdet.packet/3`
+
+`fpsdet.packet/3` binds everything `packet/2` binds, and the graph's recipe and digest. Every new case is written with it. Checking it runs `verify_graph`, so a packet/3 that verifies has a graph that matches its case. Packets written with `packet/1` or `packet/2` before the graph existed keep verifying with their own recipes. The graph adds no observation and changes no observation id, so the packet binds the same evidence it did, plus its structure.
+
 ## What the graph holds, and what it never does
 
 - Pseudonymous player and partner ids, match ids, challenge ids, external record ids, provider and provider group names, telemetry domains, observation kinds and roles, and digests. All of these are already in the case.

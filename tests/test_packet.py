@@ -189,8 +189,11 @@ class PacketTest(unittest.TestCase):
         fields = {key: obs[key] for key in ("family", "kind", "role", "subject_id", "key", "evidence", "source")}
         fields["evidence"] = {**obs["evidence"], "gap": 0.5}
         obs.update(Observation(**fields, match_ids=tuple(obs["match_ids"]), depends_on=tuple(obs["depends_on"])).to_dict())
-        self.assertEqual([p for p in verify_packet(case) if "observation" in p], [])  # the id now matches the edit
-        self.assertIn("the packet digest does not match the evidence and provenance it covers", verify_packet(case))
+        problems = verify_packet(case)
+        self.assertEqual([p for p in problems if "observation" in p and not p.startswith("graph:")], [])  # the id now matches the edit
+        self.assertIn("the packet digest does not match the evidence and provenance it covers", problems)
+        # Since packet/3, the graph notices too: the observation no longer matches the graph's node for it.
+        self.assertTrue(any(p.startswith("graph:") for p in problems))
 
     def test_a_role_that_is_not_the_scorers_is_refused(self):
         case = self.serialized("rank-outlier")
