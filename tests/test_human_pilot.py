@@ -130,6 +130,16 @@ class StudyCodeTest(unittest.TestCase):
         for key in ('"dist"', '"ps"', '"aw"', '"pw"', '"co"'):
             self.assertEqual([part.split("(")[0] for part in functions[1:] if key in part], ["func _study_row"], key)
 
+    def test_the_controls_check_drives_the_unchanged_client(self):
+        check = (GODOT / "scripts" / "controls_check_client.gd").read_text(encoding="utf-8")
+        self.assertTrue(check.startswith('extends "res://scripts/study_client.gd"'))
+        self.assertIn("Input.parse_input_event", check)
+        for name in ("_keyboard", "_unhandled_input", "_physics_process", "input_cmd"):
+            self.assertNotIn(f"func {name}(", check, "the check must not replace the controls it checks")
+        for word in ("get_image", "save_png", "OS.execute", "DirAccess", "OS.get_environment"):
+            self.assertNotIn(word, check)
+        self.assertNotIn("controls_check", " ".join(harness().CODE), "the check is not part of a study session")
+
 
 class MetricsTest(unittest.TestCase):
     """The study's own numbers, defined before collection."""
@@ -335,6 +345,69 @@ class AmendmentTest(unittest.TestCase):
             self.assertIn("a hum", (run / "private" / "comments.json").read_text(encoding="utf-8"))
         self.assertNotIn("a hum", json.dumps(found), "comments stay in the private folder")
         self.assertEqual(len(found["answers"]), 5)
+
+    def test_practice_is_short_unscored_and_kept_apart(self):
+        import argparse
+        import tempfile
+
+        rules = amendment()["practice"]
+        self.assertEqual((rules["length_ms"], rules["mode"], rules["challenges"], rules["min_client_fps"]), (90000, "free", 0, 30))
+        with tempfile.TemporaryDirectory() as folder:
+            study = Path(folder) / "study"
+            (study / "hp-12345678").mkdir(parents=True)
+            (study / "hp-12345678" / "participant.json").write_text(json.dumps({"participant": "hp-12345678", "consent": True}))
+            for inside in (study, study / "practice"):
+                with self.assertRaises(SystemExit):
+                    harness().cmd_practice(argparse.Namespace(data=str(inside), study=str(study), participant="hp-12345678", godot="godot",
+                                                              port=24800, bind="127.0.0.1", remote=False))
+
+    def test_staging_waits_for_the_first_four_and_stops_at_the_maximum(self):
+        import tempfile
+
+        study = harness()
+        with tempfile.TemporaryDirectory() as folder:
+            data = Path(folder)
+
+            modes = design()["sessions"]["modes"]
+
+            def enroll(name: str, sessions: int) -> None:
+                (data / name).mkdir()
+                (data / name / "participant.json").write_text(json.dumps({"participant": name, "kind": "human", "consent": True}))
+                for mode in modes[:sessions]:
+                    (data / name / f"{mode}-1").mkdir()
+                    (data / name / f"{mode}-1" / "session.json").write_text("{}")
+
+            for index in range(3):
+                enroll(f"hp-0000000{index}", 0)
+            self.assertIsNone(study.staging(data))
+            enroll("hp-00000003", 6)
+            for index in range(4):
+                (data / f"hp-0000000{index}" / "free-2").mkdir()
+                (data / f"hp-0000000{index}" / "free-2" / "session.json").write_text("{}")  # a repeated mode is not another one
+            self.assertIn("Staging", study.staging(data))
+            for index in range(4):
+                for mode in modes:
+                    (data / f"hp-0000000{index}" / f"{mode}-1").mkdir(exist_ok=True)
+                    (data / f"hp-0000000{index}" / f"{mode}-1" / "session.json").write_text("{}")
+            self.assertIsNone(study.staging(data))
+            for index in range(4, 12):
+                enroll(f"hp-000000{index:02d}", 0)
+            self.assertIn("maximum", study.staging(data))
+
+    def test_a_review_grade_stop_cannot_be_cleared(self):
+        import argparse
+        import tempfile
+
+        study = harness()
+        with tempfile.TemporaryDirectory() as folder:
+            data = Path(folder)
+            study.stop(data, ["hp-12345678 angle_holding-1: review-grade challenge evidence on an honest session: stop collection"])
+            with self.assertRaises(SystemExit):
+                study.cmd_clear_stop(argparse.Namespace(data=str(data), reason="looked at it"))
+            self.assertTrue((data / "STOP").exists())
+            study.stop(data, ["hp-12345678 free-1: personal data in a public output: server.log: the hostname"])
+            self.assertEqual(study.cmd_clear_stop(argparse.Namespace(data=str(data), reason="a test fixture path; removed")), 0)
+            self.assertFalse((data / "STOP").exists())
 
     def test_motion_metrics_split_overlap_four_ways(self):
         study = harness()

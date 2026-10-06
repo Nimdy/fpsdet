@@ -3,7 +3,9 @@
 Everything runs on the operator's machine with the repository's own Godot pilot; the server binds 127.0.0.1,
 or a private LAN address given with --bind for a participant on another machine. Nothing else is touched.
 
+    python examples/human-pilot/study.py controls-check --godot PATH                  # the human client's controls, no person
     python examples/human-pilot/study.py enroll --data ~/study --agree [--publish]       # a random participant id
+    python examples/human-pilot/study.py practice --data ~/practice --study ~/study --participant hp-... --godot PATH
     python examples/human-pilot/study.py session --data ~/study --participant hp-... --mode free --godot PATH
     python examples/human-pilot/study.py analyze --data ~/study --out examples/human-pilot/result.json
     python examples/human-pilot/study.py dry-run --data /tmp/dry --godot PATH         # machine stand-ins, never people
@@ -12,7 +14,8 @@ A session plans its challenges with fpsdet's planner and a fresh secret, runs th
 participant's client, asks the five questions, then scores the telemetry live and again offline, checks every
 packet and graph, reproduces the plan and the realization with the secret and deletes the secret, scans every
 public file for secrets and personal data, computes the study's metrics, and checks the stop conditions. A stop
-condition writes STOP into the data folder, and no session starts until the operator clears it.
+condition writes STOP into the data folder, and no session starts until the operator clears it; review-grade
+evidence on an honest session cannot be cleared (amendment 1).
 
 Standard library only, beside fpsdet.
 """
@@ -93,6 +96,12 @@ def cmd_enroll(args: argparse.Namespace) -> int:
     data = Path(args.data).expanduser()
     if not args.agree:
         raise SystemExit("A participant takes part only after agreeing to CONSENT.md: pass --agree once they have.")
+    reason = stopped(data)
+    if reason:
+        raise SystemExit(f"The study is stopped: {reason.strip()} Nobody is enrolled while it is stopped.")
+    refusal = staging(data)
+    if refusal:
+        raise SystemExit(refusal)
     participant = "hp-" + secrets.token_hex(4)
     folder = data / participant
     folder.mkdir(parents=True)
@@ -102,6 +111,24 @@ def cmd_enroll(args: argparse.Namespace) -> int:
     order = session_order(participant)
     print(f"{participant}: sessions in this order: {', '.join(order)}")
     return 0
+
+
+def staging(data: Path) -> str | None:
+    """Amendment 1: the first 4 participants finish every session before anyone else is enrolled, and never
+    more than the design's maximum."""
+    people = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(data.glob("hp-*/participant.json"))]
+    people = [row for row in people if row.get("kind", "human") == "human"]
+    first = design()["participants"]["minimum_to_report"]
+    if len(people) >= design()["participants"]["maximum"]:
+        return f"The study already has {len(people)} participants, its maximum."
+    if len(people) >= first:
+        modes = set(design()["sessions"]["modes"])
+        unfinished = [row["participant"] for row in people[:first]
+                      if not modes <= {path.parent.name.rsplit("-", 1)[0] for path in (data / row["participant"]).glob("*/session.json")}]
+        if unfinished:
+            return (f"Staging (amendment 1): the first {first} participants finish all their sessions, with no unexplained review-grade finding, "
+                    f"before anyone else is enrolled. Unfinished: {', '.join(unfinished)}.")
+    return None
 
 
 def session_order(participant: str) -> list[str]:
@@ -138,13 +165,20 @@ def run_session(godot: str, data: Path, participant: str, mode: str, port: int, 
         server.append("--follower=true")
     engine = build(godot)
     started = time.time()
-    processes = [subprocess.Popen(server, env=environment, stdout=(run / "server.out").open("w"), stderr=subprocess.STDOUT)]
-    time.sleep(1.5)
     instructions = found["sessions"]["instructions"][mode]
     client = [godot, "--path", str(PROJECT), "res://study.tscn", "--", "--role=client", f"--participant={participant}", f"--port={port}",
               f"--server={bind}", f"--match-ms={length}", f"--instructions={instructions}", f"--log={public / 'client.jsonl'}"]
     if stand_in is not None:
         client = [client[0], "--headless", *client[1:], "--input=standin", f"--behaviour={stand_in}"]
+    codes = play(run, environment, server, client, remote, length)
+    answers = questionnaire(found, kind, ask, run)
+    return post_session(run, plan, secret, participant, mode, kind, stand_in, codes, round(time.time() - started, 1), answers, engine)
+
+
+def play(run: Path, environment: dict, server: list[str], client: list[str], remote: bool, length: int) -> list:
+    """The server, then the client (here, or printed for the participant's machine), until both exit."""
+    processes = [subprocess.Popen(server, env=environment, stdout=(run / "server.out").open("w"), stderr=subprocess.STDOUT)]
+    time.sleep(1.5)
     if remote:
         print("On the participant's machine, from a copy of examples/pilot/godot, run:\n  godot --path . res://study.tscn -- " + " ".join(client[5:]))
     else:
@@ -156,8 +190,7 @@ def run_session(godot: str, data: Path, participant: str, mode: str, port: int, 
         except subprocess.TimeoutExpired:
             process.kill()
             codes.append("timeout")
-    answers = questionnaire(found, kind, ask, run)
-    return post_session(run, plan, secret, participant, mode, kind, stand_in, codes, round(time.time() - started, 1), answers, engine)
+    return codes
 
 
 def build(godot: str) -> dict:
@@ -653,6 +686,103 @@ def verify_samples(result_path: Path) -> list[str]:
     return problems
 
 
+# Before the recorded sessions: the human client's controls checked without a person, and each participant's practice.
+
+
+def server_saw(events: Path, participant: str) -> dict:
+    """From the server's own telemetry: did the player move, and fire."""
+    rows = [json.loads(line) for line in events.read_text(encoding="utf-8").splitlines() if line.strip()] if events.exists() else []
+    mine = [row for row in rows if row.get("player_id") == participant]
+    return {"moving_ticks": sum(1 for row in mine if row["event_type"] == "movement" and row.get("speed_mps", 0) > 0),
+            "shots": sum(1 for row in mine if row["event_type"] == "shot")}
+
+
+def client_summary(path: Path) -> dict:
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    return next((json.loads(line) for line in lines[::-1] if '"summary"' in line), {})
+
+
+def median(values: list[float]) -> float | None:
+    return sorted(values)[len(values) // 2] if values else None
+
+
+def cmd_controls_check(args: argparse.Namespace) -> int:
+    """The study's human client, unchanged, driven by injected keyboard and mouse events under a virtual
+    display: consent key, mouse look, arrow keys, W, fire. The server is the study server with no plan."""
+    participant = "hp-00000000"
+    work = Path(args.data).expanduser() if args.data else Path(tempfile.mkdtemp(prefix="fpsdet-controls-"))
+    run = work / "controls-check"
+    (run / "public").mkdir(parents=True, exist_ok=True)
+    environment = pilot.godot_env(run)
+    length = 20_000
+    server = [args.godot, "--headless", "--path", str(PROJECT), "res://study.tscn", "--", "--role=server", f"--participant={participant}",
+              "--mode=free", f"--match=controls-{participant}", f"--match-ms={length}", f"--port={args.port}", "--bind=127.0.0.1",
+              f"--events={run / 'public' / 'events.ndjson'}", f"--log={run / 'public' / 'server.log'}"]
+    display = [] if args.real_display or not shutil.which("xvfb-run") else ["xvfb-run", "-a", "-s", "-screen 0 1280x720x24"]
+    client = [*display, args.godot, "--path", str(PROJECT), "res://controls_check.tscn", "--", "--role=client", f"--participant={participant}",
+              f"--port={args.port}", "--server=127.0.0.1", f"--match-ms={length}", "--instructions=controls check", f"--log={run / 'public' / 'client.jsonl'}"]
+    play(run, environment, server, client, False, length)
+    lines = (run / "public" / "client.jsonl").read_text(encoding="utf-8").splitlines() if (run / "public" / "client.jsonl").exists() else []
+    report = next((json.loads(line)["report"] for line in lines if '"controls_check"' in line), {})
+    saw = server_saw(run / "public" / "events.ndjson", participant)
+    checks = {
+        "consent key, then connected": report.get("consent_and_connect") is True,
+        "mouse captured": report.get("mouse_captured") is True,
+        "mouse turns the view": abs(report.get("mouse_look_yaw_deg", 0)) > 10 and abs(report.get("mouse_look_pitch_deg", 0)) > 2,
+        "arrow keys turn the view": abs(report.get("arrow_keys_yaw_deg", 0)) > 10,
+        "W moves the player (client)": report.get("w_moved_m", 0) > 0.5,
+        "the server saw movement": saw["moving_ticks"] > 0,
+        "the server saw shots": saw["shots"] > 0,
+    }
+    for name, passed in checks.items():
+        print(f"  {'ok  ' if passed else 'FAIL'} {name}")
+    print(json.dumps({"client": report, "server": saw, "folder": str(run)}, indent=1))
+    return 0 if all(checks.values()) else 1
+
+
+def cmd_practice(args: argparse.Namespace) -> int:
+    """Amendment 1's practice: free mode, no challenge, 90 seconds, in its own data folder that is never analysed."""
+    rules = amendment()["practice"]
+    data, study = Path(args.data).expanduser().resolve(), Path(args.study).expanduser().resolve()
+    if data == study or study in data.parents or data in study.parents:
+        raise SystemExit("Practice goes in its own data folder, apart from the study's: it is never analysed.")
+    record = json.loads((study / args.participant / "participant.json").read_text(encoding="utf-8"))
+    if not record.get("consent"):
+        raise SystemExit(f"{args.participant} has not agreed to take part.")
+    folder = data / args.participant
+    run = folder / f"practice-{len(list(folder.glob('practice-*'))) + 1}"
+    public = run / "public"
+    public.mkdir(parents=True)
+    environment = pilot.godot_env(run)
+    length = rules["length_ms"]
+    server = [args.godot, "--headless", "--path", str(PROJECT), "res://study.tscn", "--", "--role=server", f"--participant={args.participant}",
+              f"--mode={rules['mode']}", f"--match=practice-{args.participant}-{run.name}", f"--match-ms={length}", f"--port={args.port}",
+              f"--bind={args.bind}", f"--events={public / 'events.ndjson'}", f"--log={public / 'server.log'}"]
+    instructions = "Practice, not part of the results: look with the mouse, then with the arrow keys; walk with W A S D; shoot a bot."
+    client = [args.godot, "--path", str(PROJECT), "res://study.tscn", "--", "--role=client", f"--participant={args.participant}", f"--port={args.port}",
+              f"--server={args.bind}", f"--match-ms={length}", f"--instructions={instructions}", f"--log={public / 'client.jsonl'}"]
+    codes = play(run, environment, server, client, args.remote, length)
+    print("Ask the participant, and type y or n:")
+    answers = {}
+    for item in rules["confirms"]:
+        reply = ""
+        while reply not in ("y", "n"):
+            reply = input(f"  Did this work: {item}? [y/n] ").strip().lower()[:1]
+        answers[item] = reply == "y"
+    fps = median(client_summary(public / "client.jsonl").get("fps", []))
+    result = {"participant": args.participant, "practice": run.name, "exit_codes": codes, "answers": answers,
+              "client_fps_median": fps, "server": server_saw(public / "events.ndjson", args.participant)}
+    result["ready"] = fps is not None and fps >= rules["min_client_fps"] and all(answers[item] for item in rules["confirms"] if "mouse" not in item)
+    result["fallback"] = "arrow keys" if not answers[rules["confirms"][0]] else None
+    (run / "practice.json").write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps(result, indent=1))
+    if fps is None or fps < rules["min_client_fps"]:
+        print(f"The client ran at {fps} frames a second, under {rules['min_client_fps']}: {rules['below_min_fps']}")
+    elif result["fallback"]:
+        print(rules["fallback"])
+    return 0 if result["ready"] else 1
+
+
 # Commands.
 
 
@@ -670,6 +800,10 @@ def cmd_clear_stop(args: argparse.Namespace) -> int:
     if reason is None:
         print("The study is not stopped.")
         return 0
+    if "review-grade" in reason:
+        raise SystemExit("A review-grade finding on an honest session ends collection (amendment 1): preserve and replay the session, verify "
+                         "its packet and graph, inspect its episodes, classify the behaviour, and propose the next phase. Continuing would be "
+                         "a new study version, not a cleared stop.")
     with (data / "stops.log").open("a", encoding="utf-8") as log:
         log.write(json.dumps({"stopped": reason, "cleared": datetime.date.today().isoformat(), "investigation": args.reason}) + "\n")
     (data / "STOP").unlink()
@@ -736,6 +870,21 @@ def main(argv: list[str] | None = None) -> int:
     enroll.add_argument("--publish", action="store_true", help="They also ticked the optional box: their gameplay may be published as an example")
     enroll.add_argument("--kind", default="human", choices=["human"])
     enroll.set_defaults(func=cmd_enroll)
+    controls = sub.add_parser("controls-check", help="The human client's controls, driven by injected keyboard and mouse events; no person")
+    controls.add_argument("--godot", required=True)
+    controls.add_argument("--data", help="Where to keep its telemetry (a new temporary folder if not given)")
+    controls.add_argument("--port", type=int, default=24890)
+    controls.add_argument("--real-display", action="store_true", help="Open the window on this display (it takes the mouse for a few seconds) instead of a virtual one")
+    controls.set_defaults(func=cmd_controls_check)
+    practice = sub.add_parser("practice", help="A participant's 90-second practice, no challenge, in its own data folder (amendment 1)")
+    practice.add_argument("--data", required=True, help="The practice folder: never the study's, never analysed")
+    practice.add_argument("--study", required=True, help="The study's data folder, where the participant is enrolled")
+    practice.add_argument("--participant", required=True)
+    practice.add_argument("--godot", required=True)
+    practice.add_argument("--port", type=int, default=24800)
+    practice.add_argument("--bind", default="127.0.0.1", help="A private LAN address for a participant on another machine; never a public one")
+    practice.add_argument("--remote", action="store_true", help="Print the client command to run on the participant's machine instead of opening it here")
+    practice.set_defaults(func=cmd_practice)
     session = sub.add_parser("session", help="One session: plan, play, ask, score, check")
     session.add_argument("--data", required=True)
     session.add_argument("--participant", required=True)
