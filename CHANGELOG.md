@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Changed
+
+- **The public pages and the README say where the work stands.** The site predated the evidence work; it now matches the committed artifacts, and tests tie its numbers to them.
+  - **The home page** leads with FPSDET Benchmark v1: TF2 over nine predeclared baseline draws (a median 8.9×, 7.7× to 10.4×, and no never-banned player sent to review in any draw) and CS2. The first TF2 run, one draw chosen by a private key, is linked only as a historical record.
+  - **A new evidence page** (`site/evidence.html`) covers:
+    - what a case carries;
+    - probes planned with a secret;
+    - how other systems' records stay a watch at most;
+    - what has been tested, by class: fixtures, public real data, the live Godot pilot, and the human pilot no person has played yet.
+  - **The decoys page no longer says "only a cheat follows it".** The human pilot's machine dry run showed an honest-style stand-in holding a doorway's edge reaching the challenge bar, so the page says a challenge review is a case to open. It also covers planned challenges and their fields, and labels its TF2 chart as the historical run's.
+  - **The scoring, wire and source pages** add the challenge fields and their per-moment verdicts, the evidence packet, external records, the Godot reference server and the benchmark.
+  - **The README** gains a status table, what a case carries, the challenge caveat, and a complete docs list.
+
 ### Fixed
 
 - **File order is no longer game state.** The same server events listed in a different order in a file could produce a different case. Same-time events could decide a hidden-mover, floor-run or speed review, and on Python 3.11 a float sum could cross a line in one order and not the other.

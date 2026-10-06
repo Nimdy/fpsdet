@@ -1881,6 +1881,11 @@ class OpsTest(unittest.TestCase):
         self.assertIn(f"counted a median {dry['controlled_follower']['counted_ms']['median']:,.0f} ms per challenge", page)
         share = round(dry["explained"]["explained_by_visible_bot_ms"] / dry["explained"]["overlap_ms"] * 100)
         self.assertIn(f"Visible bots explained {share}% of all honest-style overlap", page)
+        # The README's status table says the same.
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(f"All {detectors} checks against a planted behaviour", readme)
+        self.assertIn(f"All {len(pilot)} declared scenarios came out as declared", readme)
+        self.assertIn("**No person has played yet.**", readme)
 
     def test_the_desk_links_the_real_tf2_matches(self):
         import re

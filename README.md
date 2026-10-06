@@ -4,13 +4,26 @@
 
 - It runs on the server's logs. Nothing is installed on a player's PC.
 - It never bans. Every case has `automated_action: "none"`; a person decides.
+- Every case says what made it: the findings as data, what the client could have known, which checks could run, and digests of the code, settings, baseline and events behind it.
 - It needs a dedicated server that decides hits itself. A listen server or client-side hit detection can forge every field.
 - It is plain Python 3.11+ with no dependencies. Checking providers' signatures on external records is the one optional extra (`pip install 'fpsdet[auth]'`).
 
 It is for indie and small studios, community server operators, and anyone who wants to check how a server can see a cheat that left the PC.
 
-## View the Demo
-https://nimdy.github.io/detect-FPS-hackers/
+## Where it stands
+
+Every published statement carries one class, and no sentence mixes two ([docs/benchmark.md](docs/benchmark.md)):
+
+| Class | What ran | What it showed |
+| --- | --- | --- |
+| Controlled fixtures | All 22 checks against a planted behaviour and its honest twin; the challenge and signature protocols | Each check trips on its plant and stays quiet on its twin. That qualifies code; it is never a rate |
+| Benchmark v1 real data | TF2 league matches with RGL ban labels, under nine predeclared baseline draws; CS2 matches with hand labels | Below. Labels are not ground truth, and most checks cannot run on match totals at all |
+| Live controlled pilot | One challenge in a Godot dedicated server with stock clients ([docs/pilot.md](docs/pilot.md)) | All 8 declared scenarios came out as declared, and every capture scored the same offline. Not a deployment or a rate |
+| Consented human pilot | Pre-registered: consenting adults play that arena honestly with probes running ([docs/human-pilot.md](docs/human-pilot.md)) | **No person has played yet.** A machine dry run found that holding an angle still, over a probe resting behind it, can reach the challenge bar |
+
+## See it
+
+- **The site:** <https://nimdy.github.io/detect-FPS-hackers/>, with the review desk, the [decoys page](https://nimdy.github.io/detect-FPS-hackers/decoys.html) and the [evidence page](https://nimdy.github.io/detect-FPS-hackers/evidence.html): what a case carries and what has been tested.
 
 ## Try it in two minutes
 
@@ -134,7 +147,7 @@ Next week, score the new events against this week's baseline and pass `--history
 
 1. **Hidden mover.** Sustained aim on an enemy this client could neither see nor hear.
 2. **Quiet aim.** Aim noise that drops only while the target is unknowable to this client.
-3. **Private replay, now an active challenge.** A body the server plays only where this client cannot perceive it. Aim that stays on it is a review. The server can plan each one with a secret, for one player, in one match, in one window, and fpsdet then binds the finding to that exact challenge ([docs/challenges.md](docs/challenges.md)).
+3. **Private replay, now an active challenge.** A body the server plays only where this client cannot perceive it. Aim that stays on it is a review. The server can plan each one with a secret, for one player, in one match, in one window, and fpsdet then binds the finding to that exact challenge ([docs/challenges.md](docs/challenges.md)). The bar counts time, not intent: in a machine dry run, a stand-in holding a doorway's edge still, over a probe resting behind it, reached it. Until people have played the pilot, treat a challenge review as a case to open, not a verdict.
 4. **Wire, not picture.** The client draws enemies one interpolation delay late. A person aims at the drawn picture; a packet aimbot aims at the newer snapshot.
 
 **Batch checks** look across players:
@@ -145,6 +158,19 @@ Next week, score the new events against this week's baseline and pass `--history
 Player reports never add to the score. They only move a player to the front of the scan queue. A brigade can make you look; it cannot convict anyone.
 
 [docs/scoring.md](docs/scoring.md) has every bar precisely enough to reimplement.
+
+## What a case carries
+
+The reasons a reviewer reads stay exactly as they are. Under `evidence`, each case also carries:
+
+| Part | What it says | Docs |
+| --- | --- | --- |
+| `observations` | One record per finding: the check, its role in the decision, the numbers it compared, the matches it was measured on | [observations.md](docs/observations.md) |
+| knowledge | Whether this client could have known about an enemy: `known`, `unknowable` or `unknown`. Unchecked is never absent, so missing telemetry only makes fpsdet say less | [knowledge-engine.md](docs/knowledge-engine.md) |
+| `detector_eligibility` | For every check, whether it could run: eligible, telemetry unavailable, disabled, not applicable. A check that could not run is never a zero | [calibration.md](docs/calibration.md) |
+| `provenance` | Digests of the detector code, the parsed profile, the baseline, the player's events and the history read | [provenance.md](docs/provenance.md) |
+| `graph` | Typed nodes and edges: what supports the case, what it was made from, what findings share. It decides nothing | [evidence-graph.md](docs/evidence-graph.md) |
+| `packet` | One digest over all of it (`fpsdet.packet/5`). The same inputs give the same packet. It proves content, not origin | [provenance.md](docs/provenance.md) |
 
 ## Protecting honest players
 
@@ -160,6 +186,8 @@ Most of this code exists so that an honest player is not flagged. Each rule belo
 - **A short night.** Medians (distance, recoil, declared metrics) are tested on a confidence bound, as rates are. Thirty shots cannot put a player past a line that three hundred would not.
 - **Many players, many pairs.** The shared-leftover check scales each spray position by its own noise and needs a Fisher z of 5. Four hundred honest players produce no matches.
 - **New guns and thin data.** A weapon or build with fewer than 30 measured humans is listed as untrained, and its human-baseline numbers are not flagged.
+- **A probe the client could perceive.** A challenge counts a moment only when the server's own verdict says the body was unseen and unheard then. One seen or heard moment voids it, and so does a contradiction.
+- **Telemetry you did not send.** A knowledge channel nobody checked makes the answer `unknown`, and the information checks abstain.
 
 ## What still gets through
 
@@ -194,7 +222,7 @@ If the server never sends an enemy's position to a client that cannot see or hea
 
 ## Add one thing: decoys
 
-Statistics catch a cheater who is past every human. A careful one stays inside the human range: in the historical published TF2 run (one baseline draw), 131 of 189 banned cheaters still looked clean. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear, replaying another player's real movement; the game never draws it, and only software reading memory or packets can follow it. fpsdet scores the tracking from one field, `private_track_ms`, or, for a planned challenge, from `challenge_id` and `challenge_track_ms`: `fpsdet challenge plan` derives each player's challenges from a server-held secret and writes only ids, windows and commitments, so the code can be public and the next challenge still cannot be predicted ([docs/challenges.md](docs/challenges.md)). Challenge-aware cheats can ignore probes, and pixel aimbots never see them; that page lists what gets through. The [decoys page](https://nimdy.github.io/detect-FPS-hackers/decoys.html) explains it with diagrams, lists the rules that keep honest players safe, and answers whether it can be countered. A reference integration runs one challenge live, in a Godot dedicated server with stock clients, from the secret-derived plan to evidence reproduced offline ([docs/pilot.md](docs/pilot.md)): a controlled pilot, not a detection rate.
+Statistics catch a cheater who is past every human. A careful one stays inside the human range: in the historical published TF2 run (one baseline draw), 131 of 189 banned cheaters still looked clean. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear, replaying another player's real movement; the game never draws it, and only software reading memory or packets can follow it. fpsdet scores the tracking from one field, `private_track_ms`, or, for a planned challenge, from `challenge_id` and `challenge_track_ms`: `fpsdet challenge plan` derives each player's challenges from a server-held secret and writes only ids, windows and commitments, so the code can be public and the next challenge still cannot be predicted ([docs/challenges.md](docs/challenges.md)). Challenge-aware cheats can ignore probes, and pixel aimbots never see them; that page lists what gets through. The [decoys page](https://nimdy.github.io/detect-FPS-hackers/decoys.html) explains it with diagrams, lists the rules that keep honest players safe, and answers whether it can be countered. A reference integration runs one challenge live, in a Godot dedicated server with stock clients, from the secret-derived plan to evidence reproduced offline ([docs/pilot.md](docs/pilot.md)): a controlled pilot, not a detection rate. A pre-registered pilot with consenting people playing that arena honestly is ready, and no person has played it yet ([docs/human-pilot.md](docs/human-pilot.md)). Its machine dry run already found the honest case to worry about: holding a doorway's edge while a probe rests behind it reached the bar.
 
 ## Next to your other integrity systems
 
@@ -204,7 +232,7 @@ fpsdet does not replace client anti-cheat, platform attestation, league administ
 
 The dedicated server writes one JSON object per shot and per movement sample.
 
-- [docs/integration.md](docs/integration.md) has the fields and Unity, Unreal and Godot emitters. [examples/unity/BaselineEmitter.cs](examples/unity/BaselineEmitter.cs) is a complete Unity one.
+- [docs/integration.md](docs/integration.md) has the fields and Unity, Unreal and Godot emitters. [examples/unity/BaselineEmitter.cs](examples/unity/BaselineEmitter.cs) is a complete Unity one. [examples/pilot/godot](examples/pilot/godot) is a complete Godot dedicated server with vision and audio queries and a live challenge.
 - [docs/games.md](docs/games.md) maps the fields onto well-known games.
 - [profiles/](profiles/) holds game profiles. Replace the numbers with your server's.
 
@@ -271,37 +299,58 @@ Every pair of accounts on a weapon is compared for shared leftovers. That is fin
 | external record | A claim another integrity system made about a player, carried as given. It can make a watch, never a review. See [docs/external-evidence.md](docs/external-evidence.md) |
 | verified | An external record signed by a key the operator registered for its provider. Signed, not true. See [docs/external-authentication.md](docs/external-authentication.md) |
 | `displacement_cause` | Why the body moved, when the player did not move it: `explosion`, `vehicle`, `ladder`, … |
-| seal | SHA-256 of the player, game, decision, and reasons. It identifies the packet a reviewer saw |
+| seal | SHA-256 of the player, game, decision, and reasons. It identifies what a reviewer saw |
+| evidence packet | One digest over a case's findings, decision and provenance. See [docs/provenance.md](docs/provenance.md) |
+| provenance | Digests of what produced a case: the detector code, the profile, the baseline, the events, the history |
 | tape | A worked example on the review desk |
 
 ## Docs
 
-- [docs/scoring.md](docs/scoring.md): every bar, precisely enough to port
+**Run it**
 - [docs/integration.md](docs/integration.md): the event fields and engine emitters
-- [docs/challenges.md](docs/challenges.md): active challenges, the server secret, and what they do not catch
-- [docs/external-evidence.md](docs/external-evidence.md): records from other integrity systems, and the rules that keep them a watch at most
-- [docs/external-authentication.md](docs/external-authentication.md): provider signatures, the key registry, and what "verified" does not mean
-- [docs/calibration.md](docs/calibration.md): what the real-data labels mean, and each detector measured against them
-- [docs/culling.md](docs/culling.md): server-side culling, and how it fits
 - [docs/games.md](docs/games.md): mapping the fields onto well-known games
 - [docs/operations.md](docs/operations.md): lake, priority, AI, privacy, appeals
 - [docs/players.md](docs/players.md): a page operators can link for their players
+- [docs/culling.md](docs/culling.md): server-side culling, and how it fits
+
+**How it decides**
+- [docs/scoring.md](docs/scoring.md): every bar, precisely enough to port
+- [docs/event-normalization.md](docs/event-normalization.md): one canonical order for the events, whatever order the file has
+- [docs/knowledge-engine.md](docs/knowledge-engine.md): whether this client could have known
+- [docs/challenges.md](docs/challenges.md): active challenges, the server secret, and what they do not catch
+
+**What a case carries**
+- [docs/observations.md](docs/observations.md): each finding as data
+- [docs/provenance.md](docs/provenance.md): what produced a case, and the evidence packet
+- [docs/evidence-graph.md](docs/evidence-graph.md): what rests on what
+- [docs/external-evidence.md](docs/external-evidence.md): records from other integrity systems, and the rules that keep them a watch at most
+- [docs/external-authentication.md](docs/external-authentication.md): provider signatures, the key registry, and what "verified" does not mean
+
+**What has been tested**
+- [docs/benchmark.md](docs/benchmark.md): FPSDET Benchmark v1, generated from the committed artifacts
+- [docs/calibration.md](docs/calibration.md): what the real-data labels mean, and each detector measured against them
+- [docs/pilot.md](docs/pilot.md): the live challenge pilot in Godot
+- [docs/human-pilot.md](docs/human-pilot.md): the consented honest-human pilot, its design and its machine dry run
+- [docs/architecture-v1.md](docs/architecture-v1.md): the architecture the evidence work follows
 
 The public site is `site/*.html`. `fpsdet pages` writes it, plus a fresh desk, into `_site/`, and `.github/workflows/pages.yml` publishes it to <https://nimdy.github.io/detect-FPS-hackers/>. The 2021 essay is archived at [docs/archive/2021-whitepaper.md](docs/archive/2021-whitepaper.md).
 
 ## Layout
 
 ```
-src/fpsdet/        the scorer, no runtime dependencies
-tests/             behaviour locks, including the planted demo and the recorded cases in tests/golden/
-tools/regress.py   snapshot a scored run and diff two snapshots case by case
-profiles/          game profiles; replace the numbers with your server's
-schema/            event and profile JSON Schemas
-examples/          a shot and movement file, report counts, a Unity emitter, real CS2 and TF2 matches
-docs/              the docs listed above
-site/              the public pages
-demo/board.html    the review desk, regenerated by `fpsdet demo`
-dashboards/        the built-in dashboard, and the case-JSON fields for your own tools
+src/fpsdet/            the scorer and the evidence it writes, no runtime dependencies
+tests/                 behaviour locks, including the planted demo and the recorded cases in tests/golden/
+tools/regress.py       snapshot a scored run and diff two snapshots case by case
+profiles/              game profiles; replace the numbers with your server's
+schema/                event and profile JSON Schemas
+benchmark/             FPSDET Benchmark v1: datasets, pinned sources, results, draws, claims, the release manifest
+examples/              a shot and movement file, report counts, a Unity emitter, real CS2 and TF2 matches
+examples/pilot/        the live challenge pilot: a Godot dedicated server and its harness
+examples/human-pilot/  the consented honest-human pilot: design, consent notice, harness, machine dry run
+docs/                  the docs listed above
+site/                  the public pages
+demo/board.html        the review desk, regenerated by `fpsdet demo`
+dashboards/            the built-in dashboard, and the case-JSON fields for your own tools
 ```
 
 ## Contributing and security
