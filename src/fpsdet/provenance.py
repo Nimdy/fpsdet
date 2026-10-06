@@ -105,6 +105,7 @@ NOT_DETECTOR = {
     "fpsdet.pages": "the public site",
     "fpsdet.synthetic": "the planted demo players",
     "fpsdet.week": "the synthetic week",
+    "fpsdet.fixtures": "controlled fixtures beside the planted demo: plants, honest twins and eligibility probes",
     "fpsdet.challenge_plan": "plans challenges with the server secret; detection never imports it, so scoring never needs the secret",
     "fpsdet.calibration": "measures detectors against labels after scoring; detection never imports it, so no rate can reach a decision",
 }

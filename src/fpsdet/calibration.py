@@ -1249,15 +1249,21 @@ TWINS = {
 
 def qualify_fixtures() -> dict:
     """Does each planted behaviour trip the detector built for it, and does each honest twin stay clean?
-    Outcomes per fixture player, never a rate: these players are planted by construction."""
+    Outcomes per fixture player, never a rate: these players are planted by construction. Two worlds: the
+    planted demo, and the controlled fixtures beside it (fpsdet.fixtures)."""
+    from . import fixtures as controlled
     from .synthetic import EXPECT, build_demo
 
     demo = build_demo()
-    fired = {case.player_id: {obs.kind for obs in case.evidence} for case in demo.cases}
+    world = controlled.build_fixtures()
+    fired = {("demo", case.player_id): {obs.kind for obs in case.evidence} for case in demo.cases}
+    fired.update({("fixtures", case.player_id): {obs.kind for obs in case.evidence} for case in world.cases})
+    plants = [("demo", player, kinds) for player, kinds in PLANTED.items()] + [("fixtures", player, kinds) for player, kinds in controlled.PLANTED.items()]
     detectors = []
     for kind in NATIVE_KINDS:
-        planted = [{"player": player, "fired": kind in fired[player]} for player, kinds in PLANTED.items() if kind in kinds]
-        twins = [{"player": player, "fired": kind in fired[player]} for player in TWINS.get(kind, ())]
+        planted = [{"player": player, "world": where, "fired": kind in fired[(where, player)]} for where, player, kinds in plants if kind in kinds]
+        twins = [{"player": player, "world": "demo", "fired": kind in fired[("demo", player)]} for player in TWINS.get(kind, ())]
+        twins += [{"player": player, "world": "fixtures", "fired": kind in fired[("fixtures", player)]} for player in controlled.TWINS.get(kind, ())]
         if not planted:
             outcome = "no_controlled_fixture"
         elif all(row["fired"] for row in planted) and not any(row["fired"] for row in twins):
@@ -1269,10 +1275,11 @@ def qualify_fixtures() -> dict:
     return {
         "schema": FIXTURE_SCHEMA,
         "what": "controlled-fixture qualification: planted by construction, never a real-world rate, never calibration",
-        "fixture": "fpsdet.synthetic.build_demo",
+        "fixture": ["fpsdet.synthetic.build_demo", "fpsdet.fixtures.build_fixtures"],
         "demo_failures": list(demo.failures),
+        "fixture_failures": controlled.fixture_failures(world),
         "detectors": detectors,
-        "honest_fixtures_clean": {player: not fired[player] for player in honest},
+        "honest_fixtures_clean": {player: not fired[("demo", player)] for player in honest},
     }
 
 
@@ -1280,7 +1287,7 @@ def render_fixtures(result: Mapping) -> str:
     out = [
         "# Controlled-fixture qualification",
         "",
-        "Planted by construction (`fpsdet.synthetic.build_demo`). This says whether the code trips on the behaviour it was built for and stays quiet on an honest twin built to look like it. It is not a real-world rate and not calibration.",
+        "Planted by construction (`fpsdet.synthetic.build_demo` and `fpsdet.fixtures.build_fixtures`). This says whether the code trips on the behaviour it was built for and stays quiet on an honest twin built to look like it. It is not a real-world rate and not calibration.",
         "",
         "| Detector | Family | Outcome | Planted (fired?) | Honest twins (fired?) |",
         "| --- | --- | --- | --- | --- |",

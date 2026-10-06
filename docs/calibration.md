@@ -219,14 +219,21 @@ At equal evidence (15–20 matches) it was 30 of 80 against 6 of 228. The 97 pla
 
 ## Controlled fixtures
 
-`fpsdet evaluate fixtures` runs the planted demo. It asks two things of each detector: does it trip on the behaviour planted for it, and does it stay quiet on an honest twin built to look like that behaviour? This is controlled-fixture qualification of code on data built for it. It is never a rate, and never a real-world measurement.
+`fpsdet evaluate fixtures` runs two worlds:
+- **The planted demo.**
+- **The controlled fixtures beside it (`fpsdet.fixtures`):** 40 humans frozen into a baseline, plus players who each differ from a human in one deliberate way.
+
+It asks two things of each detector: does it trip on the behaviour planted for it, and does it stay quiet on an honest twin built to look like that behaviour? This is controlled-fixture qualification of code on data built for it. It is never a rate, and never a real-world measurement.
 
 | Outcome | Detectors |
 | --- | --- |
-| passes_controlled_fixture | speed, fire_rate, metronome, recoil_floor, mirror, accuracy, headshot_rate, median_distance, rank_tail, account_jump, hidden, quiet_aim, wire, occluded_motion_replay, leftover, voice |
-| no_controlled_fixture | recoil_learned, geometry_rate, extra, view_snaps, acquire_timing, supporting_extra |
+| passes_controlled_fixture | speed, fire_rate, metronome, recoil_floor, mirror, recoil_learned, accuracy, headshot_rate, median_distance, geometry_rate, extra, rank_tail, view_snaps, acquire_timing, supporting_extra, account_jump, hidden, quiet_aim, wire, occluded_motion_replay, leftover, voice |
 
-All 16 honest fixtures have no finding at all.
+**What P9 added.** P8 found six detectors with no plant: recoil learned, geometry rate, the primary and supporting declared numbers, view snaps and acquire timing. The controlled fixtures plant each one, beside a twin who is good but human. They also add honest twins that fire rate, metronome and account jump lacked: a fast but legal trigger, a steady hand that still varies, a held full-auto at the gun's own cycle, and an account that improved inside what it had shown.
+
+**Eligibility probes.** The same world carries a probe for each eligibility status the demo never reaches. Together with the demo, every detector is shown eligible and firing, eligible and quiet, and in every status its rules allow (`tests/test_eligibility.py`).
+
+All 16 honest fixtures in the demo have no finding at all.
 
 **The challenge detector.** The occluded-motion replay has no real-world measurement (`real_world_calibration: unavailable`): no public dataset carries planned challenges. Its fixture here is the legacy private replay. Planned challenges are tested in `tests/test_challenge.py`.
 

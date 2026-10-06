@@ -159,6 +159,133 @@ class NothingReadsItBackTest(unittest.TestCase):
                 self.assertEqual(parent.attr, "setdefault", name)
 
 
+@lru_cache(maxsize=1)
+def fixture_world():
+    from fpsdet.fixtures import build_fixtures
+
+    return build_fixtures()
+
+
+# What each detector can be: eligible and fired, eligible and quiet, and every way it could not run that its
+# rules allow. A player with no unit for a detector at all (no shot, say) lists "" as telemetry_unavailable. Each must be shown by a planted demo player, a controlled fixture or a unit test below.
+REACHABLE = {
+    "speed": {"telemetry_unavailable", "insufficient_samples", "disabled"},
+    "fire_rate": {"telemetry_unavailable", "insufficient_samples", "disabled"},
+    "metronome": {"telemetry_unavailable", "insufficient_samples", "disabled", "not_applicable"},
+    "recoil_floor": {"telemetry_unavailable", "insufficient_samples", "disabled"},
+    "mirror": {"telemetry_unavailable", "insufficient_samples", "conflict"},
+    "recoil_learned": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin", "not_applicable"},
+    "accuracy": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin"},
+    "headshot_rate": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin"},
+    "median_distance": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin"},
+    "geometry_rate": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin"},
+    "extra": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin", "disabled"},
+    "rank_tail": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin", "not_applicable"},
+    "view_snaps": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin"},
+    "acquire_timing": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin"},
+    "supporting_extra": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin", "disabled"},
+    "account_jump": {"telemetry_unavailable", "insufficient_samples"},
+    "hidden": {"telemetry_unavailable", "insufficient_samples", "conflict"},
+    "quiet_aim": {"telemetry_unavailable", "insufficient_samples", "conflict", "not_applicable"},
+    "wire": {"telemetry_unavailable", "insufficient_samples"},
+    "occluded_motion_replay": {"telemetry_unavailable", "insufficient_samples", "conflict", "disabled", "not_applicable"},
+    "leftover": {"telemetry_unavailable", "insufficient_samples", "baseline_too_thin", "not_applicable"},
+    "voice": {"telemetry_unavailable", "insufficient_samples", "not_applicable"},
+}
+
+
+def shown(cases) -> dict[str, set[str]]:
+    """Every (kind, status) the cases show, with eligible split into fired and quiet."""
+    found: dict[str, set[str]] = {kind: set() for kind in NATIVE_KINDS}
+    for case in cases:
+        fired = {(obs["kind"], eligibility_unit(obs)) for obs in case["evidence"]["observations"] if obs["source"] == "fpsdet"}
+        for kind, entry in case["evidence"]["detector_eligibility"]["detectors"].items():
+            for name, units in entry.items():
+                for unit in units:
+                    found[kind].add(name if name != "eligible" else ("fired" if (kind, unit) in fired else "quiet"))
+    return found
+
+
+class EveryDetectorEveryStatusTest(unittest.TestCase):
+    """For every detector: eligible and fires, eligible and does not, and each way it could not run."""
+
+    @classmethod
+    def setUpClass(cls):
+        world = [case_to_dict(case) for case in fixture_world().cases]
+        cls.found = shown([*planted().values(), *world])
+        cls.found["supporting_extra"] |= cls.unit_supporting_disabled()
+        cls.found["leftover"] |= cls.unit_leftover_alone()
+        cls.found["occluded_motion_replay"] |= cls.unit_planned_challenges()
+
+    @staticmethod
+    def unit_supporting_disabled() -> set[str]:
+        import dataclasses
+
+        from fpsdet.pipeline import run_score
+
+        world = fixture_world()
+        profile = dataclasses.replace(world.profile, extra_metrics=[])
+        events = [event for event in world.events if event.player_id == "fx-human-00"]
+        (case,) = run_score(events, profile)
+        return {status for status in case.detector_eligibility["supporting_extra"].values()}
+
+    @staticmethod
+    def unit_leftover_alone() -> set[str]:
+        """Scored alone, without the batch pass, nothing pairs a player with anyone."""
+        from fpsdet.baseline import build_cohorts
+        from fpsdet.score import assess_player
+        from fpsdet.summarize import summarize
+
+        world = fixture_world()
+        records = {record.player_id: record for record in summarize(world.events, world.profile)}
+        case = assess_player(records["fx-lone-script"], build_cohorts(list(records.values()), world.profile), world.profile)
+        return set(case.detector_eligibility["leftover"].values())
+
+    @staticmethod
+    def unit_planned_challenges() -> set[str]:
+        """Planned challenges: each result status maps to one eligibility status."""
+        from fpsdet.challenge import ABSTAINED, FOLLOWED, NO_SAMPLES, NOT_FOLLOWED, UNPLANNED, ChallengeResult
+        from fpsdet.score import _challenge_eligibility
+
+        profile = fixture_world().profile
+        bar = profile.hidden_track_min_samples
+        rows = {
+            "disabled": ChallengeResult("ch-a", None, UNPLANNED),
+            "not_applicable": ChallengeResult("ch-b", None, ABSTAINED, cause="other_subject"),
+            "conflict": ChallengeResult("ch-c", None, NO_SAMPLES, not_counted={"disagreed": 2}),
+            "telemetry_unavailable": ChallengeResult("ch-d", None, NO_SAMPLES),
+            "insufficient_samples": ChallengeResult("ch-e", None, NOT_FOLLOWED, eligible=bar - 1),
+            "eligible": ChallengeResult("ch-f", None, NOT_FOLLOWED, eligible=bar),
+        }
+        found = set()
+        for expected, result in rows.items():
+            assert _challenge_eligibility(result, profile) == expected, expected
+            found.add(expected)
+        assert _challenge_eligibility(ChallengeResult("ch-g", None, FOLLOWED, eligible=bar), profile) == "eligible"
+        assert _challenge_eligibility(ChallengeResult("ch-h", None, ABSTAINED, cause="unchecked"), profile) == "disabled"
+        return found - {"eligible"}
+
+    def test_every_detector_fires_and_stays_quiet_where_eligible(self):
+        for kind in NATIVE_KINDS:
+            with self.subTest(kind):
+                self.assertIn("fired", self.found[kind])
+                self.assertIn("quiet", self.found[kind])
+
+    def test_every_way_a_detector_could_not_run_is_shown(self):
+        self.assertEqual(set(REACHABLE), set(NATIVE_KINDS))
+        for kind, statuses in REACHABLE.items():
+            with self.subTest(kind):
+                self.assertLessEqual(statuses, self.found[kind])
+                # And nothing beyond what the rules allow.
+                self.assertLessEqual(self.found[kind] - {"fired", "quiet"}, statuses)
+
+    def test_the_fixture_world_shows_what_it_was_built_to_show(self):
+        from fpsdet.fixtures import fixture_failures
+
+        self.assertEqual(fixture_failures(fixture_world()), [])
+        for case in fixture_world().cases:
+            self.assertEqual(eligibility_problems(case_to_dict(case)["evidence"]), [], case.player_id)
+
 
 if __name__ == "__main__":
     unittest.main()

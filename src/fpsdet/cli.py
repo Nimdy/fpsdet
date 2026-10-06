@@ -544,7 +544,7 @@ def cmd_evaluate_fixtures(args: argparse.Namespace) -> int:
         write_json(args.out, result)
     print(render_fixtures(result))
     failed = [entry["kind"] for entry in result["detectors"] if entry["outcome"] == "fails_controlled_fixture"]
-    return 1 if failed or result["demo_failures"] or not all(result["honest_fixtures_clean"].values()) else 0
+    return 1 if failed or result["demo_failures"] or result["fixture_failures"] or not all(result["honest_fixtures_clean"].values()) else 0
 
 
 def build_parser() -> argparse.ArgumentParser:

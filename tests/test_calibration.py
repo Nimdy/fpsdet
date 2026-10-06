@@ -371,13 +371,12 @@ class FixtureTest(unittest.TestCase):
 
     def test_every_planted_behaviour_trips_its_detector_and_no_twin_does(self):
         result = cal.qualify_fixtures()
-        self.assertEqual(result["demo_failures"], [])
+        self.assertEqual((result["demo_failures"], result["fixture_failures"]), ([], []))
         outcomes = {entry["kind"]: entry["outcome"] for entry in result["detectors"]}
-        self.assertEqual({kind for kind, outcome in outcomes.items() if outcome == "fails_controlled_fixture"}, set())
-        self.assertEqual(
-            {kind for kind, outcome in outcomes.items() if outcome == "no_controlled_fixture"},
-            {"recoil_learned", "geometry_rate", "extra", "view_snaps", "acquire_timing", "supporting_extra"},
-        )
+        # P8 found six detectors with no plant; the controlled fixtures (P9) plant each one, beside an honest twin.
+        self.assertEqual(set(outcomes.values()), {"passes_controlled_fixture"})
+        for entry in result["detectors"]:
+            self.assertTrue(entry["planted"] and entry["honest_twins"], entry["kind"])
         self.assertTrue(all(result["honest_fixtures_clean"].values()))
         self.assertEqual(outcomes["occluded_motion_replay"], "passes_controlled_fixture")
         def keys(value):
@@ -528,10 +527,13 @@ class PublishedEvaluationTest(unittest.TestCase):
     def test_the_fixture_table_in_the_docs(self):
         doc = text("docs", "calibration.md")
         result = cal.qualify_fixtures()
-        for outcome in ("passes_controlled_fixture", "no_controlled_fixture"):
+        for outcome in ("passes_controlled_fixture", "fails_controlled_fixture", "no_controlled_fixture"):
             kinds = [entry["kind"] for entry in result["detectors"] if entry["outcome"] == outcome]
-            self.assertIn(f"| {outcome} | {', '.join(kinds)} |", doc)
-        self.assertIn(f"All {len(result['honest_fixtures_clean'])} honest fixtures have no finding at all.", doc)
+            if kinds:
+                self.assertIn(f"| {outcome} | {', '.join(kinds)} |", doc)
+            else:
+                self.assertNotIn(f"| {outcome} |", doc)
+        self.assertIn(f"All {len(result['honest_fixtures_clean'])} honest fixtures in the demo have no finding at all.", doc)
 
 
 if __name__ == "__main__":
