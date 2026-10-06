@@ -1,0 +1,81 @@
+{
+  "format": "fpsdet.pilot-qualification/1",
+  "pilot": "godot-occluded-motion-replay",
+  "declared": "2026-10-06, before any live scenario was run",
+  "purpose": "A controlled integration qualification: does a live authoritative game server carry the whole challenge path, from a secret-derived plan to verifiable evidence reproduced offline? Not a deployment, not a detection rate.",
+  "engine": {
+    "name": "Godot",
+    "version": "4.7.2.stable.official.ed1daf0bf",
+    "download": "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip",
+    "sha512": "9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65",
+    "why": "Unity and Unreal both need an account to download; Godot is MIT-licensed and downloads without one, runs a headless dedicated server on Linux, and its high-level multiplayer gives an authoritative server with stock clients in a few hundred lines."
+  },
+  "profile": "examples/pilot/pilot.json",
+  "challenge": {"type": "occluded_motion_replay", "version": 2},
+  "subject": "pilot-subject",
+  "enemy": "pilot-enemy",
+  "scenarios": [
+    {
+      "id": "honest",
+      "what": "The subject plays normally: aims at and shoots the visible enemy, and never follows the probe.",
+      "expected": {"status": "not_followed", "evidence": false}
+    },
+    {
+      "id": "accidental_crossing",
+      "what": "The subject spins on the spot every few seconds, so the crosshair passes over the probe's direction briefly.",
+      "expected": {"status": "not_followed", "evidence": false, "tracked_below_bar": true}
+    },
+    {
+      "id": "exposed_vision",
+      "what": "The server is told to place the probe where the subject has line of sight to it, breaking the placement rule; a responder then follows it.",
+      "expected": {"status": "abstained", "cause": "seen", "evidence": false}
+    },
+    {
+      "id": "exposed_audio",
+      "what": "The server is told to let the probe make footstep sounds the subject can hear; a responder follows it.",
+      "expected": {"status": "abstained", "cause": "heard", "evidence": false}
+    },
+    {
+      "id": "missing_audio_channel",
+      "what": "The server's audio query for the probe is switched off, so every sample reports audio unchecked; a responder follows it.",
+      "expected": {"status": "abstained", "cause": "unchecked", "evidence": false}
+    },
+    {
+      "id": "contradictory_channels",
+      "what": "A deliberately broken emitter writes two events at the same moment that disagree about the probe's vision; a responder follows it.",
+      "expected": {"status": "abstained", "cause": "conflict", "evidence": false, "diagnostic": true}
+    },
+    {
+      "id": "visible_enemy_cover",
+      "what": "The enemy stands in the open, in line with the probe behind the wall, and the subject aims at the visible enemy.",
+      "expected": {"status": "not_followed", "evidence": false, "not_counted": "seen"}
+    },
+    {
+      "id": "illicit_follower",
+      "what": "A server-side responder, standing in for a packet or memory reader, aims the subject at the probe it was sent: the behaviour such software produces, not cheat code.",
+      "expected": {"status": "followed", "evidence": true, "decision": "review"}
+    }
+  ],
+  "checks": [
+    "The plan is written by fpsdet challenge plan with a server-held secret; the server derives each realization from the secret and refuses a plan whose commitment its secret does not reproduce.",
+    "The probe is sent to the subject's client only, with the same fields as a real player, and the stock client receives it.",
+    "The stock client draws no pixel of the probe and plays no sound of it while the server reports vision and audio absent.",
+    "Every counted sample carries the server's own per-moment vision and audio verdict for the probe body.",
+    "Every case's packet and graph verify.",
+    "Scoring the captured telemetry twice, offline, gives the same decisions, observation ids, graph and packet as the live run's scoring.",
+    "After the match, the secret reproduces the plan, and the realization the server used.",
+    "No secret or realization value appears in any public output."
+  ],
+  "failures": [
+    {"id": "missing_plan", "expected": "the server runs no challenge and says so; scoring without the plan reads no challenge sample"},
+    {"id": "unknown_challenge_id", "expected": "events naming an id no plan has are reported as unplanned and not read"},
+    {"id": "wrong_player", "expected": "a challenge planned for another player abstains as other_subject"},
+    {"id": "wrong_match", "expected": "the server refuses a plan for another match; events from another match are not read"},
+    {"id": "stale_window", "expected": "samples outside the window are not read"},
+    {"id": "duplicate_events", "expected": "a duplicated line adds nothing: one moment is one sample"},
+    {"id": "malformed_channel_state", "expected": "a line with a channel state that is not known, absent or unchecked is rejected and reported"},
+    {"id": "visible_unexpectedly", "expected": "the challenge abstains (seen)"},
+    {"id": "audible_unexpectedly", "expected": "the challenge abstains (heard)"},
+    {"id": "secret_unavailable", "expected": "the realization cannot be reproduced and the tool says so; scoring and packet checks need no secret and still work"}
+  ]
+}
