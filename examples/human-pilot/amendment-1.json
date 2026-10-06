@@ -1,0 +1,114 @@
+{
+ "format": "fpsdet.human-pilot-amendment/1",
+ "study": "p13-consented-honest-human-pilot",
+ "amends": {
+  "design": "examples/human-pilot/design.json",
+  "sha256": "sha256:f12c0f830d8b35f9df74b70af826ae52550bf522ceda4574f2041c317607412f",
+  "version": 1
+ },
+ "declared": "2026-10-06, before any human session, after the machine dry run",
+ "why": "The dry run showed honest-style angle holding crossing the frozen bar. This amendment adds what is needed to examine that in people, and how collection proceeds and stops. It changes nothing that decides a challenge.",
+ "unchanged": [
+  "participants: target 8, at least 4 to report, at most 12",
+  "seven 4-minute sessions, one per mode, in the pre-registered order",
+  "occluded_motion_replay/2, 4 challenges per session, the pre-registered schedule and the four sealed probe rooms",
+  "the review bar (8 moments and 1,200 ms per challenge), the aim cone, the 250 ms episode gap, placement and scoring",
+  "the metrics, primary outcome, analysis, exclusions, stop conditions and data policy of design.json"
+ ],
+ "staging": "Collect from 4 participants first. If none of them has an unexplained review-grade challenge finding, continue toward 8, at most 12. The study does not recruit beyond what it has collected without that check.",
+ "unexplained_review_grade": {
+  "definition": [
+   "the challenge was planned by the real planner and its realization reproduces",
+   "every counted moment had the server's own vision and audio verdict, and KnowledgeState was unknowable",
+   "no target the participant could see or hear explains the counted moments",
+   "the case's packet and graph verify",
+   "the challenge crosses the frozen bar: review-grade"
+  ],
+  "then": [
+   "stop collection at once; no further participant plays",
+   "preserve the session",
+   "replay it offline",
+   "verify its packet and graph",
+   "inspect its overlap episodes",
+   "classify the honest behaviour that produced it",
+   "change no threshold in the same study",
+   "propose, do not implement, the discrimination research phase (P14)"
+  ]
+ },
+ "practice": {
+  "when": "before each participant's first recorded session",
+  "length_ms": 90000,
+  "mode": "free",
+  "challenges": 0,
+  "data": "a separate data folder, never inside the study's, never analysed and never published",
+  "confirms": [
+   "mouse look (the mouse is captured)",
+   "W A S D movement",
+   "the arrow-key look fallback",
+   "the fire button",
+   "that the participant understands the controls"
+  ],
+  "min_client_fps": 30,
+  "fallback": "If mouse capture does not work, the participant plays with the arrow keys, which every study client already has.",
+  "below_min_fps": "Do not start the recorded sessions on that machine."
+ },
+ "questionnaire": {
+  "added": [
+   "Did the controls behave normally?"
+  ],
+  "comments": "Each answer may carry an optional short comment. Comments are kept only in the session's private folder and never enter the artifact, because free text could identify someone."
+ },
+ "metrics_added": {
+  "probe_distance_m": "server: from the participant's eye to the body's chest, each tick",
+  "probe_speed_mps": "server: the body's ground speed, each tick",
+  "drafted": "Two drafts were replaced after machine smoke runs, before any person played. The first compared per-tick motion at 5 deg/s: per-tick jitter hid the controlled follower's motion, and a still player's probe was still too, since the challenge replays the player's own motion. The second compared 250 ms motion as seen from the eye: a pre-aiming stand-in that strafed while holding fixed spots then looked like it followed the probe, because its own movement turned its aim and the probe's direction together.",
+  "aim_speed_dps": "server: how fast the point the aim passes at the body's distance moved, over the last 250 ms, as an angle at that distance",
+  "probe_speed_dps": "server: how fast the body moved, over the last 250 ms, as an angle at its distance",
+  "co_motion_deg": "server: the angle between those two movements, over the last 250 ms",
+  "overlap, split four ways": {
+   "both_still_ms": "the aim point and the body both moved slower than 2 deg/s",
+   "stationary_aim_moving_probe_ms": "the aim point moved slower than 2 deg/s while the body moved at 2 deg/s or more: holding a spot the body moved through",
+   "co_moving_ms": "both moved at 2 deg/s or more, the aim point within 45 degrees of the body's direction of motion: following",
+   "aim_moving_otherwise_ms": "the aim point moved at 2 deg/s or more in any other way"
+  },
+  "why": "In the world, not as seen from the eye: a player's own movement turns the aim and the body's direction together, which would look like following. Over 250 ms, the episode gap: per tick, a hand's jitter hides where the aim went. Under 2 deg/s the aim point moves less than 0.5 degrees in that window, a quarter of the cone's 2-degree margin.",
+  "frozen": {
+   "window_ms": 250,
+   "still_deg_per_s": 2.0,
+   "co_motion_deg": 45.0
+  },
+  "use": "analysis only: they never enter scoring"
+ },
+ "participant_results_added": "per participant: whether they ever had any overlap, 500 ms counted, 1,200 ms counted, and a review-grade challenge; their longest episode and their strongest challenge. Per session: any overlap, repeated overlap (a challenge with 2 or more episodes), review-grade.",
+ "regression_fixture": {
+  "session": "examples/human-pilot/dry-run/sessions/hp-8e9f0d72-angle_holding-1",
+  "what": "the machine stand-in that held the doorway's frame over a probe: review-grade under the current rule",
+  "rule": "Kept permanently, unchanged, as evidence of the current rule's weakness and as a false-positive control. Any future challenge detector must show this case is no longer review-grade, for the right reason."
+ },
+ "dry_run": {
+  "folder": "examples/human-pilot/dry-run",
+  "result_sha256": "sha256:3f24bcf2e5a015ee1b35f2a9d1768d1ba8be80355e191987426e68bfbd544020",
+  "digest": "sha256:3c564b13b5814f36fffa5ec2a703a8527b3dcc01c627ae86f85cde8c1a920ff6",
+  "made_with": {
+   "commit": "68a6fa3",
+   "code": {
+    "examples/pilot/godot/study.tscn": "sha256:a46eb764772c9e65cf7a1d2a86cf06afc5067bd5fb17d1292acbc193837c5dd7",
+    "examples/pilot/godot/study.gd": "sha256:162b9b8874c46fc0c172d8d40564d2daadef5bfb3cfcf6c508f863a11a135377",
+    "examples/pilot/godot/scripts/study_arena.gd": "sha256:3690e0e9b4efca5b1d833693bfc08aa8c9652cf2be3bbe576c769f7ea049ca9a",
+    "examples/pilot/godot/scripts/study_server.gd": "sha256:d8ca27bc7f483ab49a60ed2501116ff286b2b6f68e91c55ab5c2170e8af46b20",
+    "examples/pilot/godot/scripts/study_client.gd": "sha256:81d8fddafdf5a0958858f47cb52f32449e5ea7ef646e2d9ac4fdbb36fcbd347d",
+    "examples/pilot/godot/scripts/arena.gd": "sha256:560cccfcf300164bd18d15a9dfc250cf7a9030c63d0f12af5ade32be04751a13",
+    "examples/pilot/godot/scripts/recipe.gd": "sha256:1d77e38dd63624bd3a9950ff9db8542568457362e8cd1284a6a7944480ef24e0",
+    "examples/human-pilot/study.py": "sha256:543f54c00b640753e56db564816d9a8165da34fc4a203a3c7b9edeab5ab9279f"
+   }
+  },
+  "changed_by_this_amendment": [
+   "examples/pilot/godot/scripts/study_server.gd",
+   "examples/human-pilot/study.py"
+  ],
+  "rule": "Stays as committed: machine stand-ins, bound to the study code it was made with, never rewritten. The amendment changes only the two files listed, and neither change alters what decides a challenge."
+ },
+ "controls_check": "Before any participant, study.py controls-check drives the unchanged human client with injected keyboard and mouse events (consent key, mouse look, arrow keys, W, fire) and checks that the client looked and the server saw it move and fire. No person is involved and nothing is analysed.",
+ "session_records_added": "each session records the engine binary's SHA-256 beside the pinned release, and the study code's identity; the artifact lists the engines used and how many sessions ran on its own code",
+ "stop_added": "A stop for review-grade evidence on an honest session cannot be cleared: collection ends there, and continuing would be a new study version."
+}

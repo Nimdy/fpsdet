@@ -15,7 +15,8 @@ We are studying **honest** play. Nobody is being tested for cheating. We want to
 - **Nothing else is recorded.** No screen recording, no other windows, no files, no processes and no memory of your computer are read. The game is an ordinary program; it needs no special permissions and installs nothing.
 - **No accounts.** No commercial game, no anti-cheat, and no game or social account is involved.
 - **You are a random code.** You get an id like `hp-3f9a2c71`. We do not record your name, email, game accounts, device or network address.
-- **After each round** we ask four yes-or-no questions: did you see or hear anything you could not explain, did anything look odd, and did the game stutter.
+- **Before the first round,** a 90-second practice checks that the controls work. It is not part of the results.
+- **After each round** we ask five yes-or-no questions: did you see or hear anything you could not explain, did anything look odd, did the game stutter, and did the controls behave normally. You may add a short comment to any answer. Comments are never published, and they are deleted with your recordings.
 - **It is voluntary.** You can stop at any time, for any reason, without saying why. Ask, and your sessions are deleted.
 
 ## What happens to the data

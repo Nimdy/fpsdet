@@ -171,14 +171,37 @@ class DryRunTest(unittest.TestCase):
     """examples/human-pilot/dry-run: machine stand-ins that qualify the instruments before any person plays.
     Never people, never counted as human, and what they found is recorded, not hidden."""
 
-    def test_it_says_it_is_machines_and_was_made_by_this_code(self):
+    def test_it_says_it_is_machines_and_keeps_the_code_it_was_made_with(self):
+        """A historical record: bound to the study code at the commit that made it (amendment 1), never rewritten
+        to match later code."""
         found = dry_run()
         self.assertEqual((found["format"], found["kind"]), ("fpsdet.human-pilot/1", "machine_standin"))
         self.assertIn("Not people", found["statement"])
         self.assertEqual(found["questionnaire"], "not asked: machine stand-ins")
-        self.assertEqual(found["code"], harness().code_identity())
         self.assertEqual(found["design"]["sha256"], harness().pilot.sha256_file(STUDY / "design.json"))
         self.assertEqual(found["digest"], harness().digest(found))
+        record = amendment()["dry_run"]
+        self.assertEqual(harness().pilot.sha256_file(STUDY / "dry-run" / "result.json"), record["result_sha256"])
+        self.assertEqual((found["digest"], found["code"]), (record["digest"], record["made_with"]["code"]))
+        now = harness().code_identity()
+        self.assertEqual(set(now), set(found["code"]))
+        changed = sorted(path for path in now if now[path] != found["code"][path])
+        self.assertLessEqual(set(changed), set(record["changed_by_this_amendment"]), "only the files amendment 1 names may differ")
+
+    def test_its_code_is_the_commit_it_names_when_history_is_available(self):
+        import hashlib
+        import subprocess
+
+        from fpsdet.provenance import normalized_source
+
+        made = amendment()["dry_run"]["made_with"]
+        try:
+            subprocess.run(["git", "-C", str(ROOT), "cat-file", "-e", made["commit"]], check=True, capture_output=True)
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest("a shallow checkout: the commit is not here")
+        for path, expected in made["code"].items():
+            blob = subprocess.run(["git", "-C", str(ROOT), "show", f"{made['commit']}:{path}"], check=True, capture_output=True).stdout
+            self.assertEqual("sha256:" + hashlib.sha256(normalized_source(blob)).hexdigest(), expected, path)
 
     def test_every_runtime_check_held(self):
         runtime = dry_run()["runtime"]
@@ -228,6 +251,63 @@ class DryRunTest(unittest.TestCase):
             bm.human_addendum_from(dry_run(), "sha256:" + "0" * 64)
         self.assertFalse((ROOT / "benchmark" / "addenda" / "p13-consented-human-pilot.json").exists())
         self.assertFalse((STUDY / "result.json").exists(), "no human result exists until people have played")
+
+
+def amendment() -> dict:
+    return json.loads((STUDY / "amendment-1.json").read_text(encoding="utf-8"))
+
+
+class RegressionFixtureTest(unittest.TestCase):
+    """dry-run/sessions/hp-8e9f0d72-angle_holding-1: a machine stand-in holding the doorway's frame, still, over
+    a probe in the sealed room behind it. Under the current rule it is review-grade. It is kept permanently as
+    a false-positive control: a future challenge detector must change this test to show the case is no longer
+    review-grade, and why, never delete it."""
+
+    FOLDER = STUDY / "dry-run" / "sessions" / "hp-8e9f0d72-angle_holding-1"
+
+    def test_it_is_the_fixture_amendment_1_names(self):
+        self.assertEqual(amendment()["regression_fixture"]["session"], self.FOLDER.relative_to(ROOT).as_posix())
+        sample = next(row for row in dry_run()["samples"] if row["folder"] == self.FOLDER.relative_to(ROOT).as_posix())
+        self.assertEqual(harness().pilot.sha256_file(self.FOLDER / "events.ndjson"), sample["events"])
+        self.assertEqual(harness().pilot.sha256_file(self.FOLDER / "plan.json"), sample["plan"])
+
+    def test_it_replays_to_review_grade_under_the_current_rule(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as work:
+            cases = harness().score(self.FOLDER / "events.ndjson", self.FOLDER / "plan.json", Path(work))
+        case = cases["hp-8e9f0d72"]
+        self.assertEqual(case["problems"], [])
+        self.assertEqual((case["decision"], case["kinds"]), ("review", ["occluded_motion_replay"]))
+        followed = [row for row in case["challenges"] if row["status"] == "followed"]
+        self.assertEqual(len(followed), 1)
+        row = followed[0]
+        self.assertEqual((row["tracked_samples"], round(row["total_ms"])), (56, 5500))
+        self.assertEqual((row["verification"], row["verified_samples"]), ("per_sample", row["eligible_samples"]))
+
+    def test_no_visible_bot_explains_it_and_the_aim_never_turned(self):
+        worst = dry_run()["worst_case"]
+        self.assertEqual((worst["participant"], worst["mode"], worst["room"]), ("hp-8e9f0d72", "angle_holding", "door_edge"))
+        self.assertEqual(worst["explained_ms"], 0.0)
+        self.assertEqual(worst["turn_rate_dps"], {"median": 0.0, "p95": 0.0})
+        self.assertEqual(worst["episodes"], 3)
+
+
+class AmendmentTest(unittest.TestCase):
+    """Amendment 1, declared after the machine dry run and before any human session: it adds instruments and
+    collection rules and changes nothing that decides a challenge."""
+
+    def test_it_binds_the_design_and_keeps_every_frozen_value(self):
+        found = amendment()
+        self.assertEqual(found["format"], "fpsdet.human-pilot-amendment/1")
+        self.assertEqual(found["amends"]["sha256"], harness().pilot.sha256_file(STUDY / "design.json"))
+        self.assertIn("before any human session", found["declared"])
+        self.assertFalse((STUDY / "result.json").exists())
+        self.assertEqual(design()["frozen"]["episode_gap_ms"], 250)
+        self.assertEqual((design()["frozen"]["hidden_track_min_samples"], design()["frozen"]["hidden_track_min_ms"]), (8, 1200))
+        self.assertEqual(found["metrics_added"]["frozen"], {"window_ms": 250, "still_deg_per_s": 2.0, "co_motion_deg": 45.0})
+        self.assertEqual(found["metrics_added"]["frozen"]["window_ms"], design()["frozen"]["episode_gap_ms"])
+        self.assertIn("never enter scoring", found["metrics_added"]["use"])
 
 
 if __name__ == "__main__":
