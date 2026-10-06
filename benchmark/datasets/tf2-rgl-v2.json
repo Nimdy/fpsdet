@@ -27,7 +27,39 @@
   "identity": {
    "recipe": "fpsdet.tf2-sources/1",
    "file": "sources.json",
-   "what": "the frozen bans, the labelled accounts' and the extra players' match selections, and every selected log, as digests and counts; tf2bench.py sources writes it, and it names nobody"
+   "what": "the frozen bans, the labelled accounts' and the extra players' match selections, and every selected log, as digests and counts; tf2bench.py sources writes it, and it names nobody",
+   "parts": {
+    "bans": {
+     "category": "source changed",
+     "upstream": true,
+     "detail": "RGL's bans dated on or before the freeze differ: a ban was added, edited or removed upstream. They feed every label, and who counts as never banned."
+    },
+    "logs": {
+     "category": "source changed",
+     "upstream": true,
+     "detail": "the selected logs' bytes differ: a log was removed or re-uploaded on logs.tf, or other logs were selected. They feed every event."
+    },
+    "cheaters": {
+     "category": "selection changed",
+     "upstream": true,
+     "detail": "the same rules chose other labelled accounts or matches: a logs.tf match list changed upstream, or the bans did. They feed the positive group."
+    },
+    "honest": {
+     "category": "selection changed",
+     "upstream": true,
+     "detail": "the same public order chose other extra never-banned players or matches: a logs.tf match list changed upstream, or the labelled accounts' matches did. They feed the comparison group and every baseline."
+    },
+    "freeze": {
+     "category": "selection changed",
+     "upstream": false,
+     "detail": "the source file was written with another freeze date"
+    },
+    "format": {
+     "category": "code changed",
+     "upstream": false,
+     "detail": "the source file was written by another recipe"
+    }
+   }
   }
  },
  "license": {
@@ -194,7 +226,197 @@
   "path": "examples/tf2/tf2.json",
   "digest": "sha256:2f4232e7c3338fb7500e4a9b18173baf365022c9be2bdaf0ee17bf8126a4dd5e"
  },
- "inputs": null,
+ "inputs": {
+  "source": {
+   "format": "fpsdet.tf2-sources/1",
+   "freeze": "2026-10-03",
+   "bans": {
+    "count": 3457,
+    "labels": {
+     "cheater": 314,
+     "other ban": 2701,
+     "vac": 442
+    },
+    "digest": "sha256:dc91224eac69cc0aa15e313bb0d2e0b3326643767e643b9458e4e0c155a58892"
+   },
+   "cheaters": {
+    "accounts": 228,
+    "digest": "sha256:d39ae3c81bd0f919c7287220dff5d17752f7842cde99855eacc8be8c1d7c0d83"
+   },
+   "honest": {
+    "accounts": 300,
+    "digest": "sha256:df801127dd2857743184d4e684a3e9994799b07eb84eecc6fc4311dbd6a41e41"
+   },
+   "logs": {
+    "count": 10149,
+    "digest": "sha256:64617f68810cf066ccce215c9e11d10470fcce4c41f24c257b5d3c47b7c88568"
+   }
+  },
+  "draws": {
+   "0": {
+    "events": {
+     "sha256": "sha256:81926ccd8b7ba1e59e875da33194d52fb69aedb8556f3e92f4aadb805fe4901d"
+    },
+    "baseline": {
+     "sha256": "sha256:95def89c21e1d9744dc3925516ee3a0e0178c502dfa807b44eb69734104efab8"
+    },
+    "labels": {
+     "sha256": "sha256:88020af4339e72ec8f16b318a328a4fe639992d02d2c9e7d3d3a8c5bfc67506f",
+     "digest": "sha256:a8180ab52620ea1cd1ef3204c4bb33b7532896a9a36a962bdbe10828fd244094",
+     "count": 3604
+    },
+    "cohort": {
+     "digest": "sha256:c2a7c0549aaa5a6bdea4eca26939e4fd114127a597b7182b4c10f81b1302f147",
+     "players": 1562
+    },
+    "key": null
+   },
+   "1": {
+    "events": {
+     "sha256": "sha256:c9d66bb6fbf32114922318d5d719045c4e6d48b8a9c859267fc27b0d02f60354"
+    },
+    "baseline": {
+     "sha256": "sha256:0a08a8b1c315cc36890cf6badf48042525f6e921cb1b64366962787226781beb"
+    },
+    "labels": {
+     "sha256": "sha256:2402cee50c1cb4e9611198f0406b0e15432e29577478df32a8bc3fe9d8b3dc28",
+     "digest": "sha256:b15d8c409c992da5ef56e1375392ac2667486003e8a6d2a26ffb1e786901fe99",
+     "count": 3602
+    },
+    "cohort": {
+     "digest": "sha256:ce8efb689d699fc252254a384b8c25bcdc43deab976d08406fb87d91bbe3bab4",
+     "players": 1573
+    },
+    "key": null
+   },
+   "2": {
+    "events": {
+     "sha256": "sha256:fc863b569de35c9c226a74d3c26fb9f687c081a139c85513f6ce3de1bddbc6f2"
+    },
+    "baseline": {
+     "sha256": "sha256:e6cf3164e7d316f62f89a568600830d75a0cd4ea4dbfd3b611cf94144db30e4f"
+    },
+    "labels": {
+     "sha256": "sha256:f5169514b398b306d86bccbd37803342af7836da6149acb05da19ada0fbc17b7",
+     "digest": "sha256:163aaa69b78c2a8ea2c9cc94939e433d2dd3e96763726cf7605a90504d4d38f2",
+     "count": 3577
+    },
+    "cohort": {
+     "digest": "sha256:6618eb1b6e51b57e365411161620e2ecac22372686210218053e6812e269d1af",
+     "players": 1577
+    },
+    "key": null
+   },
+   "3": {
+    "events": {
+     "sha256": "sha256:79b01251f8a26d89a3fc69e15c82661705e6cc41785ba77af250d3d9e5d766fd"
+    },
+    "baseline": {
+     "sha256": "sha256:4dee04c03fcce5ed5fe611eef442272f376b31a97e074c9e13ee2efdee6db09e"
+    },
+    "labels": {
+     "sha256": "sha256:88265dbd3a1bf3f7657cb3e654d02e4297c556cc9b2dec1b7c0dcf0a9a545345",
+     "digest": "sha256:974fd13d04946cead08d94a363cfb76addb09185d76a6f364d25a8db174cbb6a",
+     "count": 3583
+    },
+    "cohort": {
+     "digest": "sha256:819a59230e78bf85d99fea34d0eacd40a0b15f4d57d5c30daf88a1c972f0b3c5",
+     "players": 1579
+    },
+    "key": null
+   },
+   "4": {
+    "events": {
+     "sha256": "sha256:303285b7ed0abf3a6fc25adfc9639b4dddd3e3f925db2ccb861ec3ad4e80c248"
+    },
+    "baseline": {
+     "sha256": "sha256:dd914f33a3d25a5108d85be3082c4b6099a2b91d8791b184af4964ecede80b76"
+    },
+    "labels": {
+     "sha256": "sha256:6e926f1023ab6d463a356c923859b504c86e418c5cf26ab8f1d6d3f0ef041ee3",
+     "digest": "sha256:a6a7dbb253722f765e19c29ba8223b64292b60da42e399e69b12e2032c0acd4a",
+     "count": 3622
+    },
+    "cohort": {
+     "digest": "sha256:cbd86abae25879e4634a098ffcf520116430bf6d31bcd578a68812bd80393a9e",
+     "players": 1566
+    },
+    "key": null
+   },
+   "5": {
+    "events": {
+     "sha256": "sha256:8023b2bd3c9f1926a2291b6c3c7082496f2dec940bcbc5317dee1f28f1def28f"
+    },
+    "baseline": {
+     "sha256": "sha256:fbba72842d4b04dc02f861465fddcec448b48e61a0072fb0579cf30078deeadf"
+    },
+    "labels": {
+     "sha256": "sha256:2a29a60f67f2a803050cdfb757be0d1953f5f127d553c41a072efa2cc47785f5",
+     "digest": "sha256:802fbbc1b1b4f3077cc462855c8ccd9e6d88a7e985e3aaecf71ab923c8318631",
+     "count": 3631
+    },
+    "cohort": {
+     "digest": "sha256:76f377da1be88bbd444f91f095ba875af202dd563269dcb39cbe49d38bfebf8b",
+     "players": 1554
+    },
+    "key": null
+   },
+   "6": {
+    "events": {
+     "sha256": "sha256:0209952bdbbc3bd9ae3d13fc4a2f6a97a09189f722a23c0c983b55c91f8e21c6"
+    },
+    "baseline": {
+     "sha256": "sha256:ff9faf0b782cbc3bb848bef0fc7b066412aa17473a7063d86c3b2b964de201f9"
+    },
+    "labels": {
+     "sha256": "sha256:84e3190d954a870fcb55a61729d322210c87746e2aa12c9e7c4063e0b8a6e7d3",
+     "digest": "sha256:4a7eac11986c981a157674830ed0312cad09b8fccbf9a5763ded0e7e5671549c",
+     "count": 3591
+    },
+    "cohort": {
+     "digest": "sha256:724bb0e1fcbbf09514230893231d09abcfdb8635be89ff0b0341b0b6fd9cea63",
+     "players": 1578
+    },
+    "key": null
+   },
+   "7": {
+    "events": {
+     "sha256": "sha256:fc6a678a4d5b5ea98d261a210db02d20a3d3f90332496c7b3f6c641cfa66302c"
+    },
+    "baseline": {
+     "sha256": "sha256:e7ceff761d1ce1dbafe9d46f27b744366b841811c199d8340cafabff90bdd5b7"
+    },
+    "labels": {
+     "sha256": "sha256:cefb94f6bccd5427fec5365482b7fae4751c6b6bc09b313eb5dccd83f84ca0f2",
+     "digest": "sha256:90a3fef2350adf4d2e1ee2b860688e7d23c61c27294abf7949af308b57d5d673",
+     "count": 3576
+    },
+    "cohort": {
+     "digest": "sha256:03f59b641c86fee4667fc1f9a5d7502e2883aef3709e8dda29787b0f6e7a1caa",
+     "players": 1602
+    },
+    "key": null
+   },
+   "8": {
+    "events": {
+     "sha256": "sha256:a6eb0998b9cf912127cba70d74a1149b3d817012893723b8ac69aec323fb3b9d"
+    },
+    "baseline": {
+     "sha256": "sha256:88ef8ff945805128074d375f46fbfa66c808ced128c311f50bb28b08f701dafd"
+    },
+    "labels": {
+     "sha256": "sha256:a465a9a57e36ad87fe8553f9cd305e0ba3714aab23f1e8008fbb7e3a959074cb",
+     "digest": "sha256:821e97d814069c78a6059f924c9589ab54da759f927d6c1dd32fe8ccec346cec",
+     "count": 3551
+    },
+    "cohort": {
+     "digest": "sha256:35f10624068f8dbd3c625fb231033a7dc1a351f57f7bd33dab043663f330d86a",
+     "players": 1608
+    },
+    "key": null
+   }
+  }
+ },
  "split": {
   "recipe": "fpsdet.calibration-split/1",
   "unit": "player",
@@ -213,5 +435,10 @@
   "draw": "benchmark/results/tf2-rgl-v2/draw-{draw}",
   "sensitivity": "benchmark/sensitivity/tf2-rgl-v2.json"
  },
- "expected_counts": null
+ "expected_counts": {
+  "bans": 3457,
+  "labelled_accounts": 228,
+  "extra_never_banned": 300,
+  "selected_logs": 10149
+ }
 }
