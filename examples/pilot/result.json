@@ -1,0 +1,1513 @@
+{
+ "format": "fpsdet.pilot/1",
+ "pilot": "godot-occluded-motion-replay",
+ "pilot_version": 1,
+ "class": "live_controlled_pilot",
+ "engine": {
+  "name": "Godot",
+  "version": "4.7.2.stable.official.ed1daf0bf",
+  "sha512": "9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65"
+ },
+ "code": {
+  "examples/pilot/godot/project.godot": "sha256:eb0d4d1a433acd397324dbf5bd162f69a216913a1e753e1018ef0690e56c0727",
+  "examples/pilot/godot/main.tscn": "sha256:182b3989c0f1b29435d36fa0ac4bb525b93596d2f092514c2f361bf4a7790299",
+  "examples/pilot/godot/main.gd": "sha256:9b58e95581ec0f5d04aef64fa53a0a4d4eb5b74c8faeace49364e2f426e57317",
+  "examples/pilot/godot/scripts/arena.gd": "sha256:560cccfcf300164bd18d15a9dfc250cf7a9030c63d0f12af5ade32be04751a13",
+  "examples/pilot/godot/scripts/recipe.gd": "sha256:1d77e38dd63624bd3a9950ff9db8542568457362e8cd1284a6a7944480ef24e0",
+  "examples/pilot/godot/scripts/server.gd": "sha256:ae0ff02eece3fbc2eecd2e20bddbc72d1d102032365a3f03f4ec5646216f5ec5",
+  "examples/pilot/godot/scripts/client.gd": "sha256:c735732db846afe06843245810ffd6ab590ca7510584bbd5bcc655f1a2dbf825",
+  "examples/pilot/pilot.py": "sha256:8c272815b51e967428620255a0ed59fe5dccd5735322a64fd132b344e69667b0"
+ },
+ "qualification": "sha256:69e3ee1a62b2fa61279c6ab11a2ff5cc6a858911720b0424c3d228c8064cac31",
+ "profile": "sha256:8df38b7990e8953eafae0ebdc036c040e6eed3c2a9bd47698ff21e066fbecf90",
+ "scenarios": [
+  {
+   "id": "honest",
+   "expected": {
+    "status": "not_followed",
+    "evidence": false
+   },
+   "observed": {
+    "status": "not_followed",
+    "cause": null,
+    "tracked_samples": 2,
+    "verified_samples": 116,
+    "eligible_samples": 116,
+    "total_ms": 116.667,
+    "not_counted": {
+     "seen": 5
+    },
+    "evidence": false,
+    "decision": "insufficient_data",
+    "diagnostic": false
+   },
+   "as_expected": true,
+   "problems": [],
+   "plan": {
+    "file": "examples/pilot/captured/honest/plan.json",
+    "sha256": "sha256:d5b25984b760f8d84289a4488e25657932a68e8f6bc9885f41dbe27e9bb1d51b",
+    "challenges": [
+     {
+      "challenge_id": "ch-3a1be8f106edade7aed09687",
+      "version": 2,
+      "plan": "sha256:1d30f44143128959bbe4cb0f762778975d91dec2247d4ce2a95e16b2401f1544",
+      "commitment": "sha256:de55609f585b353bb0a7c8c303786e74de1320e84c36fa2aee505e6c24af1277",
+      "window": [
+       13680,
+       24898
+      ]
+     }
+    ]
+   },
+   "events": {
+    "file": "examples/pilot/captured/honest/events.ndjson",
+    "sha256": "sha256:e8854b268cdf253b16511416fa1863e5d0a47826cf57e51bb1a8e1ac5db4b7ce",
+    "lines": 793
+   },
+   "cases": {
+    "pilot-enemy": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:1753b37ee0a127d5116fd6693e2b63f7dffe37a1de146b58ce6f6a8716a99852",
+     "packet": "sha256:d60be2cdc653728c639ec3bf64c4f7f1ea48e2e24f74de1c781f075cd8c30638",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:6f60059b948852f6cb399e2c5a788cbda31503342b45f3e3124ade614168ba4e",
+      "events": 360
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [],
+     "problems": []
+    },
+    "pilot-subject": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:dbf18b57d10506c71cd13e5d5436bc7d474025b262c10a313cee84123d720d41",
+     "packet": "sha256:9b150b00db3f931d21932a6496936a863a9a91e20fd8ef9d49e85793aadd2d76",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:cdd0c2505683a70902d33fe15b01a36e460e03d889b1a050e0de132a80148456",
+      "events": 433
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [
+      {
+       "challenge_id": "ch-3a1be8f106edade7aed09687",
+       "plan": "sha256:1d30f44143128959bbe4cb0f762778975d91dec2247d4ce2a95e16b2401f1544",
+       "match_id": "pilot-honest",
+       "status": "not_followed",
+       "eligible_samples": 116,
+       "tracked_samples": 2,
+       "total_ms": 116.667,
+       "not_counted": {
+        "seen": 5
+       },
+       "verification": "per_sample",
+       "verified_samples": 116
+      }
+     ],
+     "problems": []
+    }
+   },
+   "live_vs_offline": "identical",
+   "realization": {
+    "status": "reproduced",
+    "problems": []
+   },
+   "without_secret": "secret_unavailable",
+   "secret_leaks": [],
+   "client": {
+    "entities": {
+     "enemy": "e949",
+     "probe": "e166",
+     "subject": "e188"
+    },
+    "subject": {
+     "probe_updates": 214,
+     "probe_bytes": 12840,
+     "enemy_or_subject_updates": 706,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    },
+    "enemy": {
+     "probe_updates": 0,
+     "probe_bytes": 0,
+     "enemy_or_subject_updates": 718,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    }
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "challenge_update": "every server tick (60 Hz) while a window is open",
+    "knowledge_queries": "every server tick (60 Hz) while a window is open",
+    "movement_event_spacing_ms": [
+     100
+    ],
+    "t_ms_on_tick_grid": true,
+    "parse_errors": 0,
+    "track_ms_resolution_ms": 16.667,
+    "track_ms_off_grid_max_ms": 0.000333,
+    "track_ms_emitted": 300.001,
+    "track_ms_server": 300.0,
+    "tick_us_mean": 377.9,
+    "tick_us_max": 2041,
+    "challenge_us_per_probe_tick": 333.9,
+    "knowledge_us_per_probe_tick": 273.1,
+    "telemetry_us_per_tick": 21.7,
+    "rays_per_probe_tick": 161.1,
+    "event_bytes_per_s": 6722.1,
+    "snapshot_bytes_per_s": {
+     "pilot-enemy": 2800.0,
+     "pilot-subject": 3173.3
+    },
+    "server_memory_static_peak_bytes": 32400476,
+    "verdicts": {
+     "audio": {
+      "absent": 673
+     },
+     "vision": {
+      "absent": 673
+     }
+    },
+    "probe_ticks": 673
+   }
+  },
+  {
+   "id": "accidental_crossing",
+   "expected": {
+    "status": "not_followed",
+    "evidence": false,
+    "tracked_below_bar": true
+   },
+   "observed": {
+    "status": "not_followed",
+    "cause": null,
+    "tracked_samples": 5,
+    "verified_samples": 98,
+    "eligible_samples": 98,
+    "total_ms": 100.001,
+    "not_counted": {
+     "seen": 5
+    },
+    "evidence": false,
+    "decision": "insufficient_data",
+    "diagnostic": false
+   },
+   "as_expected": true,
+   "problems": [],
+   "plan": {
+    "file": "examples/pilot/captured/accidental_crossing/plan.json",
+    "sha256": "sha256:62a997f3d181faa1855ae940d54e307957b93d7f1902afb9a274ab7421b61c33",
+    "challenges": [
+     {
+      "challenge_id": "ch-1951296ba8458580797b2a04",
+      "version": 2,
+      "plan": "sha256:e8a57dcc4576251fbb3c2515b36cfb59417b3062b07013b8b560b2f9b8eec2af",
+      "commitment": "sha256:e571d186b3fa946dd930fff56748a0cae7387999a5da6e95f1e04a0c25119ceb",
+      "window": [
+       16066,
+       24361
+      ]
+     }
+    ]
+   },
+   "events": {
+    "file": "examples/pilot/captured/accidental_crossing/events.ndjson",
+    "sha256": "sha256:56bf6d7a89662c49775fd7bd2686fd6de2c448284c249be1983cf8e0ade2d012",
+    "lines": 772
+   },
+   "cases": {
+    "pilot-enemy": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:1753b37ee0a127d5116fd6693e2b63f7dffe37a1de146b58ce6f6a8716a99852",
+     "packet": "sha256:34d25adb2c8fc720e709bea27c9b4b3806ebf438b8e5db8e0c0053a7c215c71e",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:c99ba7be22f9cb68c9c68e35b6ac18aa3b919cc4ec3c5e66ddb489eaad2fd7ef",
+      "events": 360
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [],
+     "problems": []
+    },
+    "pilot-subject": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:dbf18b57d10506c71cd13e5d5436bc7d474025b262c10a313cee84123d720d41",
+     "packet": "sha256:dc7b353574a2edb11f0b5d103b49048a9a1d7f02847ef2e23697f1370e17cdeb",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:0adf45f17f8c6de30c59fa03c34caba1e67e1200973bf293ed308ead1c753f8f",
+      "events": 412
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [
+      {
+       "challenge_id": "ch-1951296ba8458580797b2a04",
+       "plan": "sha256:e8a57dcc4576251fbb3c2515b36cfb59417b3062b07013b8b560b2f9b8eec2af",
+       "match_id": "pilot-accidental_crossing",
+       "status": "not_followed",
+       "eligible_samples": 98,
+       "tracked_samples": 5,
+       "total_ms": 100.001,
+       "not_counted": {
+        "seen": 5
+       },
+       "verification": "per_sample",
+       "verified_samples": 98
+      }
+     ],
+     "problems": []
+    }
+   },
+   "live_vs_offline": "identical",
+   "realization": {
+    "status": "reproduced",
+    "problems": []
+   },
+   "without_secret": "secret_unavailable",
+   "secret_leaks": [],
+   "client": {
+    "entities": {
+     "enemy": "e437",
+     "probe": "e429",
+     "subject": "e145"
+    },
+    "subject": {
+     "probe_updates": 163,
+     "probe_bytes": 9780,
+     "enemy_or_subject_updates": 717,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    },
+    "enemy": {
+     "probe_updates": 0,
+     "probe_bytes": 0,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    }
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "challenge_update": "every server tick (60 Hz) while a window is open",
+    "knowledge_queries": "every server tick (60 Hz) while a window is open",
+    "movement_event_spacing_ms": [
+     100
+    ],
+    "t_ms_on_tick_grid": true,
+    "parse_errors": 0,
+    "track_ms_resolution_ms": 16.667,
+    "track_ms_off_grid_max_ms": 0.000333,
+    "track_ms_emitted": 483.334,
+    "track_ms_server": 483.333,
+    "tick_us_mean": 280.9,
+    "tick_us_max": 951,
+    "challenge_us_per_probe_tick": 197.4,
+    "knowledge_us_per_probe_tick": 264.7,
+    "telemetry_us_per_tick": 20.1,
+    "rays_per_probe_tick": 161.3,
+    "event_bytes_per_s": 6553.4,
+    "snapshot_bytes_per_s": {
+     "pilot-enemy": 2800.0,
+     "pilot-subject": 3076.7
+    },
+    "server_memory_static_peak_bytes": 32400944,
+    "verdicts": {
+     "audio": {
+      "absent": 498
+     },
+     "vision": {
+      "absent": 498
+     }
+    },
+    "probe_ticks": 498
+   }
+  },
+  {
+   "id": "exposed_vision",
+   "expected": {
+    "status": "abstained",
+    "cause": "seen",
+    "evidence": false
+   },
+   "observed": {
+    "status": "abstained",
+    "cause": "seen",
+    "tracked_samples": 0,
+    "verified_samples": 0,
+    "eligible_samples": 0,
+    "total_ms": 0,
+    "not_counted": {
+     "seen": 85
+    },
+    "evidence": false,
+    "decision": "insufficient_data",
+    "diagnostic": true
+   },
+   "as_expected": true,
+   "problems": [],
+   "plan": {
+    "file": "examples/pilot/captured/exposed_vision/plan.json",
+    "sha256": "sha256:b50d85197d687c99cf104c85693f77cc38df83bda93c1e0dcdc2991a640e8bfe",
+    "challenges": [
+     {
+      "challenge_id": "ch-95747ad7a261768af1a5755b",
+      "version": 2,
+      "plan": "sha256:635def6e45fb8f06e36352079de15cc67a58cdaf3f3b577a68f9d106f606a7cb",
+      "commitment": "sha256:03923b9ad619a4a46c822cf06a545b0de54c6a16da7f9ea4e4be8ba610088402",
+      "window": [
+       20642,
+       29131
+      ]
+     }
+    ]
+   },
+   "events": {
+    "file": "examples/pilot/captured/exposed_vision/events.ndjson",
+    "sha256": "sha256:0b93adf60ba12fd34d6fdd07ee84ad0bd47b85e1fa862a0e24d06dd093f41a73",
+    "lines": 774
+   },
+   "cases": {
+    "pilot-enemy": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:1753b37ee0a127d5116fd6693e2b63f7dffe37a1de146b58ce6f6a8716a99852",
+     "packet": "sha256:0351e5b13e7a8c81c3faddebc9a98e2be5a77ff03641dee37b5e914d99ae5d30",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:0c01782bceb6e8165d16082a431151011fff70170bc843caee631c2ce0693161",
+      "events": 360
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [],
+     "problems": []
+    },
+    "pilot-subject": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:dbf18b57d10506c71cd13e5d5436bc7d474025b262c10a313cee84123d720d41",
+     "packet": "sha256:876bc1fb054f34d06915783d5f8e76e7c2c093ec222aff93f004725cfaacea6b",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:84d3a4b1ed6fbcb0ab036954ab6581cdb2abb689a7206073f5863e6586f321d1",
+      "events": 414
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [
+      {
+       "challenge_id": "ch-95747ad7a261768af1a5755b",
+       "plan": "sha256:635def6e45fb8f06e36352079de15cc67a58cdaf3f3b577a68f9d106f606a7cb",
+       "match_id": "pilot-exposed_vision",
+       "status": "abstained",
+       "eligible_samples": 0,
+       "tracked_samples": 0,
+       "total_ms": 0,
+       "not_counted": {
+        "seen": 85
+       },
+       "cause": "seen",
+       "verification": "per_sample",
+       "verified_samples": 0
+      }
+     ],
+     "problems": []
+    }
+   },
+   "live_vs_offline": "identical",
+   "realization": {
+    "status": "reproduced",
+    "problems": []
+   },
+   "without_secret": "secret_unavailable",
+   "secret_leaks": [],
+   "client": {
+    "entities": {
+     "enemy": "e116",
+     "probe": "e377",
+     "subject": "e286"
+    },
+    "subject": {
+     "probe_updates": 170,
+     "probe_bytes": 10200,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2,
+     "pixel_checks": 18,
+     "probe_checks_drawn": 4,
+     "probe_pixels_max": 2162,
+     "probe_checks_with_pixels": 4,
+     "enemy_checks_with_pixels": 17,
+     "unchanged_frame_pixels_max": 0,
+     "screenshots": [
+      "view-000050.png",
+      "view-002050.png",
+      "view-004050.png",
+      "view-006050.png",
+      "view-008050.png",
+      "view-010050.png",
+      "view-012050.png",
+      "view-014050.png",
+      "view-016100.png",
+      "view-018100.png",
+      "view-020100.png",
+      "view-022100.png",
+      "view-024100.png",
+      "view-026100.png",
+      "view-028100.png",
+      "view-030100.png",
+      "view-032100.png",
+      "view-034100.png"
+     ],
+     "fps_median": 155.0
+    },
+    "enemy": {
+     "probe_updates": 0,
+     "probe_bytes": 0,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    }
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "challenge_update": "every server tick (60 Hz) while a window is open",
+    "knowledge_queries": "every server tick (60 Hz) while a window is open",
+    "movement_event_spacing_ms": [
+     100
+    ],
+    "t_ms_on_tick_grid": true,
+    "parse_errors": 0,
+    "track_ms_resolution_ms": 16.667,
+    "track_ms_off_grid_max_ms": 0.000333,
+    "track_ms_emitted": 8116.668,
+    "track_ms_server": 8133.333,
+    "tick_us_mean": 287.1,
+    "tick_us_max": 1146,
+    "challenge_us_per_probe_tick": 311.4,
+    "knowledge_us_per_probe_tick": 77.1,
+    "telemetry_us_per_tick": 23.8,
+    "rays_per_probe_tick": 2.3,
+    "event_bytes_per_s": 6434.6,
+    "snapshot_bytes_per_s": {
+     "pilot-enemy": 2833.7,
+     "pilot-subject": 3117.0
+    },
+    "server_memory_static_peak_bytes": 32400764,
+    "verdicts": {
+     "audio": {
+      "absent": 509
+     },
+     "vision": {
+      "known": 509
+     }
+    },
+    "probe_ticks": 509
+   }
+  },
+  {
+   "id": "exposed_audio",
+   "expected": {
+    "status": "abstained",
+    "cause": "heard",
+    "evidence": false
+   },
+   "observed": {
+    "status": "abstained",
+    "cause": "heard",
+    "tracked_samples": 2,
+    "verified_samples": 3,
+    "eligible_samples": 3,
+    "total_ms": 133.0,
+    "not_counted": {
+     "heard": 94
+    },
+    "evidence": false,
+    "decision": "insufficient_data",
+    "diagnostic": true
+   },
+   "as_expected": true,
+   "problems": [],
+   "plan": {
+    "file": "examples/pilot/captured/exposed_audio/plan.json",
+    "sha256": "sha256:7d1faf1a3ee2ef7aa42c0d520ba7e2f47a14dbac99376c745550bed618faa82f",
+    "challenges": [
+     {
+      "challenge_id": "ch-3a028944f4f66b6f6b72d88f",
+      "version": 2,
+      "plan": "sha256:a0184c86a531a0432b8895d1a8d256858d743a81c17629360d9ec43e43d0a1fc",
+      "commitment": "sha256:62df9c41f138316605615b1071122e8e589fc03133dd52f621f301c1a14219ab",
+      "window": [
+       10565,
+       20127
+      ]
+     }
+    ]
+   },
+   "events": {
+    "file": "examples/pilot/captured/exposed_audio/events.ndjson",
+    "sha256": "sha256:171d6a7a72833f667cff5cbf2328a1add4e0c81cb8c804aec45cc008a0346dfc",
+    "lines": 770
+   },
+   "cases": {
+    "pilot-enemy": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:1753b37ee0a127d5116fd6693e2b63f7dffe37a1de146b58ce6f6a8716a99852",
+     "packet": "sha256:ed03524b5a7308cd2c18812b8eb40b94462b71c13a2063e014b509c689cc745f",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:b8c16201ba3d40e55bd42d6e51d28457550d76e4ae61a97540e018bb701567c1",
+      "events": 360
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [],
+     "problems": []
+    },
+    "pilot-subject": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:dbf18b57d10506c71cd13e5d5436bc7d474025b262c10a313cee84123d720d41",
+     "packet": "sha256:3dfe608a00941df97b648401f40b7d13e7e7fd039c71088f1a1dca689c8a941f",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:8bd41b509488fc39ea6f0887bfbdd5176af45cb9058fc6a547e40377cdb7babb",
+      "events": 410
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [
+      {
+       "challenge_id": "ch-3a028944f4f66b6f6b72d88f",
+       "plan": "sha256:a0184c86a531a0432b8895d1a8d256858d743a81c17629360d9ec43e43d0a1fc",
+       "match_id": "pilot-exposed_audio",
+       "status": "abstained",
+       "eligible_samples": 3,
+       "tracked_samples": 2,
+       "total_ms": 133.0,
+       "not_counted": {
+        "heard": 94
+       },
+       "cause": "heard",
+       "verification": "per_sample",
+       "verified_samples": 3
+      }
+     ],
+     "problems": []
+    }
+   },
+   "live_vs_offline": "identical",
+   "realization": {
+    "status": "reproduced",
+    "problems": []
+   },
+   "without_secret": "secret_unavailable",
+   "secret_leaks": [],
+   "client": {
+    "entities": {
+     "enemy": "e788",
+     "probe": "e157",
+     "subject": "e355"
+    },
+    "subject": {
+     "probe_updates": 191,
+     "probe_bytes": 11460,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 24,
+     "scoreboard_rows": 2
+    },
+    "enemy": {
+     "probe_updates": 0,
+     "probe_bytes": 0,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 24,
+     "scoreboard_rows": 2
+    }
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "challenge_update": "every server tick (60 Hz) while a window is open",
+    "knowledge_queries": "every server tick (60 Hz) while a window is open",
+    "movement_event_spacing_ms": [
+     100
+    ],
+    "t_ms_on_tick_grid": true,
+    "parse_errors": 0,
+    "track_ms_resolution_ms": 16.667,
+    "track_ms_off_grid_max_ms": 0.000333,
+    "track_ms_emitted": 9200.0,
+    "track_ms_server": 9216.667,
+    "tick_us_mean": 307.4,
+    "tick_us_max": 1648,
+    "challenge_us_per_probe_tick": 160.8,
+    "knowledge_us_per_probe_tick": 269.9,
+    "telemetry_us_per_tick": 22.3,
+    "rays_per_probe_tick": 161.1,
+    "event_bytes_per_s": 6417.4,
+    "snapshot_bytes_per_s": {
+     "pilot-enemy": 2830.0,
+     "pilot-subject": 3148.3
+    },
+    "server_memory_static_peak_bytes": 32400728,
+    "verdicts": {
+     "audio": {
+      "absent": 14,
+      "known": 560
+     },
+     "vision": {
+      "absent": 574
+     }
+    },
+    "probe_ticks": 574
+   }
+  },
+  {
+   "id": "missing_audio_channel",
+   "expected": {
+    "status": "abstained",
+    "cause": "unchecked",
+    "evidence": false
+   },
+   "observed": {
+    "status": "abstained",
+    "cause": "unchecked",
+    "tracked_samples": 0,
+    "verified_samples": 0,
+    "eligible_samples": 88,
+    "total_ms": 0,
+    "not_counted": {
+     "unchecked": 88
+    },
+    "evidence": false,
+    "decision": "insufficient_data",
+    "diagnostic": true
+   },
+   "as_expected": true,
+   "problems": [],
+   "plan": {
+    "file": "examples/pilot/captured/missing_audio_channel/plan.json",
+    "sha256": "sha256:cda7e6d9852df9098072c4f0d384e76a3bbefb8fe14eba7e8b0d29078bd90879",
+    "challenges": [
+     {
+      "challenge_id": "ch-98a8949ec463676f990f0b25",
+      "version": 2,
+      "plan": "sha256:c2b6fceaaa072cb1505ab6d9427e2bf7d6f44aa1f770b67d589b41279a7abfc0",
+      "commitment": "sha256:e5871ec01b8502bb49d73445818522134dd2b8cc1dfeae93e4b6b23620ff32b7",
+      "window": [
+       20443,
+       29249
+      ]
+     }
+    ]
+   },
+   "events": {
+    "file": "examples/pilot/captured/missing_audio_channel/events.ndjson",
+    "sha256": "sha256:0326cc55adb059c87ebf636a57414006154a3ce230781ccaa5c8d4197a859f7e",
+    "lines": 767
+   },
+   "cases": {
+    "pilot-enemy": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:1753b37ee0a127d5116fd6693e2b63f7dffe37a1de146b58ce6f6a8716a99852",
+     "packet": "sha256:db8aeb3b3142c3354136b33483e7b0dfe45d4987733f9f7797509b7733e34afd",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:810b642eef1242834df1d610cc14e71b7a6bb3870e617e6576f1a8a3f3063d7a",
+      "events": 360
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [],
+     "problems": []
+    },
+    "pilot-subject": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:dbf18b57d10506c71cd13e5d5436bc7d474025b262c10a313cee84123d720d41",
+     "packet": "sha256:29df550f51ebeac94a0a18b81c7ca008eba94d9d4a99aa9c64b22ac5b397bbaa",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:93b0f139459748d85596e9bb5cfe1d921fced51ab1f7dab5c9f71c4788cb10e0",
+      "events": 407
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [
+      {
+       "challenge_id": "ch-98a8949ec463676f990f0b25",
+       "plan": "sha256:c2b6fceaaa072cb1505ab6d9427e2bf7d6f44aa1f770b67d589b41279a7abfc0",
+       "match_id": "pilot-missing_audio_channel",
+       "status": "abstained",
+       "eligible_samples": 88,
+       "tracked_samples": 0,
+       "total_ms": 0,
+       "not_counted": {
+        "unchecked": 88
+       },
+       "cause": "unchecked",
+       "verification": "per_sample",
+       "verified_samples": 0
+      }
+     ],
+     "problems": []
+    }
+   },
+   "live_vs_offline": "identical",
+   "realization": {
+    "status": "reproduced",
+    "problems": []
+   },
+   "without_secret": "secret_unavailable",
+   "secret_leaks": [],
+   "client": {
+    "entities": {
+     "enemy": "e684",
+     "probe": "e403",
+     "subject": "e384"
+    },
+    "subject": {
+     "probe_updates": 176,
+     "probe_bytes": 10560,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    },
+    "enemy": {
+     "probe_updates": 0,
+     "probe_bytes": 0,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    }
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "challenge_update": "every server tick (60 Hz) while a window is open",
+    "knowledge_queries": "every server tick (60 Hz) while a window is open",
+    "movement_event_spacing_ms": [
+     100
+    ],
+    "t_ms_on_tick_grid": true,
+    "parse_errors": 0,
+    "track_ms_resolution_ms": 16.667,
+    "track_ms_off_grid_max_ms": 0.0,
+    "track_ms_emitted": 8750.0,
+    "track_ms_server": 8783.333,
+    "tick_us_mean": 364.8,
+    "tick_us_max": 1562,
+    "challenge_us_per_probe_tick": 418.8,
+    "knowledge_us_per_probe_tick": 280.5,
+    "telemetry_us_per_tick": 22.0,
+    "rays_per_probe_tick": 161.2,
+    "event_bytes_per_s": 6547.1,
+    "snapshot_bytes_per_s": {
+     "pilot-enemy": 2823.2,
+     "pilot-subject": 3116.6
+    },
+    "server_memory_static_peak_bytes": 32401016,
+    "verdicts": {
+     "audio": {
+      "unchecked": 528
+     },
+     "vision": {
+      "absent": 528
+     }
+    },
+    "probe_ticks": 528
+   }
+  },
+  {
+   "id": "contradictory_channels",
+   "expected": {
+    "status": "abstained",
+    "cause": "conflict",
+    "evidence": false,
+    "diagnostic": true
+   },
+   "observed": {
+    "status": "abstained",
+    "cause": "conflict",
+    "tracked_samples": 75,
+    "verified_samples": 86,
+    "eligible_samples": 86,
+    "total_ms": 7433.334,
+    "not_counted": {
+     "conflict": 2,
+     "seen": 10
+    },
+    "evidence": false,
+    "decision": "insufficient_data",
+    "diagnostic": true
+   },
+   "as_expected": true,
+   "problems": [],
+   "plan": {
+    "file": "examples/pilot/captured/contradictory_channels/plan.json",
+    "sha256": "sha256:9c269d0dcf295fd89fd97603dc203c4b5523e782e837cc036e717dc1d9faf1a9",
+    "challenges": [
+     {
+      "challenge_id": "ch-ff7cda0c5bb9cf64c18daa5b",
+      "version": 2,
+      "plan": "sha256:1411eba4f5390d687245f4733730ed63433f84dcc3b5fae4ea52e583ee4a27ca",
+      "commitment": "sha256:022c4c3765a5b95e2a05a3f576926462c6a23e3b55ed800a967ade37baead60e",
+      "window": [
+       21020,
+       29723
+      ]
+     }
+    ]
+   },
+   "events": {
+    "file": "examples/pilot/captured/contradictory_channels/events.ndjson",
+    "sha256": "sha256:42ab64b6851a636a6913c4678c2f355cdb7a34194c726879e7681f01bbcaa52e",
+    "lines": 773
+   },
+   "cases": {
+    "pilot-enemy": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:1753b37ee0a127d5116fd6693e2b63f7dffe37a1de146b58ce6f6a8716a99852",
+     "packet": "sha256:b362974488b128ea78b6f5434f3c07c51f371884a7f6e3660e9df9ab55af014b",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:1e57bfcb36604f11058e9f8e5fac3fa8da186a64e286ec0b37afee1b08af1ca8",
+      "events": 360
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [],
+     "problems": []
+    },
+    "pilot-subject": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:dbf18b57d10506c71cd13e5d5436bc7d474025b262c10a313cee84123d720d41",
+     "packet": "sha256:84f01306a7578e6db44be63193cf743bddb8dc4ba3285f77c8282035f12671b2",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:c5cf33484fc3fccc8291e26408e9e806b87e257645d30bcf4f2881df2a181193",
+      "events": 413
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [
+      {
+       "challenge_id": "ch-ff7cda0c5bb9cf64c18daa5b",
+       "plan": "sha256:1411eba4f5390d687245f4733730ed63433f84dcc3b5fae4ea52e583ee4a27ca",
+       "match_id": "pilot-contradictory_channels",
+       "status": "abstained",
+       "eligible_samples": 86,
+       "tracked_samples": 75,
+       "total_ms": 7433.334,
+       "not_counted": {
+        "conflict": 2,
+        "seen": 10
+       },
+       "cause": "conflict",
+       "verification": "per_sample",
+       "verified_samples": 86
+      }
+     ],
+     "problems": []
+    }
+   },
+   "live_vs_offline": "identical",
+   "realization": {
+    "status": "reproduced",
+    "problems": []
+   },
+   "without_secret": "secret_unavailable",
+   "secret_leaks": [],
+   "client": {
+    "entities": {
+     "enemy": "e505",
+     "probe": "e247",
+     "subject": "e544"
+    },
+    "subject": {
+     "probe_updates": 174,
+     "probe_bytes": 10440,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    },
+    "enemy": {
+     "probe_updates": 0,
+     "probe_bytes": 0,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    }
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "challenge_update": "every server tick (60 Hz) while a window is open",
+    "knowledge_queries": "every server tick (60 Hz) while a window is open",
+    "movement_event_spacing_ms": [
+     0,
+     100
+    ],
+    "t_ms_on_tick_grid": true,
+    "parse_errors": 0,
+    "track_ms_resolution_ms": 16.667,
+    "track_ms_off_grid_max_ms": 0.000333,
+    "track_ms_emitted": 8500.001,
+    "track_ms_server": 8516.667,
+    "tick_us_mean": 285.0,
+    "tick_us_max": 1445,
+    "challenge_us_per_probe_tick": 109.2,
+    "knowledge_us_per_probe_tick": 270.8,
+    "telemetry_us_per_tick": 21.4,
+    "rays_per_probe_tick": 161.3,
+    "event_bytes_per_s": 6623.1,
+    "snapshot_bytes_per_s": {
+     "pilot-enemy": 2830.2,
+     "pilot-subject": 3120.2
+    },
+    "server_memory_static_peak_bytes": 32401052,
+    "verdicts": {
+     "audio": {
+      "absent": 522
+     },
+     "vision": {
+      "absent": 522
+     }
+    },
+    "probe_ticks": 522
+   }
+  },
+  {
+   "id": "visible_enemy_cover",
+   "expected": {
+    "status": "not_followed",
+    "evidence": false,
+    "not_counted": "seen"
+   },
+   "observed": {
+    "status": "not_followed",
+    "cause": null,
+    "tracked_samples": 4,
+    "verified_samples": 114,
+    "eligible_samples": 114,
+    "total_ms": 166.667,
+    "not_counted": {
+     "seen": 31
+    },
+    "evidence": false,
+    "decision": "insufficient_data",
+    "diagnostic": false
+   },
+   "as_expected": true,
+   "problems": [],
+   "plan": {
+    "file": "examples/pilot/captured/visible_enemy_cover/plan.json",
+    "sha256": "sha256:5a601334fb481f8e5d20c72c4ba63b5e508b4db2518767d22aa2fd3d5129ea95",
+    "challenges": [
+     {
+      "challenge_id": "ch-8a7869da5af880bf78a488c5",
+      "version": 2,
+      "plan": "sha256:71fc9a47fc5d90b6d1f6fd492204ccbcad6b4b329509dbafacb1e02131477c81",
+      "commitment": "sha256:64e675b9918db9e53e9a83e5aed16c6006fa13367e6fb568644ddf11bc45549b",
+      "window": [
+       18858,
+       28476
+      ]
+     }
+    ]
+   },
+   "events": {
+    "file": "examples/pilot/captured/visible_enemy_cover/events.ndjson",
+    "sha256": "sha256:d9aaf1844ee01f8c0b69ecb2caa3f0f1cb9d4f308a7dc380cb8e8366647a381b",
+    "lines": 792
+   },
+   "cases": {
+    "pilot-enemy": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:1753b37ee0a127d5116fd6693e2b63f7dffe37a1de146b58ce6f6a8716a99852",
+     "packet": "sha256:45982d214627d7a68eeafcb7c408097d656ecc4aa8b8e54f69e8fab346382d9f",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:4784462eaa65843364f09de776dd5922687436618ea97ed68dcd270e1a16a0a0",
+      "events": 360
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [],
+     "problems": []
+    },
+    "pilot-subject": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:dbf18b57d10506c71cd13e5d5436bc7d474025b262c10a313cee84123d720d41",
+     "packet": "sha256:814695ff231758249124428795f38dbd802a0e0119db6022aef1511b3d868474",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:4ff0de5be5915f481ed1687e26960bfec7b4f26fa7271a023d698996e5848da4",
+      "events": 432
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [
+      {
+       "challenge_id": "ch-8a7869da5af880bf78a488c5",
+       "plan": "sha256:71fc9a47fc5d90b6d1f6fd492204ccbcad6b4b329509dbafacb1e02131477c81",
+       "match_id": "pilot-visible_enemy_cover",
+       "status": "not_followed",
+       "eligible_samples": 114,
+       "tracked_samples": 4,
+       "total_ms": 166.667,
+       "not_counted": {
+        "seen": 31
+       },
+       "verification": "per_sample",
+       "verified_samples": 114
+      }
+     ],
+     "problems": []
+    }
+   },
+   "live_vs_offline": "identical",
+   "realization": {
+    "status": "reproduced",
+    "problems": []
+   },
+   "without_secret": "secret_unavailable",
+   "secret_leaks": [],
+   "client": {
+    "entities": {
+     "enemy": "e453",
+     "probe": "e329",
+     "subject": "e110"
+    },
+    "subject": {
+     "probe_updates": 192,
+     "probe_bytes": 11520,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    },
+    "enemy": {
+     "probe_updates": 0,
+     "probe_bytes": 0,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    }
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "challenge_update": "every server tick (60 Hz) while a window is open",
+    "knowledge_queries": "every server tick (60 Hz) while a window is open",
+    "movement_event_spacing_ms": [
+     100
+    ],
+    "t_ms_on_tick_grid": true,
+    "parse_errors": 0,
+    "track_ms_resolution_ms": 16.667,
+    "track_ms_off_grid_max_ms": 0.000333,
+    "track_ms_emitted": 2033.334,
+    "track_ms_server": 2083.333,
+    "tick_us_mean": 322.3,
+    "tick_us_max": 1920,
+    "challenge_us_per_probe_tick": 239.0,
+    "knowledge_us_per_probe_tick": 267.1,
+    "telemetry_us_per_tick": 20.4,
+    "rays_per_probe_tick": 161.1,
+    "event_bytes_per_s": 6710.8,
+    "snapshot_bytes_per_s": {
+     "pilot-enemy": 2800.0,
+     "pilot-subject": 3120.0
+    },
+    "server_memory_static_peak_bytes": 32400944,
+    "verdicts": {
+     "audio": {
+      "absent": 577
+     },
+     "vision": {
+      "absent": 577
+     }
+    },
+    "probe_ticks": 577
+   }
+  },
+  {
+   "id": "illicit_follower",
+   "expected": {
+    "status": "followed",
+    "evidence": true,
+    "decision": "review"
+   },
+   "observed": {
+    "status": "followed",
+    "cause": null,
+    "tracked_samples": 80,
+    "verified_samples": 95,
+    "eligible_samples": 95,
+    "total_ms": 8000.0,
+    "not_counted": {
+     "seen": 15
+    },
+    "evidence": true,
+    "decision": "review",
+    "diagnostic": false
+   },
+   "as_expected": true,
+   "problems": [],
+   "plan": {
+    "file": "examples/pilot/captured/illicit_follower/plan.json",
+    "sha256": "sha256:488e4127204e3dffdb03cbf665d5631ce8b5c97b0af2d7fc5dae72726afeb460",
+    "challenges": [
+     {
+      "challenge_id": "ch-fcbc1113807ba01edeb697e8",
+      "version": 2,
+      "plan": "sha256:8fc633f744b4ce826deb276a9257ec222c89b67d1367d43288226a7d36ca042e",
+      "commitment": "sha256:e709bfd7ecaf2f4b21b8711907fe1329ece7bf5f5ad5a66cb14abea17b7016e3",
+      "window": [
+       14112,
+       23642
+      ]
+     }
+    ]
+   },
+   "events": {
+    "file": "examples/pilot/captured/illicit_follower/events.ndjson",
+    "sha256": "sha256:f09126792cbffbf870392a4e9e9dd06a1a3f01be8e68811a0ea0ab3ea231afb7",
+    "lines": 777
+   },
+   "cases": {
+    "pilot-enemy": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:1753b37ee0a127d5116fd6693e2b63f7dffe37a1de146b58ce6f6a8716a99852",
+     "packet": "sha256:8e62fcf8a2e1ea7676dc97efa2b1027d8a1163e1cea561930347e84811d4f7ae",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:302fbbbd706768de7fbb414b021799b22a4111764ad5f62e9ea5db6125ae9644",
+      "events": 360
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [],
+     "problems": []
+    },
+    "pilot-subject": {
+     "decision": "review",
+     "observations": [
+      "obs-b860317a6fb350563f1506db"
+     ],
+     "kinds": [
+      "occluded_motion_replay"
+     ],
+     "graph": "sha256:15e080c77b78997b2a64d3ee80939d0c689344c6aee89976aa69271da5f7ddf3",
+     "packet": "sha256:056fd74a4bb1ad897c836bb03147d2424e2d29d0e0d18f49599ec60fa9fe3157",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:558c8fb7cce41280b501a3f6e98799b20b477c950d24a50960b67716cc6d7791",
+      "events": 417
+     },
+     "detector": "sha256:d42e99607318ea03fcb556ce87556f2c89b28a991ac3ddaaa5fee7cb59ab8dbb",
+     "challenges": [
+      {
+       "challenge_id": "ch-fcbc1113807ba01edeb697e8",
+       "plan": "sha256:8fc633f744b4ce826deb276a9257ec222c89b67d1367d43288226a7d36ca042e",
+       "match_id": "pilot-illicit_follower",
+       "status": "followed",
+       "eligible_samples": 95,
+       "tracked_samples": 80,
+       "total_ms": 8000.0,
+       "not_counted": {
+        "seen": 15
+       },
+       "verification": "per_sample",
+       "verified_samples": 95
+      }
+     ],
+     "problems": []
+    }
+   },
+   "live_vs_offline": "identical",
+   "realization": {
+    "status": "reproduced",
+    "problems": []
+   },
+   "without_secret": "secret_unavailable",
+   "secret_leaks": [],
+   "client": {
+    "entities": {
+     "enemy": "e128",
+     "probe": "e682",
+     "subject": "e313"
+    },
+    "subject": {
+     "probe_updates": 190,
+     "probe_bytes": 11400,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2,
+     "pixel_checks": 18,
+     "probe_checks_drawn": 4,
+     "probe_pixels_max": 0,
+     "probe_checks_with_pixels": 0,
+     "enemy_checks_with_pixels": 17,
+     "unchanged_frame_pixels_max": 0,
+     "screenshots": [
+      "view-000050.png",
+      "view-002050.png",
+      "view-004050.png",
+      "view-006100.png",
+      "view-008100.png",
+      "view-010100.png",
+      "view-012100.png",
+      "view-014050.png",
+      "view-016100.png",
+      "view-018100.png",
+      "view-020100.png",
+      "view-022100.png",
+      "view-024100.png",
+      "view-026100.png",
+      "view-028100.png",
+      "view-030100.png",
+      "view-032100.png",
+      "view-034100.png"
+     ],
+     "fps_median": 157.0
+    },
+    "enemy": {
+     "probe_updates": 0,
+     "probe_bytes": 0,
+     "enemy_or_subject_updates": 720,
+     "probe_sounds": 0,
+     "scoreboard_rows": 2
+    }
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "challenge_update": "every server tick (60 Hz) while a window is open",
+    "knowledge_queries": "every server tick (60 Hz) while a window is open",
+    "movement_event_spacing_ms": [
+     100
+    ],
+    "t_ms_on_tick_grid": true,
+    "parse_errors": 0,
+    "track_ms_resolution_ms": 16.667,
+    "track_ms_off_grid_max_ms": 0.000333,
+    "track_ms_emitted": 9483.333,
+    "track_ms_server": 9516.667,
+    "tick_us_mean": 310.8,
+    "tick_us_max": 1510,
+    "challenge_us_per_probe_tick": 114.9,
+    "knowledge_us_per_probe_tick": 304.4,
+    "telemetry_us_per_tick": 23.5,
+    "rays_per_probe_tick": 161.1,
+    "event_bytes_per_s": 6544.1,
+    "snapshot_bytes_per_s": {
+     "pilot-enemy": 2831.8,
+     "pilot-subject": 3148.4
+    },
+    "server_memory_static_peak_bytes": 32400836,
+    "verdicts": {
+     "audio": {
+      "absent": 572
+     },
+     "vision": {
+      "absent": 572
+     }
+    },
+    "probe_ticks": 572
+   }
+  }
+ ],
+ "telemetry_failures": [
+  {
+   "failure": "missing_plan",
+   "status": "unplanned",
+   "cause": null,
+   "tracked_samples": 0,
+   "evidence": false,
+   "not_counted": {
+    "unplanned": 95
+   },
+   "stronger_than_undamaged": false
+  },
+  {
+   "failure": "unknown_challenge_id",
+   "status": "unplanned",
+   "cause": null,
+   "tracked_samples": 0,
+   "evidence": false,
+   "not_counted": {
+    "unplanned": 95
+   },
+   "stronger_than_undamaged": false
+  },
+  {
+   "failure": "wrong_player",
+   "status": "abstained",
+   "cause": "other_subject",
+   "tracked_samples": 0,
+   "evidence": false,
+   "not_counted": {
+    "other_subject": 95
+   },
+   "stronger_than_undamaged": false
+  },
+  {
+   "failure": "wrong_match",
+   "status": "no_samples",
+   "cause": null,
+   "tracked_samples": 0,
+   "evidence": false,
+   "not_counted": {
+    "other_match": 95
+   },
+   "stronger_than_undamaged": false
+  },
+  {
+   "failure": "stale_window",
+   "status": "no_samples",
+   "cause": null,
+   "tracked_samples": 0,
+   "evidence": false,
+   "not_counted": {
+    "outside_window": 95
+   },
+   "stronger_than_undamaged": false
+  },
+  {
+   "failure": "duplicate_events",
+   "status": "followed",
+   "cause": null,
+   "tracked_samples": 80,
+   "evidence": true,
+   "not_counted": {
+    "seen": 15
+   },
+   "stronger_than_undamaged": false
+  },
+  {
+   "failure": "malformed_channel_state",
+   "status": "followed",
+   "cause": null,
+   "tracked_samples": 40,
+   "evidence": true,
+   "not_counted": {
+    "seen": 7
+   },
+   "stronger_than_undamaged": false
+  }
+ ],
+ "server_failures": [
+  {
+   "failure": "missing_plan",
+   "server": "missing",
+   "detail": "no challenge plan: no challenge runs in this match",
+   "events_naming_a_challenge": 0,
+   "exit_codes": [
+    0
+   ]
+  },
+  {
+   "failure": "wrong_match",
+   "server": "refused",
+   "detail": "the plan is for game fpsdet-godot-pilot match pilot-server-failures, this is fpsdet-godot-pilot pilot-some-other-match: no challenge runs",
+   "events_naming_a_challenge": 0,
+   "exit_codes": [
+    0
+   ]
+  },
+  {
+   "failure": "tampered_plan",
+   "server": "loaded",
+   "detail": [
+    "the commitment of ch-4db205d36439393fabcb2258 is not what this secret makes"
+   ],
+   "events_naming_a_challenge": 0,
+   "exit_codes": [
+    0
+   ]
+  },
+  {
+   "failure": "secret_unavailable_on_server",
+   "server": "refused",
+   "detail": "no challenge secret file: no challenge runs",
+   "events_naming_a_challenge": 0,
+   "exit_codes": [
+    0
+   ]
+  }
+ ],
+ "non_interference": {
+  "ticks": 2160,
+  "probe_ticks": 670,
+  "gameplay_digest_with": "580bbf5341c0765033dc7f5ba47a7fcb59ae823fcf787613e1168ae3bbe18698",
+  "gameplay_digest_without": "580bbf5341c0765033dc7f5ba47a7fcb59ae823fcf787613e1168ae3bbe18698",
+  "identical": true,
+  "scoreboard": {
+   "pilot-enemy": {
+    "damage": 0,
+    "deaths": 0,
+    "hits": 0,
+    "kills": 0,
+    "shots": 0
+   },
+   "pilot-subject": {
+    "damage": 0,
+    "deaths": 0,
+    "hits": 0,
+    "kills": 0,
+    "shots": 72
+   }
+  },
+  "tick_us_mean_with": 428.8,
+  "tick_us_mean_without": 256.3,
+  "exit_codes": [
+   [
+    0
+   ],
+   [
+    0
+   ]
+  ]
+ },
+ "media": {
+  "stock-client-probe-hidden.png": {
+   "scenario": "illicit_follower",
+   "frame": "view-016100.png",
+   "sha256": "sha256:66a2f4fe0d38cd48261fbaa56143cab0c5dd867b76e42fee77ac31ccc152186a"
+  },
+  "stock-client-probe-exposed.png": {
+   "scenario": "exposed_vision",
+   "frame": "view-022100.png",
+   "sha256": "sha256:ed5a66bb5d542f37e9dbb306527902029a43ad0fdc6530733fe1af3010104fec"
+  }
+ },
+ "not": "Not a deployment and not a detection rate: a controlled qualification of one integration, with scripted players.",
+ "digest": "sha256:ded4a95d8fb9ac2191ef49cce28a15ba96da44f915df9fefad4ea5f24a32d4a7"
+}

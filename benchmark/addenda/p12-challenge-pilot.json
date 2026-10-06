@@ -1,0 +1,89 @@
+{
+ "capabilities": [
+  {
+   "controlled_synthetic": "yes",
+   "live_engine_pilot": "yes: a server-side stand-in for a reader of the probe it was sent was caught, and the honest scenarios were not",
+   "name": "Packet or memory reader",
+   "real_adversarial_population": "no",
+   "technique": "packet_reader"
+  },
+  {
+   "controlled_synthetic": "yes",
+   "live_engine_pilot": "partly: following the probe only while a visible enemy covers it was run live and gets through, as in the controlled scenario; nothing else challenge-aware was run live",
+   "name": "Challenge-aware cheat",
+   "real_adversarial_population": "no",
+   "technique": "challenge_aware_cheat"
+  }
+ ],
+ "claims": [
+  {
+   "class": "live_controlled_pilot",
+   "id": "pilot.follower",
+   "source": {
+    "digest": "sha256:ded4a95d8fb9ac2191ef49cce28a15ba96da44f915df9fefad4ea5f24a32d4a7",
+    "path": "examples/pilot/result.json"
+   },
+   "text": "In a live Godot 4.7.2.stable dedicated server with stock clients, a server-side stand-in for software reading the probe it was sent produced challenge evidence (review) from a secret-derived occluded_motion_replay/2 plan: 80 counted moments, 8000 ms, each with the server's own vision and audio verdict."
+  },
+  {
+   "class": "live_controlled_pilot",
+   "id": "pilot.quiet",
+   "source": {
+    "digest": "sha256:ded4a95d8fb9ac2191ef49cce28a15ba96da44f915df9fefad4ea5f24a32d4a7",
+    "path": "examples/pilot/result.json"
+   },
+   "text": "In the same server, honest, accidental crossing, visible enemy cover produced no challenge evidence; exposed vision abstained (seen); exposed audio abstained (heard); missing audio channel abstained (unchecked); contradictory channels abstained (conflict)."
+  },
+  {
+   "class": "live_controlled_pilot",
+   "id": "pilot.client",
+   "source": {
+    "digest": "sha256:ded4a95d8fb9ac2191ef49cce28a15ba96da44f915df9fefad4ea5f24a32d4a7",
+    "path": "examples/pilot/result.json"
+   },
+   "text": "The subject's stock client received the probe (190 updates, 11400 bytes) and drew no pixel of it in 4 checks while the server reported it hidden; the enemy's client never received it. When the server was made to place it in the open, the client drew it (up to 2162 pixels) and the server reported it seen."
+  },
+  {
+   "class": "live_controlled_pilot",
+   "id": "pilot.gameplay",
+   "source": {
+    "digest": "sha256:ded4a95d8fb9ac2191ef49cce28a15ba96da44f915df9fefad4ea5f24a32d4a7",
+    "path": "examples/pilot/result.json"
+   },
+   "text": "Gameplay was identical, tick for tick over 2160 ticks, with and without the probe running: every position, hit, damage and score."
+  },
+  {
+   "class": "live_controlled_pilot",
+   "id": "pilot.replay",
+   "source": {
+    "digest": "sha256:ded4a95d8fb9ac2191ef49cce28a15ba96da44f915df9fefad4ea5f24a32d4a7",
+    "path": "examples/pilot/result.json"
+   },
+   "text": "Scoring the captured server telemetry again offline gave the same decisions, observation ids, graphs and packets in all 8 scenarios."
+  }
+ ],
+ "class": {
+  "live_controlled_pilot": "live controlled pilot: a real game server and stock client, run on purpose with scripted players and controlled stand-ins; it qualifies one integration, never a detection rate"
+ },
+ "extends": {
+  "digest": "sha256:175ec12b3eafa4d83f0f4a0902e0ab67fc118e827a897522caab6198f3eefd4d",
+  "path": "benchmark/release.json",
+  "release": "FPSDET Benchmark v1"
+ },
+ "format": "fpsdet.benchmark-addendum/1",
+ "frozen": "Benchmark v1 is unchanged by this addendum: its release manifest, results, claims and report verify as they did. This is evidence added after it, with its own class.",
+ "id": "p12-challenge-pilot",
+ "not": "No real adversarial population: nothing here is a detection rate or a calibration.",
+ "pilot": {
+  "as_expected": 8,
+  "digest": "sha256:ded4a95d8fb9ac2191ef49cce28a15ba96da44f915df9fefad4ea5f24a32d4a7",
+  "engine": {
+   "name": "Godot",
+   "sha512": "9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65",
+   "version": "4.7.2.stable.official.ed1daf0bf"
+  },
+  "path": "examples/pilot/result.json",
+  "scenarios": 8
+ },
+ "digest": "sha256:69af4ec1cb59fb95c790687b66a1931d2b8c7604dc14d495622b63e9c11d0fa8"
+}

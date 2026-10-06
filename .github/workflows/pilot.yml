@@ -1,0 +1,41 @@
+# Runs the live challenge pilot (docs/pilot.md) by hand only: downloads the pinned Godot build, checks its
+# SHA-512, and runs every declared scenario, failure and non-interference run on the runner. A pass means the
+# qualification holds on a clean machine. It is not run on every pull request: it starts game servers and a
+# drawing client for about ten minutes. Ordinary CI checks the committed capture offline (tests/test_pilot.py).
+
+name: Challenge pilot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: A virtual display and software OpenGL for the drawing client
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri
+      - name: The pinned Godot build, checked
+        run: python examples/pilot/pilot.py godot --dest "$RUNNER_TEMP/godot"
+      - name: Qualify every scenario live
+        run: python examples/pilot/pilot.py qualify --godot "$RUNNER_TEMP/godot/Godot_v4.7.2-stable_linux.x86_64" --out "$RUNNER_TEMP/pilot"
+      - name: The fresh capture reproduces offline
+        run: python examples/pilot/pilot.py verify
+      - name: Keep the result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: challenge-pilot
+          path: |
+            examples/pilot/result.json
+            examples/pilot/captured/
+          if-no-files-found: warn
