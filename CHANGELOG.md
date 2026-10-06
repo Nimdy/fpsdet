@@ -19,6 +19,25 @@
 
 ### Added
 
+- **The consented honest-human pilot: designed, instrumented, dry-run; not yet played by people** ([docs/human-pilot.md](docs/human-pilot.md)). It asks how often, and for how long, honest players' aim behaves like challenge tracking in the repository's own Godot pilot.
+  - **Pre-registered** in `examples/human-pilot/design.json` before any session:
+    - 8 participants, seven 4-minute sessions each across honest-play modes up to an aggressive pre-aim stress session;
+    - challenges from the real planner;
+    - P12's thresholds and cone, frozen, and a 250 ms episode gap;
+    - every metric and the analysis at participant, session and challenge level with exact bounds;
+    - exclusions, stop conditions, and the data and retention policy.
+  - **Consent and privacy:** a plain-language notice says that hidden probes exist and what is and is not recorded.
+    - Participants are random ids.
+    - The server binds loopback or a private LAN address only.
+    - Every publishable file is scanned for addresses and machine names.
+    - Only participants who opt in have gameplay published.
+  - **Instruments:**
+    - A study arena (doorway, corner, passage, and sealed probe rooms near each) in the P12 project, with P12's own files untouched.
+    - A study server keeping P12's challenge and knowledge rules (a test compares them).
+    - A human-playable client with a consent gate and no screen capture.
+    - `study.py`: enroll, sessions with live and offline scoring, reproduction and secret deletion, the questionnaire, stop conditions, and `fpsdet.human-pilot/1`.
+    - A `consented_human_pilot` benchmark addendum that refuses anything but people.
+  - **Machine dry run** (`examples/human-pilot/dry-run`, scripted stand-ins, never people): every runtime check held. Honest-style aiming crossed the frozen bar: a stand-in holding a doorway's frame while a probe sat behind it counted 5,500 ms (bar 1,200 ms). The controlled follower counted a median of 13,258 ms. No threshold changed; the human sessions will measure how often people do this.
 - **The live challenge pilot** ([docs/pilot.md](docs/pilot.md), [examples/pilot](examples/pilot/README.md)): fpsdet's active challenge run end to end in a real game for the first time. It runs in a Godot 4.7.2 dedicated server with stock clients, on one machine, over loopback only. A controlled integration qualification, not a deployment and not a detection rate.
   - **The path:**
     - `fpsdet challenge plan` writes the plan with a server secret.

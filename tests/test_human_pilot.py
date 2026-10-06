@@ -205,6 +205,22 @@ class DryRunTest(unittest.TestCase):
         self.assertEqual(harness().verify_samples(STUDY / "dry-run" / "result.json"), [])
         self.assertEqual(len(dry_run()["samples"]), 2)
 
+    def test_the_documented_numbers_are_the_artifacts(self):
+        found = dry_run()
+        doc = (ROOT / "docs" / "human-pilot.md").read_text(encoding="utf-8")
+        counted = found["distributions"]["counted_ms"]
+        worst = found["worst_case"]
+        self.assertIn(f"median {counted['median']:.0f}, 95th percentile {counted['p95']:.0f}, max {counted['max']:,.0f}", doc)
+        follower = found["controlled_follower"]
+        self.assertIn(f"median {follower['counted_ms']['median']:,.0f}, max {follower['counted_ms']['max']:,.0f}", doc)
+        self.assertIn(f"median {follower['longest_episode_ms']['median']:,.0f} ms", doc)
+        self.assertIn(f"median {found['distributions']['longest_episode_ms']['median']:.0f} ms, max {found['distributions']['longest_episode_ms']['max']:,.0f} ms", doc)
+        self.assertIn(f"{found['review_grade']['challenges']} of {found['units']['challenges']}", doc)
+        self.assertIn(f"{worst['counted_moments']} counted moments and {worst['counted_ms']:,.0f} ms", doc)
+        share = round(found["explained"]["explained_by_visible_bot_ms"] / found["explained"]["overlap_ms"] * 100)
+        self.assertIn(f"Visible bots explained {share}% of all overlap", doc)
+        self.assertIn("No person has played yet, and there are no human results", doc)
+
     def test_machine_results_never_become_the_human_addendum(self):
         from fpsdet import benchmark as bm
 
