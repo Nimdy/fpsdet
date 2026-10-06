@@ -25,7 +25,9 @@ python3 examples/historic/convert.py export.csv --map my-map.json --game my-game
 PYTHONPATH=src python3 -m fpsdet score events.ndjson --profile examples/historic/profile.json --out cases/
 ```
 
-[examples/historic](examples/historic/README.md) has the five steps, a sample export and the field map, and the [Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html) shows the same steps. Then [tell us what you found](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml), counts only, never ids. If it holds up, we are looking for a server to run a live test with.
+![The setup as a game quest: five levels from git clone to reading the cases, with prod HP at 100 of 100 and nobody banned](site/img/setup-quest.svg)
+
+[examples/historic](examples/historic/README.md) has the five steps, a sample export and the field map, and the [Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html) shows the same steps. Then [tell us what you found](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml), counts only, never ids. If it holds up, [offer a server for a live test](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=live_test.yml).
 
 ## Where it stands
 

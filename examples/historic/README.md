@@ -4,6 +4,8 @@ fpsdet scores a copy of your dedicated server's logs, on any machine with Python
 
 The same steps, with pictures, are on the [Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html).
 
+![The setup as a game quest: five levels from git clone to reading the cases, with prod HP at 100 of 100 and nobody banned](../../site/img/setup-quest.svg)
+
 ## 1. Get fpsdet
 
 ```bash
@@ -91,4 +93,4 @@ If the results hold up, the next step is a live test on a dedicated server you r
 - the wire against the picture;
 - planned challenges.
 
-If you run a server and want to try that, [open an issue](https://github.com/Nimdy/detect-FPS-hackers/issues).
+If you run a server and want to try that, [offer it for a live test](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=live_test.yml).

@@ -39,7 +39,13 @@
     - every value is checked against the schema;
     - `--who` finds an account's pseudonym again.
   - **Example files:** a made-up sample export, its column map, and a one-line profile. On the sample, they give one speed review and keep an explosion out of the case, as the page says.
-  - **Every page asks.** A "Try it" nav link and a banner above every footer, a banner at the top of the home page, and the desk's nav. The second ask is a dedicated server for a live test.
+  - **Every page asks.** A "Try it" nav link and a banner above every footer, a banner at the top of the home page, and the desk's nav. The second ask is a dedicated server for a live test, through its own issue form (`live_test.yml`).
+  - **The setup as a cheesy game quest** (`site/build_quest.py` draws `site/img/setup-quest.svg` and a tall version for phones):
+    - a HUD with prod HP 100/100, players banned 0, and the network offline;
+    - five levels from `git clone` to reading the cases;
+    - an achievement toast and a loading tip.
+
+    The jokes carry only the page's own facts. It sits on the Try it page, under the home page's top banner, and in the READMEs.
 
 - **Amendment 1 to the human pilot, before any person plays** ([examples/human-pilot/amendment-1.json](examples/human-pilot/amendment-1.json)). It changes nothing that decides a challenge: the bar, the cone, the episode gap, placement and scoring are as pre-registered.
   - **Staging:** the first 4 participants finish before anyone else is enrolled. Review-grade evidence on an honest session ends collection, and `clear-stop` refuses it.
