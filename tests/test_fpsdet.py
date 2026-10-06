@@ -2416,6 +2416,60 @@ class TryItTest(unittest.TestCase):
             self.assertNotEqual({e["player_id"] for e in events}, {e["player_id"] for e in elsewhere})
             self.assertIsNone(re.search(r"acct-\d+", json.dumps(elsewhere)))
 
+    def test_the_sample_scores_as_the_page_says(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp)
+            printed, _ = self.run_convert(folder)
+            events, errors = load_events(folder / "events.ndjson")
+            self.assertEqual(errors, [])
+            cases = run_score(events, load_profile(self.HERE / "profile.json"))
+            who = io.StringIO()
+            with contextlib.redirect_stdout(who):
+                self.convert.main(["--who", "acct-1001", "--salt-file", str(folder / "salt.hex")])
+            sprinter = who.getvalue().strip()
+        decisions = {case.player_id: case.decision for case in cases}
+        self.assertEqual([player for player, decision in decisions.items() if decision == "review"], [sprinter])
+        self.assertEqual({case.automated_action for case in cases}, {"none"})
+        review = next(case for case in cases if case.decision == "review")
+        self.assertEqual(review.checks, ["speed"])
+        page = (ROOT / "site" / "try.html").read_text(encoding="utf-8")
+        readme = (self.HERE / "README.md").read_text(encoding="utf-8")
+        first = printed.splitlines()[0].replace(str(folder / "events.ndjson"), "events.ndjson")
+        self.assertIn(first, page)
+        self.assertIn(first, readme)
+        self.assertIn("columns not copied (fpsdet has no field for them): ip, name", page)
+        for text in (page, readme):
+            self.assertIn("7.0 m/s against", text)
+            self.assertIn("for 30 samples", text)
+
+    def test_every_page_asks_to_try_it(self):
+        import re
+        from fpsdet.pages import write_pages
+
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = write_pages(build_demo(), tmp)
+            pages = {path.name: path.read_text(encoding="utf-8") for path in dest.glob("*.html")}
+        self.assertIn("try.html", pages)
+        for name in ("index.html", "scoring.html", "wire.html", "games.html", "source.html", "decoys.html", "evidence.html"):
+            self.assertIn('id="try-cta"', pages[name], name)
+            self.assertIn('<a class="nav-link nav-cta" href="try.html"><span>09</span>Try it</a>', pages[name], name)
+        self.assertIn('id="try-top"', pages["index.html"])
+        self.assertLess(pages["index.html"].index('id="try-top"'), pages["index.html"].index('id="real"'))
+        self.assertIn('href="try.html"', pages["board.html"])
+        page = pages["try.html"]
+        for words in ("Automated action: none", "This does not end cheating", "Production never knows it ran"):
+            self.assertIn(words, page)
+        self.assertNotIn("<script", page)
+        self.assertIn('href="board.html"', page)
+        # Every path and form the page names exists.
+        for path in set(re.findall(r"examples/historic/[\w.]+", page)):
+            self.assertTrue((ROOT / path).exists(), path)
+        for template in set(re.findall(r"template=([\w.]+)", page)):
+            self.assertTrue((ROOT / ".github" / "ISSUE_TEMPLATE" / template).exists(), template)
+        # Scoring opens no connection unless asked for a brief: only the AI module touches the network.
+        network = [path.name for path in (ROOT / "src" / "fpsdet").glob("*.py")
+                   if re.search(r"^\s*(import|from)\s+(urllib|socket|http\.client|requests)\b", path.read_text(encoding="utf-8"), re.M)]
+        self.assertEqual(network, ["ai_triage.py"])
 
 if __name__ == "__main__":
     unittest.main()

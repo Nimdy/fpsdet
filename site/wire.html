@@ -24,6 +24,7 @@
       <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
       <a class="nav-link" href="decoys.html"><span>07</span>Decoys</a>
       <a class="nav-link" href="evidence.html"><span>08</span>Evidence</a>
+      <a class="nav-link nav-cta" href="try.html"><span>09</span>Try it</a>
     </nav>
     <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
   </div>
@@ -213,6 +214,16 @@ events = [parse_event(obj) for obj in batch]
 cases = run_score(events, profile, cohort, history, reports)</code></pre>
   </div>
 </div>
+<section id="try-cta" class="mx-auto w-full max-w-[1800px] px-10 pb-12 pt-4 max-md:px-4" aria-labelledby="try-cta-title">
+  <div class="corner-frame rounded-xl grid grid-cols-[minmax(0,1fr)_auto] items-center gap-6 border border-signal/50 bg-plot p-6 shadow-[0_0_0_1px_rgb(56_200_255/0.15),0_0_40px_-8px_rgb(56_200_255/0.45),0_0_56px_-12px_rgb(168_85_247/0.35)] max-lg:grid-cols-1">
+    <div>
+      <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-signal">Run a dedicated server?</p>
+      <h2 id="try-cta-title" class="m-0 mt-2 font-mono text-[1.45rem] font-bold leading-[1.15] tracking-tight text-white">Test it on last month's logs.</h2>
+      <p class="m-0 mt-2 max-w-3xl text-sm text-muted">fpsdet scores a copy of your dedicated server's logs, offline, on any machine with Python. Nothing goes on your servers or your players' PCs, nothing is sent anywhere, and nobody is banned. Production never knows it ran.</p>
+    </div>
+    <p class="m-0 flex flex-wrap gap-3"><a class="btn-signal" href="try.html">How to set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
+  </div>
+</section>
 </main>
 
 <footer class="relative border-t border-line bg-bg/60">
@@ -228,6 +239,7 @@ cases = run_score(events, profile, cohort, history, reports)</code></pre>
       <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
       <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
       <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
+      <a class="text-ink no-underline hover:underline" href="try.html">Try it</a>
       <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
       <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
     </p>

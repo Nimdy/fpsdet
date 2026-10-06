@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Try it — fpsdet</title>
+<meta name="description" content="Test fpsdet on logs your dedicated server already wrote. It scores a copy, offline, on any machine with Python 3.11. Nothing goes on your servers or players' PCs, nothing is sent anywhere, and it bans no one.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="fpsdet — test it on last month's logs">
+<meta property="og:description" content="Server-side cheat evidence, scored offline on a copy of your logs. Production never knows it ran. Nobody is banned.">
+<meta property="og:url" content="https://nimdy.github.io/detect-FPS-hackers/try.html">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="fpsdet.css">
+</head>
+<body class="relative m-0 bg-bg font-sans text-[17px] leading-relaxed text-ink antialiased">
+<div class="zb-backdrop" aria-hidden="true"></div>
+<a class="sr-only rounded-md bg-signal px-4 py-2 font-medium text-bg focus:not-sr-only focus:absolute focus:left-4 focus:top-4" href="#main">Skip to content</a>
+<header class="relative z-50 border-b border-line bg-bg/80 backdrop-blur-xl md:sticky md:top-0">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-center gap-x-5 gap-y-2 px-10 py-3 max-md:px-4">
+    <a class="zb-logo flex items-center gap-2.5 font-mono text-[1.05rem] font-semibold tracking-tight text-white no-underline" href="index.html"><span class="pulse-dot" aria-hidden="true"></span><span>fps<span class="text-signal">det</span></span></a>
+    <a class="font-mono text-[11px] text-muted no-underline hover:text-ink" href="https://zerobandwidth.com">by Zero<span class="text-signal">Bandwidth</span></a>
+    <nav class="flex flex-wrap items-center gap-x-0.5 gap-y-1 text-[0.9rem]" aria-label="Site">
+      <a class="nav-link" href="index.html"><span>01</span>What this is</a>
+      <a class="nav-link" href="scoring.html"><span>02</span>Scoring</a>
+      <a class="nav-link" href="wire.html"><span>03</span>Wire a game</a>
+      <a class="nav-link" href="games.html"><span>04</span>Games</a>
+      <a class="nav-link" href="source.html"><span>05</span>Source</a>
+      <a class="nav-link" href="../demo/board.html"><span>06</span>Desk</a>
+      <a class="nav-link" href="decoys.html"><span>07</span>Decoys</a>
+      <a class="nav-link" href="evidence.html"><span>08</span>Evidence</a>
+      <a class="nav-link nav-cta" href="try.html" aria-current="page"><span>09</span>Try it</a>
+    </nav>
+    <p class="status-pill ml-auto max-md:ml-0"><span class="pulse-dot" aria-hidden="true"></span>Automated action: none</p>
+  </div>
+</header>
+
+<main id="main">
+<section class="mx-auto grid w-full max-w-[1800px] grid-cols-12 items-end gap-8 px-10 py-12 max-lg:grid-cols-1 max-md:px-4">
+  <div class="col-span-7 max-lg:col-span-1">
+    <p class="prompt m-0"><span class="text-signal-soft">zb@zerobandwidth</span><span class="text-faint">:</span><span class="text-prototype">~/fpsdet</span><span class="text-faint">$</span> <span class="text-ink">Try it</span><span class="caret" aria-hidden="true"></span></p>
+    <h1 class="m-0 mt-5 font-mono text-[3.4rem] font-bold leading-[1.04] tracking-tighter text-white text-balance max-xl:text-[2.9rem] max-md:text-[2.05rem]">Test it on logs <span class="text-gradient-brand">you already have.</span></h1>
+  </div>
+  <div class="col-span-5 max-lg:col-span-1">
+    <p class="m-0 text-lg"><strong class="font-medium">Last month's matches are enough.</strong> fpsdet scores a copy of your dedicated server's logs on any machine with Python 3.11. Nothing goes on your servers or your players' PCs, nothing is sent anywhere, and nobody is banned. Production never knows it ran. This does not end cheating.</p>
+    <p class="m-0 mt-6 flex flex-wrap gap-3"><a class="btn-signal" href="#setup">Set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
+  </div>
+</section>
+
+<div class="mx-auto w-full max-w-[1800px] px-10 pb-16 max-md:px-4">
+
+  <section aria-labelledby="safe-title">
+    <p class="zb-kicker">Why it cannot touch production</p>
+    <h2 id="safe-title" class="m-0 mt-4 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">A copy of your logs, and nothing else.</h2>
+    <div class="mt-8 grid grid-cols-4 gap-4 max-xl:grid-cols-2 max-md:grid-cols-1">
+      <article class="rounded-xl border border-line border-t-[3px] border-t-signal panel p-5">
+        <h3 class="m-0 text-base font-medium">Offline.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">It reads files and writes files. It is not in your match loop, your request path or your launcher. Run it on a machine that is not serving matches, and it cannot slow a server or drop a player.</p>
+      </article>
+      <article class="rounded-xl border border-line border-t-[3px] border-t-signal panel p-5">
+        <h3 class="m-0 text-base font-medium">Nothing installed.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">No agent on your servers, no client, no driver on anyone's PC. Plain Python with no packages, on a laptop if you like.</p>
+      </article>
+      <article class="rounded-xl border border-line border-t-[3px] border-t-signal panel p-5">
+        <h3 class="m-0 text-base font-medium">Nothing sent.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Scoring opens no network connection unless you ask for an AI brief with <code class="font-mono text-[0.92em]">--ai</code>. The converter swaps account ids for salted pseudonyms before anything is scored.</p>
+      </article>
+      <article class="rounded-xl border border-line border-t-[3px] border-t-clean panel p-5">
+        <h3 class="m-0 text-base font-medium">Nobody banned.</h3>
+        <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Every case says <code class="font-mono text-[0.92em]">automated_action: none</code>. A review is a file a person opens. What you do with it is up to you, later.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="setup" class="mt-16" aria-labelledby="setup-title">
+    <p class="zb-kicker">Set it up</p>
+    <h2 id="setup-title" class="m-0 mt-4 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Five steps, on one machine.</h2>
+    <ol class="m-0 mt-8 grid list-none gap-4 p-0">
+      <li class="rounded-xl grid grid-cols-[3rem_minmax(0,1fr)] gap-4 border border-line panel p-5 max-md:grid-cols-1">
+        <span class="grid h-8 w-8 place-items-center rounded-full border border-signal font-mono text-xs text-ink" aria-hidden="true">1</span>
+        <div>
+          <h3 class="m-0 text-base font-medium">Get fpsdet, and check it works.</h3>
+          <pre class="m-0 mt-3 overflow-x-auto rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>git clone https://github.com/Nimdy/detect-FPS-hackers
+cd detect-FPS-hackers
+PYTHONPATH=src python3 -m fpsdet demo</code></pre>
+          <p class="m-0 mt-3 text-sm text-muted">The last line should say the planted cases matched. If it does not, stop and tell us.</p>
+        </div>
+      </li>
+      <li class="rounded-xl grid grid-cols-[3rem_minmax(0,1fr)] gap-4 border border-line panel p-5 max-md:grid-cols-1">
+        <span class="grid h-8 w-8 place-items-center rounded-full border border-signal font-mono text-xs text-ink" aria-hidden="true">2</span>
+        <div>
+          <h3 class="m-0 text-base font-medium">Export a week or more of shots and movement.</h3>
+          <p class="m-0 mt-3 text-sm leading-relaxed text-muted">One row per shot and one per movement sample (ten a second is plenty), as CSV with a header row or as JSON lines, from wherever your server's logs land. Every row needs a match, an account and a time. The more fields a row carries, the more checks can run; <a class="text-ink underline decoration-line underline-offset-4" href="#fields">the table below</a> says which.</p>
+        </div>
+      </li>
+      <li class="rounded-xl grid grid-cols-[3rem_minmax(0,1fr)] gap-4 border border-line panel p-5 max-md:grid-cols-1">
+        <span class="grid h-8 w-8 place-items-center rounded-full border border-signal font-mono text-xs text-ink" aria-hidden="true">3</span>
+        <div>
+          <h3 class="m-0 text-base font-medium">Convert it, with pseudonyms.</h3>
+          <p class="m-0 mt-3 text-sm leading-relaxed text-muted">A small map says which of your columns is which fpsdet field. The converter copies only fields fpsdet knows, so names, addresses and chat never reach the output. It swaps account ids for salted pseudonyms, and it checks every value against the schema.</p>
+          <pre class="m-0 mt-3 overflow-x-auto rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>python3 examples/historic/convert.py export.csv --map my-map.json --game my-game --out events.ndjson</code></pre>
+          <pre class="m-0 mt-3 overflow-x-auto rounded-r-lg border-l-[3px] border-clean bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>108 of 108 rows written to events.ndjson.
+  columns not copied (fpsdet has no field for them): ip, name</code></pre>
+          <p class="m-0 mt-3 text-sm text-muted">That is the bundled <code class="font-mono text-[0.92em]">examples/historic/sample.csv</code>, a made-up export with its own column names. Keep the salt file private. <code class="font-mono text-[0.92em]">--who ACCOUNT_ID</code> finds an account's pseudonym again.</p>
+        </div>
+      </li>
+      <li class="rounded-xl grid grid-cols-[3rem_minmax(0,1fr)] gap-4 border border-line panel p-5 max-md:grid-cols-1">
+        <span class="grid h-8 w-8 place-items-center rounded-full border border-signal font-mono text-xs text-ink" aria-hidden="true">4</span>
+        <div>
+          <h3 class="m-0 text-base font-medium">Score it.</h3>
+          <pre class="m-0 mt-3 overflow-x-auto rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>PYTHONPATH=src python3 -m fpsdet score events.ndjson --profile examples/historic/profile.json --out cases/</code></pre>
+          <p class="m-0 mt-3 text-sm leading-relaxed text-muted">The bundled profile is every default, which is enough when your logs carry the speed cap your server applied. On the sample it opens one review: a player who held 7.0 m/s against a 5.6 m/s cap for 30 samples. The player an explosion moved just as fast is not a case. For a fairer comparison with your best players, build the baseline from an earlier window you trust with <code class="font-mono text-[0.92em]">fpsdet baseline</code>, then score a later one with <code class="font-mono text-[0.92em]">--cohort</code>.</p>
+        </div>
+      </li>
+      <li class="rounded-xl grid grid-cols-[3rem_minmax(0,1fr)] gap-4 border border-line panel p-5 max-md:grid-cols-1">
+        <span class="grid h-8 w-8 place-items-center rounded-full bg-signal font-mono text-xs text-bg" aria-hidden="true">5</span>
+        <div>
+          <h3 class="m-0 text-base font-medium">Read what came out.</h3>
+          <p class="m-0 mt-3 text-sm leading-relaxed text-muted"><code class="font-mono text-[0.92em]">cases/dashboard.html</code> is the batch in a browser; its "What the server sends" panel shows how many events carried each field. <code class="font-mono text-[0.92em]">cases/review-index.json</code> is the queue, strongest evidence first. Every case is a <code class="font-mono text-[0.92em]">.json</code> and an <code class="font-mono text-[0.92em]">.html</code>, with the reasons, the numbers, and which checks could run at all. A review is a case to open, not a verdict.</p>
+        </div>
+      </li>
+    </ol>
+    <p class="m-0 mt-6 text-sm text-muted">Every step, as text: <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/examples/historic/README.md">examples/historic/README.md</a>.</p>
+  </section>
+
+  <section id="fields" class="mt-16" aria-labelledby="fields-title">
+    <h2 id="fields-title" class="m-0 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">What your logs need</h2>
+    <p class="m-0 mt-4 max-w-3xl">A field you do not have turns its check off. A wrong one frames players, so send only what your server measured. Every field is on <a class="text-ink underline decoration-line underline-offset-4" href="wire.html">Wire a game</a>.</p>
+    <div class="mt-6 overflow-x-auto">
+      <table class="w-full min-w-[44rem] border-collapse text-left">
+        <thead>
+          <tr>
+            <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">Your logs have</th>
+            <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">fpsdet fields</th>
+            <th class="border-b border-line py-3 pr-6 font-mono text-xs font-normal uppercase tracking-[0.12em] text-muted">Turns on</th>
+          </tr>
+        </thead>
+        <tbody class="align-top text-sm">
+          <tr><td class="border-b border-line py-3 pr-6">Match, account, time</td><td class="border-b border-line py-3 pr-6 font-mono">match_id · player_id · t_ms</td><td class="border-b border-line py-3 pr-6">Required on every row</td></tr>
+          <tr><td class="border-b border-line py-3 pr-6">Ground speed, and the cap the server applied</td><td class="border-b border-line py-3 pr-6 font-mono">speed_mps · on_ground · expected_max_ground_speed_mps</td><td class="border-b border-line py-3 pr-6">Speed over the cap, from the first match</td></tr>
+          <tr><td class="border-b border-line py-3 pr-6">Why a body moved, when the player did not</td><td class="border-b border-line py-3 pr-6 font-mono">displacement_cause</td><td class="border-b border-line py-3 pr-6">Keeps blasts, vehicles and ladders out of speed cases</td></tr>
+          <tr><td class="border-b border-line py-3 pr-6">Shots and hits per weapon</td><td class="border-b border-line py-3 pr-6 font-mono">weapon_id · hit · hitbox · distance_m</td><td class="border-b border-line py-3 pr-6">Accuracy, headshots and distance against the best humans you have measured, once a weapon has 30 players</td></tr>
+          <tr><td class="border-b border-line py-3 pr-6">Shot times, and each gun's cycle</td><td class="border-b border-line py-3 pr-6 font-mono">t_ms on each shot · cycles in the profile</td><td class="border-b border-line py-3 pr-6">Fire rate and the metronome</td></tr>
+          <tr><td class="border-b border-line py-3 pr-6">The kick and the view command, on the same tick</td><td class="border-b border-line py-3 pr-6 font-mono">applied_recoil_pitch_deg · compensation_pitch_deg · spray_index</td><td class="border-b border-line py-3 pr-6">No-recoil and the recoil mirror</td></tr>
+          <tr><td class="border-b border-line py-3 pr-6">What each client could see and hear</td><td class="border-b border-line py-3 pr-6 font-mono">information_state · hidden_track_ms · …</td><td class="border-b border-line py-3 pr-6">The information checks. Few logs have this yet: it is what a live test adds</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mt-16 grid grid-cols-2 gap-8 max-lg:grid-cols-1" aria-labelledby="tell-title">
+    <div class="rounded-xl border border-line border-l-[3px] border-l-signal panel p-6">
+      <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Then</p>
+      <h2 id="tell-title" class="m-0 mt-2 font-mono text-[1.6rem] font-semibold leading-[1.15] tracking-tight text-white">Tell us what you found.</h2>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Counts help most: how many players, which fields you had, what went to review and watch, and above all any honest player who came out as a case. Never post account ids, pseudonyms or names.</p>
+      <p class="m-0 mt-5"><a class="btn-signal" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">Send a result</a></p>
+    </div>
+    <div class="rounded-xl border border-line border-l-[3px] border-l-watch panel p-6">
+      <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">After that</p>
+      <h2 class="m-0 mt-2 font-mono text-[1.6rem] font-semibold leading-[1.15] tracking-tight text-white">Run a live test with us.</h2>
+      <p class="m-0 mt-3 text-sm leading-relaxed text-muted">No studio runs fpsdet today. The checks that need it most have only run on planted fixtures and one Godot pilot: hidden-mover tracking, quiet aim, the wire against the picture, and planned challenges. If you run a dedicated server and can tell your players what is logged, we will help you wire the fields. The Godot reference server shows every one of them.</p>
+      <p class="m-0 mt-5"><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=question.yml">Offer a server</a></p>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer class="relative border-t border-line bg-bg/60">
+  <div class="mx-auto flex w-full max-w-[1800px] flex-wrap items-end justify-between gap-6 px-10 py-8 max-md:px-4">
+    <p class="m-0 basis-full font-mono text-sm"><a class="text-white no-underline" href="https://zerobandwidth.com">Zero<span class="text-signal">Bandwidth</span></a> <span class="text-muted">· the original signal · a ZeroBandwidth system</span></p>
+    <p class="m-0 text-sm text-muted">A person still reviews. This does not end cheating.</p>
+    <p class="m-0 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+      <a class="text-ink no-underline hover:underline" href="index.html">What this is</a>
+      <a class="text-ink no-underline hover:underline" href="scoring.html">Scoring</a>
+      <a class="text-ink no-underline hover:underline" href="wire.html">Wire a game</a>
+      <a class="text-ink no-underline hover:underline" href="games.html">Games</a>
+      <a class="text-ink no-underline hover:underline" href="source.html">Source</a>
+      <a class="text-ink no-underline hover:underline" href="../demo/board.html">Desk</a>
+      <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
+      <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
+      <a class="text-ink no-underline hover:underline" href="try.html" aria-current="page">Try it</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
+    </p>
+  </div>
+</footer>
+</body>
+</html>
