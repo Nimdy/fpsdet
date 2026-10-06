@@ -38,7 +38,7 @@ Every published statement carries one class, and no sentence mixes two ([docs/be
 | Class | What ran | What it showed |
 | --- | --- | --- |
 | Controlled fixtures | All 22 checks against a planted behaviour and its honest twin; the challenge and signature protocols | Each check trips on its plant and stays quiet on its twin. That qualifies code; it is never a rate |
-| Benchmark v1 real data | TF2 league matches with RGL ban labels, under nine predeclared baseline draws; CS2 matches with hand labels | Below. Labels are not ground truth, and most checks cannot run on match totals at all |
+| Benchmark v1 real data | TF2 league matches with RGL ban labels, under nine predeclared baseline draws; CS2 matches with hand labels | Below. Labels are not ground truth and may partly follow suspicious performance, and most checks cannot run on match totals at all |
 | Live controlled pilot | One challenge in a Godot dedicated server with stock clients ([docs/pilot.md](docs/pilot.md)) | All 8 declared scenarios came out as declared, and every capture scored the same offline. Not a deployment or a rate |
 | Consented human pilot | Pre-registered: consenting adults play that arena honestly with probes running ([docs/human-pilot.md](docs/human-pilot.md)) | **No person has played yet.** A machine dry run found that holding an angle still, over a probe resting behind it, can reach the challenge bar |
 
@@ -86,6 +86,8 @@ Run it yourself, on more matches or on your own server's logs, and share what yo
 - **[historical real data]** tf2-rgl-v1's own 6 draws ran from 9.9x to 15.0x. Its extra never-banned players were chosen by the curator's private key, not by this release's public order, so its population differs from this release's, not only its baseline draw.
 
 <!-- benchmark:tf2:end -->
+
+Most of that separation comes from the rank-tail check: better than the player's own rank, inside the best humans measured, which is a watch. RGL's cheating decisions may take suspicious performance into account, so the ratio may partly reflect how the labels were chosen; this data cannot show how much ([docs/calibration.md](docs/calibration.md)).
 
 The desk's **D · Real TF2 matches** tab and [examples/tf2/README.md](examples/tf2/README.md) show the historical published run (tf2-rgl-v1: one baseline draw, chosen by a private key), player by player.
 
@@ -168,7 +170,7 @@ Next week, score the new events against this week's baseline and pass `--history
 
 1. **Hidden mover.** Sustained aim on an enemy this client could neither see nor hear.
 2. **Quiet aim.** Aim noise that drops only while the target is unknowable to this client.
-3. **Private replay, now an active challenge.** A body the server plays only where this client cannot perceive it. Aim that stays on it is a review. The server can plan each one with a secret, for one player, in one match, in one window, and fpsdet then binds the finding to that exact challenge ([docs/challenges.md](docs/challenges.md)). The bar counts time, not intent: in a machine dry run, a stand-in holding a doorway's edge still, over a probe resting behind it, reached it. Until people have played the pilot, treat a challenge review as a case to open, not a verdict.
+3. **Private replay, now an active challenge.** A body the server plays only where this client cannot perceive it. Aim that stays on it is a review. The server can plan each one with a secret, for one player, in one match, in one window, and fpsdet then binds the finding to that exact challenge ([docs/challenges.md](docs/challenges.md)). The bar counts time, not intent: in a machine dry run, a stand-in holding a doorway's edge still, over a probe resting behind it, reached it. Challenge reviews are experimental and not production-qualified. Until the consented human pilot and the research after it say otherwise, treat a challenge review as a case to open, not a verdict.
 4. **Wire, not picture.** The client draws enemies one interpolation delay late. A person aims at the drawn picture; a packet aimbot aims at the newer snapshot.
 
 **Batch checks** look across players:

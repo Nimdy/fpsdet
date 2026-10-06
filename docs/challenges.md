@@ -8,6 +8,8 @@ The server places a probe that the official client never draws or plays, and rec
 
 A challenge never decides anything about an account. Its finding is a review, every case still has `automated_action: "none"`, and a person decides.
 
+**Challenge reviews are experimental and not production-qualified.** The bar counts time on the probe, not why the aim was there. In the human pilot's machine dry run, a stand-in holding a doorway's edge still, over a probe resting in the sealed room behind it, reached it ([human-pilot.md](human-pilot.md)). The consented human pilot is testing how often honest play does the same, and the scoring stays frozen until it and the research after it report.
+
 ## What exists
 
 | | Status |

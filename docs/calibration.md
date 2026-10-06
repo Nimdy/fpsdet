@@ -15,6 +15,8 @@ Source: RGL's public ban list, joined to server-logged league matches kept by lo
 | `other ban` | RGL banned the account for something other than cheating, such as an alt account | Anything about cheating |
 | `vac` | RGL mirrored a Valve ban, possibly from another game | That the player cheated in TF2 |
 
+**Label-selection confounding.** A league's cheating decisions may take suspicious performance into account: a player who looks too good draws reports and attention. A check that fires on performance, such as the rank tail (better than the player's own rank, inside the best humans measured), may therefore separate these labels partly because of how the labels were chosen. This data cannot show how much of the observed separation comes from that. Benchmark v1's frozen claims do not state it; the next benchmark release states it as a limit.
+
 **How the matches are chosen.**
 - **Ban date:** a banned account's matches count only before the ban date.
 - **Equal evidence:** every player keeps at most their 20 latest team matches (6v6, prolander or highlander, 12 or more players).

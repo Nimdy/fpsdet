@@ -1,7 +1,7 @@
 [project]
 name = "fpsdet"
 version = "0.3.0"
-description = "Server-side human-play and gear-rule baselines for FPS anti-cheat"
+description = "Server-side evidence for FPS cheats: deterministic checks on what the dedicated server accepted and what each client could know"
 readme = "README.md"
 license = { text = "PolyForm-Small-Business-1.0.0" }
 requires-python = ">=3.11"

@@ -99,7 +99,7 @@
       <div>
         <p class="m-0">A <a class="text-ink underline decoration-line underline-offset-4" href="decoys.html">decoy</a> becomes a challenge when the server plans it with a secret: at least 32 random bytes that never leave the game server. Each challenge is keyed to the game, the match, the player and its place in that player's match. The code is public, this recipe included. Without the secret, no one can compute when, where or how the next probe runs, even knowing every earlier one.</p>
         <p class="m-0 mt-4">The plan holds ids, windows and commitments, and no realization. The game server derives where the body goes, keeps it while the challenge runs, and writes <code class="font-mono text-[0.92em]">challenge_id</code> and <code class="font-mono text-[0.92em]">challenge_track_ms</code> on the player's events. fpsdet binds a finding to that exact challenge. Scoring, reviewing and verifying a case never need the secret.</p>
-        <p class="m-0 mt-4">Version 2 of the challenge counts a moment only when the server's own verdict for that moment says the body was neither seen nor heard. One moment where it was seen or heard voids the challenge. So does a contradiction. A badly placed probe ends as an abstention, not as evidence.</p>
+        <p class="m-0 mt-4"><strong class="font-medium">Challenge reviews are experimental and not production-qualified.</strong> The consented human pilot is testing exactly how often honest play reaches them. Version 2 of the challenge counts a moment only when the server's own verdict for that moment says the body was neither seen nor heard. One moment where it was seen or heard voids the challenge. So does a contradiction. A badly placed probe ends as an abstention, not as evidence.</p>
       </div>
       <div>
         <pre class="m-0 overflow-x-auto border-l-[3px] border-signal bg-plot p-5 font-mono text-[13px] leading-relaxed"><code>fpsdet challenge keygen --out secret.hex
@@ -147,7 +147,7 @@ fpsdet challenge verify plan.json --secret-file secret.hex</code></pre>
             <td class="border-b border-line py-3 pr-6 font-mono">benchmark v1 real data</td>
             <td class="border-b border-line py-3 pr-6">TF2 league matches: 10,149 server logs from logs.tf, 228 accounts RGL banned for cheating, never-banned players from the same lobbies, scored under 9 baseline draws fixed before any ran.</td>
             <td class="border-b border-line py-3 pr-6">Flagged for review or watch: a median 28.6% of the banned accounts it could compare, against 3.2% of the never-banned. 8.9× at the median, 7.7× to 10.4× across the draws. No never-banned player went to review in any draw.</td>
-            <td class="border-b border-line py-3 pr-6 text-muted">How well fpsdet detects cheating in general. Bans are labels, and most checks cannot be observed on match totals at all.</td>
+            <td class="border-b border-line py-3 pr-6 text-muted">How well fpsdet detects cheating in general. Bans are labels, and may partly follow suspicious performance; most of the separation is the rank-tail check, and most checks cannot be observed on match totals at all.</td>
           </tr>
           <tr>
             <td class="border-b border-line py-3 pr-6 font-mono">benchmark v1 real data</td>

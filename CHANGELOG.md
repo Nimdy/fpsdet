@@ -4,6 +4,12 @@
 
 ### Changed
 
+- **What the numbers can and cannot carry.**
+  - Challenge reviews are now labelled experimental and not production-qualified on every public page, in the README and in docs/challenges.md. Scoring and case text are unchanged: the study keeps them frozen, and case text is sealed.
+  - The home page's 8.9× says most of it is the rank-tail check, a watch-level signal. Its "0 never-banned to review" tile says how rarely anyone reaches review on match totals: 1 to 10 banned accounts per draw.
+  - docs/calibration.md names possible label-selection confounding: league cheating decisions may take suspicious performance into account. Benchmark v1's frozen claims are unchanged.
+  - The GitHub description, topics and the package description no longer say "ML and AI".
+
 - **The public pages and the README say where the work stands.** The site predated the evidence work; it now matches the committed artifacts, and tests tie its numbers to them.
   - **The home page** leads with FPSDET Benchmark v1: TF2 over nine predeclared baseline draws (a median 8.9×, 7.7× to 10.4×, and no never-banned player sent to review in any draw) and CS2. The first TF2 run, one draw chosen by a private key, is linked only as a historical record.
   - **A new evidence page** (`site/evidence.html`) covers:

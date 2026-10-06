@@ -1810,9 +1810,12 @@ class OpsTest(unittest.TestCase):
         self.assertIn(f"A median {across['positive_rate']['median']:.1%} of the banned accounts it could compare were flagged for review or watch, "
                       f"against {across['comparison_rate']['median']:.1%} of never-banned players. "
                       f"{across['ratio']['min']:.1f}× to {across['ratio']['max']:.1f}× across the nine draws.", index)
-        # "0 never-banned players sent to review, in any draw"
+        # "0 never-banned players sent to review, in any draw", beside how rarely anyone reaches review on match totals.
         self.assertEqual({draw["numbers"]["comparison"]["review"] for draw in draws}, {0})
         self.assertIn("never-banned players sent to review, in any draw", index)
+        reviews = sorted(draw["numbers"]["positive"]["review"] for draw in draws)
+        self.assertIn(f"Few checks can reach review on match totals: {reviews[0]} to {reviews[-1]} banned accounts did per draw, median {reviews[len(reviews) // 2]}.", index)
+        self.assertIn("Most of it is the rank-tail check, a watch-level signal, and league bans may partly follow suspicious performance.", index)
         missed = sorted(draw["numbers"]["positive"]["eligible"] - draw["numbers"]["positive"]["flagged"] for draw in draws)
         (eligible,) = {draw["numbers"]["positive"]["eligible"] for draw in draws}
         self.assertIn(f"{missed[len(missed) // 2]} of {eligible}</p>", index)
@@ -2508,6 +2511,23 @@ class TryItTest(unittest.TestCase):
             self.assertIn('src="img/setup-quest.svg" width="1200" height="700" alt="The setup as a game quest.', page)
         self.assertIn("template=live_test.yml", try_page)
         self.assertNotIn("template=question.yml", try_page)
+
+
+class ChallengeStatusTest(unittest.TestCase):
+    """Until the consented human pilot and the research after it report, every public description of a challenge
+    review says it is experimental. The scoring itself stays frozen, and case text is untouched: it is sealed."""
+
+    def test_every_public_description_of_a_challenge_review_says_it_is_experimental(self):
+        from fpsdet.pages import write_pages
+
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = write_pages(build_demo(), tmp)
+            pages = {name: (dest / name).read_text(encoding="utf-8") for name in ("index.html", "evidence.html", "scoring.html", "wire.html", "decoys.html")}
+        texts = {**pages, "README.md": (ROOT / "README.md").read_text(encoding="utf-8"),
+                 "docs/challenges.md": (ROOT / "docs" / "challenges.md").read_text(encoding="utf-8")}
+        for name, text in texts.items():
+            self.assertIn("Challenge reviews are experimental and not production-qualified.", text, name)
+        self.assertIn("Label-selection confounding.", (ROOT / "docs" / "calibration.md").read_text(encoding="utf-8"))
 
 if __name__ == "__main__":
     unittest.main()
