@@ -1,6 +1,6 @@
 # The consented honest-human pilot
 
-**Status: designed, instrumented, dry-run with machines, and amended twice before collection. No person has played yet, and there are no human results.** Everything below that is a number comes from machine stand-ins and says so.
+**Status: designed, instrumented, dry-run with machines, and amended three times before collection. No person has played yet, and there are no human results.** Everything below that is a number comes from machine stand-ins and says so.
 
 **The question:** when honest people play the repository's own Godot pilot ([pilot.md](pilot.md)), normally and aggressively, how often and for how long does their aim behave like challenge tracking? How close do they come to producing challenge evidence?
 
@@ -164,6 +164,15 @@ Declared in [examples/human-pilot/amendment-2.json](../examples/human-pilot/amen
 
   Tests hold each boundary.
 - **A known confound:** probes in this arena replay a bot's route inside sealed rooms 1.2 to 2.3 m wide, and in the stress and sweep modes that bot stands still, so probes here are often near-still. A finding may say as much about this placement as about the challenge type, and the next phase must separate the two.
+
+## Amendment 3
+
+Declared in [examples/human-pilot/amendment-3.json](../examples/human-pilot/amendment-3.json) on 2026-10-06, before anyone enrolled. It binds the design and both earlier amendments by digest. It settles one case amendment 2 left open: the participant whose session stopped the study for good asks for their data to be deleted.
+
+- **Deletion always wins.**
+- **Collection stays ended.** The final stop cannot be cleared, with or without its data: the operator saw it happen, and continuing without investigation would not be safe.
+- **The stop no longer names them.** `study.py withdraw` rewrites `STOP` and `stops.log`, so no line holds their random id. A final stop keeps its words and gains the note "deleted at the participant's request: withdrawn evidence, not reportable". Consent version 2's promise still holds, so the notice is unchanged.
+- **The answer is indeterminate.** A withdrawn finding is not a positive human finding, and the study cannot claim a clean result either. Nothing from the deleted session is reported: no metric, rate, interval or bound. A finding still on record answers "yes" first.
 
 ## Running it
 

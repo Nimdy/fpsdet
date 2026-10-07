@@ -1,0 +1,37 @@
+{
+ "format": "fpsdet.human-pilot-amendment/1",
+ "study": "p13-consented-honest-human-pilot",
+ "amendment": 3,
+ "amends": {
+  "design": {
+   "path": "examples/human-pilot/design.json",
+   "sha256": "sha256:f12c0f830d8b35f9df74b70af826ae52550bf522ceda4574f2041c317607412f"
+  },
+  "amendment_1": {
+   "path": "examples/human-pilot/amendment-1.json",
+   "sha256": "sha256:e9b9a44456058f8c687d27d4b7bc5cbee3ad10133927b53a7b189c971044750d"
+  },
+  "amendment_2": {
+   "path": "examples/human-pilot/amendment-2.json",
+   "sha256": "sha256:b6def4015874e8f6504def7a9ca9a3e0d74e28f5ad65083b1ec558c3ad757db9"
+  }
+ },
+ "declared": "2026-10-06, before any participant enrolled",
+ "why": "Amendment 2 honours a deletion request even when the deleted session holds the evidence of a final stop, but does not say what that stop then means, and its stop record would still name the participant. This settles both before anyone plays.",
+ "rule": {
+  "deletion": "Always honoured, as amendment 2 says.",
+  "collection": "Stays terminated. A stop for review-grade evidence on a protocol-valid honest session cannot be cleared, with or without its data: the operator saw it happen, and continuing without investigation would not be safe.",
+  "stop_record": "study.py withdraw rewrites STOP and stops.log so that no line names the participant: their id becomes 'a withdrawn participant', and a final stop gains the note below. Consent version 2's promise holds: only a note that someone withdrew is kept under their random code.",
+  "note": "deleted at the participant's request: withdrawn evidence, not reportable",
+  "primary_answer": "indeterminate: a protocol-valid finding was withdrawn at the participant's request. It is not a positive human finding, and the study cannot claim a clean result either.",
+  "reporting": "No metric from the deleted session is kept or reported: no rate, no interval and no bound.",
+  "precedence": "A retained protocol-valid finding answers yes. With none retained, a withdrawn one makes the answer indeterminate."
+ },
+ "unchanged": [
+  "everything in design.json and amendments 1 and 2 that this does not name",
+  "consent version 2: its text already promises that only a note that someone withdrew is kept"
+ ],
+ "code_changed": [
+  "examples/human-pilot/study.py"
+ ]
+}

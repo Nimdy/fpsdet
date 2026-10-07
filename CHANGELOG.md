@@ -38,6 +38,13 @@
 
 ### Added
 
+- **Amendment 3 to the human pilot, before anyone enrolled** ([examples/human-pilot/amendment-3.json](examples/human-pilot/amendment-3.json)). If the participant whose session stopped the study for good asks for deletion:
+  - deletion is honoured, and collection stays ended;
+  - `withdraw` rewrites `STOP` and `stops.log` so no line names them, and marks the final stop as withdrawn evidence;
+  - the analysis answers the primary question "indeterminate", with nothing from the deleted session.
+
+  Consent version 2 is unchanged.
+
 - **Amendment 2 to the human pilot, before anyone enrolled** ([examples/human-pilot/amendment-2.json](examples/human-pilot/amendment-2.json)). Outside review found collection holes that could deadlock, bias or overclaim the study. Nothing that decides a challenge changed.
   - **Participant states and replacements:**
     - at most 4 in play until 4 have completed, then at most 12;

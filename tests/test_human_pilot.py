@@ -206,7 +206,8 @@ class DryRunTest(unittest.TestCase):
         now = harness().code_identity()
         self.assertEqual(set(now), set(found["code"]))
         changed = sorted(path for path in now if now[path] != found["code"][path])
-        named = set(record["changed_by_this_amendment"]) | set(amendment_2()["code_changed"])
+        named = set(record["changed_by_this_amendment"]).union(*(json.loads(path.read_text(encoding="utf-8")).get("code_changed", [])
+                                                                 for path in STUDY.glob("amendment-*.json")))
         self.assertLessEqual(set(changed), named, "only the files the amendments name may differ")
 
     def test_its_code_is_the_commit_it_names_when_history_is_available(self):
@@ -494,7 +495,7 @@ class Amendment2Test(unittest.TestCase):
             participant = self.enrolled(data)
             record = study.load_participant(data, participant)
         self.assertEqual(record["bindings"], study.bindings())
-        self.assertEqual(set(record["bindings"]), {"consent", "design", "amendment_1", "amendment_2"})
+        self.assertEqual(set(record["bindings"]), {"consent", "design", "amendment_1", "amendment_2", "amendment_3"})
         self.assertEqual((record["status"], record["history"][0]["status"]), ("enrolled", "enrolled"))
 
     def test_a_session_needs_a_passed_practice_the_next_mode_and_the_same_bindings(self):
@@ -649,6 +650,71 @@ class Amendment2Test(unittest.TestCase):
         split = amendment_2()["motion_definitions"]["split"]
         self.assertEqual(split["co_moving"], "aw >= 2.0 and pw >= 2.0 and co is not null and co <= 45.0")
         self.assertEqual(amendment()["metrics_added"]["frozen"]["still_deg_per_s"], 2.0)
+
+
+class Amendment3Test(unittest.TestCase):
+    """Amendment 3, declared before anyone enrolled: what a final stop means once its participant asks for deletion."""
+
+    def test_it_binds_the_earlier_documents_and_leaves_consent_alone(self):
+        found, study = json.loads((STUDY / "amendment-3.json").read_text(encoding="utf-8")), harness()
+        self.assertEqual((found["format"], found["amendment"]), ("fpsdet.human-pilot-amendment/1", 3))
+        for name, path in (("design", "design.json"), ("amendment_1", "amendment-1.json"), ("amendment_2", "amendment-2.json")):
+            self.assertEqual(found["amends"][name]["sha256"], study.pilot.sha256_file(STUDY / path), name)
+        self.assertIn("before any participant enrolled", found["declared"])
+        self.assertIn("*Consent notice, version 2.*", (STUDY / "CONSENT.md").read_text(encoding="utf-8"))
+        self.assertEqual(study.withdrawn_note(), found["rule"]["note"])
+
+    def test_deleting_a_final_stops_session_keeps_collection_ended_and_unnames_them(self):
+        import argparse
+        import contextlib
+        import io
+        import tempfile
+
+        study = harness()
+        with tempfile.TemporaryDirectory() as folder:
+            data = Path(folder)
+            with contextlib.redirect_stdout(io.StringIO()):
+                study.cmd_enroll(argparse.Namespace(data=str(data), agree=True, publish=False, kind="human"))
+                study.cmd_enroll(argparse.Namespace(data=str(data), agree=True, publish=False, kind="human"))
+            first, second = sorted(path.parent.name for path in data.glob("hp-*/participant.json"))
+            (data / first / "angle_holding-1").mkdir()
+            (data / first / "angle_holding-1" / "session.json").write_text(json.dumps({"participant": first, "kind": "human", "mode": "angle_holding",
+                                                                                     "session": "angle_holding-1", "review_grade": True}))
+            study.stop(data, [f"{first} angle_holding-1: {study.FALSIFYING}: stop collection", f"{first} angle_holding-1: a packet or graph does not verify"])
+            with open(data / "stops.log", "w", encoding="utf-8") as log:
+                log.write(json.dumps({"stopped": f"{second} free-1: an address in a kept file", "cleared": "2026-10-06",
+                                      "investigation": f"{second}'s comment held an address; removed"}) + "\n")
+            with contextlib.redirect_stdout(io.StringIO()):
+                study.cmd_withdraw(argparse.Namespace(data=str(data), participant=first, reason="participant_request", practice=None))
+                study.cmd_withdraw(argparse.Namespace(data=str(data), participant=second, reason="participant_request", practice=None))
+            stop_text = (data / "STOP").read_text(encoding="utf-8")
+            log_text = (data / "stops.log").read_text(encoding="utf-8")
+            for name in (first, second):
+                self.assertNotIn(name, stop_text)
+                self.assertNotIn(name, log_text)
+            lines = stop_text.splitlines()
+            self.assertIn(study.FALSIFYING, lines[0])
+            self.assertTrue(lines[0].endswith(f"[{study.withdrawn_note()}]"))
+            self.assertNotIn(study.withdrawn_note(), lines[1], "only a final stop is marked withdrawn evidence")
+            # Collection stays ended.
+            with self.assertRaises(SystemExit):
+                study.cmd_clear_stop(argparse.Namespace(data=str(data), reason="the data is gone"))
+            with self.assertRaises(SystemExit), contextlib.redirect_stdout(io.StringIO()):
+                study.cmd_enroll(argparse.Namespace(data=str(data), agree=True, publish=False, kind="human"))
+            # The answer is neither yes nor no, and nothing from the deleted session is reported.
+            body = study.analyze(data, "human")
+        self.assertEqual(body["primary"]["answer"], json.loads((STUDY / "amendment-3.json").read_text(encoding="utf-8"))["rule"]["primary_answer"])
+        self.assertNotIn("upper_95_if_none", body["primary"])
+        self.assertNotIn("findings", body["primary"])
+        self.assertEqual((body["units"]["sessions"], body["participants"]["withdrawn"]), (0, 2))
+
+    def test_a_retained_finding_answers_yes_before_a_withdrawn_one(self):
+        study = harness()
+        units = {"participants": 4, "sessions": 28, "challenges": 112}
+        retained = [{"participant": "hp-2", "session": "stress-1", "mode": "stress"}]
+        self.assertEqual(study.endpoint(retained, False, units, withdrawn=True)["answer"], "yes")
+        self.assertTrue(study.endpoint([], True, units, withdrawn=True)["answer"].startswith("indeterminate"))
+        self.assertEqual(study.endpoint([], True, units, withdrawn=False)["answer"], "no")
 
 if __name__ == "__main__":
     unittest.main()

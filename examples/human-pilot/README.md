@@ -78,6 +78,8 @@ Do not edit, pull or switch the repository between the first session and the ana
   ```
 
   If any of their samples were published in the repository, the command lists them: delete those too.
+
+  If their session had stopped the study for good, collection stays ended. The stop no longer names them, and the analysis reports the finding as withdrawn evidence, neither a result nor a clean run (amendment 3).
 - **They cannot continue, but did not ask for deletion:** use `--reason unable_to_continue`. Their sessions stay, and their place is freed.
 
 ## If the study stops

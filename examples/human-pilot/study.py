@@ -26,7 +26,9 @@ planner and a fresh secret, and runs the study server and the participant's clie
 
 A stop condition writes STOP into the data folder, and no session starts until the operator clears it. A
 review-grade finding on a protocol-valid honest session cannot be cleared: collection ends there. One on a
-session already invalid before it was scored may be cleared after investigation (amendment 2).
+session already invalid before it was scored may be cleared after investigation (amendment 2). If the participant
+behind a final stop then asks for deletion, the stop stays, no longer names them, and the finding is reported as
+withdrawn, not as a result (amendment 3).
 
 Standard library only, beside fpsdet.
 """
@@ -61,6 +63,7 @@ PROJECT = ROOT / "examples" / "pilot" / "godot"
 DESIGN = HERE / "design.json"
 AMENDMENT = HERE / "amendment-1.json"
 AMENDMENT_2 = HERE / "amendment-2.json"
+AMENDMENT_3 = HERE / "amendment-3.json"
 CONSENT = HERE / "CONSENT.md"
 # Amendment 2: what a participant can be, which of those are out of play, and why a session may not count.
 INACTIVE = ("practice_failed", "withdrawn", "discontinued")
@@ -91,6 +94,15 @@ def amendment_2() -> dict:
     return json.loads(AMENDMENT_2.read_text(encoding="utf-8"))
 
 
+def amendment_3() -> dict:
+    return json.loads(AMENDMENT_3.read_text(encoding="utf-8"))
+
+
+def withdrawn_note() -> str:
+    """What a final stop says once its participant asked for deletion (amendment 3)."""
+    return amendment_3()["rule"]["note"]
+
+
 def questions() -> list[str]:
     """design.json's questions, then amendment 1's, then amendment 2's."""
     return [*design()["questionnaire"], *amendment()["questionnaire"]["added"], amendment_2()["validity"]["question_added"]]
@@ -104,7 +116,7 @@ def validity_reasons() -> list[str]:
 def bindings() -> dict:
     """What a participant agreed to and under which protocol, bound at enrollment (amendment 2)."""
     return {"consent": pilot.sha256_file(CONSENT), "design": pilot.sha256_file(DESIGN), "amendment_1": pilot.sha256_file(AMENDMENT),
-            "amendment_2": pilot.sha256_file(AMENDMENT_2)}
+            "amendment_2": pilot.sha256_file(AMENDMENT_2), "amendment_3": pilot.sha256_file(AMENDMENT_3)}
 
 
 def code_identity() -> dict:
@@ -661,14 +673,18 @@ def summary(values: list[float]) -> dict:
     return {"n": len(values), "median": quantile(values, 0.5), "p90": quantile(values, 0.9), "p95": quantile(values, 0.95), "max": max(values, default=None)}
 
 
-def endpoint(findings: list[dict], complete: bool, units: dict) -> dict:
+def endpoint(findings: list[dict], complete: bool, units: dict, withdrawn: bool = False) -> dict:
     """Amendment 2: the primary question, and which statistics its answer allows. The study stops on its first
-    finding and continues only without one, so it is a falsification test, never a prevalence estimate."""
+    finding and continues only without one, so it is a falsification test, never a prevalence estimate.
+    Amendment 3: a finding whose participant then asked for deletion makes the answer indeterminate."""
     question = amendment_2()["statistics"]["primary_question"]
     if findings:
         return {"question": question, "answer": "yes",
                 "findings": [{key: row[key] for key in ("participant", "session", "mode")} for row in findings],
                 "statistics": "the finding and descriptive counts only: no rate and no interval, at any level (amendment 2)"}
+    if withdrawn:
+        return {"question": question, "answer": amendment_3()["rule"]["primary_answer"],
+                "statistics": "nothing from the deleted session: no metric, no rate, no interval and no bound; collection ended (amendment 3)"}
     if not complete:
         return {"question": question, "answer": "not yet: the planned group has not completed",
                 "statistics": "descriptive counts only until the planned group completes (amendment 2)"}
@@ -676,6 +692,47 @@ def endpoint(findings: list[dict], complete: bool, units: dict) -> dict:
             "upper_95_if_none": {unit: {"of": n, "bound": upper_zero(n)} for unit, n in units.items()},
             "statistics": ("exact one-sided 95% upper bounds with no finding, at each level, the participant level first. They follow the "
                            "pre-declared continuation rule, and none of them is a false-positive rate (amendment 2)")}
+
+
+def stop_lines(data: Path) -> list[str]:
+    """Every stop the study recorded: the open one, and the cleared ones in stops.log."""
+    lines = (stopped(data) or "").splitlines()
+    if (data / "stops.log").exists():
+        lines += [line for entry in (data / "stops.log").read_text(encoding="utf-8").splitlines() if entry.strip()
+                  for line in json.loads(entry)["stopped"].splitlines()]
+    return lines
+
+
+def withdrawn_finding(data: Path) -> bool:
+    """Whether a final stop's participant asked for deletion (amendment 3)."""
+    return any(FALSIFYING in line and withdrawn_note() in line for line in stop_lines(data))
+
+
+def unlink_stops(data: Path, participant: str) -> int:
+    """Amendment 3: rewrite STOP and stops.log so that no line names a participant who asked for deletion. A final
+    stop keeps its words, so it still cannot be cleared, and gains the note that its evidence was withdrawn."""
+    pattern = re.compile(rf"\b{re.escape(participant)}\b")
+    changed = 0
+
+    def rewrite(text: str) -> str:
+        nonlocal changed
+        out = []
+        for line in text.splitlines():
+            if pattern.search(line):
+                changed += 1
+                line = pattern.sub("a withdrawn participant", line)
+                if FALSIFYING in line:
+                    line += f" [{withdrawn_note()}]"
+            out.append(line)
+        return "\n".join(out) + ("\n" if text.endswith("\n") else "")
+
+    if (data / "STOP").exists():
+        (data / "STOP").write_text(rewrite((data / "STOP").read_text(encoding="utf-8")), encoding="utf-8")
+    if (data / "stops.log").exists():
+        entries = [json.loads(line) for line in (data / "stops.log").read_text(encoding="utf-8").splitlines() if line.strip()]
+        entries = [{key: rewrite(value) if isinstance(value, str) else value for key, value in entry.items()} for entry in entries]
+        (data / "stops.log").write_text("".join(json.dumps(entry) + "\n" for entry in entries), encoding="utf-8")
+    return changed
 
 
 def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
@@ -707,7 +764,7 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
             status in ("enrolled", "practice_passed") for status in tally)
     else:
         complete = True
-    primary = endpoint([row for row in included if row["review_grade"]], complete, units)
+    primary = endpoint([row for row in included if row["review_grade"]], complete, units, withdrawn_finding(data))
     per_participant = []
     for participant in participants:
         mine = [challenge for challenge in challenges if challenge["participant"] == participant]
@@ -796,6 +853,7 @@ def analyze(data: Path, kind: str, samples: list[dict] | None = None) -> dict:
         **({"motion": motion_summary(challenges)} if challenges and "both_still_ms" in challenges[0] else {}),
         "amendment": {"path": "examples/human-pilot/amendment-1.json", "sha256": pilot.sha256_file(AMENDMENT)},
         "amendment_2": {"path": "examples/human-pilot/amendment-2.json", "sha256": pilot.sha256_file(AMENDMENT_2)},
+        "amendment_3": {"path": "examples/human-pilot/amendment-3.json", "sha256": pilot.sha256_file(AMENDMENT_3)},
         "stop": {"stopped": stopped(data) is not None, "reason": stopped(data),
                  "history": [json.loads(line) for line in (data / "stops.log").read_text().splitlines()] if (data / "stops.log").exists() else []},
         "runtime": {
@@ -1026,7 +1084,12 @@ def cmd_withdraw(args: argparse.Namespace) -> int:
     kept = {"participant": record["participant"], "kind": "human", "status": "withdrawn", "sessions_deleted": True, "reason_class": args.reason,
             "withdrawn": datetime.date.today().isoformat(), "bindings": record.get("bindings")}
     save_participant(data, kept)
+    unlinked = unlink_stops(data, args.participant)
     print(f"{args.participant} withdrew: deleted {', '.join(deleted) or 'nothing (no sessions yet)'}. Kept: that someone withdrew, under the random id.")
+    if unlinked:
+        print(f"{unlinked} stop line(s) no longer name them (amendment 3).")
+        if withdrawn_finding(data):
+            print("Their session had stopped the study for good. Collection stays ended; the finding is withdrawn evidence, not a result.")
     published = sorted((ROOT / "examples" / "human-pilot" / "sessions").glob(f"{args.participant}-*"))
     if published:
         print("Their published samples are in the repository; delete them too, and record the withdrawal in the next analysis:")
