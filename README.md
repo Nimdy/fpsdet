@@ -1,4 +1,4 @@
-# detect-FPS-hackers
+# fpsdet
 
 **fpsdet** is server-side anti-cheat evidence for first-person shooters. Your dedicated game server writes one JSON line per shot and per movement sample. fpsdet scores each player against the game's own rules, against the best humans you have measured, and against what that player's client could have known, then writes a case file for a person to review.
 
@@ -29,7 +29,7 @@ That is a first look: without `--cohort` the baseline is fitted on the same file
 
 ![The setup as a game quest: five levels from git clone to reading the cases, with prod HP at 100 of 100 and nobody banned](site/img/setup-quest.svg)
 
-[examples/historic](examples/historic/README.md) has the five steps, a sample export and the field map, and the [Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html) shows the same steps. Then [tell us what you found](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml), counts only, never ids. If it holds up, [offer a server for a live test](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=live_test.yml).
+[examples/historic](examples/historic/README.md) has the five steps, a sample export and the field map, and the [Try it page](https://nimdy.github.io/fpsdet/try.html) shows the same steps. Then [tell us what you found](https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml), counts only, never ids. If it holds up, [offer a server for a live test](https://github.com/Nimdy/fpsdet/issues/new?template=live_test.yml).
 
 ## Where it stands
 
@@ -44,7 +44,7 @@ Every published statement carries one class, and no sentence mixes two ([docs/be
 
 ## See it
 
-- **The site:** <https://nimdy.github.io/detect-FPS-hackers/>, with the review desk, the [decoys page](https://nimdy.github.io/detect-FPS-hackers/decoys.html) and the [evidence page](https://nimdy.github.io/detect-FPS-hackers/evidence.html): what a case carries and what has been tested.
+- **The site:** <https://nimdy.github.io/fpsdet/>, with the review desk, the [decoys page](https://nimdy.github.io/fpsdet/decoys.html) and the [evidence page](https://nimdy.github.io/fpsdet/evidence.html): what a case carries and what has been tested.
 
 ## Try it in two minutes
 
@@ -70,9 +70,9 @@ Then open `demo/board.html` in a browser, the review desk. It works offline and 
 
 [examples/cs2](examples/cs2/README.md) converts CS2CD, a public CC BY 4.0 dataset of CS2 matchmaking matches with hand-labelled cheaters, into fpsdet events, then scores them against a baseline built from clean matches. The README there has the results, including what one match per player cannot show.
 
-The scored run is in the desk too: **C · Real CS2 matches** in the [review desk](https://nimdy.github.io/detect-FPS-hackers/board.html), or `demo/cs2.html` after `fpsdet demo`. Every player has fpsdet's decision, the reason, and the dataset's label beside it.
+The scored run is in the desk too: **C · Real CS2 matches** in the [review desk](https://nimdy.github.io/fpsdet/board.html), or `demo/cs2.html` after `fpsdet demo`. Every player has fpsdet's decision, the reason, and the dataset's label beside it.
 
-Run it yourself, on more matches or on your own server's logs, and share what you find with the [result form](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml).
+Run it yourself, on more matches or on your own server's logs, and share what you find with the [result form](https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml).
 
 ## Try it on real Team Fortress 2 matches
 
@@ -245,7 +245,7 @@ If the server never sends an enemy's position to a client that cannot see or hea
 
 ## Add one thing: decoys
 
-Statistics catch a cheater who is past every human. A careful one stays inside the human range: in the historical published TF2 run (one baseline draw), 131 of 189 banned cheaters still looked clean. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear, replaying another player's real movement; the game never draws it, and only software reading memory or packets can follow it. fpsdet scores the tracking from one field, `private_track_ms`, or, for a planned challenge, from `challenge_id` and `challenge_track_ms`: `fpsdet challenge plan` derives each player's challenges from a server-held secret and writes only ids, windows and commitments, so the code can be public and the next challenge still cannot be predicted ([docs/challenges.md](docs/challenges.md)). Challenge-aware cheats can ignore probes, and pixel aimbots never see them; that page lists what gets through. The [decoys page](https://nimdy.github.io/detect-FPS-hackers/decoys.html) explains it with diagrams, lists the rules that keep honest players safe, and answers whether it can be countered. A reference integration runs one challenge live, in a Godot dedicated server with stock clients, from the secret-derived plan to evidence reproduced offline ([docs/pilot.md](docs/pilot.md)): a controlled pilot, not a detection rate. A pre-registered pilot with consenting people playing that arena honestly is ready, and no person has played it yet ([docs/human-pilot.md](docs/human-pilot.md)). Its machine dry run already found the honest case to worry about: holding a doorway's edge while a probe rests behind it reached the bar.
+Statistics catch a cheater who is past every human. A careful one stays inside the human range: in the historical published TF2 run (one baseline draw), 131 of 189 banned cheaters still looked clean. A decoy is evidence that does not depend on skill. The server sends one client a body that client cannot see or hear, replaying another player's real movement; the game never draws it, and only software reading memory or packets can follow it. fpsdet scores the tracking from one field, `private_track_ms`, or, for a planned challenge, from `challenge_id` and `challenge_track_ms`: `fpsdet challenge plan` derives each player's challenges from a server-held secret and writes only ids, windows and commitments, so the code can be public and the next challenge still cannot be predicted ([docs/challenges.md](docs/challenges.md)). Challenge-aware cheats can ignore probes, and pixel aimbots never see them; that page lists what gets through. The [decoys page](https://nimdy.github.io/fpsdet/decoys.html) explains it with diagrams, lists the rules that keep honest players safe, and answers whether it can be countered. A reference integration runs one challenge live, in a Godot dedicated server with stock clients, from the secret-derived plan to evidence reproduced offline ([docs/pilot.md](docs/pilot.md)): a controlled pilot, not a detection rate. A pre-registered pilot with consenting people playing that arena honestly is ready, and no person has played it yet ([docs/human-pilot.md](docs/human-pilot.md)). Its machine dry run already found the honest case to worry about: holding a doorway's edge while a probe rests behind it reached the bar.
 
 ## Next to your other integrity systems
 
@@ -356,7 +356,7 @@ Every pair of accounts on a weapon is compared for shared leftovers. That is fin
 - [docs/human-pilot.md](docs/human-pilot.md): the consented honest-human pilot, its design and its machine dry run
 - [docs/architecture-v1.md](docs/architecture-v1.md): the architecture the evidence work follows
 
-The public site is `site/*.html`. `fpsdet pages` writes it, plus a fresh desk, into `_site/`, and `.github/workflows/pages.yml` publishes it to <https://nimdy.github.io/detect-FPS-hackers/>. The 2021 essay is archived at [docs/archive/2021-whitepaper.md](docs/archive/2021-whitepaper.md).
+The public site is `site/*.html`. `fpsdet pages` writes it, plus a fresh desk, into `_site/`, and `.github/workflows/pages.yml` publishes it to <https://nimdy.github.io/fpsdet/>. The 2021 essay is archived at [docs/archive/2021-whitepaper.md](docs/archive/2021-whitepaper.md).
 
 ## Layout
 
@@ -385,4 +385,4 @@ Report a bypass or a way to frame an honest player privately; see [SECURITY.md](
 
 ## License
 
-[PolyForm Small Business 1.0.0](LICENSE.md). It is source-available, not OSI open source. Use for the benefit of a company with fewer than 100 people and less than US$1M revenue in the prior tax year (in 2019 dollars, adjusted for inflation) is permitted: you can use it, change it, and ship it in your game. Past that, you need a commercial license from ZeroBandwidth. If you are unsure whether your community or project fits, [open an issue](https://github.com/Nimdy/detect-FPS-hackers/issues) and ask. The fonts in `site/fonts/` are under the SIL Open Font License, which sits beside them.
+[PolyForm Small Business 1.0.0](LICENSE.md). It is source-available, not OSI open source. Use for the benefit of a company with fewer than 100 people and less than US$1M revenue in the prior tax year (in 2019 dollars, adjusted for inflation) is permitted: you can use it, change it, and ship it in your game. Past that, you need a commercial license from ZeroBandwidth. If you are unsure whether your community or project fits, [open an issue](https://github.com/Nimdy/fpsdet/issues) and ask. The fonts in `site/fonts/` are under the SIL Open Font License, which sits beside them.

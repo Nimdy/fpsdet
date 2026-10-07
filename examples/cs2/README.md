@@ -4,9 +4,9 @@ The planted demo and the synthetic week show what fpsdet does when the answer is
 
 Not affiliated with Valve or with the dataset's authors. The script downloads the dataset when you run it; the only thing committed here is `desk.json`, the scored results the review desk shows.
 
-**See it:** open the [review desk](https://nimdy.github.io/detect-FPS-hackers/board.html) and pick **C · Real CS2 matches**, or run `fpsdet demo` and open `demo/cs2.html`. Every scored player is there with fpsdet's decision, the reason, and the dataset's label beside it.
+**See it:** open the [review desk](https://nimdy.github.io/fpsdet/board.html) and pick **C · Real CS2 matches**, or run `fpsdet demo` and open `demo/cs2.html`. Every scored player is there with fpsdet's decision, the reason, and the dataset's label beside it.
 
-**Try it, and tell us what you find.** Run it on more matches, or on your own server's logs, and post the result with the [result form](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml). Results that look wrong are the most useful ones.
+**Try it, and tell us what you find.** Run it on more matches, or on your own server's logs, and post the result with the [result form](https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml). Results that look wrong are the most useful ones.
 
 ## The data
 

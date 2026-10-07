@@ -10,7 +10,7 @@ body:
 
         **Before you paste anything, replace every id that could point to a real person** (player id, account name, party id, match id, IP) with a made-up one, such as `player-a`, `party-1`, `match-1`. Keep the replacements consistent, so the same player has the same fake id everywhere.
 
-        If you found a way to make the scorer flag *someone else* on purpose, or a way for a cheat to get through, do not file it here. Report it privately: see the [security policy](https://github.com/Nimdy/detect-FPS-hackers/security/policy).
+        If you found a way to make the scorer flag *someone else* on purpose, or a way for a cheat to get through, do not file it here. Report it privately: see the [security policy](https://github.com/Nimdy/fpsdet/security/policy).
 
   - type: input
     id: game

@@ -2,15 +2,15 @@
 
 fpsdet scores a copy of your dedicated server's logs, on any machine with Python 3.11. Nothing is installed on your servers or your players' PCs, and scoring makes no network connection unless you ask for an AI brief with `--ai`. It bans no one: every case says `automated_action: "none"`. Production never knows it ran.
 
-The same steps, with pictures, are on the [Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html).
+The same steps, with pictures, are on the [Try it page](https://nimdy.github.io/fpsdet/try.html).
 
 ![The setup as a game quest: five levels from git clone to reading the cases, with prod HP at 100 of 100 and nobody banned](../../site/img/setup-quest.svg)
 
 ## 1. Get fpsdet
 
 ```bash
-git clone https://github.com/Nimdy/detect-FPS-hackers
-cd detect-FPS-hackers
+git clone https://github.com/Nimdy/fpsdet
+cd fpsdet
 PYTHONPATH=src python3 -m fpsdet demo     # the last line should say the planted cases matched
 ```
 
@@ -26,7 +26,7 @@ From wherever your server logs land, export one row per shot and one per movemen
 | why the body moved, when the player did not | `displacement_cause` | Keeps blasts, vehicles and ladders out of speed cases |
 | shot timing per weapon | `t_ms` on each shot, cycles in the profile | Fire rate and metronome |
 | the kick and the view command on the same tick | `applied_recoil_pitch_deg`, `compensation_pitch_deg`, `spray_index` | No-recoil and the recoil mirror |
-| what this client could see and hear | `information_state`, `hidden_track_ms`, and the rest on [Wire a game](https://nimdy.github.io/detect-FPS-hackers/wire.html) | The information checks |
+| what this client could see and hear | `information_state`, `hidden_track_ms`, and the rest on [Wire a game](https://nimdy.github.io/fpsdet/wire.html) | The information checks |
 
 A field you do not have just turns its check off. A wrong one frames players: send only what your server measured.
 
@@ -75,7 +75,7 @@ A review is a case for a person to open, not a verdict.
 
 ## 6. Tell us what you found
 
-Use the [result form](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml). Counts are what helps:
+Use the [result form](https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml). Counts are what helps:
 
 - how many players;
 - which fields you had;
@@ -93,4 +93,4 @@ If the results hold up, the next step is a live test on a dedicated server you r
 - the wire against the picture;
 - planned challenges.
 
-If you run a server and want to try that, [offer it for a live test](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=live_test.yml).
+If you run a server and want to try that, [offer it for a live test](https://github.com/Nimdy/fpsdet/issues/new?template=live_test.yml).

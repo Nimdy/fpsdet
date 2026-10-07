@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        fpsdet is under the [PolyForm Small Business License 1.0.0](https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md). Companies above its size limits need a commercial license from ZeroBandwidth. Ask here. Do not post anything confidential: if a question needs private details, say so and the maintainer will follow up.
+        fpsdet is under the [PolyForm Small Business License 1.0.0](https://github.com/Nimdy/fpsdet/blob/main/LICENSE.md). Companies above its size limits need a commercial license from ZeroBandwidth. Ask here. Do not post anything confidential: if a question needs private details, say so and the maintainer will follow up.
 
   - type: textarea
     id: question

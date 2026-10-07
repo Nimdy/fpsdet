@@ -4,7 +4,7 @@ fpsdet decides which players a person reviews. A flaw can let a cheater through,
 
 ## How to report
 
-Use GitHub's private vulnerability reporting: open the repository's **Security** tab and click **Report a vulnerability**, or go straight to <https://github.com/Nimdy/detect-FPS-hackers/security/advisories/new>. Only the maintainer can read the report.
+Use GitHub's private vulnerability reporting: open the repository's **Security** tab and click **Report a vulnerability**, or go straight to <https://github.com/Nimdy/fpsdet/security/advisories/new>. Only the maintainer can read the report.
 
 If that button is missing, open a public issue that says only "I need a private security contact." Put no details in it.
 

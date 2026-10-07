@@ -1,4 +1,4 @@
-Required Notice: Copyright 2021-2026 ZeroBandwidth (https://github.com/Nimdy/detect-FPS-hackers)
+Required Notice: Copyright 2021-2026 ZeroBandwidth (https://github.com/Nimdy/fpsdet)
 
 # PolyForm Small Business License 1.0.0
 

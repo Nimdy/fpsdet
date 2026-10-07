@@ -209,7 +209,7 @@ PAGE = f"""<!DOCTYPE html>
       <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">Tracking, not crossing.</strong> A crosshair passing a common angle is not evidence. The check needs sustained following across many shots.</span></li>
       <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">Plan it with a secret.</strong> Derive where, when and how from a server-held secret, per player and per match. Past decoys do not predict the next, and the server changes them without a client patch.</span></li>
       <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-watch" aria-hidden="true"></span><span><strong class="font-medium">Know where players hold.</strong> A decoy resting behind an angle people hold can collect honest aim for seconds. In a machine dry run, a stand-in holding a doorway's edge reached the bar that way: 5,500 ms against 1,200. A consented human pilot will measure how often people do it. <a class="text-ink underline decoration-line underline-offset-4" href="evidence.html#honest-title">What was found</a>.</span></li>
-      <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">Tell players.</strong> Say in general terms that the server may send bodies a player cannot see, and what is logged. <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/players.md">docs/players.md</a> has the wording.</span></li>
+      <li class="flex gap-3"><span class="mt-[0.6em] h-1.5 w-1.5 shrink-0 bg-clean" aria-hidden="true"></span><span><strong class="font-medium">Tell players.</strong> Say in general terms that the server may send bodies a player cannot see, and what is logged. <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/players.md">docs/players.md</a> has the wording.</span></li>
     </ul>
   </section>
 
@@ -230,7 +230,7 @@ PAGE = f"""<!DOCTYPE html>
       </tbody>
     </table>
     </div>
-    <p class="m-0 mt-4 max-w-3xl text-sm text-muted">Decoys stack with server-side culling: a server that stops sending players a client cannot see removes most of what a wallhack shows, and the few bodies left in the hidden space can be decoys. See <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/culling.md">docs/culling.md</a>.</p>
+    <p class="m-0 mt-4 max-w-3xl text-sm text-muted">Decoys stack with server-side culling: a server that stops sending players a client cannot see removes most of what a wallhack shows, and the few bodies left in the hidden space can be decoys. See <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/culling.md">docs/culling.md</a>.</p>
   </section>
 
   <section id="log" class="mb-16" aria-labelledby="log-title">
@@ -244,13 +244,13 @@ PAGE = f"""<!DOCTYPE html>
  "event_type": "movement", "speed_mps": 2.0,
  "challenge_id": "ch-4db205d36439393fabcb2258", "challenge_track_ms": 100.0,
  "challenge_vision_state": "absent", "challenge_audio_state": "absent"}}</code></pre>
-    <p class="m-0 mt-4 max-w-3xl text-sm text-muted">A reference server does all of this live: a Godot dedicated server with stock clients plans, places, checks and logs one challenge, and fpsdet scores its capture the same offline. It is a controlled pilot, not a detection rate. <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/pilot.md">docs/pilot.md</a></p>
+    <p class="m-0 mt-4 max-w-3xl text-sm text-muted">A reference server does all of this live: a Godot dedicated server with stock clients plans, places, checks and logs one challenge, and fpsdet scores its capture the same offline. It is a controlled pilot, not a detection rate. <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/pilot.md">docs/pilot.md</a></p>
   </section>
 
   <section id="next" class="mb-4" aria-labelledby="next-title">
     <h2 id="next-title" {H2}>Next: one frequency per client</h2>
     <p class="m-0 mt-4 max-w-3xl">Half built. Planned challenges already belong to one client: one player, one match, one window. Not built: reading what a teammate who runs nothing does with another client's decoy. If they start following it, that client is calling out positions. fpsdet already flags a teammate who reacts faster than a voice can travel; a per-client decoy would name the source.</p>
-    <p class="m-0 mt-6 max-w-3xl">Running a dedicated server? Add the decoy, send <code class="font-mono text-[0.92em]">private_track_ms</code> or plan challenges, and <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">tell us what you find</a>.</p>
+    <p class="m-0 mt-6 max-w-3xl">Running a dedicated server? Add the decoy, send <code class="font-mono text-[0.92em]">private_track_ms</code> or plan challenges, and <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml">tell us what you find</a>.</p>
   </section>
 </div>
 <section id="try-cta" class="mx-auto w-full max-w-[1800px] px-10 pb-12 pt-4 max-md:px-4" aria-labelledby="try-cta-title">
@@ -260,7 +260,7 @@ PAGE = f"""<!DOCTYPE html>
       <h2 id="try-cta-title" class="m-0 mt-2 font-mono text-[1.45rem] font-bold leading-[1.15] tracking-tight text-white">Test it on last month's logs.</h2>
       <p class="m-0 mt-2 max-w-3xl text-sm text-muted">fpsdet scores a copy of your dedicated server's logs, offline, on any machine with Python. Nothing goes on your servers or your players' PCs, nothing is sent anywhere, and nobody is banned. Production never knows it ran.</p>
     </div>
-    <p class="m-0 flex flex-wrap gap-3"><a class="btn-signal" href="try.html">How to set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
+    <p class="m-0 flex flex-wrap gap-3"><a class="btn-signal" href="try.html">How to set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
   </div>
 </section>
 </main>
@@ -279,8 +279,8 @@ PAGE = f"""<!DOCTYPE html>
       <a class="text-ink no-underline hover:underline" href="decoys.html" aria-current="page">Decoys</a>
       <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
       <a class="text-ink no-underline hover:underline" href="try.html">Try it</a>
-      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
-      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/fpsdet">GitHub</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/fpsdet/blob/main/LICENSE.md">License</a>
     </p>
   </div>
 </footer>

@@ -203,7 +203,7 @@ fpsdet challenge verify plan.json --secret-file secret.hex</code></pre>
 PYTHONPATH=src python3 -m fpsdet benchmark run --dataset synthetic
 python3 examples/pilot/pilot.py verify
 python3 examples/human-pilot/study.py verify --result examples/human-pilot/dry-run/result.json</code></pre>
-      <p class="m-0 mt-4 max-w-3xl">The first checks every committed result, from the public source to the published table, by digest, without scoring anything. The second reruns every fixture and scenario in seconds. The last two replay the live pilot's capture and the dry run's samples offline. Rebuilding the real datasets from their public sources is in <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/benchmark.md">docs/benchmark.md</a>. A run says MATCH, or exactly what moved and why.</p>
+      <p class="m-0 mt-4 max-w-3xl">The first checks every committed result, from the public source to the published table, by digest, without scoring anything. The second reruns every fixture and scenario in seconds. The last two replay the live pilot's capture and the dry run's samples offline. Rebuilding the real datasets from their public sources is in <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/benchmark.md">docs/benchmark.md</a>. A run says MATCH, or exactly what moved and why.</p>
     </div>
   </section>
 
@@ -217,7 +217,7 @@ python3 examples/human-pilot/study.py verify --result examples/human-pilot/dry-r
       <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">Who made a packet. A signature over the packet needs a server-held signing key, and is not built.</p>
       <p class="rounded-xl col-span-1 m-0 border border-line p-5 text-sm leading-relaxed text-ink">A person still opens the file. This does not end cheating.</p>
     </div>
-    <p class="m-0 mt-8 text-sm text-muted">In depth: <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/observations.md">observations</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/knowledge-engine.md">knowledge</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/provenance.md">provenance</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/evidence-graph.md">the graph</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/challenges.md">challenges</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/external-evidence.md">external evidence</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/benchmark.md">the benchmark</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/pilot.md">the live pilot</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/docs/human-pilot.md">the human pilot</a></p>
+    <p class="m-0 mt-8 text-sm text-muted">In depth: <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/observations.md">observations</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/knowledge-engine.md">knowledge</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/provenance.md">provenance</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/evidence-graph.md">the graph</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/challenges.md">challenges</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/external-evidence.md">external evidence</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/benchmark.md">the benchmark</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/pilot.md">the live pilot</a> · <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/docs/human-pilot.md">the human pilot</a></p>
   </section>
 </div>
 <section id="try-cta" class="mx-auto w-full max-w-[1800px] px-10 pb-12 pt-4 max-md:px-4" aria-labelledby="try-cta-title">
@@ -227,7 +227,7 @@ python3 examples/human-pilot/study.py verify --result examples/human-pilot/dry-r
       <h2 id="try-cta-title" class="m-0 mt-2 font-mono text-[1.45rem] font-bold leading-[1.15] tracking-tight text-white">Test it on last month's logs.</h2>
       <p class="m-0 mt-2 max-w-3xl text-sm text-muted">fpsdet scores a copy of your dedicated server's logs, offline, on any machine with Python. Nothing goes on your servers or your players' PCs, nothing is sent anywhere, and nobody is banned. Production never knows it ran.</p>
     </div>
-    <p class="m-0 flex flex-wrap gap-3"><a class="btn-signal" href="try.html">How to set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
+    <p class="m-0 flex flex-wrap gap-3"><a class="btn-signal" href="try.html">How to set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
   </div>
 </section>
 </main>
@@ -246,8 +246,8 @@ python3 examples/human-pilot/study.py verify --result examples/human-pilot/dry-r
       <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
       <a class="text-ink no-underline hover:underline" href="evidence.html" aria-current="page">Evidence</a>
       <a class="text-ink no-underline hover:underline" href="try.html">Try it</a>
-      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
-      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/fpsdet">GitHub</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/fpsdet/blob/main/LICENSE.md">License</a>
     </p>
   </div>
 </footer>

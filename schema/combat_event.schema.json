@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Nimdy/detect-FPS-hackers/schema/combat_event.schema.json",
+  "$id": "https://github.com/Nimdy/fpsdet/schema/combat_event.schema.json",
   "title": "FPS baseline event",
   "type": "object",
   "additionalProperties": true,

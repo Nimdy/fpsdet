@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Bypass, false case on purpose, injection, or privacy leak
-    url: https://github.com/Nimdy/detect-FPS-hackers/security/policy
+    url: https://github.com/Nimdy/fpsdet/security/policy
     about: A way past a check, a way to get an innocent player flagged on purpose, script in a case page or the desk, or player ids leaking. Report it privately. Do not open a public issue.
   - name: License or commercial-license question
-    url: https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=question.yml
+    url: https://github.com/Nimdy/fpsdet/issues/new?template=question.yml
     about: PolyForm Small Business 1.0.0. Ask in a public issue. Larger companies need a commercial license from ZeroBandwidth.

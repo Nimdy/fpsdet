@@ -12,7 +12,7 @@ body:
 
         **Keep this public issue free of personal data.** No player ids, names, match ids or addresses. A public handle, or "reply here", is enough to reach you. If you would rather talk privately first, say so and we will find a way.
 
-        Not ready for a live test? Try it on logs you already have first: [the Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html).
+        Not ready for a live test? Try it on logs you already have first: [the Try it page](https://nimdy.github.io/fpsdet/try.html).
 
   - type: input
     id: game

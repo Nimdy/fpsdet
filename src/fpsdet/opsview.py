@@ -964,7 +964,7 @@ def payload_json(payload: dict) -> str:
 
 def render_dashboard(
     payload: dict,
-    tape_base: str | None = "https://nimdy.github.io/detect-FPS-hackers/board.html",
+    tape_base: str | None = "https://nimdy.github.io/fpsdet/board.html",
     *,
     home: str | None = None,
     title: str | None = None,

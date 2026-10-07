@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/Nimdy/detect-FPS-hackers/schema/game_profile.schema.json",
+  "$id": "https://github.com/Nimdy/fpsdet/schema/game_profile.schema.json",
   "title": "FPS baseline game profile",
   "type": "object",
   "required": ["game_id"],

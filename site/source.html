@@ -47,7 +47,7 @@ PYTHONPATH=src python3 -m fpsdet benchmark verify
 PYTHONPATH=src python3 -m fpsdet pages</code></pre>
   <div class="mt-6 grid grid-cols-2 gap-8 max-lg:grid-cols-1">
     <p class="m-0"><code class="font-mono text-[0.92em]">demo</code> writes <code class="font-mono text-[0.92em]">demo/board.html</code>. That page starts with a six-step walk-through, then the thirty-two planted players. The first tape is the 10 kg sprint beside the blast. <code class="font-mono text-[0.92em]">benchmark verify</code> checks every published result against its committed artifacts by digest, offline, without scoring. <code class="font-mono text-[0.92em]">pages</code> writes a folder a static host can serve: these pages, and a fresh desk beside them. Nothing in that command publishes the repository.</p>
-    <p class="m-0">The repository is <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers">github.com/Nimdy/detect-FPS-hackers</a>. These HTML pages are the walk-through. The same contract, written for an implementer, is <code class="font-mono text-[0.92em]">docs/scoring.md</code>, <code class="font-mono text-[0.92em]">docs/integration.md</code>, <code class="font-mono text-[0.92em]">docs/games.md</code>, and <code class="font-mono text-[0.92em]">docs/operations.md</code>. The evidence a case carries is <code class="font-mono text-[0.92em]">docs/observations.md</code>, <code class="font-mono text-[0.92em]">docs/provenance.md</code> and <code class="font-mono text-[0.92em]">docs/challenges.md</code>; what has been tested is <code class="font-mono text-[0.92em]">docs/benchmark.md</code>.</p>
+    <p class="m-0">The repository is <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet">github.com/Nimdy/fpsdet</a>. These HTML pages are the walk-through. The same contract, written for an implementer, is <code class="font-mono text-[0.92em]">docs/scoring.md</code>, <code class="font-mono text-[0.92em]">docs/integration.md</code>, <code class="font-mono text-[0.92em]">docs/games.md</code>, and <code class="font-mono text-[0.92em]">docs/operations.md</code>. The evidence a case carries is <code class="font-mono text-[0.92em]">docs/observations.md</code>, <code class="font-mono text-[0.92em]">docs/provenance.md</code> and <code class="font-mono text-[0.92em]">docs/challenges.md</code>; what has been tested is <code class="font-mono text-[0.92em]">docs/benchmark.md</code>.</p>
   </div>
 
   <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">What is in the tree</h2>
@@ -88,7 +88,7 @@ PYTHONPATH=src python3 -m fpsdet pages</code></pre>
 
   <h2 class="m-0 mt-16 font-mono text-[1.95rem] font-semibold leading-[1.12] tracking-tight text-white">Before other people send patches</h2>
   <div class="mt-6 grid grid-cols-3 gap-4 max-lg:grid-cols-1">
-    <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">fpsdet is under the <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">PolyForm Small Business License 1.0.0</a>. Under 100 people and US$1M revenue, build on it and ship it. Past that, ask ZeroBandwidth for a commercial license. There is no contributor agreement yet. Add one before you take contributions. Patches that describe how to build a cheat, or that weaken the innocence rules so a blast becomes a ban, are off the point of this repo. Patches that add a game's server-side fields, a profile, or a failing test for a false positive are the point.</p>
+    <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">fpsdet is under the <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/LICENSE.md">PolyForm Small Business License 1.0.0</a>. Under 100 people and US$1M revenue, build on it and ship it. Past that, ask ZeroBandwidth for a commercial license. There is no contributor agreement yet. Add one before you take contributions. Patches that describe how to build a cheat, or that weaken the innocence rules so a blast becomes a ban, are off the point of this repo. Patches that add a game's server-side fields, a profile, or a failing test for a false positive are the point.</p>
     <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted">Store a pseudonym. Do not collect raw mouse input, kernel memory, or a hardware id here. Those are a different product. Wire a ban action to your own review tool after a person looks. Do not wire it to <code class="font-mono text-[0.92em]">decision == review</code>.</p>
     <p class="rounded-xl m-0 border border-line p-5 text-sm leading-relaxed text-muted"><a class="text-ink underline decoration-line underline-offset-4" href="index.html#still">What still gets through</a> is part of the contract. A DMA read of the drawn frame, a capture card, a cheat that waits out the interpolation delay, a wrong timeline, and a listen server are named there on purpose.</p>
   </div>
@@ -100,7 +100,7 @@ PYTHONPATH=src python3 -m fpsdet pages</code></pre>
       <h2 id="try-cta-title" class="m-0 mt-2 font-mono text-[1.45rem] font-bold leading-[1.15] tracking-tight text-white">Test it on last month's logs.</h2>
       <p class="m-0 mt-2 max-w-3xl text-sm text-muted">fpsdet scores a copy of your dedicated server's logs, offline, on any machine with Python. Nothing goes on your servers or your players' PCs, nothing is sent anywhere, and nobody is banned. Production never knows it ran.</p>
     </div>
-    <p class="m-0 flex flex-wrap gap-3"><a class="btn-signal" href="try.html">How to set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
+    <p class="m-0 flex flex-wrap gap-3"><a class="btn-signal" href="try.html">How to set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
   </div>
 </section>
 </main>
@@ -119,8 +119,8 @@ PYTHONPATH=src python3 -m fpsdet pages</code></pre>
       <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
       <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
       <a class="text-ink no-underline hover:underline" href="try.html">Try it</a>
-      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
-      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/fpsdet">GitHub</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/fpsdet/blob/main/LICENSE.md">License</a>
     </p>
   </div>
 </footer>

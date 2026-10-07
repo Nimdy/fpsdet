@@ -10,7 +10,7 @@ body:
 
         **Share counts and cases, never raw logs.** Replace every id that could point to a real person (player id, account name, party id, match id, IP) with a made-up one, such as `player-a` or `match-1`, and keep the replacements consistent.
 
-        If one honest player was flagged and you can show why the play was innocent, the [false positive form](https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=false_positive.yml) is the faster route to a fix. If you found a way to get someone flagged on purpose, or a cheat past a check, report it privately: see the [security policy](https://github.com/Nimdy/detect-FPS-hackers/security/policy).
+        If one honest player was flagged and you can show why the play was innocent, the [false positive form](https://github.com/Nimdy/fpsdet/issues/new?template=false_positive.yml) is the faster route to a fix. If you found a way to get someone flagged on purpose, or a cheat past a check, report it privately: see the [security policy](https://github.com/Nimdy/fpsdet/security/policy).
 
   - type: dropdown
     id: source

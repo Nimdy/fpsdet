@@ -61,7 +61,7 @@
     - Motion-split boundaries are tested exactly.
     - The study arena's near-still probes are named as a confound.
 
-- **Try it on your own logs** ([examples/historic](examples/historic/README.md), [the Try it page](https://nimdy.github.io/detect-FPS-hackers/try.html)). An operator can score a copy of logs their server already wrote, offline. Nothing goes on their servers or players' PCs, and nobody is banned.
+- **Try it on your own logs** ([examples/historic](examples/historic/README.md), [the Try it page](https://nimdy.github.io/fpsdet/try.html)). An operator can score a copy of logs their server already wrote, offline. Nothing goes on their servers or players' PCs, and nobody is banned.
   - **`convert.py`** turns a CSV or JSON-lines export into fpsdet events:
     - it copies only the schema's fields, so names and addresses are dropped;
     - account ids become HMAC pseudonyms under a salt kept in an owner-only file;

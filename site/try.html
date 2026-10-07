@@ -8,7 +8,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="fpsdet — test it on last month's logs">
 <meta property="og:description" content="Server-side cheat evidence, scored offline on a copy of your logs. Production never knows it ran. Nobody is banned.">
-<meta property="og:url" content="https://nimdy.github.io/detect-FPS-hackers/try.html">
+<meta property="og:url" content="https://nimdy.github.io/fpsdet/try.html">
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="fpsdet.css">
 </head>
@@ -42,7 +42,7 @@
   </div>
   <div class="col-span-5 max-lg:col-span-1">
     <p class="m-0 text-lg"><strong class="font-medium">Last month's matches are enough.</strong> fpsdet scores a copy of your dedicated server's logs on any machine with Python 3.11. Nothing goes on your servers or your players' PCs, nothing is sent anywhere, and nobody is banned. Production never knows it ran. This does not end cheating.</p>
-    <p class="m-0 mt-6 flex flex-wrap gap-3"><a class="btn-signal" href="#setup">Set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
+    <p class="m-0 mt-6 flex flex-wrap gap-3"><a class="btn-signal" href="#setup">Set it up</a><a class="btn-ghost" href="https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml">Tell us what you find</a></p>
   </div>
 </section>
 
@@ -87,8 +87,8 @@
         <span class="grid h-8 w-8 place-items-center rounded-full border border-signal font-mono text-xs text-ink" aria-hidden="true">1</span>
         <div>
           <h3 class="m-0 text-base font-medium">Get fpsdet, and check it works.</h3>
-          <pre class="m-0 mt-3 overflow-x-auto rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>git clone https://github.com/Nimdy/detect-FPS-hackers
-cd detect-FPS-hackers
+          <pre class="m-0 mt-3 overflow-x-auto rounded-r-lg border-l-[3px] border-signal bg-plot px-4 py-3 font-mono text-[13px] leading-normal"><code>git clone https://github.com/Nimdy/fpsdet
+cd fpsdet
 PYTHONPATH=src python3 -m fpsdet demo</code></pre>
           <p class="m-0 mt-3 text-sm text-muted">The last line should say the planted cases matched. If it does not, stop and tell us.</p>
         </div>
@@ -128,7 +128,7 @@ PYTHONPATH=src python3 -m fpsdet demo</code></pre>
         </div>
       </li>
     </ol>
-    <p class="m-0 mt-6 text-sm text-muted">Every step, as text: <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/examples/historic/README.md">examples/historic/README.md</a>.</p>
+    <p class="m-0 mt-6 text-sm text-muted">Every step, as text: <a class="text-ink underline decoration-line underline-offset-4" href="https://github.com/Nimdy/fpsdet/blob/main/examples/historic/README.md">examples/historic/README.md</a>.</p>
   </section>
 
   <section id="fields" class="mt-16" aria-labelledby="fields-title">
@@ -161,13 +161,13 @@ PYTHONPATH=src python3 -m fpsdet demo</code></pre>
       <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">Then</p>
       <h2 id="tell-title" class="m-0 mt-2 font-mono text-[1.6rem] font-semibold leading-[1.15] tracking-tight text-white">Tell us what you found.</h2>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">Counts help most: how many players, which fields you had, what went to review and watch, and above all any honest player who came out as a case. Never post account ids, pseudonyms or names.</p>
-      <p class="m-0 mt-5"><a class="btn-signal" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=real_data_result.yml">Send a result</a></p>
+      <p class="m-0 mt-5"><a class="btn-signal" href="https://github.com/Nimdy/fpsdet/issues/new?template=real_data_result.yml">Send a result</a></p>
     </div>
     <div class="rounded-xl border border-line border-l-[3px] border-l-watch panel p-6">
       <p class="m-0 font-mono text-xs uppercase tracking-[0.12em] text-muted">After that</p>
       <h2 class="m-0 mt-2 font-mono text-[1.6rem] font-semibold leading-[1.15] tracking-tight text-white">Run a live test with us.</h2>
       <p class="m-0 mt-3 text-sm leading-relaxed text-muted">No studio runs fpsdet today. The checks that need it most have only run on planted fixtures and one Godot pilot: hidden-mover tracking, quiet aim, the wire against the picture, and planned challenges. If you run a dedicated server and can tell your players what is logged, we will help you wire the fields. The Godot reference server shows every one of them.</p>
-      <p class="m-0 mt-5"><a class="btn-ghost" href="https://github.com/Nimdy/detect-FPS-hackers/issues/new?template=live_test.yml">Offer a server</a></p>
+      <p class="m-0 mt-5"><a class="btn-ghost" href="https://github.com/Nimdy/fpsdet/issues/new?template=live_test.yml">Offer a server</a></p>
     </div>
   </section>
 </div>
@@ -187,8 +187,8 @@ PYTHONPATH=src python3 -m fpsdet demo</code></pre>
       <a class="text-ink no-underline hover:underline" href="decoys.html">Decoys</a>
       <a class="text-ink no-underline hover:underline" href="evidence.html">Evidence</a>
       <a class="text-ink no-underline hover:underline" href="try.html" aria-current="page">Try it</a>
-      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers">GitHub</a>
-      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/detect-FPS-hackers/blob/main/LICENSE.md">License</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/fpsdet">GitHub</a>
+      <a class="text-ink no-underline hover:underline" href="https://github.com/Nimdy/fpsdet/blob/main/LICENSE.md">License</a>
     </p>
   </div>
 </footer>

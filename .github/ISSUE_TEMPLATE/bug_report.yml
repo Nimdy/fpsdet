@@ -8,7 +8,7 @@ body:
       value: |
         For honest play that got flagged, use the **False positive** form instead.
 
-        Report these privately, not here: a way to get a cheat past a check, a way to make an innocent player get flagged on purpose, HTML or script that runs in a case page or the desk, or player ids leaking to the AI endpoint. See the [security policy](https://github.com/Nimdy/detect-FPS-hackers/security/policy).
+        Report these privately, not here: a way to get a cheat past a check, a way to make an innocent player get flagged on purpose, HTML or script that runs in a case page or the desk, or player ids leaking to the AI endpoint. See the [security policy](https://github.com/Nimdy/fpsdet/security/policy).
 
   - type: textarea
     id: command
