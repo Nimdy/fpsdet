@@ -11,12 +11,22 @@ or a private LAN address given with --bind for a participant on another machine.
     python examples/human-pilot/study.py analyze --data ~/study --out examples/human-pilot/result.json
     python examples/human-pilot/study.py dry-run --data /tmp/dry --godot PATH         # machine stand-ins, never people
 
-A session plans its challenges with fpsdet's planner and a fresh secret, runs the study server and the
-participant's client, asks the five questions, then scores the telemetry live and again offline, checks every
-packet and graph, reproduces the plan and the realization with the secret and deletes the secret, scans every
-public file for secrets and personal data, computes the study's metrics, and checks the stop conditions. A stop
-condition writes STOP into the data folder, and no session starts until the operator clears it; review-grade
-evidence on an honest session cannot be cleared (amendment 1).
+A human session starts only for a participant whose practice passed, in their pre-registered order, under the
+consent notice, design and amendments they enrolled with (amendment 2). It plans its challenges with fpsdet's
+planner and a fresh secret, and runs the study server and the participant's client. Then it:
+
+- asks the six questions, and has the operator declare whether the session ran as the protocol says, before
+  anything is scored;
+- scores the telemetry live and again offline, and checks every packet and graph;
+- reproduces the plan and the realization with the secret, then deletes the secret;
+- scans every public file for secret or realization material;
+- sweeps the whole session tree for addresses and machine identities, deletes the operational files, and scans
+  what is kept again;
+- computes the study's metrics, fixes the session's validity, and checks the stop conditions.
+
+A stop condition writes STOP into the data folder, and no session starts until the operator clears it. A
+review-grade finding on a protocol-valid honest session cannot be cleared: collection ends there. One on a
+session already invalid before it was scored may be cleared after investigation (amendment 2).
 
 Standard library only, beside fpsdet.
 """
