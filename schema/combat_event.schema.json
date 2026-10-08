@@ -54,6 +54,9 @@
     "challenge_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
     "challenge_track_ms": { "type": "number", "minimum": 0 },
     "challenge_vision_state": { "enum": ["known", "absent", "unchecked"] },
-    "challenge_audio_state": { "enum": ["known", "absent", "unchecked"] }
+    "challenge_audio_state": { "enum": ["known", "absent", "unchecked"] },
+    "view_yaw_deg": { "type": "number" },
+    "challenge_turn_index": { "type": "integer", "minimum": 0 },
+    "challenge_turn_sign": { "enum": [-1, 1] }
   }
 }

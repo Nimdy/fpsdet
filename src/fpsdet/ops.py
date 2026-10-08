@@ -176,7 +176,8 @@ def _scatter_point(case: Case, key: str) -> dict | None:
 def _coverage(events: list[Event], days: list[str] | None) -> list[dict]:
     """Share of events of the right kind that carry each optional field, per day when days are known."""
     shots = [event for event in events if event.event_type == "shot"]
-    moves = [event for event in events if event.event_type == "movement"]
+    # Secret-turn telemetry rides on movement events but is not a movement sample.
+    moves = [event for event in events if event.event_type == "movement" and event.view_yaw_deg is None and event.challenge_turn_sign is None]
 
     def eligible(rows: list[Event], name: str) -> list[Event]:
         return [row for row in rows if row.hit] if name == "hitbox" else rows  # a miss has no hitbox

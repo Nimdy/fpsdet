@@ -578,12 +578,14 @@ class PlanOutputLeakTest(unittest.TestCase):
     def test_the_types_command_prints_the_spec_and_no_secret(self):
         code, printed = run_cli("challenge", "types")
         self.assertEqual(code, 0)
-        first, second = json.loads(printed)
-        for spec in (first, second):
+        specs = json.loads(printed)
+        for spec in specs:
             self.assertEqual((spec["challenge_type"], spec["defeats"]), ("occluded_motion_replay", ["vision", "audio"]))
             self.assertTrue(spec["capability"]["limits"])
-        self.assertEqual([(spec["version"], spec["current"], spec.get("verification")) for spec in (first, second)],
-                         [(1, False, None), (2, True, "per_sample")])
+        # Version 3 is listed, and is not what a plan gets by default: the human pilot stays on version 2.
+        self.assertEqual([(spec["version"], spec["current"], spec.get("verification")) for spec in specs],
+                         [(1, False, None), (2, True, "per_sample"), (3, False, "per_turn")])
+        self.assertEqual(specs[2]["turns"]["count"], 6)
 
 
 def plan_for(subject: str = "x", match: str = "m1", count: int = 1, profile=GAME, secret: ServerSecret | None = None):

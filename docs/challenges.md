@@ -16,6 +16,7 @@ A challenge never decides anything about an account. Its finding is a review, ev
 | --- | --- |
 | `occluded_motion_replay`, version 1: the private replay as a planned challenge | Implemented. Kept unchanged, so earlier plans and Benchmark v1 reproduce |
 | `occluded_motion_replay`, version 2: the same probe, with the server's own vision and audio verdict on the body at every counted moment | Implemented, and what `fpsdet challenge plan` writes |
+| `occluded_motion_replay`, version 3: the same probe and verdict; the body turns at secret times, and the finding is whether the aim turned with it ([below](#version-3-secret-turns)) | Implemented in the scorer and planner (`fpsdet challenge plan --version 3`). Not what a plan gets by default, and no emitter sends it yet: the Godot study server still runs version 2, and the human pilot stays on version 2 |
 | Planning with the server secret, `fpsdet challenge keygen`, `plan`, `verify`, `types` | Implemented |
 | Other challenge types | Not built. The framework allows them; none is claimed |
 | Running a challenge inside a game | The game server's job. A reference integration runs it in a Godot dedicated server with stock clients ([pilot.md](pilot.md)): a controlled pilot, not a deployment |
@@ -231,6 +232,29 @@ They describe the challenge's body and nothing else: never the event's `enemy_id
 A version 1 challenge whose events carry a verdict is judged the same way, so a verdict is never ignored. A player timeline that sets either field is digested as `fpsdet.player-events/3` (otherwise `/2`, unchanged).
 
 A game that declares `radar`, `team_share`, `ability`, `objective` or `spectator` gets no challenge evidence from this type. `fpsdet challenge plan` refuses to plan it, and scoring abstains with `cause: unchecked` if a plan exists anyway. Only a future type, or version, that defeats or checks those channels can count there.
+
+### Version 3: secret turns
+
+Versions 1 and 2 count time the aim spent on the body. That cannot tell why the aim was there: in the human pilot's dry run, a stand-in holding a doorway, with the probe resting in the room behind it, reached the bar without knowing anything. Version 3 asks a question a held angle cannot answer. The body turns at secret times, each turn a secret way, and the finding is whether the aim turned with it.
+
+**The turns.** Six per challenge. The part of the window that leaves room for a lead before a turn and a reaction after it (from 450 ms after the window opens to 600 ms before it ends) is cut into six equal slots; each turn falls in its own slot, at least 1,500 ms from the next, at a point and in a direction drawn from the realization (`turn_0_pick` to `turn_5_pick`, `turn_signs`). The commitment covers them like every other realization parameter. A window must be at least 10,050 ms; `fpsdet challenge plan` refuses a shorter budget and a plan file with a shorter window does not load. `challenge_plan.turn_schedule` gives the game server the times and directions.
+
+**The telemetry.** Every event that names the challenge carries the version 2 verdict. Through the window, events naming the challenge carry `view_yaw_deg`, this client's server-authoritative view yaw, at least every 200 ms. One event at each turn's server time carries `challenge_turn_index` and `challenge_turn_sign`: +1 when the rate at which the body's bearing from this client moves went up, -1 when it went down. The fields ride on `movement` events with no speed; a timeline that sets any of them is digested as `fpsdet.player-events/4`.
+
+**One turn's response** is how much the aim's yaw rate changed the turn's way: the yaw moved from 150 to 600 ms after the turn, minus the yaw moved over the 450 ms before it, times the sign. A held aim moves neither before nor after. Software that reads the body from server state follows it and turns with it.
+
+**A turn counts** when its own verdict and every aim sample from its lead to the end of its reaction say the body was unknowable, no real enemy the client could know is on those events, and the trace has no gap over 200 ms there. A moment where the body was seen or heard, or where events disagree about it, voids the challenge, as in version 2. Fewer than four counted turns and it abstains (`too_few_turns`, or `unchecked` when the server never verified the body).
+
+**The bar, fixed before any data:**
+
+- **The shuffles.** 1,000 schedules drawn the way the secret draws one: a time in each counted turn's own slot and a fair direction, from a seed derived from the public challenge id, so anyone re-running the case draws the same ones. A player who cannot know the secret has aim independent of it, so the real schedule is one more draw among these. The p-value is the share of shuffles whose summed response reaches the real one, counting the real one.
+- **Followed** when p ≤ 0.01 and at least four counted turns moved the aim more than 2° their own way. The second condition keeps one large flick from carrying the result.
+
+The evidence carries every counted turn (index, time, sign, response, followed), `followed_turns`, `p_value`, the 2° bar and the rule.
+
+**What was tested.** Simulated aim, not people: a holder with tremor, an honest player sweeping angles on their own schedule, and software following the body with 100 to 400 ms of lag. Over 300 seeds each, no holder was followed and 2 sweepers were (0.7%, inside the 1% the shuffle test allows). Followers with 100 ms of lag were followed 100 times in 100, with 250 ms 95, with 400 ms 17: a reaction slower than the 600 ms window mostly falls outside it. These are simulations of the planned failure and its fix, not a rate.
+
+**What it does not change.** It does not catch a reader of pixels: the body is never drawn. It does not prove the server told the truth about the turns or the verdict. A follower that smooths its aim past the reaction window, or reacts slower than 600 ms, is not caught.
 
 ## Scoring
 

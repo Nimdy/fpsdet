@@ -215,6 +215,27 @@ def derive(secret: ServerSecret, game_id: str, match_id: str, subject_id: str, n
     return out
 
 
+def turn_schedule(plan: ChallengePlan, realization: Realization) -> list[tuple[int, int]]:
+    """For the game server, version 3: when the body turns, in match time, and which way (+1 or -1).
+
+    The reaction-ready part of the window, from one lead after it opens to one reaction window before it
+    ends, is cut into ``count`` equal slots. Each turn falls in its own slot, at most ``slot - min_gap_ms``
+    into it, so any two turns are at least ``min_gap_ms`` apart. Bit i of ``turn_signs`` is turn i's
+    direction. Secret until the challenge is over, like the rest of the realization."""
+    rule = plan.spec.turns
+    if rule is None:
+        raise ChallengeError(f"{plan.spec.name} has no secret turns")
+    first = plan.start_ms + rule.lead_ms
+    slot = (plan.end_ms - rule.react_to_ms - first) // rule.count
+    if slot < rule.min_gap_ms:
+        raise ChallengeError(f"{plan.challenge_id}: the window cannot hold {rule.count} turns {rule.min_gap_ms} ms apart")
+    signs = realization.parameter("turn_signs")
+    return [
+        (first + index * slot + realization.parameter(f"turn_{index}_pick") % (slot - rule.min_gap_ms + 1), 1 if signs >> index & 1 else -1)
+        for index in range(rule.count)
+    ]
+
+
 def plan_match(
     secret: ServerSecret,
     profile,
@@ -247,6 +268,8 @@ def plan_match(
         )
     if budget.min_duration_ms < profile.hidden_track_min_ms:
         raise ChallengeError(f"a window shorter than {profile.hidden_track_min_ms:g} ms could never reach the review bar")
+    if spec.turns is not None and budget.min_duration_ms < spec.turns.min_window_ms:
+        raise ChallengeError(f"{spec.name} needs windows of at least {spec.turns.min_window_ms} ms to hold {spec.turns.count} turns")
     nonce = os.urandom(16).hex() if nonce is None else nonce
     if not NONCE.fullmatch(nonce):
         raise ChallengeError("nonce must be 16 to 64 lowercase hex digits")

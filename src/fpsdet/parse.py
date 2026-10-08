@@ -70,6 +70,9 @@ _RESERVED = {
     "challenge_track_ms",
     "challenge_vision_state",
     "challenge_audio_state",
+    "view_yaw_deg",
+    "challenge_turn_index",
+    "challenge_turn_sign",
     "utc",
 }
 
@@ -95,6 +98,20 @@ def _channel_state(obj: dict, key: str) -> str | None:
     if obj[key] not in EVENT_CHANNEL_STATES:
         raise ParseError(f"{key} must be known, absent, or unchecked")
     return obj[key]
+
+
+def _turn_index(obj: dict) -> int | None:
+    value = _int(obj, "challenge_turn_index")
+    if value is not None and value < 0:
+        raise ParseError("challenge_turn_index must be 0 or more")
+    return value
+
+
+def _turn_sign(obj: dict) -> int | None:
+    value = _int(obj, "challenge_turn_sign")
+    if value is not None and value not in (-1, 1):
+        raise ParseError("challenge_turn_sign must be 1 or -1")
+    return value
 
 
 def _challenge_id(obj: dict) -> str | None:
@@ -214,6 +231,9 @@ def parse_event(obj: dict) -> Event:
         challenge_track_ms=_num(obj, "challenge_track_ms"),
         challenge_vision_state=_channel_state(obj, "challenge_vision_state"),
         challenge_audio_state=_channel_state(obj, "challenge_audio_state"),
+        view_yaw_deg=_num(obj, "view_yaw_deg"),
+        challenge_turn_index=_turn_index(obj),
+        challenge_turn_sign=_turn_sign(obj),
         extras=extras,
     )
 

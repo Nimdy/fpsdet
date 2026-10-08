@@ -241,6 +241,12 @@ class Event:
     # event covers: never about enemy_id, which vision_state and audio_state describe.
     challenge_vision_state: str | None = None
     challenge_audio_state: str | None = None
+    # Secret turns (occluded_motion_replay/3). The server-authoritative view yaw of this client, sampled
+    # through the window; and, on the event that marks a turn, which turn it was and which way the body's
+    # bearing rate from this client changed (+1 up, -1 down).
+    view_yaw_deg: float | None = None
+    challenge_turn_index: int | None = None
+    challenge_turn_sign: int | None = None
     extras: dict[str, float] = field(default_factory=dict)
 
     @property

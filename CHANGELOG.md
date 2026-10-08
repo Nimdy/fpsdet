@@ -4,6 +4,8 @@
 
 ### Added
 
+- **`occluded_motion_replay`/3: secret turns.** The body turns at six secret times, each a secret way, and the finding is whether the aim turned with it, against 1,000 shuffled schedules drawn from the challenge id. Followed when p ≤ 0.01 and four turns moved the aim more than 2° their own way. It answers the dry run's doorway holder, which version 2's time-on-body bar cannot. New event fields `view_yaw_deg`, `challenge_turn_index` and `challenge_turn_sign`, digested as `fpsdet.player-events/4`. Versions 1 and 2, Benchmark v1 and the human pilot are unchanged; plans still default to version 2, and no emitter sends version 3 yet. Tested on simulated aim only (docs/challenges.md).
+
 - **Profiles can declare their clocks.** Three opt-in fields; a profile without them scores as before and keeps its digest, so Benchmark v1 still verifies.
   - `speed_min_run_ms` measures a sustained speed run in milliseconds, not samples, which are a different length of time on every emitter. It needs `movement_clock: "server"`; without it the speed rule abstains.
   - `shot_clock: "server_tick"` without `tick_ms` makes the metronome abstain instead of flagging every held trigger on tick-quantised gaps. `server_ms` says shots are stamped to the millisecond. The finding names the clock it assumed.

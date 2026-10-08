@@ -48,6 +48,10 @@ INPUTS_RECIPE = "fpsdet.player-events/2"
 # timeline that sets them is digested under its own recipe, and /2 keeps meaning exactly what it meant.
 INPUTS_RECIPE_V3 = "fpsdet.player-events/3"
 _V3_FIELDS = ("challenge_vision_state", "challenge_audio_state")
+# The same again over a timeline that carries secret-turn telemetry (occluded_motion_replay/3): the view yaw
+# trace and the turn markers. /3 keeps meaning exactly what it meant.
+INPUTS_RECIPE_V4 = "fpsdet.player-events/4"
+_V4_FIELDS = ("view_yaw_deg", "challenge_turn_index", "challenge_turn_sign")
 # What fpsdet wrote before event normalization: the events in the order they arrived. Packets that
 # carry it still verify; nothing writes it any more.
 ARRIVAL_INPUTS_RECIPE = "fpsdet.player-events/1"
@@ -373,7 +377,10 @@ def arrival_digest(events: list) -> str:
 
 
 def timeline_recipe(events: list) -> str:
-    """``fpsdet.player-events/3`` when any event reports on a challenge's body, ``/2`` otherwise."""
+    """``fpsdet.player-events/4`` when any event carries secret-turn telemetry, ``/3`` when any reports on a
+    challenge's body, ``/2`` otherwise."""
+    if any(getattr(event, name) is not None for event in events for name in _V4_FIELDS):
+        return INPUTS_RECIPE_V4
     return INPUTS_RECIPE_V3 if any(getattr(event, name) is not None for event in events for name in _V3_FIELDS) else INPUTS_RECIPE
 
 
@@ -587,7 +594,7 @@ RECIPES = {
     "detector": (DETECTOR_RECIPE,),
     "profile": (PROFILE_RECIPE,),
     "cohort": (COHORT_RECIPE,),
-    "inputs": (INPUTS_RECIPE_V3, INPUTS_RECIPE, ARRIVAL_INPUTS_RECIPE),
+    "inputs": (INPUTS_RECIPE_V4, INPUTS_RECIPE_V3, INPUTS_RECIPE, ARRIVAL_INPUTS_RECIPE),
     "history": (HISTORY_RECIPE,),
     "external": (EXTERNAL_INPUT_RECIPE,),
 }

@@ -29,7 +29,9 @@ from .evidence import ELIGIBILITY, KINDS, NATIVE_KINDS, Observation
 from .challenge import (
     ABSTAINED,
     FOLLOWED,
+    NOT_FOLLOWED,
     PER_SAMPLE,
+    PER_TURN,
     UNPLANNED,
     ChallengeRegistry,
     challenge_context,
@@ -397,11 +399,19 @@ def _challenge_eligibility(result, profile: GameProfile) -> str:
     if result.status == ABSTAINED:
         if result.cause == "other_subject":
             return "not_applicable"
-        if result.verification == PER_SAMPLE:
+        if result.verification in (PER_SAMPLE, PER_TURN):
             # By the server's own verdict: a body this client could know is not a challenge; a contradiction
-            # cannot be judged; a verdict never reported is missing telemetry.
-            return {"conflict": "conflict", "unchecked": "telemetry_unavailable"}.get(result.cause, "not_applicable")
+            # cannot be judged; a verdict never reported is missing telemetry. Version 3: too few readable
+            # turns, or a trace too broken to shuffle, is too little data.
+            return {
+                "conflict": "conflict",
+                "unchecked": "telemetry_unavailable",
+                "too_few_turns": "insufficient_samples",
+                "no_trace": "insufficient_samples",
+            }.get(result.cause, "not_applicable")
         return "disabled"
+    if result.verification == PER_TURN:
+        return "eligible" if result.status in (FOLLOWED, NOT_FOLLOWED) else "telemetry_unavailable"
     if result.eligible >= profile.hidden_track_min_samples:
         return "eligible"
     if result.eligible:

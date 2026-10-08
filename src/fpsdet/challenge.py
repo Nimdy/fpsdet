@@ -23,7 +23,9 @@ runs, so it stays on the server until the match is over. After that it can go in
 
 from __future__ import annotations
 
+import bisect
 import hashlib
+import random
 import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
@@ -57,6 +59,9 @@ PLAN_FILE_FORMAT = "fpsdet.challenge-plans/1"
 # reported on every event that names the challenge (version 2).
 BY_PLAN = "plan"
 PER_SAMPLE = "per_sample"
+# Version 3: the per-moment verdict of version 2, and the finding is whether the aim turned with the body's
+# secret turns, against the same aim scored at shuffled times.
+PER_TURN = "per_turn"
 
 # The budget's hard ceiling. A player is not a target range: more probes make a challenge-aware cheat's
 # job easier, and add nothing a person needs to review a case.
@@ -79,6 +84,58 @@ class ChallengeError(ValueError):
 
 
 @dataclass(frozen=True)
+class TurnRule:
+    """Secret turns: how many, how far apart, the reaction window, and the bar. Public, and fixed before any
+    data, so the bar cannot be tuned to the result.
+
+    A turn's response is how much the aim's yaw rate changed in the turn's direction: the yaw moved over
+    ``react_from_ms``..``react_to_ms`` after the turn, minus the yaw moved over the same length of time
+    just before it, times the turn's sign. A holder's aim does not change with a turn it was never sent; a
+    reader of server state follows the body.
+    """
+
+    count: int = 6
+    min_gap_ms: int = 1_500
+    react_from_ms: int = 150
+    react_to_ms: int = 600
+    # The aim trace may skip at most this long between two samples where a response is read.
+    max_trace_gap_ms: int = 200
+    shuffles: int = 1_000
+    alpha: float = 0.01
+    # A turn is followed when the aim's yaw rate changed by more than this, in the turn's own direction, over
+    # the reaction window: far above a held aim's tremor. A fixed floor, not one read from the shuffles: with
+    # turns this dense, every shuffled time sits near some real turn and a follower's aim moves there too.
+    min_turn_response_deg: float = 2.0
+    min_followed: int = 4
+    # Fewer turns than this, checked and measurable, and the challenge abstains.
+    min_counted: int = 4
+
+    @property
+    def lead_ms(self) -> int:
+        """The aim before a turn that its response is measured against."""
+        return self.react_to_ms - self.react_from_ms
+
+    @property
+    def min_window_ms(self) -> int:
+        """The shortest window that holds ``count`` turns ``min_gap_ms`` apart, each with its lead and reaction."""
+        return self.lead_ms + self.react_to_ms + self.count * self.min_gap_ms
+
+    def to_dict(self) -> dict:
+        return {
+            "count": self.count,
+            "min_gap_ms": self.min_gap_ms,
+            "react_from_ms": self.react_from_ms,
+            "react_to_ms": self.react_to_ms,
+            "max_trace_gap_ms": self.max_trace_gap_ms,
+            "shuffles": self.shuffles,
+            "alpha": self.alpha,
+            "min_turn_response_deg": self.min_turn_response_deg,
+            "min_followed": self.min_followed,
+            "min_counted": self.min_counted,
+        }
+
+
+@dataclass(frozen=True)
 class ChallengeSpec:
     """What one challenge type is. Public: the source can be read by anyone, cheat authors included."""
 
@@ -95,8 +152,10 @@ class ChallengeSpec:
     requirements: tuple[str, ...]
     # Machine-readable entry for the capability matrix: what this catches, how well, and what beats it.
     capability: Mapping
-    # How the body's hiddenness is known: BY_PLAN or PER_SAMPLE.
+    # How the body's hiddenness is known: BY_PLAN, PER_SAMPLE or PER_TURN.
     verification: str = BY_PLAN
+    # PER_TURN only: the secret turns and the bar, fixed before any data.
+    turns: TurnRule | None = None
 
     @property
     def name(self) -> str:
@@ -112,6 +171,7 @@ class ChallengeSpec:
             "requirements": list(self.requirements),
             "capability": dict(self.capability),
             **({"verification": self.verification} if self.verification != BY_PLAN else {}),
+            **({"turns": self.turns.to_dict()} if self.turns is not None else {}),
         }
 
 
@@ -187,8 +247,48 @@ OCCLUDED_MOTION_REPLAY_V2 = ChallengeSpec(
     verification=PER_SAMPLE,
 )
 
+# Version 3: the same probe and per-moment verdict as version 2, but it no longer asks how long the aim stayed
+# on the body. A player holding an angle the body happens to pass behind can reach that bar without knowing
+# anything (the human pilot's dry run). Version 3 turns the body at secret moments and asks whether the aim
+# turned with it, compared with the same aim at shuffled times. Versions 1 and 2 are kept unchanged.
+OCCLUDED_MOTION_REPLAY_V3 = ChallengeSpec(
+    challenge_type="occluded_motion_replay",
+    version=3,
+    defeats=OCCLUDED_MOTION_REPLAY.defeats,
+    not_applicable=OCCLUDED_MOTION_REPLAY.not_applicable,
+    parameters=(
+        *OCCLUDED_MOTION_REPLAY.parameters,
+        # Where in its slot each turn falls, and which way each turns: challenge_plan.turn_schedule.
+        *((f"turn_{index}_pick", 0, 2**32 - 1) for index in range(TurnRule().count)),
+        ("turn_signs", 0, 2 ** TurnRule().count - 1),
+    ),
+    requirements=(
+        *OCCLUDED_MOTION_REPLAY_V2.requirements,
+        "Turn the body at the realization's turn times, each way its sign says, and at no other time; a turn is a change in the rate at which the body's bearing from this client moves.",
+        "A turn makes no sound and changes nothing this client can see or hear.",
+        "On one event at each turn's server time, send challenge_turn_index and challenge_turn_sign with the challenge's id and verdict.",
+        "Through the window, send this client's server-authoritative view yaw as view_yaw_deg on events naming the challenge, at least every max_trace_gap_ms.",
+    ),
+    capability={
+        **OCCLUDED_MOTION_REPLAY_V2.capability,
+        "strength": "strong when every knowledge channel the game declares is one the challenge defeats, the server's own per-moment verdict says the body was neither seen nor heard, and the aim turned with the body's secret turns far more than at shuffled times",
+        "needs": [
+            "challenge_id, challenge_vision_state and challenge_audio_state on the subject's events",
+            "view_yaw_deg through the window, and challenge_turn_index and challenge_turn_sign at each turn",
+            "the public plan file when the events are scored",
+            "knowledge_channels no wider than vision and audio",
+        ],
+        "limits": [
+            *OCCLUDED_MOTION_REPLAY_V2.capability["limits"],
+            "software that follows the body but smooths its aim so much that no turn reaches the aim within the reaction window",
+        ],
+    },
+    verification=PER_TURN,
+    turns=TurnRule(),
+)
+
 SPECS: dict[tuple[str, int], ChallengeSpec] = {
-    (spec.challenge_type, spec.version): spec for spec in (OCCLUDED_MOTION_REPLAY, OCCLUDED_MOTION_REPLAY_V2)
+    (spec.challenge_type, spec.version): spec for spec in (OCCLUDED_MOTION_REPLAY, OCCLUDED_MOTION_REPLAY_V2, OCCLUDED_MOTION_REPLAY_V3)
 }
 # The version a new plan uses, by type: what fpsdet challenge plan writes.
 CURRENT: dict[str, ChallengeSpec] = {OCCLUDED_MOTION_REPLAY_V2.challenge_type: OCCLUDED_MOTION_REPLAY_V2}
@@ -401,6 +501,9 @@ def schedule_problems(plans: Iterable[ChallengePlan], budget: Budget) -> list[st
             problems.append(f"{plan.challenge_id}: window outside the play window")
         if not budget.min_duration_ms <= length <= budget.max_duration_ms:
             problems.append(f"{plan.challenge_id}: window of {length} ms is outside the budget's durations")
+        rule = plan.spec.turns
+        if rule is not None and length < rule.min_window_ms:
+            problems.append(f"{plan.challenge_id}: window of {length} ms cannot hold {rule.count} turns; {plan.spec.name} needs {rule.min_window_ms} ms")
     for (_match, subject), rows in sorted(by_subject.items()):
         rows.sort(key=lambda plan: plan.start_ms)
         if len(rows) > budget.count:
@@ -489,6 +592,10 @@ class ChallengeSample:
     competing: str
     # The server's verdict on the challenge's body (challenge_vision_state, challenge_audio_state), or None.
     channels: tuple[tuple[str, str], ...] | None = None
+    # Secret-turn telemetry (version 3): this client's view yaw, and the turn this event marks.
+    yaw_deg: float | None = None
+    turn_index: int | None = None
+    turn_sign: int | None = None
 
 
 def _competing(event, profile) -> str:
@@ -516,7 +623,10 @@ def challenge_samples(events: Iterable, profile) -> list[ChallengeSample]:
         channels = challenge_channels(event)
         if event.challenge_id is None and event.challenge_track_ms is None and channels is None:
             continue
-        out.append(ChallengeSample(event.challenge_id, event.match_id, event.t_ms, event.challenge_track_ms, _competing(event, profile), channels))
+        out.append(ChallengeSample(
+            event.challenge_id, event.match_id, event.t_ms, event.challenge_track_ms, _competing(event, profile), channels,
+            event.view_yaw_deg, event.challenge_turn_index, event.challenge_turn_sign,
+        ))
     return out
 
 
@@ -541,6 +651,10 @@ class ChallengeResult:
     knowledge: KnowledgeState | None = None
     verification: str = BY_PLAN
     verified: int = 0  # eligible moments whose own verdict made the body unknowable (PER_SAMPLE only)
+    # PER_TURN only: each counted turn, the shuffle test, and the bar it was read against.
+    turns: list[dict] = field(default_factory=list)
+    p_value: float | None = None
+    turn_bar_deg: float | None = None
 
     @property
     def total_ms(self) -> float:
@@ -562,7 +676,16 @@ class ChallengeResult:
         if self.verification != BY_PLAN:
             out["verification"] = self.verification
             out["verified_samples"] = self.verified
+        if self.verification == PER_TURN:
+            out["turns"] = [dict(turn) for turn in self.turns]
+            out["followed_turns"] = self.followed_turns
+            out["p_value"] = self.p_value
+            out["turn_bar_deg"] = self.turn_bar_deg
         return out
+
+    @property
+    def followed_turns(self) -> int:
+        return sum(1 for turn in self.turns if turn["followed"])
 
 
 def _skip(result: ChallengeResult, cause: str, n: int = 1) -> None:
@@ -580,6 +703,9 @@ def _moments(rows: list[ChallengeSample]):
 
 
 def _judge(result: ChallengeResult, rows: list[ChallengeSample], plan: ChallengePlan, profile) -> None:
+    if plan.spec.verification == PER_TURN:
+        _judge_turns(result, rows, plan, profile)
+        return
     if plan.spec.verification == PER_SAMPLE or any(sample.channels is not None for sample in rows):
         _judge_verified(result, rows, plan, profile)
         return
@@ -704,6 +830,182 @@ def _judge_verified(result: ChallengeResult, rows: list[ChallengeSample], plan: 
             result.status = NOT_FOLLOWED if result.eligible else NO_SAMPLES
 
 
+def _wrap(degrees: float) -> float:
+    """An angle difference in [-180, 180)."""
+    return (degrees + 180.0) % 360.0 - 180.0
+
+
+class _Trace:
+    """One client's view yaw through a window, unwrapped so a turn past 180 degrees is not a jump."""
+
+    def __init__(self, points: list[tuple[int, float]], max_gap_ms: int):
+        self.times: list[int] = []
+        self.yaws: list[float] = []
+        previous = None  # the last raw yaw
+        for t_ms, yaw in points:
+            self.yaws.append(yaw if previous is None else self.yaws[-1] + _wrap(yaw - previous))
+            self.times.append(t_ms)
+            previous = yaw
+        self.max_gap_ms = max_gap_ms
+
+    def at(self, t_ms: int) -> float | None:
+        """The yaw at ``t_ms``, linear between the two samples around it; None if they are too far apart."""
+        index = bisect.bisect_left(self.times, t_ms)
+        if index < len(self.times) and self.times[index] == t_ms:
+            return self.yaws[index]
+        if index == 0 or index == len(self.times):
+            return None
+        before, after = self.times[index - 1], self.times[index]
+        if after - before > self.max_gap_ms:
+            return None
+        share = (t_ms - before) / (after - before)
+        return self.yaws[index - 1] + share * (self.yaws[index] - self.yaws[index - 1])
+
+    def response(self, t_ms: int, sign: int, rule: TurnRule) -> float | None:
+        """How much the yaw rate changed in the turn's direction at ``t_ms``, in degrees over the reaction window."""
+        points = [self.at(t_ms - rule.lead_ms), self.at(t_ms), self.at(t_ms + rule.react_from_ms), self.at(t_ms + rule.react_to_ms)]
+        if any(point is None for point in points):
+            return None
+        before, turn, start, end = points
+        return sign * ((end - start) - (turn - before))
+
+
+def _shuffle_seed(challenge_id: str) -> int:
+    """The shuffles are drawn from the public challenge id, so anyone re-running the case draws the same ones."""
+    return int.from_bytes(hashlib.sha256(b"fpsdet.turn-shuffle/1\0" + challenge_id.encode("utf-8")).digest()[:8], "big")
+
+
+def _judge_turns(result: ChallengeResult, rows: list[ChallengeSample], plan: ChallengePlan, profile) -> None:
+    """Version 3: did the aim turn with the body's secret turns?
+
+    The per-moment verdict is read as in version 2: one moment where the body was seen or heard, or where
+    events disagree about it, voids the challenge. A turn counts when its own verdict and every aim sample
+    from its lead to the end of its reaction window say the body was unknowable, no real enemy on those
+    events explains the aim, and the trace has no gap there. Then each counted turn's response is compared
+    with responses at shuffled times in the same window, drawn from the challenge id. The challenge is
+    followed when the summed response beats the shuffles at ``alpha`` and at least ``min_followed`` turns
+    moved the aim more than ``min_turn_response_deg`` their own way.
+    """
+    spec = plan.spec
+    rule = spec.turns
+    required = profile.knowledge_channels
+    result.verification = PER_TURN
+    exposed: KnowledgeState | None = None
+    conflict = ""
+    aim: dict[int, tuple[float, bool]] = {}  # t_ms -> (yaw, clean): clean when the body was unknowable and no enemy explains it
+    marks: dict[int, list[tuple[int, int, bool]]] = {}  # turn index -> (t_ms, sign, verified)
+    for moment in _moments(rows):
+        first = moment[0]
+        if first.match_id != plan.match_id:
+            _skip(result, "other_match", len(moment))
+            continue
+        if not plan.start_ms <= first.t_ms <= plan.end_ms:
+            _skip(result, "outside_window", len(moment))
+            continue
+        verdicts = {sample.channels for sample in moment}
+        if len(verdicts) != 1:
+            conflict = conflict or f"events at {first.match_id} {first.t_ms} ms disagree about the challenge's body: " + " / ".join(
+                sorted(", ".join(f"{name} {state}" for name, state in verdict) if verdict else "no verdict" for verdict in verdicts))
+            _skip(result, "conflict", len(moment))
+            continue
+        state = body_knowledge(first.channels, spec.not_applicable, required)
+        if state.status == KNOWN:
+            exposed = exposed or state
+            _skip(result, state.cause)
+            continue
+        verified = state.status == UNKNOWABLE
+        result.verified += verified
+        yaws = {sample.yaw_deg for sample in moment if sample.yaw_deg is not None}
+        if len(yaws) > 1:
+            _skip(result, "disagreed")
+        elif yaws:
+            aim[first.t_ms] = (yaws.pop(), verified and not any(sample.competing for sample in moment))
+        for sample in moment:
+            if sample.turn_index is not None and sample.turn_sign is not None:
+                marks.setdefault(sample.turn_index, []).append((first.t_ms, sample.turn_sign, verified))
+    absent = {name: CHANNEL_ABSENT for name in spec.defeats}
+    absent.update({name: CHANNEL_NOT_APPLICABLE for name in spec.not_applicable})
+    if conflict:
+        result.knowledge = resolve({}, required, conflict)
+        result.status, result.cause = ABSTAINED, "conflict"
+        return
+    if exposed is not None:
+        result.knowledge = exposed
+        result.status, result.cause = ABSTAINED, exposed.cause
+        return
+    result.knowledge = resolve(absent, required)
+    if result.knowledge.status != UNKNOWABLE:
+        result.status, result.cause = ABSTAINED, result.knowledge.cause
+        return
+    times = sorted(aim)
+    trace = _Trace([(t_ms, aim[t_ms][0]) for t_ms in times], rule.max_trace_gap_ms)
+
+    def clean(t_ms: int) -> bool:
+        low = bisect.bisect_left(times, t_ms - rule.lead_ms)
+        high = bisect.bisect_right(times, t_ms + rule.react_to_ms)
+        return all(aim[t][1] for t in times[low:high])
+
+    counted: list[tuple[int, int, int]] = []  # (index, t_ms, sign)
+    for index in sorted(marks):
+        if len(set(marks[index])) != 1:
+            _skip(result, "turn_disagreed")
+            continue
+        t_ms, sign, verified = marks[index][0]
+        if not verified:
+            _skip(result, "unchecked")
+        elif not plan.start_ms + rule.lead_ms <= t_ms <= plan.end_ms - rule.react_to_ms:
+            _skip(result, "turn_outside_window")
+        elif not clean(t_ms):
+            _skip(result, "turn_not_clean")
+        elif trace.response(t_ms, sign, rule) is None:
+            _skip(result, "no_trace")
+        else:
+            counted.append((index, t_ms, sign))
+    result.eligible = len(counted)
+    if not marks and not aim:
+        result.status = NO_SAMPLES
+        return
+    if len(counted) < rule.min_counted:
+        result.status, result.cause = ABSTAINED, "too_few_turns" if result.verified else "unchecked"
+        return
+    # Each shuffle is a whole schedule drawn the way the secret draws one: a time in each counted turn's own
+    # slot, and a fair direction. The aim of a player who cannot know the secret is independent of it, so the
+    # real schedule is one more draw among these; and a reaction near a real turn gets a random direction here,
+    # so it cancels instead of raising the null.
+    rng = random.Random(_shuffle_seed(plan.challenge_id))
+    first = plan.start_ms + rule.lead_ms
+    slot = (plan.end_ms - rule.react_to_ms - first) // rule.count
+    null_sums: list[float] = []
+    for _ in range(rule.shuffles):
+        total = 0.0
+        for index, _t_ms, _sign in counted:
+            value = None
+            for _attempt in range(64):
+                at = first + min(index, rule.count - 1) * slot + rng.randint(0, max(0, slot - rule.min_gap_ms))
+                sign = rng.choice((1, -1))
+                if clean(at):
+                    value = trace.response(at, sign, rule)
+                    if value is not None:
+                        break
+            if value is None:
+                result.status, result.cause = ABSTAINED, "no_trace"
+                return
+            total += value
+        null_sums.append(total)
+    responses = [(index, t_ms, sign, trace.response(t_ms, sign, rule)) for index, t_ms, sign in counted]
+    observed = exact_sum([value for *_rest, value in responses])
+    result.p_value = (1 + sum(1 for value in null_sums if value >= observed)) / (1 + rule.shuffles)
+    result.turn_bar_deg = rule.min_turn_response_deg
+    result.turns = [
+        {"index": index, "t_ms": t_ms, "sign": sign, "response_deg": round(value, 6), "followed": value > result.turn_bar_deg}
+        for index, t_ms, sign, value in responses
+    ]
+    if result.p_value <= rule.alpha and result.followed_turns >= rule.min_followed:
+        result.status = FOLLOWED
+    else:
+        result.status = NOT_FOLLOWED
+
+
 def evaluate_challenges(
     subject_id: str,
     match_ids: Iterable[str],
@@ -763,7 +1065,7 @@ def challenge_notes(results: list[ChallengeResult], unlinked: int) -> list[str]:
     if foreign:
         notes.append(f"{foreign} challenges named on this player's events were planned for another player. They were not read.")
     for result in results:
-        if result.verification != PER_SAMPLE or result.plan is None:
+        if result.verification not in (PER_SAMPLE, PER_TURN) or result.plan is None:
             continue
         name = result.challenge_id
         if result.cause == "conflict":
@@ -772,8 +1074,12 @@ def challenge_notes(results: list[ChallengeResult], unlinked: int) -> list[str]:
             moments = result.not_counted.get(result.cause, 0)
             notes.append(f"Challenge {name}: the server reported its body {result.cause} at {moments} moments, so this client could know it. It does not count; check the placement.")
         unverified = result.not_counted.get("unchecked", 0)
-        if unverified:
+        if unverified and result.verification == PER_SAMPLE:
             notes.append(f"Challenge {name}: {unverified} moments had no complete vision and audio verdict for its body. They were not counted.")
+        if result.verification == PER_TURN and result.cause == "too_few_turns":
+            notes.append(f"Challenge {name}: {result.eligible} of its turns could be read, and {result.plan.spec.turns.min_counted} are needed. It does not count; check the turn markers and the view yaw trace.")
+        elif result.verification == PER_TURN and result.cause == "no_trace":
+            notes.append(f"Challenge {name}: the view yaw trace had too many gaps to draw shuffled times. It does not count; check the emitter.")
     return notes
 
 
@@ -832,6 +1138,12 @@ def legacy_context(state: KnowledgeState, not_counted: Mapping) -> dict:
 
 def challenge_line(result: ChallengeResult) -> str:
     plan = result.plan
+    if result.verification == PER_TURN:
+        rule = plan.spec.turns
+        return (
+            f"aim turned with challenge {result.challenge_id}'s secret turns (occluded motion replay in {plan.match_id}): "
+            f"{result.followed_turns} of {len(result.turns)} turns followed, p = {result.p_value:.4f} against {rule.shuffles} shuffled timings"
+        )
     return (
         f"aim stayed on challenge {result.challenge_id} (occluded motion replay in {plan.match_id}) "
         f"for {result.total_ms:.0f} ms across {len(result.tracked)} samples"
@@ -843,8 +1155,28 @@ def challenge_evidence(result: ChallengeResult, profile) -> dict:
     commitment; its window; what was counted; the knowledge it needed, and how it was known; the bar."""
     plan = result.plan
     knowledge = _knowledge(plan.spec, profile)
-    if result.verification == PER_SAMPLE:
-        knowledge = {**knowledge, "verification": PER_SAMPLE, "verified_samples": result.verified}
+    if result.verification in (PER_SAMPLE, PER_TURN):
+        knowledge = {**knowledge, "verification": result.verification, "verified_samples": result.verified}
+    if result.verification == PER_TURN:
+        return {
+            "challenge": {
+                "challenge_id": plan.challenge_id,
+                "origin": PLANNED_ORIGIN,
+                "type": plan.challenge_type,
+                "version": plan.version,
+                "commitment": plan.commitment,
+                "plan": plan.digest,
+                "window": {"start_ms": plan.start_ms, "end_ms": plan.end_ms},
+            },
+            "linkage": "challenge_id",
+            "scope": "challenge",
+            "turns": [dict(turn) for turn in result.turns],
+            "followed_turns": result.followed_turns,
+            "p_value": result.p_value,
+            "turn_bar_deg": result.turn_bar_deg,
+            "knowledge": knowledge,
+            "thresholds": plan.spec.turns.to_dict(),
+        }
     return {
         "challenge": {
             "challenge_id": plan.challenge_id,
@@ -875,7 +1207,8 @@ def challenge_context(result: ChallengeResult, results: Iterable[ChallengeResult
         "knowledge": {
             **result.knowledge.to_dict(),
             "basis": (f"challenge_track_ms on events naming {result.challenge_id}; {result.plan.spec.name} defeats {', '.join(result.plan.spec.defeats)}"
-                      + ("; the server's own vision and audio verdict for the body at every counted moment" if result.verification == PER_SAMPLE else "")),
+                      + ("; the server's own vision and audio verdict for the body at every counted moment" if result.verification in (PER_SAMPLE, PER_TURN) else "")
+                      + ("; view_yaw_deg against the body's secret turns, and against shuffled times drawn from the challenge id" if result.verification == PER_TURN else "")),
             "not_counted": dict(sorted(result.not_counted.items())),
         },
         "series": {"planned": sum(series.values()), **dict(sorted(series.items()))},
