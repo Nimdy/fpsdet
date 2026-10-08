@@ -1,0 +1,503 @@
+{
+ "code": {
+  "examples/pilot/godot/scripts/arena.gd": "sha256:560cccfcf300164bd18d15a9dfc250cf7a9030c63d0f12af5ade32be04751a13",
+  "examples/pilot/godot/scripts/recipe.gd": "sha256:1d77e38dd63624bd3a9950ff9db8542568457362e8cd1284a6a7944480ef24e0",
+  "examples/pilot/godot/scripts/study_arena.gd": "sha256:3690e0e9b4efca5b1d833693bfc08aa8c9652cf2be3bbe576c769f7ea049ca9a",
+  "examples/pilot/godot/scripts/study_client.gd": "sha256:01216e1eadcddb877a063fba35c4adf8ae4549903c21e93d3f0cf199cbc66399",
+  "examples/pilot/godot/scripts/study_server.gd": "sha256:101f0c64701fa14749836ca860b85bec94a0805839a53c90d651dcf9bd5d0275",
+  "examples/pilot/godot/scripts/turns_recipe.gd": "sha256:ef3eaa7471970678c8aac0cb40c09d91a4a13f27d6fefc6d3b8642fc75f0f5a2",
+  "examples/pilot/godot/scripts/turns_server.gd": "sha256:4fc51a5516aa63b5824bc550482d00da94e8d5f289085a49174efbb83391a5e4",
+  "examples/pilot/godot/turns.gd": "sha256:4152771012ffb6a6f0be7c36d36715198b0084626a4a131d32b6ecfe25deedfd",
+  "examples/pilot/godot/turns.tscn": "sha256:f14d7c1369cd7a33d6dc33cdd30d87ae06c71c78b7ee51c833796377c69bb376",
+  "examples/turns-pilot/turns.py": "sha256:afcd328b45b37f12137a4b3ff9e77a3189ec4ba183296256e472ca8d18d4ae46"
+ },
+ "engine": "4.7.2.stable.official.ed1daf0bf",
+ "format": "fpsdet.turns-pilot/1",
+ "rule": {
+  "alpha": 0.01,
+  "count": 6,
+  "max_trace_gap_ms": 200,
+  "min_counted": 4,
+  "min_followed": 4,
+  "min_gap_ms": 1500,
+  "min_turn_response_deg": 2.0,
+  "react_from_ms": 150,
+  "react_to_ms": 600,
+  "shuffles": 1000
+ },
+ "schedule": {
+  "cooldown_ms": 30000,
+  "count": 4,
+  "from_ms": 20000,
+  "max_duration_ms": 24000,
+  "min_duration_ms": 18000,
+  "to_ms": 230000
+ },
+ "sessions": [
+  {
+   "case_problems": [],
+   "challenges": [
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "chokepoint",
+     "status": "abstained",
+     "time_on_body_ms": 666.7,
+     "turns_counted": 0
+    },
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "long_wall",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": 0.891108891109,
+     "room": "chokepoint",
+     "status": "not_followed",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 5
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 3,
+     "p_value": 0.002997002997,
+     "room": "door_edge",
+     "status": "not_followed",
+     "time_on_body_ms": 5666.7,
+     "turns_counted": 5
+    }
+   ],
+   "decision": "insufficient_data",
+   "events_sha256": "sha256:0f6c7c303299077cb88a7ccaf476bbb3bba7525e550bed46ec975edc620c28c9",
+   "exit_codes": [
+    0,
+    0
+   ],
+   "inputs": "fpsdet.player-events/4",
+   "kind": "machine_standin",
+   "leaks": [],
+   "scenario": "holder",
+   "session": "holder-1",
+   "stand_in": "holder",
+   "turns_check": []
+  },
+  {
+   "case_problems": [],
+   "challenges": [
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 1,
+     "p_value": 0.046953046953,
+     "room": "long_wall",
+     "status": "not_followed",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 5
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": 0.659340659341,
+     "room": "door_edge",
+     "status": "not_followed",
+     "time_on_body_ms": 3533.3,
+     "turns_counted": 5
+    },
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "long_wall",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": 0.851148851149,
+     "room": "long_wall",
+     "status": "not_followed",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 6
+    }
+   ],
+   "decision": "insufficient_data",
+   "events_sha256": "sha256:78928f38599ea3749d0a5f918b84b1ab8eade00430fa795f0dc191cc2d3de9c4",
+   "exit_codes": [
+    0,
+    0
+   ],
+   "inputs": "fpsdet.player-events/4",
+   "kind": "machine_standin",
+   "leaks": [],
+   "scenario": "holder",
+   "session": "holder-2",
+   "stand_in": "holder",
+   "turns_check": []
+  },
+  {
+   "case_problems": [],
+   "challenges": [
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": 0.991008991009,
+     "room": "chokepoint",
+     "status": "not_followed",
+     "time_on_body_ms": 416.7,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 3,
+     "p_value": 0.20979020979,
+     "room": "long_wall",
+     "status": "not_followed",
+     "time_on_body_ms": 466.7,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 2,
+     "p_value": 0.779220779221,
+     "room": "long_wall",
+     "status": "not_followed",
+     "time_on_body_ms": 716.7,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 1,
+     "p_value": 0.841158841159,
+     "room": "door_edge",
+     "status": "not_followed",
+     "time_on_body_ms": 716.7,
+     "turns_counted": 6
+    }
+   ],
+   "decision": "insufficient_data",
+   "events_sha256": "sha256:71bf73e9558e2dea86780d45d5f7213ac63b42d7d97defbf9695ddee9d5ab71f",
+   "exit_codes": [
+    0,
+    0
+   ],
+   "inputs": "fpsdet.player-events/4",
+   "kind": "machine_standin",
+   "leaks": [],
+   "scenario": "sweeper",
+   "session": "sweeper-1",
+   "stand_in": "sweeper",
+   "turns_check": []
+  },
+  {
+   "case_problems": [],
+   "challenges": [
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 4,
+     "p_value": 0.307692307692,
+     "room": "corner",
+     "status": "not_followed",
+     "time_on_body_ms": 1183.3,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 1,
+     "p_value": 0.715284715285,
+     "room": "door_edge",
+     "status": "not_followed",
+     "time_on_body_ms": 650.0,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 1,
+     "p_value": 0.678321678322,
+     "room": "corner",
+     "status": "not_followed",
+     "time_on_body_ms": 1266.7,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 1,
+     "p_value": 0.908091908092,
+     "room": "corner",
+     "status": "not_followed",
+     "time_on_body_ms": 1266.7,
+     "turns_counted": 6
+    }
+   ],
+   "decision": "insufficient_data",
+   "events_sha256": "sha256:74f96bf9fb55c535309c9c8545867f7977e36f6f480e6ba6e39e47b668134a07",
+   "exit_codes": [
+    0,
+    0
+   ],
+   "inputs": "fpsdet.player-events/4",
+   "kind": "machine_standin",
+   "leaks": [],
+   "scenario": "sweeper",
+   "session": "sweeper-2",
+   "stand_in": "sweeper",
+   "turns_check": []
+  },
+  {
+   "case_problems": [],
+   "challenges": [
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "door_edge",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    },
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "door_edge",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    },
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "door_edge",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    },
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "door_edge",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    }
+   ],
+   "decision": "insufficient_data",
+   "events_sha256": "sha256:470bdd8e01b53c03785df391cbc541b653894ab8c906edd37f51113284064633",
+   "exit_codes": [
+    0,
+    0
+   ],
+   "inputs": "fpsdet.player-events/4",
+   "kind": "machine_standin",
+   "leaks": [],
+   "scenario": "tracker",
+   "session": "tracker-1",
+   "stand_in": "tracker",
+   "turns_check": []
+  },
+  {
+   "case_problems": [],
+   "challenges": [
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "long_wall",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    },
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "long_wall",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    },
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "long_wall",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    },
+    {
+     "cause": "too_few_turns",
+     "ended": "window over",
+     "followed_turns": 0,
+     "p_value": null,
+     "room": "door_edge",
+     "status": "abstained",
+     "time_on_body_ms": 0.0,
+     "turns_counted": 0
+    }
+   ],
+   "decision": "insufficient_data",
+   "events_sha256": "sha256:3e2782ae50a75b93607ad701834a3bb7ec9644e57cd50702170e1d3bfee8fde3",
+   "exit_codes": [
+    0,
+    0
+   ],
+   "inputs": "fpsdet.player-events/4",
+   "kind": "machine_standin",
+   "leaks": [],
+   "scenario": "tracker",
+   "session": "tracker-2",
+   "stand_in": "tracker",
+   "turns_check": []
+  },
+  {
+   "case_problems": [],
+   "challenges": [
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 6,
+     "p_value": 0.000999000999001,
+     "room": "corner",
+     "status": "followed",
+     "time_on_body_ms": 21366.7,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 6,
+     "p_value": 0.000999000999001,
+     "room": "door_edge",
+     "status": "followed",
+     "time_on_body_ms": 17650.0,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 6,
+     "p_value": 0.000999000999001,
+     "room": "door_edge",
+     "status": "followed",
+     "time_on_body_ms": 20166.7,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 6,
+     "p_value": 0.000999000999001,
+     "room": "corner",
+     "status": "followed",
+     "time_on_body_ms": 17983.3,
+     "turns_counted": 6
+    }
+   ],
+   "decision": "review",
+   "events_sha256": "sha256:430aaffdf2bfa0201d29c65c51b0b532323453ba09f9c85fadc5cfc8668eadfb",
+   "exit_codes": [
+    0,
+    0
+   ],
+   "inputs": "fpsdet.player-events/4",
+   "kind": "controlled_follower",
+   "leaks": [],
+   "scenario": "follower",
+   "session": "follower-1",
+   "stand_in": "holder",
+   "turns_check": []
+  },
+  {
+   "case_problems": [],
+   "challenges": [
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 6,
+     "p_value": 0.000999000999001,
+     "room": "corner",
+     "status": "followed",
+     "time_on_body_ms": 21083.3,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 6,
+     "p_value": 0.000999000999001,
+     "room": "corner",
+     "status": "followed",
+     "time_on_body_ms": 18866.7,
+     "turns_counted": 6
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 5,
+     "p_value": 0.001998001998,
+     "room": "chokepoint",
+     "status": "followed",
+     "time_on_body_ms": 21400.0,
+     "turns_counted": 5
+    },
+    {
+     "cause": null,
+     "ended": "window over",
+     "followed_turns": 5,
+     "p_value": 0.000999000999001,
+     "room": "chokepoint",
+     "status": "followed",
+     "time_on_body_ms": 21100.0,
+     "turns_counted": 5
+    }
+   ],
+   "decision": "review",
+   "events_sha256": "sha256:84174f7a15b1af60c0d28649ba0bad8efb6a013323255f24d983ecf367bcdc16",
+   "exit_codes": [
+    0,
+    0
+   ],
+   "inputs": "fpsdet.player-events/4",
+   "kind": "controlled_follower",
+   "leaks": [],
+   "scenario": "follower",
+   "session": "follower-2",
+   "stand_in": "holder",
+   "turns_check": []
+  }
+ ],
+ "statement": "Machine stand-ins and a controlled follower in a live Godot dedicated server. Not people, not a deployment, not a rate."
+}

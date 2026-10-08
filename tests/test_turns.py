@@ -15,6 +15,7 @@ from __future__ import annotations
 import math
 import random
 import unittest
+from pathlib import Path
 
 from fpsdet.challenge import (
     ABSTAINED,
@@ -237,6 +238,81 @@ class TelemetryTest(unittest.TestCase):
         bearing = follower(plan, turns)
         _case, result = judged(plans, events_for(plan, turns, lambda t: bearing(t) + 359.0))
         self.assertEqual(result.status, FOLLOWED)
+
+
+class GodotTurnsTest(unittest.TestCase):
+    """The Godot study server runs version 3 from new files only, with fpsdet's own rule."""
+
+    GODOT = Path(__file__).resolve().parents[1] / "examples" / "pilot" / "godot"
+
+    def test_the_gdscript_rule_is_fpsdets(self):
+        import re
+
+        source = (self.GODOT / "scripts" / "turns_recipe.gd").read_text(encoding="utf-8")
+        found = dict(re.findall(r"const (COUNT|MIN_GAP_MS|REACT_FROM_MS|REACT_TO_MS|VERSION) := (\d+)", source))
+        self.assertEqual({key: int(value) for key, value in found.items()},
+                         {"VERSION": 3, "COUNT": RULE.count, "MIN_GAP_MS": RULE.min_gap_ms, "REACT_FROM_MS": RULE.react_from_ms, "REACT_TO_MS": RULE.react_to_ms})
+        self.assertIn('"turn_%d_pick" % index, 0, 4294967295', source)
+        self.assertIn('"turn_signs", 0, (1 << COUNT) - 1', source)
+        names = [name for name, _low, _high in OCCLUDED_MOTION_REPLAY_V3.parameters[4:]]
+        self.assertEqual(names, [f"turn_{index}_pick" for index in range(RULE.count)] + ["turn_signs"])
+
+    def test_the_turns_server_extends_the_study_server_and_keeps_the_secret(self):
+        server = (self.GODOT / "scripts" / "turns_server.gd").read_text(encoding="utf-8")
+        self.assertTrue(server.startswith('extends "res://scripts/study_server.gd"'))
+        self.assertIn("secret = PackedByteArray()", server)
+        for line in server.splitlines():
+            if "_log(" in line or "store_string" in line:
+                self.assertNotIn("secret", line.replace("secret-file", "").replace("no challenge secret", "").replace("loaded[1]", ""), line)
+        self.assertIn('preload("res://scripts/turns_server.gd")', (self.GODOT / "turns.gd").read_text(encoding="utf-8"))
+
+
+class PublishedTurnsPilotTest(unittest.TestCase):
+    """examples/turns-pilot/result.json: what the live run found, checked offline with no engine."""
+
+    HERE = Path(__file__).resolve().parents[1] / "examples" / "turns-pilot"
+
+    def setUp(self):
+        import importlib.util
+        import json
+        import sys
+
+        path = self.HERE / "result.json"
+        if not path.exists():
+            self.skipTest("no published turns pilot")
+        self.result = json.loads(path.read_text(encoding="utf-8"))
+        spec = importlib.util.spec_from_file_location("turns_pilot_for_test", self.HERE / "turns.py")
+        self.module = importlib.util.module_from_spec(spec)
+        sys.modules["turns_pilot_for_test"] = self.module
+        spec.loader.exec_module(self.module)
+
+    def test_it_ran_this_code_under_this_rule(self):
+        self.assertEqual(self.result["code"], self.module.code_identity())
+        self.assertEqual(self.result["rule"], RULE.to_dict())
+
+    def test_every_check_held(self):
+        for row in self.result["sessions"]:
+            self.assertEqual((row["turns_check"], row["leaks"], row["case_problems"]), ([], [], []), row["session"])
+            self.assertEqual(row["inputs"], INPUTS_RECIPE_V4)
+
+    def test_the_captures_score_as_published(self):
+        import json
+
+        from fpsdet.parse import load_events, load_profile
+
+        profile = load_profile(self.module.PROFILE)
+        sessions = {row["session"]: row for row in self.result["sessions"]}
+        for name in self.module.PUBLISHED:
+            folder = self.HERE / "captured" / name
+            row = sessions[name]
+            self.assertEqual("sha256:" + __import__("hashlib").sha256((folder / "events.ndjson").read_bytes()).hexdigest(), row["events_sha256"])
+            plans = plan_file_from_dict(json.loads((folder / "plan.json").read_text(encoding="utf-8")))
+            events, _errors = load_events(folder / "events.ndjson")
+            subject = plans.plans[0].subject_id
+            case = next(case for case in run_score(events, profile, challenges=ChallengeRegistry.from_files([plans])) if case.player_id == subject)
+            self.assertEqual(case.decision, row["decision"], name)
+            self.assertEqual([(result.status, result.followed_turns, None if result.p_value is None else round(result.p_value, 12)) for result in case.challenges],
+                             [(c["status"], c["followed_turns"], None if c["p_value"] is None else round(c["p_value"], 12)) for c in row["challenges"]], name)
 
 
 if __name__ == "__main__":

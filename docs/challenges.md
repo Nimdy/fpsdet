@@ -16,7 +16,7 @@ A challenge never decides anything about an account. Its finding is a review, ev
 | --- | --- |
 | `occluded_motion_replay`, version 1: the private replay as a planned challenge | Implemented. Kept unchanged, so earlier plans and Benchmark v1 reproduce |
 | `occluded_motion_replay`, version 2: the same probe, with the server's own vision and audio verdict on the body at every counted moment | Implemented, and what `fpsdet challenge plan` writes |
-| `occluded_motion_replay`, version 3: the same probe and verdict; the body turns at secret times, and the finding is whether the aim turned with it ([below](#version-3-secret-turns)) | Implemented in the scorer and planner (`fpsdet challenge plan --version 3`). Not what a plan gets by default, and no emitter sends it yet: the Godot study server still runs version 2, and the human pilot stays on version 2 |
+| `occluded_motion_replay`, version 3: the same probe and verdict; the body turns at secret times, and the finding is whether the aim turned with it ([below](#version-3-secret-turns)) | Implemented in the scorer and planner (`fpsdet challenge plan --version 3`), and run live by machine stand-ins in a Godot server built for it ([examples/turns-pilot](../examples/turns-pilot/README.md)). Not what a plan gets by default; the human pilot and its server stay on version 2 |
 | Planning with the server secret, `fpsdet challenge keygen`, `plan`, `verify`, `types` | Implemented |
 | Other challenge types | Not built. The framework allows them; none is claimed |
 | Running a challenge inside a game | The game server's job. A reference integration runs it in a Godot dedicated server with stock clients ([pilot.md](pilot.md)): a controlled pilot, not a deployment |
@@ -253,6 +253,20 @@ Versions 1 and 2 count time the aim spent on the body. That cannot tell why the 
 The evidence carries every counted turn (index, time, sign, response, followed), `followed_turns`, `p_value`, the 2° bar and the rule.
 
 **What was tested.** Simulated aim, not people: a holder with tremor, an honest player sweeping angles on their own schedule, and software following the body with 100 to 400 ms of lag. Over 300 seeds each, no holder was followed and 2 sweepers were (0.7%, inside the 1% the shuffle test allows). Followers with 100 ms of lag were followed 100 times in 100, with 250 ms 95, with 400 ms 17: a reaction slower than the 600 ms window mostly falls outside it. These are simulations of the planned failure and its fix, not a rate.
+
+**Live, in Godot.** [examples/turns-pilot](../examples/turns-pilot/README.md) runs version 3 in the human pilot's arena with its stand-ins (holder, sweeper, tracker) and its controlled follower: two sessions each, four challenges a session, from new files beside the frozen study server. Every turn the server ran and sent was the secret's, within a tick; no public file held the secret or a realization; every case verified. It took three runs, all reported:
+
+| Run | Windows | Honest stand-ins: reviews | Follower: followed |
+| --- | --- | --- | --- |
+| 1 | 12 to 16 s | 0 of 24 | 5 of 8 |
+| 2 | 18 to 24 s | 1 of 24: a sweeper, p = 0.00999 | 6 of 8 |
+| 3, published | 18 to 24 s, and the probe no longer stops dead after a turn | 0 of 24 | 8 of 8 |
+
+Two things changed between runs. Short windows leave each turn's timing little room to be secret, and the shuffles then test mostly the six directions, which cannot reach p below 1/64; so the harness plans 18 to 24 s windows. And the Godot probe stopped dead at the end of each reaction window, an undeclared change in its bearing; it now eases out from its running speed. In the published run the holder's aim sat on the body for up to 5.7 s in one challenge, beyond version 2's bar, and it was not followed. The trackers abstained throughout: they aim at bots they can see, and a visible enemy in the cone keeps a turn from counting.
+
+**The bar lets about 1 in 100 through.** Run 2's sweeper review is what α = 0.01 allows: an aim that sweeps all the time changes pace near some turns by chance, a fair direction matches half the time, and the four-turn condition barely helps when every response is large. In simulation a smooth sweep is followed in 1.2 to 1.6% of challenges, at any window length; at four challenges a session that is several percent of honest sessions. A stricter bar (α = 0.001 over 10,000 shuffles) followed none of 600 simulated sweeps and still every simulated follower at 100 and 250 ms lag. The bar is fixed before data and has not been changed after seeing these runs; changing it is a decision for the project, and would be a new version.
+
+**How much the timing hides.** Each turn's time is secret only within its own slot: the slot's length less 1,500 ms. A 12-second window leaves about 400 ms per turn; a 16-second one about 1,000. Aim that moves on a rhythm of its own, such as a stand-in that snaps to a bot every three seconds, can land in a turn's reaction window by chance, and with a fair direction half the time the turn's way. The shuffle test counts that chance honestly, and the four-turn condition keeps two lucky turns from making a review: in the live run below, one holder challenge reached p = 0.001 that way, with two turns followed, and was not a review. Longer windows give each turn more room.
 
 **What it does not change.** It does not catch a reader of pixels: the body is never drawn. It does not prove the server told the truth about the turns or the verdict. A follower that smooths its aim past the reaction window, or reacts slower than 600 ms, is not caught.
 

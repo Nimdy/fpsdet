@@ -1,0 +1,91 @@
+{
+  "format": "fpsdet.challenge-plans/1",
+  "notice": "Public plan: challenge ids, windows and commitments. It holds no key and no realization. Keep it on the server until the match is over, because its windows say when each challenge runs.",
+  "game_id": "fpsdet-godot-study",
+  "match_id": "turns-hp-b9586028-follower-1",
+  "nonce": "65da06e45471bfca7abaa2d5e8e6544c",
+  "challenge_type": "occluded_motion_replay",
+  "version": 3,
+  "schedule": {
+    "count": 4,
+    "from_ms": 20000,
+    "to_ms": 230000,
+    "cooldown_ms": 30000,
+    "min_duration_ms": 18000,
+    "max_duration_ms": 24000
+  },
+  "requirements": [
+    "Place the body only where this client's line-of-sight and audio queries both fail, for the whole window; end it early if either would succeed.",
+    "Send it to this client only.",
+    "Never draw it in the stock client, and never show it in the scoreboard, kill feed, radar, minimap or any other UI.",
+    "It makes no sound.",
+    "It has no collision: it blocks no player, projectile or trace.",
+    "It cannot be hit, damaged or killed, and deals no damage.",
+    "It changes no movement, score, objective, economy or match result.",
+    "Send it with the same fields as a real player: no decoy bit.",
+    "Keep it away from any enemy this client can see or hear, so the aim on a real enemy does not cross it.",
+    "Query this client's line-of-sight and audio against the body at every server tick of the window, and send the verdict over the time each event covers on every event that names the challenge: challenge_vision_state and challenge_audio_state, known if the query succeeded at any tick, unchecked if it did not run at every tick, absent otherwise.",
+    "Turn the body at the realization's turn times, each way its sign says, and at no other time; a turn is a change in the rate at which the body's bearing from this client moves.",
+    "A turn makes no sound and changes nothing this client can see or hear.",
+    "On one event at each turn's server time, send challenge_turn_index and challenge_turn_sign with the challenge's id and verdict.",
+    "Through the window, send this client's server-authoritative view yaw as view_yaw_deg on events naming the challenge, at least every max_trace_gap_ms."
+  ],
+  "challenges": [
+    {
+      "challenge_id": "ch-70665b0eb394333f619dbc87",
+      "challenge_type": "occluded_motion_replay",
+      "version": 3,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "turns-hp-b9586028-follower-1",
+      "subject_id": "hp-b9586028",
+      "counter": 0,
+      "nonce": "65da06e45471bfca7abaa2d5e8e6544c",
+      "start_ms": 29228,
+      "end_ms": 50959,
+      "commitment": "sha256:f9ce380f71db9236fae8e5f60b21734804ac4cac7fcabb921d0d469093a9bf34",
+      "plan": "sha256:6a5ab96329d128b989f09ccc1fa2ba8866d5e2ba1e4c4ae01cc9d71a9a3a63a2"
+    },
+    {
+      "challenge_id": "ch-a204bd7d3817f3560d40960d",
+      "challenge_type": "occluded_motion_replay",
+      "version": 3,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "turns-hp-b9586028-follower-1",
+      "subject_id": "hp-b9586028",
+      "counter": 1,
+      "nonce": "65da06e45471bfca7abaa2d5e8e6544c",
+      "start_ms": 82191,
+      "end_ms": 100298,
+      "commitment": "sha256:84332f2ee4e81401d3e9f34c823649f6b611099fcc228a2a45aba06b4f21ccf6",
+      "plan": "sha256:c9b6ddb3d9df5bff32aec55e92317feefb864fc0b7e87173d239c9a7766a182c"
+    },
+    {
+      "challenge_id": "ch-f51b015aba9d37695119c4b3",
+      "challenge_type": "occluded_motion_replay",
+      "version": 3,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "turns-hp-b9586028-follower-1",
+      "subject_id": "hp-b9586028",
+      "counter": 2,
+      "nonce": "65da06e45471bfca7abaa2d5e8e6544c",
+      "start_ms": 130863,
+      "end_ms": 149130,
+      "commitment": "sha256:98aed11abbf3bd36b460ef64adedcfb2a00b492ce2d26db02f1475b54c659e82",
+      "plan": "sha256:0299fa30ad66757f6e9a1d45cc2086b65f1e6178d6daef2695e7f50f2ba5229e"
+    },
+    {
+      "challenge_id": "ch-d35f1053d74051e085a2b526",
+      "challenge_type": "occluded_motion_replay",
+      "version": 3,
+      "game_id": "fpsdet-godot-study",
+      "match_id": "turns-hp-b9586028-follower-1",
+      "subject_id": "hp-b9586028",
+      "counter": 3,
+      "nonce": "65da06e45471bfca7abaa2d5e8e6544c",
+      "start_ms": 181374,
+      "end_ms": 201798,
+      "commitment": "sha256:167693d24f3e54c7b3d1ce3d488e59c95e38877a8cfeaea1e37db9d93f62e3f9",
+      "plan": "sha256:c02d5df9888dc26f6081aee7734789afbc977b2c2d619b08a672143546d07d96"
+    }
+  ]
+}
