@@ -100,6 +100,11 @@ class GameProfile:
     speed_over_fraction: float = 0.08
     speed_min_run: int = 25
     speed_run_gap_ms: int = 400
+    # Opt-in: a sustained run is this many milliseconds of the movement clock, not speed_min_run samples.
+    # It needs movement_clock: "server", the emitter's word that movement t_ms is the server's own clock.
+    # Without that the speed rule abstains. Both absent: today's sample count.
+    speed_min_run_ms: int | None = None
+    movement_clock: str | None = None
     recoil_floor_fraction: float = 0.25
     recoil_min_spray_index: int = 3
     recoil_min_run: int = 10
@@ -113,6 +118,10 @@ class GameProfile:
     metronome_min_gaps: int = 40
     metronome_max_std_ms: float = 1.0
     tick_ms: int | None = None
+    # Opt-in: the clock that stamps shots. "server_tick" needs tick_ms, or the metronome abstains instead
+    # of flagging every held trigger on tick-quantised gaps. "server_ms": stamped to the millisecond.
+    # Absent: today's behaviour, tick_ms if given.
+    shot_clock: str | None = None
     hidden_track_min_ms: float = 1200
     hidden_track_min_samples: int = 8
     hidden_grace_ms: float = 1000
@@ -289,6 +298,10 @@ class SpeedReport:
     missing_cap: int = 0
     violations: int = 0
     longest_run: int = 0
+    # Milliseconds from the first to the last moment of the longest run by time. Read only under speed_min_run_ms.
+    longest_run_ms: int = 0
+    # The longest time from a match's first eligible ground sample to its last. Read only under speed_min_run_ms.
+    eligible_span_ms: int = 0
     sustained: bool = False
     spike_samples: int = 0
     cap_source: str = "none"

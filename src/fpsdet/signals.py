@@ -212,7 +212,7 @@ def metronome_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str,
     before it.
     """
     rule = profile.weapon_rule(weapon.weapon_class, weapon.weapon_key)
-    if rule is None or rule.min_shot_interval_ms is None or rule.server_paced:
+    if rule is None or rule.min_shot_interval_ms is None or rule.server_paced or _unclocked(profile):
         return None
     pace = rule.min_shot_interval_ms + max(rule.interval_slack_ms, profile.tick_ms or 0)
     steady: list[int] = []
@@ -240,21 +240,32 @@ def metronome_finding(weapon: WeaponSummary, profile: GameProfile) -> tuple[str,
         f"{weapon.weapon_key} fire interval std {max(spreads):.2f} ms across {len(steady)} legal gaps{where} "
         f"(mean {mean:.0f} ms)"
     )
+    thresholds = {
+        "cycle_ms": rule.min_shot_interval_ms,
+        "pace_ms": pace,
+        "cadence_cycles": CADENCE_CYCLES,
+        "max_std_ms": profile.metronome_max_std_ms,
+        "min_gaps": profile.metronome_min_gaps,
+        "min_gaps_per_match": METRONOME_MATCH_GAPS,
+    }
+    if profile.shot_clock is not None:
+        # The clock the case assumed. Only when the profile declares one, so older cases read as they did.
+        thresholds["shot_clock"] = profile.shot_clock
+        thresholds["tick_ms"] = profile.tick_ms
     return text, {
         "steady_gaps": len(steady),
         "matches": matches,
         "max_std_ms": max(spreads),
         "mean_ms": mean,
         "counted": counted,
-        "thresholds": {
-            "cycle_ms": rule.min_shot_interval_ms,
-            "pace_ms": pace,
-            "cadence_cycles": CADENCE_CYCLES,
-            "max_std_ms": profile.metronome_max_std_ms,
-            "min_gaps": profile.metronome_min_gaps,
-            "min_gaps_per_match": METRONOME_MATCH_GAPS,
-        },
+        "thresholds": thresholds,
     }
+
+
+def _unclocked(profile: GameProfile) -> bool:
+    """Shots stamped on server ticks of an undeclared length. Every held trigger lands on the same tick
+    multiple, so the gaps have no spread for a reason that is not the player's."""
+    return profile.shot_clock == "server_tick" and profile.tick_ms is None
 
 
 def metronome_eligibility(weapon: WeaponSummary, profile: GameProfile) -> str:
@@ -265,6 +276,8 @@ def metronome_eligibility(weapon: WeaponSummary, profile: GameProfile) -> str:
         return "disabled"
     if rule.server_paced:
         return "not_applicable"
+    if _unclocked(profile):
+        return "disabled"
     pace = rule.min_shot_interval_ms + max(rule.interval_slack_ms, profile.tick_ms or 0)
     judged = 0
     long_enough = False

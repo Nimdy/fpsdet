@@ -118,6 +118,9 @@ NOT_DETECTOR = {
 }
 # GameProfile fields the scorer never reads. Editing them changes no detection.
 PROFILE_NOT_MATERIAL = frozenset({"notes"})
+# Opt-in GameProfile fields added after profile/1 was pinned. Unset, the scorer behaves as before they
+# existed, so they are left out of the digest and every older profile keeps its digest. Set, they count.
+PROFILE_OPT_IN = frozenset({"speed_min_run_ms", "movement_clock", "shot_clock"})
 # Sequences whose order the scorer ignores. A recoil floor's mods are matched as a sorted build key.
 UNORDERED_FIELDS = frozenset({("RecoilFloor", "mod_set")})
 
@@ -168,6 +171,7 @@ def canonical_profile(profile) -> dict:
         spec.name: _canonical(getattr(profile, spec.name))
         for spec in dataclasses.fields(profile)
         if spec.name not in PROFILE_NOT_MATERIAL
+        and not (spec.name in PROFILE_OPT_IN and getattr(profile, spec.name) is None)
     }
 
 

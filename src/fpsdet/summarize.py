@@ -86,11 +86,15 @@ def analyze_speed(events: list[Event], profile: GameProfile) -> SpeedReport:
     samples = [ev for ev in events if ev.speed_mps is not None]
     samples.sort(key=lambda ev: (ev.match_id, ev.t_ms))
     limit = 1.0 + profile.speed_over_fraction
+    by_ms = profile.speed_min_run_ms is not None
+    clocked = profile.movement_clock == "server"
     run = 0
     run_start = 0
     run_peak = (0.0, 1.0)  # (speed, cap) of the fastest sample in the current run, against its own cap
     prev: Event | None = None
+    first_eligible: dict[str, int] = {}
     for moment in same_time_groups(samples):
+        before = report.eligible
         sources = set()
         over: list[tuple[float, float]] = []
         all_over = True
@@ -109,6 +113,9 @@ def analyze_speed(events: list[Event], profile: GameProfile) -> SpeedReport:
         elif report.cap_source == "none" and "unset_curve" in sources:
             report.cap_source = "unset_curve"
         first = moment[0]
+        if report.eligible > before:
+            start = first_eligible.setdefault(first.match_id, first.t_ms)
+            report.eligible_span_ms = max(report.eligible_span_ms, first.t_ms - start)
         same_run = (
             prev is not None
             and prev.match_id == first.match_id
@@ -123,17 +130,40 @@ def analyze_speed(events: list[Event], profile: GameProfile) -> SpeedReport:
                 run_peak = fastest
             elif fastest[0] / fastest[1] > run_peak[0] / run_peak[1]:
                 run_peak = fastest
-            if run > report.longest_run:
+            span = first.t_ms - run_start
+            if (span > report.longest_run_ms) if by_ms else (run > report.longest_run):
                 report.run_match = first.match_id
                 report.run_start_ms = run_start
                 report.run_end_ms = first.t_ms
                 report.run_peak_mps, report.run_peak_cap_mps = run_peak
             report.longest_run = max(report.longest_run, run)
+            report.longest_run_ms = max(report.longest_run_ms, span)
         else:
             run = 0
         prev = moment[-1]
-    report.sustained = report.longest_run >= profile.speed_min_run
-    if report.violations and not report.sustained:
+    if by_ms:
+        report.sustained = clocked and report.longest_run_ms >= profile.speed_min_run_ms
+    else:
+        report.sustained = report.longest_run >= profile.speed_min_run
+    if by_ms and not clocked:
+        report.detail = (
+            f"The profile measures speed runs in milliseconds, but movement_clock is not \"server\": "
+            "nothing says movement t_ms is the server's clock, so the speed rule abstained."
+        )
+    elif by_ms and report.violations and not report.sustained:
+        report.spike_samples = report.violations
+        report.detail = (
+            f"{report.spike_samples} over-cap ground samples, longest run "
+            f"{report.longest_run_ms} ms (need {profile.speed_min_run_ms}). Treated as a glitch or a blast "
+            "the server did not tag, not as a cheat."
+        )
+    elif by_ms and report.sustained:
+        report.detail = (
+            f"Ground speed stayed over the gear cap for {report.longest_run_ms} ms of server time "
+            f"with displacement_cause none. Cap source: {report.cap_source}. "
+            "If this was a ragdoll or explosion, the server did not mark it."
+        )
+    elif report.violations and not report.sustained:
         report.spike_samples = report.violations
         report.detail = (
             f"{report.spike_samples} over-cap ground samples, longest run "

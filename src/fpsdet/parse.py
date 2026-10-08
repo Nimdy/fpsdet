@@ -76,6 +76,8 @@ _RESERVED = {
 
 _INFO_STATES = {"visible", "audio", "unknowable"}
 _RECOIL_PATTERNS = {"learnable", "random"}
+_MOVEMENT_CLOCKS = {"server"}
+_SHOT_CLOCKS = {"server_tick", "server_ms"}
 
 
 def _information_state(obj: dict) -> str | None:
@@ -296,6 +298,12 @@ def profile_from_dict(obj: dict) -> GameProfile:
     if pattern not in _RECOIL_PATTERNS:
         raise ParseError("recoil_pattern must be learnable or random")
     ref = obj.get("reference_lightest_speed_mps")
+    movement_clock = obj.get("movement_clock")
+    if movement_clock is not None and movement_clock not in _MOVEMENT_CLOCKS:
+        raise ParseError("movement_clock must be server")
+    shot_clock = obj.get("shot_clock")
+    if shot_clock is not None and shot_clock not in _SHOT_CLOCKS:
+        raise ParseError("shot_clock must be server_tick or server_ms")
     try:
         channels = profile_channels(obj["knowledge_channels"] if obj.get("knowledge_channels") is not None else DEFAULT_CHANNELS)
     except (TypeError, ValueError) as error:
@@ -310,6 +318,8 @@ def profile_from_dict(obj: dict) -> GameProfile:
         speed_over_fraction=float(obj.get("speed_over_fraction") or 0.08),
         speed_min_run=int(obj.get("speed_min_run") or 25),
         speed_run_gap_ms=int(obj.get("speed_run_gap_ms") or 400),
+        speed_min_run_ms=int(obj["speed_min_run_ms"]) if obj.get("speed_min_run_ms") is not None else None,
+        movement_clock=movement_clock,
         recoil_floor_fraction=float(obj.get("recoil_floor_fraction") or 0.25),
         recoil_min_spray_index=int(obj.get("recoil_min_spray_index") or 3),
         recoil_min_run=int(obj.get("recoil_min_run") or 10),
@@ -323,6 +333,7 @@ def profile_from_dict(obj: dict) -> GameProfile:
             obj.get("metronome_max_std_ms") if obj.get("metronome_max_std_ms") is not None else 1.0
         ),
         tick_ms=int(obj["tick_ms"]) if obj.get("tick_ms") is not None else None,
+        shot_clock=shot_clock,
         hidden_track_min_ms=float(obj.get("hidden_track_min_ms") or 1200),
         hidden_track_min_samples=int(obj.get("hidden_track_min_samples") or 8),
         hidden_grace_ms=float(obj.get("hidden_grace_ms") if obj.get("hidden_grace_ms") is not None else 1000),

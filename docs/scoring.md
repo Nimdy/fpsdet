@@ -92,6 +92,8 @@ A sample is over cap when speed > cap × (1 + `speed_over_fraction`). Default fr
 
 A run is consecutive over-cap samples in one match with gaps no larger than `speed_run_gap_ms` (default 400). The finding fires when the longest run is at least `speed_min_run` (default 25). Shorter runs are recorded as a possible glitch and do not change the decision.
 
+A count of samples is a different length of time on every emitter: 25 samples are 2.5 s at 10 Hz and 0.4 s at 64 Hz. A profile can measure the run in time instead. Set `speed_min_run_ms`, and the finding fires when the longest run spans at least that many milliseconds from its first moment to its last; `speed_min_run` is then not read. It needs `movement_clock: "server"`, the emitter's word that movement `t_ms` is the server's own clock. Without it the speed rule abstains (`disabled`) rather than measure time on a clock nobody declared. Neither field set is today's sample count, and such a profile keeps its digest.
+
 Samples at the same match and time are one moment. A moment extends a run by its number of samples only when every sample in it is an eligible ground sample over its cap. Any other sample at that moment breaks the run there, whichever order the file listed them in.
 
 Only `displacement_cause` of `none` is scored. Innocent causes, `unknown`, any cause the profile has not listed, missing `on_ground`, and airborne samples break a run and are counted in the case so a reviewer can see them. They are not violations. A new traversal gadget is safe until you decide it is a normal sprint.
@@ -135,6 +137,8 @@ When the sprays are too few, or `spray_index` is missing, the profile decides. `
 Fire interval catches gaps under the legal line. A macro that fires on the legal line, with no motor noise, does not. Only the cadence counts: gaps no longer than 2.5 times `min_shot_interval_ms`. Longer gaps are pauses between bursts. They vary the way a person's do, and they would hide a perfect cadence. Each match is judged on its own. A match counts when it has at least 5 cadence gaps, their mean is above the server's pace, and their sample standard deviation is at or under `metronome_max_std_ms` (default 1.0 ms). Review when the matches that count hold at least `metronome_min_gaps` (default 40) cadence gaps between them.
 
 The server's pace is `min_shot_interval_ms` plus `tick_ms` or `interval_slack_ms`, whichever is larger. A match whose cadence averages at or under it is the server firing as fast as the gun cycles, which is what a held trigger on a full-auto does, and the rule leaves it alone. Under the legal line the fire-interval rule owns it. Set `tick_ms` when the server stamps shots on ticks: a 90 ms cycle on a 20-tick server fires every 100 ms. `WeaponRule.server_paced` true opts that weapon out entirely.
+
+A profile can declare the clock that stamps shots with `shot_clock`. `server_tick` says shots land on ticks; without `tick_ms` beside it the metronome abstains (`disabled`), because every held trigger lands on the same tick multiple and its gaps have no spread for a reason that is not the player's. `server_ms` says shots are stamped to the millisecond. Either way the finding's thresholds name the clock and `tick_ms` it assumed. No `shot_clock` is today's behaviour, and such a profile keeps its digest.
 
 ## What the client could know
 

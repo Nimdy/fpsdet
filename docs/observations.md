@@ -92,7 +92,7 @@ Each row is a detector the scorer runs today. `key` is the weapon key unless the
 | --- | --- | --- | --- | --- |
 | Speed over the gear cap (`speed`) | physics | `speed` | review | `longest_run`, `over_cap_samples`, `eligible_samples`, `cap_source`, `run` (its match, start and end ms, and the fastest sample `peak_mps` against that sample's `cap_mps`); `min_run`, `over_fraction`, `run_gap_ms`. Key: none. Samples left out (innocent cause, unknown cause, airborne, no cap) are context |
 | Faster than the gun cycles (`fire_rate`) | weapon_rules | `fire_rate` | review | `gaps`, `under_floor`, `matches`, `floor_ms`, `counted` (each match and gun that counted, with its gaps and gaps under the floor); cycle, slack, gaps per match, violation rate, totals |
-| Legal cycle, no variation (`metronome`) | weapon_rules | `metronome` | review | `steady_gaps`, `matches`, `max_std_ms`, `mean_ms`, `counted` (each match: gaps, std, mean); cycle, `pace_ms`, cadence cycles, max std, min gaps |
+| Legal cycle, no variation (`metronome`) | weapon_rules | `metronome` | review | `steady_gaps`, `matches`, `max_std_ms`, `mean_ms`, `counted` (each match: gaps, std, mean); cycle, `pace_ms`, cadence cycles, max std, min gaps; `shot_clock` and `tick_ms` when the profile declares a shot clock |
 | Recoil under the build floor (`recoil_floor`) | weapon_rules | `recoil_floor` | review | `floor_deg`, `longest_low_run`, `low_shots`, `shots`; floor fraction, min run, min spray index. Key: the build |
 | Command mirrors the kick (`mirror`) | weapon_rules | `mirror` | review | `same_tick_r`, `lagged_r`, `shots`, `pattern_removed`; max r, lag shots, lag gap, min shots. Key: the build |
 | Recoil under every human on the build (`recoil_learned`) | human_baseline | `recoil_learned` | review | recoil median `observed`, its upper `bound`, `samples`, `ceiling` (band, players, min, p05, median), `learned_floor`; floor fraction. Key: the build |
@@ -162,9 +162,9 @@ A detector with nothing to judge lists `""` as `telemetry_unavailable`: a player
 
 | Detector | Unit | Eligible when | Otherwise |
 | --- | --- | --- | --- |
-| `speed` | account | at least `speed_min_run` eligible ground samples | `insufficient_samples` (fewer, or every sample left out as airborne or a tagged cause); `disabled` (ground samples with no cap); `telemetry_unavailable` |
+| `speed` | account | at least `speed_min_run` eligible ground samples; under `speed_min_run_ms`, eligible samples in one match that span that many milliseconds | `insufficient_samples` (fewer, or every sample left out as airborne or a tagged cause); `disabled` (ground samples with no cap, or `speed_min_run_ms` without `movement_clock: "server"`); `telemetry_unavailable` |
 | `fire_rate` | weapon | a cycle rule, and as many gaps in matches of 5 or more gaps as the rule needs to fire | `disabled` (no rule); `insufficient_samples` |
-| `metronome` | weapon | a cycle rule that is not server-paced, and `metronome_min_gaps` cadence gaps in matches that did not fire at the gun's own cycle | `disabled`; `not_applicable` (server-paced, or every long match at the cycle); `insufficient_samples` |
+| `metronome` | weapon | a cycle rule that is not server-paced, and `metronome_min_gaps` cadence gaps in matches that did not fire at the gun's own cycle | `disabled` (no cycle rule, or `shot_clock: "server_tick"` without `tick_ms`); `not_applicable` (server-paced, or every long match at the cycle); `insufficient_samples` |
 | `recoil_floor` | build | recoil pitches, a floor, and `recoil_min_run` eligible pitches | `telemetry_unavailable`; `disabled` (no floor); `insufficient_samples` |
 | `mirror` | build | `mirror_min_shots` kick and command pairs, with repeated sprays (or a random pattern) | `conflict` (kicks the server did not order); `telemetry_unavailable`; `insufficient_samples` |
 | `recoil_learned` | build | no designer floor, `recoil_min_run` pitches and a thick ceiling cohort | `not_applicable` (a floored build); `telemetry_unavailable`; `insufficient_samples`; `baseline_too_thin` |

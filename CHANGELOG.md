@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
+- **Profiles can declare their clocks.** Three opt-in fields; a profile without them scores as before and keeps its digest, so Benchmark v1 still verifies.
+  - `speed_min_run_ms` measures a sustained speed run in milliseconds, not samples, which are a different length of time on every emitter. It needs `movement_clock: "server"`; without it the speed rule abstains.
+  - `shot_clock: "server_tick"` without `tick_ms` makes the metronome abstain instead of flagging every held trigger on tick-quantised gaps. `server_ms` says shots are stamped to the millisecond. The finding names the clock it assumed.
+
 ### Changed
 
 - **What the numbers can and cannot carry.**

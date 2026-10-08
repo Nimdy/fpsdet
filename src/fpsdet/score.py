@@ -367,10 +367,18 @@ def _floor_eligibility(recoil, profile: GameProfile) -> str:
 
 
 def _speed_eligibility(speed, profile: GameProfile) -> str:
-    """Could the speed rule run? A sustained run needs at least ``speed_min_run`` eligible ground samples."""
+    """Could the speed rule run? A sustained run needs at least ``speed_min_run`` eligible ground samples.
+    Under ``speed_min_run_ms`` it needs the server's movement clock, and eligible samples in one match that
+    span that long."""
     if speed is None:
         return "telemetry_unavailable"
-    if speed.eligible >= profile.speed_min_run:
+    if profile.speed_min_run_ms is not None and profile.movement_clock != "server":
+        return "disabled"
+    if (
+        speed.eligible_span_ms >= profile.speed_min_run_ms
+        if profile.speed_min_run_ms is not None
+        else speed.eligible >= profile.speed_min_run
+    ):
         return "eligible"
     if speed.eligible:
         return "insufficient_samples"
@@ -462,7 +470,7 @@ def _knowledge_notes(record: PlayerRecord, profile: GameProfile) -> list[str]:
 
 def _speed_facts(record: PlayerRecord, profile: GameProfile) -> dict:
     speed = record.speed
-    return {
+    facts = {
         "longest_run": speed.longest_run,
         "over_cap_samples": speed.violations,
         "eligible_samples": speed.eligible,
@@ -480,6 +488,12 @@ def _speed_facts(record: PlayerRecord, profile: GameProfile) -> dict:
             "run_gap_ms": profile.speed_run_gap_ms,
         },
     }
+    if profile.speed_min_run_ms is not None:
+        # Only when the profile opts in, so a case scored without it reads as it always did.
+        facts["longest_run_ms"] = speed.longest_run_ms
+        facts["thresholds"]["min_run_ms"] = profile.speed_min_run_ms
+        facts["thresholds"]["movement_clock"] = profile.movement_clock
+    return facts
 
 
 def _matches_in(rows: list[dict]) -> set[str]:
