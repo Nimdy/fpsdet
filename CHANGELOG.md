@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased: the fpsdet Arena
+
+Nothing here changes fpsdet. No detector, threshold, packet format, benchmark artifact, pilot or study protocol moved; the arena consumes the scorer as it ships.
+
+### Added
+
+- **The fpsdet Arena** (`examples/fps-arena`): a tiny reference FPS in a Godot 4.7.2 dedicated server, built to show what fpsdet sees. One window holds the stock client's view beside the server's view, with the operator panels under them: server knowledge with fpsdet's `known`, `unknowable` and `unknown` on every body, every detector's eligibility, the findings, the case with `automated_action: none`, the packet and graph, the raw telemetry, and a replay of any match. A Python scorer beside the server runs fpsdet on the match once a second, and again with the `fpsdet` command when it ends, and the panel says `OFFLINE REPLAY: IDENTICAL` or `MISMATCH`.
+  - Thirteen scenarios, each with a card (what this tests, what the player can know, what the server knows, the expected fpsdet behaviour, what would make it invalid) and an expectation the harness compares with fpsdet's output: normal play; impossible speed; fire rate; recoil floor; recoil mirror; a hidden enemy that is audible, silent, or unmeasured; the wire against the picture; a real `occluded_motion_replay/2` challenge from a secret-derived plan; the angle-hold false positive, kept and labelled `EXPERIMENTAL: NOT PRODUCTION QUALIFIED`; and a fictional external record that makes a watch and cannot make a review.
+  - `harness/arena.py`: `doctor`, `run`, `scenario`, `qualify`, `verify`, `replay`. The qualification runs every scenario with the real topology, checks packets, graphs and plans, reproduces each realization from the secret, scans every public file for secret material and for addresses or machine identities, and writes `result.json` (`fpsdet.arena/1`, class `interactive_reference_demo`) and the public captures. All 13 came out as declared and replayed identically.
+  - An optional AI reviewer brief through fpsdet's own brief path, with the packet digest shown before and after: it summarizes, creates nothing, and changes no decision.
+  - `tests/test_fps_arena.py`: the scenario metadata, the committed captures re-scored offline, the server's knowledge queries byte for byte the pilot's, the stock client's ignorance of challenges and the operator feed, AI and external evidence changing nothing they must not, no secret or personal data in any capture, and the pilots and Benchmark v1 untouched.
+
 ## 0.4.0 (2026-10-09): secret turns and declared clocks
 
 Nothing here changes a default. Plans still default to `occluded_motion_replay`/2, profiles without the new fields score as before, and Benchmark v1 and the human pilot reproduce. Challenge reviews remain experimental and not production-qualified, and no person has played the human pilot yet.

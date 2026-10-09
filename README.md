@@ -42,6 +42,17 @@ Every published statement carries one class, and no sentence mixes two ([docs/be
 | Live controlled pilot | One challenge in a Godot dedicated server with stock clients ([docs/pilot.md](docs/pilot.md)) | All 8 declared scenarios came out as declared, and every capture scored the same offline. Not a deployment or a rate |
 | Consented human pilot | Pre-registered: consenting adults play that arena honestly with probes running ([docs/human-pilot.md](docs/human-pilot.md)) | **No person has played yet.** A machine dry run found that holding an angle still, over a probe resting behind it, can reach the challenge bar |
 
+## See it work
+
+Run the fpsdet Arena: a tiny playable FPS in a Godot dedicated server, with the player's view beside what the server knows, and fpsdet scoring the match live.
+
+```bash
+python examples/pilot/pilot.py godot --dest ~/godot-4.7.2      # the pinned engine, checked, user-local; nothing is installed
+python examples/fps-arena/harness/arena.py run --godot ~/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64
+```
+
+Thirteen scenarios, each one thing fpsdet does or refuses to do: normal play, impossible speed, fire rate, recoil floor and mirror, a hidden enemy that is audible (`known`), silent (`unknowable`) or unmeasured (`unknown`), the wire against the picture, a real active challenge, the known angle-hold false positive labelled experimental, and an external record that can only make a watch. The operator panel shows live server knowledge, every detector's eligibility, the findings, the case with `automated_action: none`, the packet and graph digests, and a replay of any match; every match is scored again offline and the panel says whether it came out identical. [examples/fps-arena](examples/fps-arena/README.md) has the keys, the scenario cards and the qualified results.
+
 ## See it
 
 - **The site:** <https://nimdy.github.io/fpsdet/>, with the review desk, the [decoys page](https://nimdy.github.io/fpsdet/decoys.html) and the [evidence page](https://nimdy.github.io/fpsdet/evidence.html): what a case carries and what has been tested.
@@ -353,6 +364,7 @@ Every pair of accounts on a weapon is compared for shared leftovers. That is fin
 - [docs/benchmark.md](docs/benchmark.md): FPSDET Benchmark v1, generated from the committed artifacts
 - [docs/calibration.md](docs/calibration.md): what the real-data labels mean, and each detector measured against them
 - [docs/pilot.md](docs/pilot.md): the live challenge pilot in Godot
+- [examples/fps-arena/docs/architecture.md](examples/fps-arena/docs/architecture.md): the Arena, a playable reference FPS that shows what fpsdet sees
 - [docs/human-pilot.md](docs/human-pilot.md): the consented honest-human pilot, its design and its machine dry run
 - [docs/architecture-v1.md](docs/architecture-v1.md): the architecture the evidence work follows
 
@@ -368,6 +380,7 @@ profiles/              game profiles; replace the numbers with your server's
 schema/                event and profile JSON Schemas
 benchmark/             FPSDET Benchmark v1: datasets, pinned sources, results, draws, claims, the release manifest
 examples/              a shot and movement file, report counts, a Unity emitter, real CS2 and TF2 matches
+examples/fps-arena/    the fpsdet Arena: a playable reference FPS with the server's view beside the player's, scored live
 examples/pilot/        the live challenge pilot: a Godot dedicated server and its harness
 examples/human-pilot/  the consented honest-human pilot: design, consent notice, harness, machine dry run
 examples/historic/     try fpsdet on your own logs: a converter with pseudonyms, a sample export, a minimal profile
