@@ -44,14 +44,14 @@ Every published statement carries one class, and no sentence mixes two ([docs/be
 
 ## See it work
 
-Run the fpsdet Arena: a tiny playable FPS in a Godot dedicated server, with the player's view beside what the server knows, and fpsdet scoring the match live.
+Want to see fpsdet work? Run the Arena: a tiny playable FPS in a Godot dedicated server, the player's view beside what the server knows, and fpsdet scoring the match live.
 
 ```bash
 python examples/pilot/pilot.py godot --dest ~/godot-4.7.2      # the pinned engine, checked, user-local; nothing is installed
 python examples/fps-arena/harness/arena.py run --godot ~/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64
 ```
 
-Thirteen scenarios, each one thing fpsdet does or refuses to do: normal play, impossible speed, fire rate, recoil floor and mirror, a hidden enemy that is audible (`known`), silent (`unknowable`) or unmeasured (`unknown`), the wire against the picture, a real active challenge, the known angle-hold false positive labelled experimental, and an external record that can only make a watch. The operator panel shows live server knowledge, every detector's eligibility, the findings, the case with `automated_action: none`, the packet and graph digests, and a replay of any match; every match is scored again offline and the panel says whether it came out identical. [examples/fps-arena](examples/fps-arena/README.md) has the keys, the scenario cards and the qualified results.
+Fourteen scenarios, from normal play to a real active challenge and the known angle-hold false positive. Every actor is a labelled script, nothing is a person or real cheat software, and every match is scored again offline. [examples/fps-arena](examples/fps-arena/README.md) has the keys, the scenarios, what it demonstrates and what it does not prove.
 
 ## See it
 

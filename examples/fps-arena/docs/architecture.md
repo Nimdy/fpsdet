@@ -90,6 +90,14 @@ When `match.json` appears, the scorer scores the file once more in-process and o
 
 The 3D labels and the knowledge chips must read at tick rate, before the scorer's next pass. Rather than reimplement the knowledge engine in GDScript, the scorer writes `live/knowledge-table.json` at startup: fpsdet's own `resolve` for every combination of vision, audio and recent-perception channel state, and `body_knowledge` for every vision and audio pair of a challenge body, under the profile's declared channels. The operator view looks up the server's channel words in that table. The only comparison it makes itself is recent perception against the grace, and the grace is the profile's, from the table. The scorer's per-event answer, from `shot_knowledge` over the real events, is shown beside it.
 
+## The player pixel proof
+
+The server's verdict that the probe was unseen is its own raycast. The qualification does not take it on trust: it runs the challenge scenario and the exposed positive control once more with `pixel_check_client.gd`, the stock client plus the P12 pilot's frame check, drawing in a private virtual display. Every two seconds it freezes the frame, draws it again with each remote body hidden in turn, and counts the pixels that changed. The probe is named afterwards from the server's own entity record, never by the client. The proof passes only when the probe in the sealed chamber was drawn as a body and changed no pixel while the same checks found pixels of the visible bots and the frozen frame was stable, and when the probe placed in the open did change pixels. Qualification only: no scoring rule reads it.
+
+## Who is at the keyboard
+
+The launcher tells the server who it put at the keyboard (`--subject-input`), and every scenario file names its actor. The server puts both in the operator feed, the timeline rows and the match record; the operator view shows the label in large type over the security pane, on the strip, on the card and on the replay header; the player's HUD says when a stand-in holds the aim; the qualification result carries it per row. No label is a judgement: it is the launcher's own knowledge of what it started.
+
 ## Replay
 
 `operator/<match>/timeline.ndjson` is the feed as the server sent it: every 50 ms, the subject's position, view and aim, every bot's true position with its wire and picture and verdicts, the probe with its verdict. `live/<match>.json` holds the case timeline: fpsdet's decision, findings, observation ids and eligibility after each second. The replay scrubs the first and shows the second as it stood at that time; `arena.py replay` rebuilds the case timeline offline by scoring the events up to each second.
@@ -100,11 +108,11 @@ From [result.json](../result.json): thirteen matches of about 30 s each, run sev
 
 | | |
 | --- | --- |
-| Server tick | 314 µs mean (median over scenarios; 215 to 1,349 µs across them), 4.1 ms worst single tick, against a 16.7 ms budget |
-| Knowledge queries | 31 µs and 15 rays per tick (median); 76 to 180 µs per probe tick for the challenge |
-| Telemetry | about 9.9 KB/s of events, 3.6 KB/s of snapshots to the client, 73 KB/s of operator feed |
-| fpsdet | 8 to 25 ms per scoring pass over 650 to 993 events |
-| Server memory | 42 MB static peak |
+| Server tick | 562 µs mean (median over scenarios; 262 to 1,377 µs across them), 4.8 ms worst single tick, against a 16.7 ms budget |
+| Knowledge queries | 138 µs and 176 rays per tick (median); 114 to 382 µs per probe tick for the challenge |
+| Telemetry | about 10.5 KB/s of events, 3.6 KB/s of snapshots to the client, 77 KB/s of operator feed |
+| fpsdet | 9 to 25 ms per scoring pass over 657 to 1,020 events |
+| Server memory | 44 MB static peak |
 | Headless autopilot client | 145 frames a second; the lab window reports its own rate on the performance tab |
 
 None of these is a target. The operator feed is the one cost that does not exist in a game: it is the security view's, not the server's.

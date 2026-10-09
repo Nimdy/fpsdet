@@ -1,10 +1,12 @@
 # Scenario guide
 
-Every scenario is a file in [scenarios/](../scenarios/). Its card is shown before it plays; its expectation is metadata the harness compares with fpsdet's output. The numbers under *Qualified* are from [result.json](../result.json): one headless run of each scenario with the real topology (a dedicated server and a stock client with the honest autopilot, over loopback), scored live and offline. Every one came out as declared and replayed identically; the digest at the end of result.json binds them to the arena's code.
+Every scenario is a file in [scenarios/](../scenarios/). Its card is shown before it plays; its expectation is metadata the harness compares with fpsdet's output and never uses as the output. The numbers under *Qualified* are from [result.json](../result.json): one headless run of each scenario with the real topology (a dedicated server and a stock client with the honest autopilot, over loopback), scored live and offline. Every one came out as declared and replayed identically; the digest at the end of result.json binds them to the arena's code.
 
-A stand-in is a server-side script that aims the subject the way a reader of hidden state would: the behaviour such software produces, never cheat code. A fault is something the lab does to the subject's own body or weapon on purpose, standing in for a server that accepted what it should not have. Both are declared on the panel while they run.
+**Nobody here is a person, and nothing is real cheat software.** The subject is the honest autopilot (scripted). Where a scenario names a stand-in, it is a server-side script that aims the subject the way a reader of hidden state would: the behaviour such software produces, never the software. A fault is something the lab does to the subject's own body or weapon on purpose, standing in for a server that accepted what it should not have. The actor label under each title is the one the lab shows over the security pane while the scenario runs.
 
 ## Normal play  (`normal_play`, key `1`)
+
+**Actor.** NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)
 
 **Setup.** Move with W A S D, aim with the mouse, shoot the bot in the lane. Nothing is wrong here.
 Bots: `arena-bot-a` at 3.0 m/s (fires). Subject autopilot: `tracker`. 
@@ -14,14 +16,16 @@ Bots: `arena-bot-a` at 3.0 m/s (fires). Subject autopilot: `tracker`.
 | What this tests | Ordinary movement and shooting make no case. |
 | What the player can know | Yes: the bot is in the open lane, in plain sight. |
 | What the server knows | Vision known on every aimed shot; every speed sample under the cap; every accepted shot on the rifle's cycle. |
-| Expected fpsdet behavior | clean or insufficient_data. One player is not a human baseline, so the aim numbers are not compared; the gear rules and the information checks still run and find nothing. |
+| Expected fpsdet behavior | insufficient_data: not a clean verdict. One player is not a human baseline, so the aim numbers are never compared; the gear rules and the information checks still run and find nothing. fpsdet writes clean only when at least one number was actually compared against a thick enough cohort. |
 | What would make this invalid | Any review or watch appears, or the knowledge chip reads anything but known while the bot is in view. |
 
-**Qualified.** decision `insufficient_data`; findings none; speed `eligible`; hidden `eligible`; arena-bot-a `known`. Offline replay identical; realization no_challenge.
+**Qualified.** decision `insufficient_data` (not a clean verdict: nothing was comparable); findings none; speed `eligible`; hidden `eligible`; arena-bot-a `known`. Offline replay identical; realization no_challenge.
 
 - With no frozen baseline the aim numbers (accuracy, headshots, distance) are never compared: a server with one player has no humans to compare against, and fpsdet says insufficient_data rather than clean.
 
 ## Impossible speed  (`impossible_speed`, key `2`)
+
+**Actor.** NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)
 
 **Setup.** Keep running down the lane. From 5 s to 20 s the server lets your body move at twice the cap.
 Bots: `arena-bot-a` at 3.0 m/s. Subject autopilot: `runner`. fault speed_multiplier 2.0 from 5000 to 20000 ms.
@@ -34,12 +38,14 @@ Bots: `arena-bot-a` at 3.0 m/s. Subject autopilot: `runner`. fault speed_multipl
 | Expected fpsdet behavior | The speed check fires: a run of at least 25 consecutive over-cap samples (2.5 s at 10 Hz) with displacement_cause none. Decision review. |
 | What would make this invalid | The server tags the samples with an innocence cause, the cap field is missing, or the run is shorter than 25 samples. |
 
-**Qualified.** decision `review`; findings ['speed']; speed `eligible`; arena-bot-a `known`; longest run 151 samples at 10 Hz against the bar of 25. Offline replay identical; realization no_challenge.
+**Qualified.** decision `review`; findings ['speed']; speed `eligible`; arena-bot-a `known`; longest run 151 consecutive samples at the emitted 100 ms cadence, about 15100 ms, against a bar of 25 samples (the bar counts samples, not milliseconds). Offline replay identical; realization no_challenge.
 
 - The speed run is counted in samples: 25 consecutive over-cap samples at this server's 10 Hz movement cadence is 2.5 s. A profile can measure it in milliseconds instead (speed_min_run_ms with movement_clock), which this arena does not set, so it shows the default as it is.
 - The lab moves the body past the cap on purpose. It stands in for a server that trusts client positions, or a movement exploit; the server still records the speed it measured and the cap it should have held.
 
 ## Fire rate  (`fire_rate`, key `3`)
+
+**Actor.** NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)
 
 **Setup.** Hold the trigger on the bot. From 5 s to 20 s the server accepts shots every 50 ms, twice the rifle's cycle.
 Bots: `arena-bot-a` at 3.0 m/s. Subject autopilot: `trigger`. fault fire_cycle_ticks 3 from 5000 to 20000 ms.
@@ -59,6 +65,8 @@ Bots: `arena-bot-a` at 3.0 m/s. Subject autopilot: `trigger`. fault fire_cycle_t
 
 ## Recoil floor  (`recoil_floor`, key `4`)
 
+**Actor.** NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)
+
 **Setup.** Hold the trigger on the bot. From 5 s to 25 s the kick that lands on your view is a tenth of what the rifle applies.
 Bots: `arena-bot-a` at 3.0 m/s. Subject autopilot: `trigger`. fault recoil_multiplier 0.1 from 5000 to 25000 ms.
 
@@ -75,6 +83,8 @@ Bots: `arena-bot-a` at 3.0 m/s. Subject autopilot: `trigger`. fault recoil_multi
 - The lab scales the kick the server applies on purpose, standing in for recoil the server measured under its own floor.
 
 ## Recoil mirror  (`recoil_mirror`, key `5`)
+
+**Actor.** SCRIPTED TEST STAND-IN (same-tick recoil mirror) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE
 
 **Setup.** Hold the trigger on the bot. A stand-in supplies the view command a mirror script would: the kick, flipped, on the same tick, for the whole round.
 Bots: `arena-bot-a` at 3.0 m/s. Subject autopilot: `trigger`. stand-in `mirror` from 0 to 30000 ms.
@@ -93,7 +103,9 @@ Bots: `arena-bot-a` at 3.0 m/s. Subject autopilot: `trigger`. stand-in `mirror` 
 
 ## Hidden enemy, audible  (`audible_hidden_enemy`, key `6`)
 
-**Setup.** A bot runs behind the solid wall; you can hear its footsteps. A stand-in tracks it through the wall and fires, as a wallhack would.
+**Actor.** SCRIPTED TEST STAND-IN (reader of hidden positions) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE
+
+**Setup.** A bot runs behind the solid wall; you can hear its footsteps. A scripted stand-in (not a human, not cheat software) aims your avatar at it through the wall and fires, as a reader of hidden positions would.
 Bots: `arena-bot-b` at 4.5 m/s. Subject autopilot: `tracker`. stand-in `wallhack` on `arena-bot-b` from 3000 to 30000 ms.
 
 | | |
@@ -104,13 +116,15 @@ Bots: `arena-bot-b` at 4.5 m/s. Subject autopilot: `tracker`. stand-in `wallhack
 | Expected fpsdet behavior | KnowledgeState known (heard). The hidden-mover check is eligible, counts nothing, and makes no finding. No review. |
 | What would make this invalid | Audio telemetry is missing or wrong: a server that never reports footsteps turns this into the unknowable case. |
 
-**Qualified.** decision `insufficient_data`; findings none; hidden `eligible`; arena-bot-b `known`. Offline replay identical; realization no_challenge.
+**Qualified.** decision `insufficient_data` (not a clean verdict: nothing was comparable); findings none; hidden `eligible`; arena-bot-b `known`. Offline replay identical; realization no_challenge.
 
 - Hearing is modelled as a server sound event within 30 m in the last 500 ms. A real game's audio query is engine work; a wrong one frames players.
 
 ## Hidden and unknowable  (`unknowable_hidden_enemy`, key `7`)
 
-**Setup.** A bot creeps silently behind the solid wall while another patrols the lane in view. Shoot the one you can see. Press T to switch on the wallhack stand-in.
+**Actor.** NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)
+
+**Setup.** A bot creeps silently behind the solid wall while another patrols the lane in view. Shoot the one you can see. Press T to switch on the scripted stand-in that aims at it through the wall.
 Bots: `arena-bot-a` at 3.0 m/s (fires), `arena-bot-b` at 1.5 m/s. Subject autopilot: `tracker`. 
 
 | | |
@@ -121,13 +135,15 @@ Bots: `arena-bot-a` at 3.0 m/s (fires), `arena-bot-b` at 1.5 m/s. Subject autopi
 | Expected fpsdet behavior | KnowledgeState unknowable for the hidden bot. The hidden-mover check is eligible. Honest play makes no finding; a stand-in that tracks the hidden bot does. |
 | What would make this invalid | The server reports the hidden bot visible, or the audio query is switched off (that is the next scenario). |
 
-**Qualified.** decision `insufficient_data`; findings none; hidden `eligible`; arena-bot-a `known`; arena-bot-b `unknowable`. Offline replay identical; realization no_challenge.
+**Qualified.** decision `insufficient_data` (not a clean verdict: nothing was comparable); findings none; hidden `eligible`; arena-bot-a `known`; arena-bot-b `unknowable`. Offline replay identical; realization no_challenge.
 
 - No finding is manufactured: the honest autopilot never aims at what it cannot see. The tracked variant (scenario T) shows the finding.
 
 ## Hidden and unknowable, tracked  (`unknowable_hidden_tracked`, key `t`)
 
-**Setup.** The same silent bot behind the wall. A stand-in tracks it through the wall and fires, as a wallhack would.
+**Actor.** SCRIPTED TEST STAND-IN (reader of hidden positions) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE
+
+**Setup.** The same silent bot behind the wall. A scripted stand-in (not a human, not cheat software) aims your avatar at it through the wall and fires, as a reader of hidden positions would.
 Bots: `arena-bot-b` at 1.5 m/s. Subject autopilot: `tracker`. stand-in `wallhack` on `arena-bot-b` from 3000 to 30000 ms.
 
 | | |
@@ -144,6 +160,8 @@ Bots: `arena-bot-b` at 1.5 m/s. Subject autopilot: `tracker`. stand-in `wallhack
 
 ## Unknown: audio telemetry missing  (`unchecked_audio_channel`, key `8`)
 
+**Actor.** SCRIPTED TEST STAND-IN (reader of hidden positions) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE
+
 **Setup.** The same silent bot and the same wallhack stand-in, but the server's audio query is switched off.
 Bots: `arena-bot-b` at 1.5 m/s. Subject autopilot: `tracker`. stand-in `wallhack` on `arena-bot-b` from 3000 to 30000 ms; audio query off.
 
@@ -155,13 +173,15 @@ Bots: `arena-bot-b` at 1.5 m/s. Subject autopilot: `tracker`. stand-in `wallhack
 | Expected fpsdet behavior | KnowledgeState unknown. The hidden-mover check abstains (telemetry_unavailable). No evidence, whatever the aim did. |
 | What would make this invalid | A server reports unchecked as absent. That manufactures the previous scenario's review from nothing. |
 
-**Qualified.** decision `insufficient_data`; findings none; hidden `telemetry_unavailable`; arena-bot-b `unknown`. Offline replay identical; realization no_challenge.
+**Qualified.** decision `insufficient_data` (not a clean verdict: nothing was comparable); findings none; hidden `telemetry_unavailable`; arena-bot-b `unknown`. Offline replay identical; realization no_challenge.
 
 - Unchecked is not absent. A channel the server did not report makes the answer unknown, and the information checks abstain.
 
 ## Wire vs picture  (`wire_vs_picture`, key `9`)
 
-**Setup.** A bot strafes across the lane. From 5 s to 25 s a stand-in aims at the newest snapshot the server sent, not at the body your client draws.
+**Actor.** SCRIPTED TEST STAND-IN (reader of the newest snapshot) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE
+
+**Setup.** A bot strafes across the lane. From 5 s to 25 s a scripted stand-in (not a human, not cheat software) aims at the newest snapshot the server sent, not at the body your client draws.
 Bots: `arena-bot-a` at 4.5 m/s. Subject autopilot: `tracker`. stand-in `packet_reader` on `arena-bot-a` from 5000 to 25000 ms.
 
 | | |
@@ -174,11 +194,13 @@ Bots: `arena-bot-a` at 4.5 m/s. Subject autopilot: `tracker`. stand-in `packet_r
 
 **Qualified.** decision `review`; findings ['wire']; wire `eligible`; arena-bot-a `known`. Offline replay identical; realization no_challenge.
 
-- This does not catch every packet reader: a cheat that waits out the interpolation delay, or reads the drawn frame, aims at the picture too.
+- This does not cover every packet reader: a cheat that waits out the interpolation delay, or reads the drawn frame, aims at the picture too.
 
 ## Active challenge  (`active_challenge`, key `c`)
 
-**Setup.** A planned challenge runs inside the sealed chamber behind the doorway's left frame. You cannot see or hear it. A stand-in follows it, as a reader of the body it was sent would.
+**Actor.** CONTROLLED FOLLOWER · SCRIPTED TEST STAND-IN · NOT A HUMAN · NOT REAL CHEAT SOFTWARE
+
+**Setup.** A planned challenge runs inside the sealed chamber behind the doorway's left frame. You cannot see or hear it. A controlled follower, a scripted stand-in that is not a human and not cheat software, aims your avatar at it, as a reader of the body it was sent would.
 Bots: `arena-bot-a` at 3.0 m/s (fires), `arena-bot-b` at 1.5 m/s. Subject autopilot: `tracker`. stand-in `follower` from 0 to 32000 ms; one occluded_motion_replay/2 challenge of 14 to 16 s planned between 6 and 30 s.
 
 | | |
@@ -189,16 +211,18 @@ Bots: `arena-bot-a` at 3.0 m/s (fires), `arena-bot-b` at 1.5 m/s. Subject autopi
 | Expected fpsdet behavior | Challenge followed: at least 8 verified moments and 1200 ms on the body. Decision review, bound to the plan's id, digest and commitment. |
 | What would make this invalid | The server reports the body seen or heard at any moment (the challenge voids), or the events name an id the plan does not have. |
 
-**Qualified.** decision `review`; findings ['occluded_motion_replay']; occluded_motion_replay `eligible`; arena-bot-a `known`; arena-bot-b `unknowable`; challenge `followed`, 150 of 153 moments counted, 153 verified, 14983 ms, not counted {'seen': 3}. Offline replay identical; realization reproduced.
+**Qualified.** decision `review`; findings ['occluded_motion_replay']; occluded_motion_replay `eligible`; arena-bot-a `known`; arena-bot-b `unknowable`; challenge `followed`, 142 of 153 moments counted, 153 verified, 14200 ms, not counted {'seen': 11}. Offline replay identical; realization reproduced.
 
-**EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED.**
+**EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED.** Controlled behaviour from a labelled script; not a cheat-detection rate.
 
 - Challenge reviews are experimental and not production-qualified. The bar counts time on the body, not intent.
-- One chamber: placement_pick always lands here. The secret still picks the route, the heading and the replay delay, and the commitment binds all of it.
+- One chamber: the secret's placement draw always lands here. The secret still picks the route, the heading and the replay delay, and the commitment binds all of it.
 
 ## Angle hold: experimental challenge failure  (`angle_hold_false_positive`, key `h`)
 
-**Setup.** A stand-in holds the doorway's left frame from across the room, as a player waiting for a push would. A near-still probe rests in the chamber behind that frame. Nobody is following anything.
+**Actor.** HONEST-STYLE SCRIPTED STAND-IN (holds an angle) · NOT A HUMAN
+
+**Setup.** An honest-style scripted stand-in (not a human) holds the doorway's left frame from across the room, as a player waiting for a push would. A near-still probe rests in the chamber behind that frame. Nobody is following anything.
 Bots: `arena-bot-b` at 0.0 m/s, `arena-bot-a` at 2.0 m/s. Subject autopilot: `holder`. stand-in `holder` from 0 to 32000 ms; one occluded_motion_replay/2 challenge of 14 to 16 s planned between 6 and 30 s.
 
 | | |
@@ -209,14 +233,16 @@ Bots: `arena-bot-b` at 0.0 m/s, `arena-bot-a` at 2.0 m/s. Subject autopilot: `ho
 | Expected fpsdet behavior | Challenge followed, decision review: the same evidence as the follower. EXPERIMENTAL, NOT PRODUCTION QUALIFIED. Geometric alignment is not the same thing as responding to hidden information. |
 | What would make this invalid | The holder's aim moves with the body, which would make it a follower. Here the body is near-still and the aim is still. |
 
-**Qualified.** decision `review`; findings ['occluded_motion_replay']; occluded_motion_replay `eligible`; challenge `followed`, 153 of 153 moments counted, 153 verified, 15274 ms. Offline replay identical; realization reproduced.
+**Qualified.** decision `review`; findings ['occluded_motion_replay']; occluded_motion_replay `eligible`; challenge `followed`, 142 of 142 moments counted, 142 verified, 14199 ms. Offline replay identical; realization reproduced.
 
-**EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED.**
+**EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED.** Controlled behaviour from a labelled script; not a cheat-detection rate.
 
 - Challenge reviews are experimental and not production-qualified. The bar counts time on the body, not intent.
 - This failure is preserved on purpose: it is why the consented human pilot exists and why occluded_motion_replay/3 asks whether the aim turns with secret turns instead.
 
 ## External evidence  (`external_record`, key `e`)
+
+**Actor.** NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)
 
 **Setup.** Normal play, while a fictional provider sends one adverse record about this player in this match.
 Bots: `arena-bot-a` at 3.0 m/s (fires). Subject autopilot: `tracker`. a fictional `example-lab-integrity` record (client_integrity, adverse) for this match.
@@ -229,6 +255,38 @@ Bots: `arena-bot-a` at 3.0 m/s (fires). Subject autopilot: `tracker`. a fictiona
 | Expected fpsdet behavior | Native decision clean or insufficient_data; fused decision watch (rule A). An external observation with its provider, class, direction and confidence; automated_action still none. |
 | What would make this invalid | The record names another match (then it is context), or anyone treats a provider's claim as fpsdet's finding. |
 
-**Qualified.** decision `watch`; findings ['external_signal']; arena-bot-a `known`; fusion `insufficient_data` → `watch` by rule A. Offline replay identical; realization no_challenge.
+**Qualified.** decision `watch`; findings ['external_signal']; arena-bot-a `known`; native fpsdet result `insufficient_data` → external evidence → final `watch` by rule A; external evidence caused this watch and cannot create a review. Offline replay identical; realization no_challenge.
 
 - No adapter or signing key for any commercial anti-cheat exists; this provider is fictional. A signature, when there is one, proves who signed a record, not that it is true.
+
+## Exposed challenge: positive control  (`exposed_challenge_control`, key `o`)
+
+**Actor.** CONTROLLED FOLLOWER · SCRIPTED TEST STAND-IN · NOT A HUMAN · NOT REAL CHEAT SOFTWARE
+
+**Setup.** The positive control of the pixel proof: the server breaks the placement rule on purpose and puts the probe body in the open lane, in plain sight. You will see a red body nobody can shoot. The server's own verdict says seen, and fpsdet must abstain. A controlled follower, a scripted stand-in that is not a human and not cheat software, aims your avatar at it.
+Bots: `arena-bot-a` at 3.0 m/s, `arena-bot-b` at 1.5 m/s. Subject autopilot: `tracker`. stand-in `follower` from 0 to 32000 ms; one occluded_motion_replay/2 challenge of 14 to 16 s planned between 6 and 30 s, placed in the open on purpose.
+
+| | |
+| --- | --- |
+| What this tests | That the player's renderer draws a probe placed in the open (so the pixel proof's zero in the sealed chamber means something), and that a body the client could see voids the challenge. |
+| What the player can know | Yes: the body stands in the open lane and the stock client draws it like any body. |
+| What the server knows | Vision known on the body at every moment of the window; it does not end the challenge, so that only the per-moment verdict stands between a visible body and evidence. |
+| Expected fpsdet behavior | The challenge abstains (seen). No finding, no review, whatever the aim did. |
+| What would make this invalid | The renderer draws no pixel of a body in the open, or fpsdet counts a moment the server reported seen. |
+
+**Qualified.** decision `insufficient_data` (not a clean verdict: nothing was comparable); findings none; occluded_motion_replay `not_applicable`; arena-bot-a `known`; arena-bot-b `unknowable`; challenge `abstained` (seen), 0 of 0 moments counted, 0 verified, 0 ms, not counted {'seen': 145}. Offline replay identical; realization reproduced.
+
+**EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED.** Controlled behaviour from a labelled script; not a cheat-detection rate.
+
+- A qualification control, kept as a scenario so the rule it shows is visible: one moment where the server reports the body seen or heard voids the whole challenge. Challenge reviews are experimental and not production-qualified.
+
+## The player pixel proof
+
+Two of these scenarios ran once more with the pixel-check client, drawing in a private virtual display: `active_challenge` as the hidden control and `exposed_challenge_control` as the positive control.
+
+```text
+PLAYER PIXEL PROOF
+hidden:          0 challenge pixels in 8 checks (the same checks found pixels of visible bots 14 times; the frozen frame was stable)
+visible control: 1769 changed pixels in 7 checks
+PASS
+```

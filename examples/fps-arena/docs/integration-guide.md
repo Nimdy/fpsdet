@@ -65,7 +65,7 @@ The telemetry tab in the lab shows these as they are written, filtered by moveme
 
 ## The decisions the arena made, and why
 
-- **The clock.** `t_ms` is the server tick, rounded to the millisecond, and the profile says so (`shot_clock: "server_tick"`, `tick_ms: 17`). Without that, a held trigger paced by the server at exactly its cycle would have no timing spread for a reason that is not the player's, and the metronome rule would be wrong to read it. With it, the metronome abstains on the arena's held triggers (`not_applicable`), as it should.
+- **The clock.** `t_ms` is the server tick, rounded to the millisecond, and the profile says so (`shot_clock: "server_tick"`, `tick_ms: 17`). Low timing variance means nothing on its own: how meaningful it is depends on how your server timestamps and quantizes shots. A held trigger paced by the server at exactly its cycle has no timing spread for a reason that is not the player's, and the metronome rule would be wrong to read it as a macro. With the clock declared, the metronome abstains on the arena's held triggers (`not_applicable`), as it should; declare yours before you trust that check.
 - **The cap on the sample.** Every movement sample carries `expected_max_ground_speed_mps` (5.5 for a 5.0 m/s sprint). The speed rule reads the cap the server declared, never a table.
 - **The speed run in samples.** The profile does not set `speed_min_run_ms`, so the run is 25 consecutive samples, which at this server's 10 Hz is 2.5 s. The panel says so. A profile can measure it in milliseconds instead (`speed_min_run_ms` with `movement_clock: "server"`); the arena shows the default as it is.
 - **The recoil pair.** `applied_recoil_pitch_deg` is the kick the server applied; `compensation_pitch_deg` is the change in the client's commanded pitch on that same tick; `spray_index` restarts at 0 after 300 ms without a shot. The pattern is learnable (the profile's default), so fpsdet removes the mean kick and command per spray index before it tests what is left.
@@ -73,6 +73,21 @@ The telemetry tab in the lab shows these as they are written, filtered by moveme
 - **The picture from the server's own record.** The server keeps the snapshots it sent the subject's client. The wire is the newest; the picture is the interpolation one delay behind it, which is exactly what the stock client draws. A game would use the client's acknowledged snapshot; scoring aim against a timeline the client was never shown would manufacture the case.
 - **The probe is a player on the wire.** It is replicated with the same fields as any body, to the subject's client only, with no collider and no sound, inside a sealed chamber. The stock client draws it as it draws any body, behind the wall. The server queries vision and audio against it every tick and ends it the moment either would succeed.
 - **The server's view is the one fpsdet reads.** A shot's enemy, wire and picture fields are computed from the view the shot was fired from; the kick lands on the view after the event is written.
+
+## What is Godot-specific?
+
+Godot is the executable reference implementation. fpsdet is engine-agnostic at the evidence layer. Other engines need an authoritative emitter and equivalent telemetry; nothing here works on every engine by itself.
+
+| Godot-specific (replace in your engine) | fpsdet-specific (the same everywhere) |
+| --- | --- |
+| scene and node integration: `CharacterBody3D`, `StaticBody3D`, the physics layers | the event schema: one JSON object per shot and per movement sample, the field names in [docs/integration.md](../../../docs/integration.md) |
+| the line-of-sight query: `PhysicsRayQueryParameters3D` from the eye to the body points | the knowledge state: `known`, `unknowable`, `unknown`, resolved by fpsdet from `vision_state`, `audio_state` and `since_perceived_ms` |
+| the audio event plumbing: server sound events within hearing range, with a 500 ms memory | detector eligibility: why each check could or could not run |
+| replication: ENet snapshots at 20 Hz, the interpolation delay the stock client draws at | observations, the evidence graph, the packet, the provenance digests |
+| the player controller, the recoil model, the fire cycle, the magazine | the decision, `automated_action: none`, the fusion rules for external records |
+| the challenge recipe in GDScript (`recipe.gd`, HMAC-SHA256 as the Python does it) | the plan, the commitment, the per-moment verdict fields, the challenge result |
+
+Unity and Unreal emitters for the gear rules are in [docs/integration.md](../../../docs/integration.md); the knowledge queries and the challenge are the engine work this arena shows in Godot.
 
 ## What the arena deliberately does not emit
 
