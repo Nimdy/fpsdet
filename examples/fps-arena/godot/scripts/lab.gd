@@ -37,6 +37,7 @@ var replay_at_ms := 0
 
 func _ready() -> void:
 	mode = options.get("mode", mode)
+	get_window().title = "fpsdet Arena"
 	keys = Scenario.key_map(Scenario.load_all(options.get("scenarios", "")))
 	_build_layout()
 	# The networked nodes sit beside this one, at the fixed paths the server routes RPCs to. Added once this
@@ -65,7 +66,7 @@ func _build_layout() -> void:
 	add_child(root)
 	var views := HBoxContainer.new()
 	views.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	views.size_flags_stretch_ratio = 1.5 if mode == "demo" else 1.35
+	views.size_flags_stretch_ratio = 1.7 if mode == "demo" else 1.35
 	views.add_theme_constant_override("separation", 4)
 	root.add_child(views)
 	left = _pane(views, "PLAYER VIEW  ·  what the stock client draws")
@@ -76,6 +77,7 @@ func _build_layout() -> void:
 	root.add_child(panel_host)
 	hint = Label.new()
 	hint.text = ""
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.add_theme_font_size_override("font_size", 12)
 	hint.add_theme_color_override("font_color", Color(0.5, 0.55, 0.6))
 	root.add_child(hint)
@@ -194,9 +196,11 @@ func _process(_delta: float) -> void:
 	if operator != null and client != null:
 		operator.client_fps = Engine.get_frames_per_second()
 		var scenario_keys := []
-		for key in keys:
-			scenario_keys.append("%s %s" % [key, keys[key]])
-		hint.text = ("%s mode · " % mode) + " · ".join(scenario_keys)
+		var ordered := keys.keys()
+		ordered.sort_custom(func(a, b): return (a.is_valid_int() and not b.is_valid_int()) or (a.is_valid_int() == b.is_valid_int() and a < b))
+		for key in ordered:
+			scenario_keys.append("%s %s" % [key, String(keys[key]).replace("_", " ")])
+		hint.text = "SCENARIOS  " + "   ".join(scenario_keys) + "\nKEYS  m %s mode · v camera · r replay · tab panels · x end match · esc mouse" % ("developer" if mode == "demo" else "demo")
 	var now := Time.get_ticks_msec()
 	if start_scenario != "" and operator != null and operator.accepted and now >= start_at_ms:
 		operator.request("scenario", start_scenario)

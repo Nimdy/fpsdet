@@ -16,10 +16,10 @@
   "examples/fps-arena/godot/scripts/arena_map.gd": "sha256:06de1cceceaf5ee106e3b9b9c936af44c1600e377d626bd13193116f11d6aeff",
   "examples/fps-arena/godot/scripts/arena_server.gd": "sha256:d41d321517d7ac852b526f4e183355308523102b66a0def141117ed638965453",
   "examples/fps-arena/godot/scripts/server_operator.gd": "sha256:142c36ceaac8ca2f9a6250f6b92a1a3a4b57e45ddca2879528d8c912d77571d2",
-  "examples/fps-arena/godot/scripts/arena_client.gd": "sha256:9dea6b4cdc81038e4824eeb0f8d4be9a74e2e88916081cfc3fdda4c69632b4bb",
+  "examples/fps-arena/godot/scripts/arena_client.gd": "sha256:fb33b4699f4ff664c71236105d3c6e5181cd3de584ec3078ba4abe618eeae686",
   "examples/fps-arena/godot/scripts/pixel_check_client.gd": "sha256:fd3fed7c809b5780cec08cea09f2961d8fd983fc1452893a2b5e4e8cddd3bf0f",
-  "examples/fps-arena/godot/scripts/operator_view.gd": "sha256:bcf64b75bceb11140490134d4b3e2e977c61695dd784d7e6458f4f52374016da",
-  "examples/fps-arena/godot/scripts/lab.gd": "sha256:bcd276c1c3366156e71510ce906b735edb6db6c4b6fad9415b54aa5bf3da8e83",
+  "examples/fps-arena/godot/scripts/operator_view.gd": "sha256:e201a646c28b26034fa577fa87655ca0f95cb9a598a775483dce9aab39b1cbf0",
+  "examples/fps-arena/godot/scripts/lab.gd": "sha256:0adabb9a800c447ccb611dc1ca30c25f08db47c6870ab4c69677985880cfa36c",
   "examples/fps-arena/godot/scripts/autopilot.gd": "sha256:747c0f4550ec06961d09931238ec23fd278f69bfe7d3497a48438ee23968fdce",
   "examples/fps-arena/godot/scripts/bots.gd": "sha256:fd208fb3502aaf9c37cc05cd36b281bfeb41863b8a04b626bf8a383b0e1c0983",
   "examples/fps-arena/godot/scripts/scenario.gd": "sha256:8d7fc3bb79870d8ac11b87d7603e0dcf47dadfba06eb23a7892371421af7d670",
@@ -61,7 +61,7 @@
      "occluded_motion_replay"
     ],
     "observations": [
-     "obs-15ebe3383b11de99d71da6b0"
+     "obs-e12ce13ebbae6c15828627f6"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -88,16 +88,16 @@
      "voice": "not_applicable"
     },
     "challenge": {
-     "challenge_id": "ch-e008989beb8a9da6a8c1347f",
+     "challenge_id": "ch-e68a9769095a51673d5b02f5",
      "status": "followed",
      "cause": null,
      "verification": "per_sample",
-     "eligible_samples": 149,
-     "tracked_samples": 140,
-     "verified_samples": 149,
-     "total_ms": 14000.0,
+     "eligible_samples": 147,
+     "tracked_samples": 133,
+     "verified_samples": 147,
+     "total_ms": 13300.0,
      "not_counted": {
-      "seen": 8
+      "seen": 13
      }
     },
     "fusion": null,
@@ -107,12 +107,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 183,
+      "events": 188,
       "statuses": {
-       "known": 183
+       "known": 188
       },
       "causes": {
-       "seen": 183
+       "seen": 188
       },
       "latest": {
        "t_ms": 32000,
@@ -134,15 +134,15 @@
       "majority": "known"
      },
      "arena-bot-b": {
-      "events": 11,
+      "events": 10,
       "statuses": {
-       "unknowable": 11
+       "unknowable": 10
       },
       "causes": {
-       "unknowable": 11
+       "unknowable": 10
       },
       "latest": {
-       "t_ms": 30400,
+       "t_ms": 30500,
        "status": "unknowable",
        "cause": "unknowable",
        "channels": {
@@ -174,8 +174,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:019de2d9a3efbe5cfa394525663a8140c419dd00d464c9bc6629a8b64853c9f6",
-    "packet": "sha256:f871a7ec7006f2bac47b917241a7846121b9b8414c9eb8bc890b31264013872b",
+    "graph": "sha256:5166a09e34470dfba966d5e330e52611085597170bfbe3477cb18437c4544a8c",
+    "packet": "sha256:6220c791fc29c1fc626750539b79f97dd4ab17253e55b89d8ecd0b4bec006f08",
     "experimental": true,
     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
    },
@@ -189,11 +189,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:194daa805caf63077bfc5a710609508482e42f8c75d567be4ad1e2f0843d215c",
+     "packet": "sha256:774e7948e9cf8f34ff9d58c95c0269336fc2f11abf34ab7582c3da692e2db5e8",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:27b737fb4db19a966ee20555f3ca9b2188f625ebacdd87e527442306dcaadbdd",
+      "digest": "sha256:6ce9ef75b96f96ace0fa27a6564aa700968d81d1d21238fff7240ffd02497546",
       "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -321,11 +321,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:b6ae80b603e2482066e4182b0941be66a08a480fe933aadedf04ebef9a17291a",
+     "packet": "sha256:888a8117dcc9493588739588b9c88977bfc5d647db12d550bbb286410330b52e",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:c9005c25639e356a92d7cfc2dabb41825b8a8f89139adffe5833271dafc90ad4",
+      "digest": "sha256:fd44a7c15c53a83ea39622d6b8f3154f84e8e3596f96c0f0ab7c1f15dde871f2",
       "events": 320
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -447,34 +447,34 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-15ebe3383b11de99d71da6b0"
+      "obs-e12ce13ebbae6c15828627f6"
      ],
      "kinds": [
       "occluded_motion_replay"
      ],
-     "graph": "sha256:019de2d9a3efbe5cfa394525663a8140c419dd00d464c9bc6629a8b64853c9f6",
-     "packet": "sha256:f871a7ec7006f2bac47b917241a7846121b9b8414c9eb8bc890b31264013872b",
+     "graph": "sha256:5166a09e34470dfba966d5e330e52611085597170bfbe3477cb18437c4544a8c",
+     "packet": "sha256:6220c791fc29c1fc626750539b79f97dd4ab17253e55b89d8ecd0b4bec006f08",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/3",
-      "digest": "sha256:b9e852b4728ae12ca3e51298367a44c200e8e22c16a8bfd91c205367221c3e10",
-      "events": 352
+      "digest": "sha256:eb13c702259f333e9a4bf2ad3ebaa1fa39c148a40e3e1dfd0cb69ff19682f815",
+      "events": 351
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [
       {
-       "challenge_id": "ch-e008989beb8a9da6a8c1347f",
-       "plan": "sha256:6d1a544ae4e5a2c86508476cb423c1d2f2c5dc5ec49165404ac0aa0614b7fb80",
+       "challenge_id": "ch-e68a9769095a51673d5b02f5",
+       "plan": "sha256:0ad9dce03a4388861356ae98ecd3ddd15c535ac1822b46d4cc7dd0af69e06b60",
        "match_id": "arena-active_challenge-1",
        "status": "followed",
-       "eligible_samples": 149,
-       "tracked_samples": 140,
-       "total_ms": 14000.0,
+       "eligible_samples": 147,
+       "tracked_samples": 133,
+       "total_ms": 13300.0,
        "not_counted": {
-        "seen": 8
+        "seen": 13
        },
        "verification": "per_sample",
-       "verified_samples": 149
+       "verified_samples": 147
       }
      ],
      "fusion": null,
@@ -580,7 +580,7 @@
       },
       "occluded_motion_replay": {
        "eligible": [
-        "ch-e008989beb8a9da6a8c1347f"
+        "ch-e68a9769095a51673d5b02f5"
        ]
       },
       "leftover": {
@@ -599,7 +599,7 @@
    "realization": {
     "status": "reproduced",
     "challenges": [
-     "ch-e008989beb8a9da6a8c1347f"
+     "ch-e68a9769095a51673d5b02f5"
     ],
     "problems": []
    },
@@ -607,7 +607,7 @@
    "personal_data": [],
    "client": {
     "entities_received": 3,
-    "probe_updates": 298,
+    "probe_updates": 294,
     "probe_sounds": 0,
     "sounds": 110,
     "fps_median": 145.0
@@ -616,27 +616,27 @@
     "server_tick_hz": 60,
     "match_ms": 32000,
     "ticks": 1920,
-    "tick_us_mean": 865.4,
-    "tick_us_max": 2740,
-    "knowledge_us_per_tick": 338.6,
-    "challenge_us_per_probe_tick": 82.9,
-    "rays_per_tick": 424.5,
-    "event_bytes_per_s": 12424.3,
-    "event_lines": 1022,
-    "snapshot_bytes_per_s": 5276.1,
-    "feed_bytes_per_s": 94256.4,
-    "scoring_ms_live": 19.4,
+    "tick_us_mean": 778.7,
+    "tick_us_max": 1885,
+    "knowledge_us_per_tick": 316.2,
+    "challenge_us_per_probe_tick": 96.9,
+    "rays_per_tick": 423.4,
+    "event_bytes_per_s": 12409.2,
+    "event_lines": 1021,
+    "snapshot_bytes_per_s": 5266.6,
+    "feed_bytes_per_s": 94158.5,
+    "scoring_ms_live": 13.1,
     "parse_errors": 0,
     "verdicts": {
      "audio": {
-      "absent": 894
+      "absent": 882
      },
      "vision": {
-      "absent": 894
+      "absent": 882
      }
     },
-    "probe_ticks": 894,
-    "memory_static_peak_bytes": 43641125
+    "probe_ticks": 882,
+    "memory_static_peak_bytes": 44927579
    },
    "exit_codes": [
     0,
@@ -647,12 +647,12 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/active_challenge/events.ndjson",
-     "sha256": "sha256:a5df569b34f59a740fa23b8c1f5c55b6d66a8e453094f5d8ce8d71e48053d0bc",
-     "lines": 1022
+     "sha256": "sha256:c1997e281608a73c8b9540ba38771d45567fc64ec282d5fb0d7bb4a8526644cc",
+     "lines": 1021
     },
     "plan.json": {
      "file": "examples/fps-arena/captures/active_challenge/plan.json",
-     "sha256": "sha256:f5999f750c75291825e054b270d8e778de562c125259f9d9af6300ea7c7436d6"
+     "sha256": "sha256:bd32c176c1c86ea962c89a06732c5be7d3ef4dff513f487328250ae756e6ef4a"
     }
    }
   },
@@ -687,7 +687,7 @@
      "occluded_motion_replay"
     ],
     "observations": [
-     "obs-183656812c2ad92585aeb4fa"
+     "obs-c934177248b30fab02b9f73c"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -714,14 +714,14 @@
      "voice": "not_applicable"
     },
     "challenge": {
-     "challenge_id": "ch-7cf6db94b646f12951ab368e",
+     "challenge_id": "ch-bf4f25b386a3f12538df3cbe",
      "status": "followed",
      "cause": null,
      "verification": "per_sample",
-     "eligible_samples": 153,
-     "tracked_samples": 153,
-     "verified_samples": 153,
-     "total_ms": 15289.0,
+     "eligible_samples": 145,
+     "tracked_samples": 145,
+     "verified_samples": 145,
+     "total_ms": 14416.0,
      "not_counted": {}
     },
     "fusion": null,
@@ -740,8 +740,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:2f39822e05dc80c425b7f54d51d6ff9c18f44a7297f8de2e043b63846ac79d63",
-    "packet": "sha256:4afbcc4b5fa94efeeeb010c63e207fee5ec50b2a3d4391e33cf9ca346b511925",
+    "graph": "sha256:aca76a2e7fc1c32c2a570bdbe296f6b79f5c0a1c6b63e31f771d2abbc9478976",
+    "packet": "sha256:bd0a620a654a7228d25c9bfb006c81edb256313574a027bf70f3e070e40e84a7",
     "experimental": true,
     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
    },
@@ -1009,32 +1009,32 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-183656812c2ad92585aeb4fa"
+      "obs-c934177248b30fab02b9f73c"
      ],
      "kinds": [
       "occluded_motion_replay"
      ],
-     "graph": "sha256:2f39822e05dc80c425b7f54d51d6ff9c18f44a7297f8de2e043b63846ac79d63",
-     "packet": "sha256:4afbcc4b5fa94efeeeb010c63e207fee5ec50b2a3d4391e33cf9ca346b511925",
+     "graph": "sha256:aca76a2e7fc1c32c2a570bdbe296f6b79f5c0a1c6b63e31f771d2abbc9478976",
+     "packet": "sha256:bd0a620a654a7228d25c9bfb006c81edb256313574a027bf70f3e070e40e84a7",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/3",
-      "digest": "sha256:d02a11c81b8ab26dfd065f94622a1b9290bf4a426470e2d5c5b5fc1a5e15a46d",
+      "digest": "sha256:0c28b6a503a2731e3ff03059ed9fc49e4466df0591c9922be65a0f30ff63e357",
       "events": 338
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [
       {
-       "challenge_id": "ch-7cf6db94b646f12951ab368e",
-       "plan": "sha256:376c1965c69faf05ffe0c616cc9ac78334db2fbb0799ba684aeb50a4cb3f456a",
+       "challenge_id": "ch-bf4f25b386a3f12538df3cbe",
+       "plan": "sha256:3652ca1976eada12ba1803b0b21d3dabbee8f64d269eeeb06514f9316c84aa23",
        "match_id": "arena-angle_hold_false_positive-1",
        "status": "followed",
-       "eligible_samples": 153,
-       "tracked_samples": 153,
-       "total_ms": 15289.0,
+       "eligible_samples": 145,
+       "tracked_samples": 145,
+       "total_ms": 14416.0,
        "not_counted": {},
        "verification": "per_sample",
-       "verified_samples": 153
+       "verified_samples": 145
       }
      ],
      "fusion": null,
@@ -1140,7 +1140,7 @@
       },
       "occluded_motion_replay": {
        "eligible": [
-        "ch-7cf6db94b646f12951ab368e"
+        "ch-bf4f25b386a3f12538df3cbe"
        ]
       },
       "leftover": {
@@ -1159,7 +1159,7 @@
    "realization": {
     "status": "reproduced",
     "challenges": [
-     "ch-7cf6db94b646f12951ab368e"
+     "ch-bf4f25b386a3f12538df3cbe"
     ],
     "problems": []
    },
@@ -1167,7 +1167,7 @@
    "personal_data": [],
    "client": {
     "entities_received": 3,
-    "probe_updates": 307,
+    "probe_updates": 290,
     "probe_sounds": 0,
     "sounds": 58,
     "fps_median": 145.0
@@ -1176,43 +1176,43 @@
     "server_tick_hz": 60,
     "match_ms": 32000,
     "ticks": 1920,
-    "tick_us_mean": 1063.2,
-    "tick_us_max": 3139,
-    "knowledge_us_per_tick": 405.5,
-    "challenge_us_per_probe_tick": 158.1,
-    "rays_per_tick": 588.0,
-    "event_bytes_per_s": 11127.5,
+    "tick_us_mean": 928.6,
+    "tick_us_max": 2293,
+    "knowledge_us_per_tick": 377.4,
+    "challenge_us_per_probe_tick": 112.1,
+    "rays_per_tick": 583.8,
+    "event_bytes_per_s": 11097.1,
     "event_lines": 978,
-    "snapshot_bytes_per_s": 5232.6,
-    "feed_bytes_per_s": 87556.8,
-    "scoring_ms_live": 12.2,
+    "snapshot_bytes_per_s": 5201.8,
+    "feed_bytes_per_s": 87363.0,
+    "scoring_ms_live": 14.4,
     "parse_errors": 0,
     "verdicts": {
      "audio": {
-      "absent": 921
+      "absent": 870
      },
      "vision": {
-      "absent": 921
+      "absent": 870
      }
     },
-    "probe_ticks": 921,
-    "memory_static_peak_bytes": 43641341
+    "probe_ticks": 870,
+    "memory_static_peak_bytes": 44927795
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 34.4,
+   "wall_s": 34.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/angle_hold_false_positive/events.ndjson",
-     "sha256": "sha256:f1ee795d6f5ba7454d19bb9f018a2d8ec22f772142fc9a8dbceb7025a374d547",
+     "sha256": "sha256:8b8d057dd9eb57f15d505ecf3d57ef5bc6b7390f20a87846d1ba12741bc41e75",
      "lines": 978
     },
     "plan.json": {
      "file": "examples/fps-arena/captures/angle_hold_false_positive/plan.json",
-     "sha256": "sha256:042f92552d16e545f1505480d9ce8a80992d65882e39996e1d4c0ce30c839075"
+     "sha256": "sha256:749415a1f8b7a0c2de1205ca2131d8d6acea011e4d5fa06b1fd12d8fe999cf7f"
     }
    }
   },
@@ -1318,7 +1318,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:a35ca29c407b7cd10b3514c248051729de63fd3789fee4e6dae27439f2102cda",
+    "packet": "sha256:cfb374ad45cbc39c6640d9d7895ccb26f391e1a607cde3d1a67dfb71b16b20f6",
     "experimental": false,
     "label": null
    },
@@ -1332,11 +1332,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:edc300947036e8bdee40123e1ceae180b5aee21571dcfb04f055c6445924c626",
+     "packet": "sha256:7318f5d2a0b269707d54cb7a9e83335db23b2ea72b68e05f1b9bc43be095c9fb",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:226ea1bccd1945484c762d9f208aa498939b38268dd954276b736d718ea55240",
+      "digest": "sha256:738b50b158687562fda88b194017816ecf80f5737dae802b7c6a3b090c5c0e13",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1460,11 +1460,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:a35ca29c407b7cd10b3514c248051729de63fd3789fee4e6dae27439f2102cda",
+     "packet": "sha256:cfb374ad45cbc39c6640d9d7895ccb26f391e1a607cde3d1a67dfb71b16b20f6",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:8f0297337e869e29fedd1af05b3f024993520c7200631313a96e901b215a54c5",
+      "digest": "sha256:f515191d3bb0467bbf151d79845612e5e1179b3f6f1bf1daba26f657e4721a54",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1606,34 +1606,34 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 697.1,
-    "tick_us_max": 2077,
-    "knowledge_us_per_tick": 218.7,
-    "challenge_us_per_probe_tick": 2770.0,
+    "tick_us_mean": 601.1,
+    "tick_us_max": 1597,
+    "knowledge_us_per_tick": 200.6,
+    "challenge_us_per_probe_tick": 1700.0,
     "rays_per_tick": 377.7,
-    "event_bytes_per_s": 9293.0,
+    "event_bytes_per_s": 9293.6,
     "event_lines": 681,
-    "snapshot_bytes_per_s": 3608.0,
-    "feed_bytes_per_s": 74402.7,
-    "scoring_ms_live": 8.7,
+    "snapshot_bytes_per_s": 3607.3,
+    "feed_bytes_per_s": 74127.2,
+    "scoring_ms_live": 8.1,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641221
+    "memory_static_peak_bytes": 44927675
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.3,
+   "wall_s": 32.4,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/audible_hidden_enemy/events.ndjson",
-     "sha256": "sha256:a3324d34537bc13fab12f898b12389dad09145858b80d42f84ac929f5d0593ec",
+     "sha256": "sha256:320cf795d67631edc44c9b430a3c6bc7cf03da5b4731e113ba14b02db8f232bb",
      "lines": 681
     }
    }
@@ -1691,11 +1691,11 @@
      "quiet_aim": "telemetry_unavailable",
      "wire": "eligible",
      "occluded_motion_replay": "not_applicable",
-     "leftover": "baseline_too_thin",
+     "leftover": "insufficient_samples",
      "voice": "not_applicable"
     },
     "challenge": {
-     "challenge_id": "ch-d4af4e3097f397f32899b327",
+     "challenge_id": "ch-35639e5f9a05e95031943b9a",
      "status": "abstained",
      "cause": "seen",
      "verification": "per_sample",
@@ -1704,7 +1704,7 @@
      "verified_samples": 0,
      "total_ms": 0,
      "not_counted": {
-      "seen": 146
+      "seen": 149
      }
     },
     "fusion": null,
@@ -1714,12 +1714,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 178,
+      "events": 180,
       "statuses": {
-       "known": 178
+       "known": 180
       },
       "causes": {
-       "seen": 178
+       "seen": 180
       },
       "latest": {
        "t_ms": 32000,
@@ -1741,15 +1741,15 @@
       "majority": "known"
      },
      "arena-bot-b": {
-      "events": 15,
+      "events": 10,
       "statuses": {
-       "unknowable": 15
+       "unknowable": 10
       },
       "causes": {
-       "unknowable": 15
+       "unknowable": 10
       },
       "latest": {
-       "t_ms": 29700,
+       "t_ms": 29600,
        "status": "unknowable",
        "cause": "unknowable",
        "channels": {
@@ -1782,7 +1782,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:e720224ddec85e6f17bdac14c5f826610a5895493393d587ab6da4e47fdb9d82",
+    "packet": "sha256:da5a4d310da42979a72471e14e5c73b2d54ce8ce8a09aa881a9e6d36ff7e8589",
     "experimental": true,
     "label": null
    },
@@ -1796,11 +1796,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:09b8ad7bf5757875a66e5751d326f05a5bcdc0c4408e768ba069ba9c41b5001a",
+     "packet": "sha256:48ad503ee3e18d5aea879486c93b29d31e3ba45a62fd7645544a3f0a81e82eca",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:80c0ffa55212f108ec9b4fb8b14f7621d4f82cf47127335a3f10448818a2ff77",
+      "digest": "sha256:ff3bad26a31bd7b6455d265d39a6d9a857e3f69b50b31bd28061bfb3f079aa85",
       "events": 320
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1924,11 +1924,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:ceda074a39bae2db4d0d427ea95ca00913ef88d3515c9eba01d10cbb684ae516",
+     "packet": "sha256:0d42aeccf2ffc7a1ad94badee0e39d8ce313105a357d6c395c76d43fbb5cbe3b",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:3126171d84079bcb897c6ed9c552c497d5187bbcc9caa500bb6a4346e358b132",
+      "digest": "sha256:3a4b64820d57a3dc4a46507c893cf15b09f48a432eaf8300f4d6b2298ee7a703",
       "events": 320
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2052,25 +2052,25 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:e720224ddec85e6f17bdac14c5f826610a5895493393d587ab6da4e47fdb9d82",
+     "packet": "sha256:da5a4d310da42979a72471e14e5c73b2d54ce8ce8a09aa881a9e6d36ff7e8589",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/3",
-      "digest": "sha256:c21638ef1ad4ec0072064a603857dc7710b330417d0c5a7be25ed5e8ba82bb93",
-      "events": 353
+      "digest": "sha256:26a78649355f189c1b4a347469c9c04a6058d97828726b6166d2088d0adc0195",
+      "events": 352
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [
       {
-       "challenge_id": "ch-d4af4e3097f397f32899b327",
-       "plan": "sha256:172da39925e0a4c6b29a226f94d543e3cefa87ff66c06abf66bea72457b42b08",
+       "challenge_id": "ch-35639e5f9a05e95031943b9a",
+       "plan": "sha256:3cfc801ac0e9dbc9d0476e00c1cb6cdaecf6568b17be7640d3ff693c5f3a2ba0",
        "match_id": "arena-exposed_challenge_control-1",
        "status": "abstained",
        "eligible_samples": 0,
        "tracked_samples": 0,
        "total_ms": 0,
        "not_counted": {
-        "seen": 146
+        "seen": 149
        },
        "cause": "seen",
        "verification": "per_sample",
@@ -2180,11 +2180,11 @@
       },
       "occluded_motion_replay": {
        "not_applicable": [
-        "ch-d4af4e3097f397f32899b327"
+        "ch-35639e5f9a05e95031943b9a"
        ]
       },
       "leftover": {
-       "baseline_too_thin": [
+       "insufficient_samples": [
         "rifle"
        ]
       },
@@ -2199,7 +2199,7 @@
    "realization": {
     "status": "reproduced",
     "challenges": [
-     "ch-d4af4e3097f397f32899b327"
+     "ch-35639e5f9a05e95031943b9a"
     ],
     "problems": []
    },
@@ -2207,7 +2207,7 @@
    "personal_data": [],
    "client": {
     "entities_received": 3,
-    "probe_updates": 292,
+    "probe_updates": 297,
     "probe_sounds": 0,
     "sounds": 80,
     "fps_median": 145.0
@@ -2216,27 +2216,27 @@
     "server_tick_hz": 60,
     "match_ms": 32000,
     "ticks": 1920,
-    "tick_us_mean": 749.2,
-    "tick_us_max": 1991,
-    "knowledge_us_per_tick": 236.0,
-    "challenge_us_per_probe_tick": 70.0,
-    "rays_per_tick": 350.8,
-    "event_bytes_per_s": 12227.3,
-    "event_lines": 993,
-    "snapshot_bytes_per_s": 5268.8,
-    "feed_bytes_per_s": 93712.0,
-    "scoring_ms_live": 13.6,
+    "tick_us_mean": 672.0,
+    "tick_us_max": 1705,
+    "knowledge_us_per_tick": 223.8,
+    "challenge_us_per_probe_tick": 51.3,
+    "rays_per_tick": 350.3,
+    "event_bytes_per_s": 12225.1,
+    "event_lines": 992,
+    "snapshot_bytes_per_s": 5280.8,
+    "feed_bytes_per_s": 93487.5,
+    "scoring_ms_live": 11.5,
     "parse_errors": 0,
     "verdicts": {
      "audio": {
-      "absent": 876
+      "absent": 891
      },
      "vision": {
-      "known": 876
+      "known": 891
      }
     },
-    "probe_ticks": 876,
-    "memory_static_peak_bytes": 43641341
+    "probe_ticks": 891,
+    "memory_static_peak_bytes": 44927795
    },
    "exit_codes": [
     0,
@@ -2247,12 +2247,12 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/exposed_challenge_control/events.ndjson",
-     "sha256": "sha256:b89ee7200e58fc5d85bf0a801ba11c5d7487a4f1185fc03afebff16fdf2fa840",
-     "lines": 993
+     "sha256": "sha256:40dca8a04ff9a80d71cb8b48d33da47c17c1a78e2bc7f8ce49ae88864880a686",
+     "lines": 992
     },
     "plan.json": {
      "file": "examples/fps-arena/captures/exposed_challenge_control/plan.json",
-     "sha256": "sha256:fc7eaf2a9b1f309c7336d69e9bbcc1b23f561afe87b68b658648b74dfceb6c5e"
+     "sha256": "sha256:a3bc5429a37de892e78aa198382778695cb6a0b957a912ad4db92f9dccb38653"
     }
    }
   },
@@ -2334,12 +2334,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 314,
+      "events": 316,
       "statuses": {
-       "known": 314
+       "known": 316
       },
       "causes": {
-       "seen": 314
+       "seen": 316
       },
       "latest": {
        "t_ms": 30000,
@@ -2375,7 +2375,7 @@
      "detail": ""
     },
     "graph": "sha256:906155e739e1c46b1755eddb67fcf99f60098ca45583bfd900fd0c1b7ece9bfa",
-    "packet": "sha256:bb5da8f068afe884c4b54a4ccfe5a569a8a3ab22e33b19762b84faec90a92384",
+    "packet": "sha256:cdfcc88bbd57f42d535cca39943527bb4f52530c961c09d07609ba30949601b5",
     "experimental": false,
     "label": null
    },
@@ -2389,11 +2389,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:34e92209d5f513ce3a535689578f021ed5f9f43f7fc135f6b60c100a3c8bf4e8",
+     "packet": "sha256:7f5f2405b300db9b2a406e7f288f18ea0419c2c77ba3193d67694a204cb356ed",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:02675fec1588ae861276a2b98ac2153b859cf48bcad9b27c6f01fbe60b8e9555",
+      "digest": "sha256:d411e864cdf4879a8076c281162b00f3195f6d483567d6aaf8efc4f4d234d5ef",
       "events": 330
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2534,12 +2534,12 @@
       "external_signal"
      ],
      "graph": "sha256:906155e739e1c46b1755eddb67fcf99f60098ca45583bfd900fd0c1b7ece9bfa",
-     "packet": "sha256:bb5da8f068afe884c4b54a4ccfe5a569a8a3ab22e33b19762b84faec90a92384",
+     "packet": "sha256:cdfcc88bbd57f42d535cca39943527bb4f52530c961c09d07609ba30949601b5",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:23a65a48ebf77c29b7275b7464f83368263b981ffcc69aabf9ea7c96d4353f9d",
-      "events": 350
+      "digest": "sha256:ad6c09d5645bb6c47807869c4df4f398399c5e4eb4bd6277ca78958cd21f0372",
+      "events": 353
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -2693,23 +2693,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 236.3,
-    "tick_us_max": 877,
-    "knowledge_us_per_tick": 23.1,
-    "challenge_us_per_probe_tick": 3266.0,
+    "tick_us_mean": 155.5,
+    "tick_us_max": 494,
+    "knowledge_us_per_tick": 14.6,
+    "challenge_us_per_probe_tick": 1580.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9174.7,
-    "event_lines": 680,
-    "snapshot_bytes_per_s": 3464.4,
-    "feed_bytes_per_s": 74956.0,
-    "scoring_ms_live": 9.5,
+    "event_bytes_per_s": 9219.5,
+    "event_lines": 683,
+    "snapshot_bytes_per_s": 3466.5,
+    "feed_bytes_per_s": 74838.1,
+    "scoring_ms_live": 8.7,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641101
+    "memory_static_peak_bytes": 44927555
    },
    "exit_codes": [
     0,
@@ -2720,8 +2720,8 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/external_record/events.ndjson",
-     "sha256": "sha256:a349282f059232e3809c1cdfc7cbc0fe61c385f728d8312ef853cc424496e0cc",
-     "lines": 680
+     "sha256": "sha256:52c7333770734bf6ad8fae5e02d033e079088447fede78da835d721cc99db883",
+     "lines": 683
     },
     "external.ndjson": {
      "file": "examples/fps-arena/captures/external_record/external.ndjson",
@@ -2757,7 +2757,7 @@
      "fire_rate"
     ],
     "observations": [
-     "obs-70236ba14c30e03c828ebd5c"
+     "obs-5518fda556da3182bff7dd58"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -2790,12 +2790,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 491,
+      "events": 492,
       "statuses": {
-       "known": 491
+       "known": 492
       },
       "causes": {
-       "seen": 491
+       "seen": 492
       },
       "latest": {
        "t_ms": 30000,
@@ -2830,8 +2830,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:63685d7386a46bb004fbaa5663b0800df415aac6b71e28f44936716a21678f5d",
-    "packet": "sha256:d1426022ea959d8e0bb5972395936ef770ee5ed425780ed82eab96a6234ad2e2",
+    "graph": "sha256:89910819a69699abf43bc4c4e88126b7a5eb5af1c7c26e2e3b6e76a9e6665503",
+    "packet": "sha256:64dc4a95193da6cc5da8c65d93ada836ac2a1927fb082d5e2af6096504a948c3",
     "experimental": false,
     "label": null
    },
@@ -2845,11 +2845,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:4ac895f8c67e1b07d0ea1b8438c594def29a8bc429ae676d9163f30dea41195e",
+     "packet": "sha256:4e076b808f8e49fc40d86d9e799e292be85dc7e769ec847fc6a18eae4b2a7391",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:309c0b47c1c8378ad3037c116b056da1423efb3ade3bb310ac357023cddf4fa4",
+      "digest": "sha256:720741d4eacb798c3e47705a77611c2b2560c8337805e1ebe3635252b47468a2",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2971,18 +2971,18 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-70236ba14c30e03c828ebd5c"
+      "obs-5518fda556da3182bff7dd58"
      ],
      "kinds": [
       "fire_rate"
      ],
-     "graph": "sha256:63685d7386a46bb004fbaa5663b0800df415aac6b71e28f44936716a21678f5d",
-     "packet": "sha256:d1426022ea959d8e0bb5972395936ef770ee5ed425780ed82eab96a6234ad2e2",
+     "graph": "sha256:89910819a69699abf43bc4c4e88126b7a5eb5af1c7c26e2e3b6e76a9e6665503",
+     "packet": "sha256:64dc4a95193da6cc5da8c65d93ada836ac2a1927fb082d5e2af6096504a948c3",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:c0de70e4d6cb13a359edb7547c1beb8f9f0c52ffa615a4b5b62fc3d950a031b8",
-      "events": 537
+      "digest": "sha256:8603cc4e408deacc673f5a8fb62589fdb72229c1d744e5712ab63a474c263abf",
+      "events": 538
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -3121,23 +3121,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 242.7,
-    "tick_us_max": 996,
-    "knowledge_us_per_tick": 21.8,
-    "challenge_us_per_probe_tick": 3031.0,
+    "tick_us_mean": 162.9,
+    "tick_us_max": 611,
+    "knowledge_us_per_tick": 14.7,
+    "challenge_us_per_probe_tick": 1715.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 12100.1,
-    "event_lines": 837,
+    "event_bytes_per_s": 12112.7,
+    "event_lines": 838,
     "snapshot_bytes_per_s": 3519.5,
-    "feed_bytes_per_s": 79234.8,
-    "scoring_ms_live": 13.0,
+    "feed_bytes_per_s": 79037.1,
+    "scoring_ms_live": 12.1,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43640957
+    "memory_static_peak_bytes": 44927411
    },
    "exit_codes": [
     0,
@@ -3148,8 +3148,8 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/fire_rate/events.ndjson",
-     "sha256": "sha256:fc3588657c64a9b74d84c4c007fc1612cc6af86a073c1d5e482358f238be41b0",
-     "lines": 837
+     "sha256": "sha256:845e28ee2d8fe10f2a0128b7e58e09768885841b411e15c2689497b73ca63926",
+     "lines": 838
     }
    }
   },
@@ -3213,12 +3213,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 276,
+      "events": 268,
       "statuses": {
-       "known": 276
+       "known": 268
       },
       "causes": {
-       "seen": 276
+       "seen": 268
       },
       "latest": {
        "t_ms": 30000,
@@ -3254,7 +3254,7 @@
      "detail": "Ground speed stayed over the gear cap for 151 samples with displacement_cause none. Cap source: server. If this was a ragdoll or explosion, the server did not mark it."
     },
     "graph": "sha256:0dcf9c7867e75c074704b6c892e7cc4421b886d536fb197c50c6d88ce1ebf7f5",
-    "packet": "sha256:bf4ed6408723d3c67c61364b6c4e188bdff64029202a628a66982a637b9aa0c2",
+    "packet": "sha256:9b8300b600722db05b55aa205caaa6e245ee0e4e0f5bfbcba9f88065c633bffb",
     "experimental": false,
     "label": null
    },
@@ -3268,11 +3268,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:aebdf1d197f216aca283e6f9a1efc5ed6e1de0d12f65ed156ddc2599acd70cf6",
+     "packet": "sha256:d72348adeb077435a7e49be23bdc0623031cef51c974ad159988de8c1787826c",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:8814a7e07036453c5e73b84230cba2bca8a91c817e97142a333d9a5dab2f0ba4",
+      "digest": "sha256:4b562ccd19948044377cb9e5f4c887706960cd1f26015e9099f81256be27bbc7",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -3400,12 +3400,12 @@
       "speed"
      ],
      "graph": "sha256:0dcf9c7867e75c074704b6c892e7cc4421b886d536fb197c50c6d88ce1ebf7f5",
-     "packet": "sha256:bf4ed6408723d3c67c61364b6c4e188bdff64029202a628a66982a637b9aa0c2",
+     "packet": "sha256:9b8300b600722db05b55aa205caaa6e245ee0e4e0f5bfbcba9f88065c633bffb",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:4368810fc713f18c0006cafbc3f372cdd0371616e03e6dd5a2e055f2b64454d5",
-      "events": 352
+      "digest": "sha256:299fea34266a03a4ec37ffbf0521cf23a985b63cd27585b1db201ec4fcc0f4fa",
+      "events": 351
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -3546,35 +3546,35 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 227.5,
-    "tick_us_max": 1121,
-    "knowledge_us_per_tick": 22.3,
-    "challenge_us_per_probe_tick": 3261.0,
+    "tick_us_mean": 163.5,
+    "tick_us_max": 9881,
+    "knowledge_us_per_tick": 15.0,
+    "challenge_us_per_probe_tick": 1699.0,
     "rays_per_tick": 2.3,
-    "event_bytes_per_s": 8492.4,
-    "event_lines": 652,
-    "snapshot_bytes_per_s": 3465.9,
-    "feed_bytes_per_s": 74350.4,
-    "scoring_ms_live": 8.3,
+    "event_bytes_per_s": 8435.7,
+    "event_lines": 651,
+    "snapshot_bytes_per_s": 3465.2,
+    "feed_bytes_per_s": 74244.8,
+    "scoring_ms_live": 15.4,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641125
+    "memory_static_peak_bytes": 44927579
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.4,
+   "wall_s": 32.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/impossible_speed/events.ndjson",
-     "sha256": "sha256:7a603dc15b9e2bc98f64dd511d8d9042965cf03d83230c401422360581eec936",
-     "lines": 652
+     "sha256": "sha256:13365b45447a754f2e0fbd718351540115ec3dfec53674cc66c9cf1b9cb331f6",
+     "lines": 651
     }
    }
   },
@@ -3640,12 +3640,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 313,
+      "events": 314,
       "statuses": {
-       "known": 313
+       "known": 314
       },
       "causes": {
-       "seen": 313
+       "seen": 314
       },
       "latest": {
        "t_ms": 30000,
@@ -3681,7 +3681,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:83e427e637a88d19984f7893501a6cf96b7a6ce05a88a7c0c5a3f6a595a9fccc",
+    "packet": "sha256:ea1df37160d80779fe648f7333e0a0546bf0ebe697544b170051ffeefaf3d911",
     "experimental": false,
     "label": null
    },
@@ -3695,11 +3695,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:04135a890897fe28fde7764bbb7720de130080f6c5cf510a17e41cbb902402e6",
+     "packet": "sha256:3b90176ae6868ae636407e951214245dc07c7b5fd1d827a3441a075e33b3bd4b",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:a573cfc71331f8721d3294315e5a7fd23d3c43d43d3afeb9246ea6667a3df653",
+      "digest": "sha256:9c7c8793a29f6327047c93cb8acaef942f8096128212799f73043770b4ec7d6d",
       "events": 330
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -3827,11 +3827,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:83e427e637a88d19984f7893501a6cf96b7a6ce05a88a7c0c5a3f6a595a9fccc",
+     "packet": "sha256:ea1df37160d80779fe648f7333e0a0546bf0ebe697544b170051ffeefaf3d911",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:8f0d3618e4c5da786240cd8d175330e82888e518486682de58b95e1be965ddf2",
+      "digest": "sha256:2e0e3156a6b9bb8a7f6c4eca6c0e2af293ddbc264ba7b5ae1a2e25c344ded20e",
       "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -3973,23 +3973,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 224.4,
-    "tick_us_max": 1630,
-    "knowledge_us_per_tick": 21.6,
-    "challenge_us_per_probe_tick": 3134.0,
+    "tick_us_mean": 189.0,
+    "tick_us_max": 9677,
+    "knowledge_us_per_tick": 17.9,
+    "challenge_us_per_probe_tick": 2043.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9064.0,
+    "event_bytes_per_s": 9084.4,
     "event_lines": 680,
-    "snapshot_bytes_per_s": 3465.3,
-    "feed_bytes_per_s": 74642.1,
-    "scoring_ms_live": 8.1,
+    "snapshot_bytes_per_s": 3465.5,
+    "feed_bytes_per_s": 74764.9,
+    "scoring_ms_live": 8.6,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641005
+    "memory_static_peak_bytes": 44927459
    },
    "exit_codes": [
     0,
@@ -4000,7 +4000,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/normal_play/events.ndjson",
-     "sha256": "sha256:34f8596624f4db279ddec32062c3c4157cb85cfd68e7b4c43cc45ad0c1ec16a9",
+     "sha256": "sha256:4855294622adbc119895b7d227a039bcdacdfc2482028e72f58f5eca4f593742",
      "lines": 680
     }
    }
@@ -4106,7 +4106,7 @@
      "detail": ""
     },
     "graph": "sha256:7058168a8eedc891d46544307488596cb53685d06b606f1fd29d12cf2f0323a8",
-    "packet": "sha256:fb3785c261a921b4779875e137937b10b77b66afef5709894ee26bec7dcea5d6",
+    "packet": "sha256:62d905af1de3a91f182991b1c9d62765e6a40291b032aea269a6f87b286166ef",
     "experimental": false,
     "label": null
    },
@@ -4252,11 +4252,11 @@
       "recoil_floor"
      ],
      "graph": "sha256:7058168a8eedc891d46544307488596cb53685d06b606f1fd29d12cf2f0323a8",
-     "packet": "sha256:fb3785c261a921b4779875e137937b10b77b66afef5709894ee26bec7dcea5d6",
+     "packet": "sha256:62d905af1de3a91f182991b1c9d62765e6a40291b032aea269a6f87b286166ef",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:37ff08775e5a8f888b3c7afdc07fbdc80a3c96ca6e0e87411fb9f5d82a04b25e",
+      "digest": "sha256:6447465575365a089626f2579bc7b7e71655259d3a8c1a2976d20fa4dd61d376",
       "events": 508
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4398,34 +4398,34 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 259.5,
-    "tick_us_max": 1152,
-    "knowledge_us_per_tick": 23.7,
-    "challenge_us_per_probe_tick": 3508.0,
+    "tick_us_mean": 248.8,
+    "tick_us_max": 746,
+    "knowledge_us_per_tick": 22.8,
+    "challenge_us_per_probe_tick": 3412.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 11713.2,
+    "event_bytes_per_s": 11712.6,
     "event_lines": 808,
-    "snapshot_bytes_per_s": 3481.1,
-    "feed_bytes_per_s": 78510.3,
-    "scoring_ms_live": 15.8,
+    "snapshot_bytes_per_s": 3482.8,
+    "feed_bytes_per_s": 78652.0,
+    "scoring_ms_live": 13.3,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641029
+    "memory_static_peak_bytes": 44927483
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.4,
+   "wall_s": 32.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/recoil_floor/events.ndjson",
-     "sha256": "sha256:59d94e74fb012501c21886f91a37c1399d0b0f7459cc4b81be07273121735db1",
+     "sha256": "sha256:1937f873b2a00020e668f861b44c36a62e128628821d4fac770ed0364dd31a10",
      "lines": 808
     }
    }
@@ -4531,7 +4531,7 @@
      "detail": ""
     },
     "graph": "sha256:f8ae819d8ac2a31010322cae1af27793c710fa9d1893975a988444c049f7fa91",
-    "packet": "sha256:f0bfe5bd642727dbf5a795684b8f2d8ce23c0ee77a7b91e9b116b0cb2256ec9a",
+    "packet": "sha256:9a3f77a21bb297fd9e4f98e39a451abbde212771a104bbbc81cf6c6f0d9cc2b1",
     "experimental": false,
     "label": null
    },
@@ -4677,11 +4677,11 @@
       "mirror"
      ],
      "graph": "sha256:f8ae819d8ac2a31010322cae1af27793c710fa9d1893975a988444c049f7fa91",
-     "packet": "sha256:f0bfe5bd642727dbf5a795684b8f2d8ce23c0ee77a7b91e9b116b0cb2256ec9a",
+     "packet": "sha256:9a3f77a21bb297fd9e4f98e39a451abbde212771a104bbbc81cf6c6f0d9cc2b1",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:e2d74696d76ec1794bc637776889fd24c3f8a99dd5108d036f44fa30192b1c05",
+      "digest": "sha256:507f6de0dbcd7f6f3087f801b78ace24220bd5c4196bb33b8e92efbd358ea9f5",
       "events": 508
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4821,34 +4821,34 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 248.6,
-    "tick_us_max": 744,
-    "knowledge_us_per_tick": 23.6,
-    "challenge_us_per_probe_tick": 3295.0,
+    "tick_us_mean": 249.4,
+    "tick_us_max": 1314,
+    "knowledge_us_per_tick": 24.1,
+    "challenge_us_per_probe_tick": 3579.0,
     "rays_per_tick": 2.4,
     "event_bytes_per_s": 11573.1,
     "event_lines": 808,
-    "snapshot_bytes_per_s": 3542.7,
-    "feed_bytes_per_s": 78506.1,
-    "scoring_ms_live": 17.2,
+    "snapshot_bytes_per_s": 3543.7,
+    "feed_bytes_per_s": 78495.3,
+    "scoring_ms_live": 14.0,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641053
+    "memory_static_peak_bytes": 44927507
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.4,
+   "wall_s": 32.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/recoil_mirror/events.ndjson",
-     "sha256": "sha256:674002ed46a5204e71ff8d8b253f0d85e2ad975c7f43070014cf57d8ff8b6a5b",
+     "sha256": "sha256:e5dc018cc32e6b912b47928306ae3027ad6fb7566cf79b4c8b332815ad15139b",
      "lines": 808
     }
    }
@@ -4955,7 +4955,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:f9b81f7d4d64a2119ac724cebde4601fb5a44f23d4e7fcd3f18f513931eec9ad",
+    "packet": "sha256:b91c70ee969ad4e16572a1305495de7c34f6aae89326fe2fa827134672922d6d",
     "experimental": false,
     "label": null
    },
@@ -5097,11 +5097,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:f9b81f7d4d64a2119ac724cebde4601fb5a44f23d4e7fcd3f18f513931eec9ad",
+     "packet": "sha256:b91c70ee969ad4e16572a1305495de7c34f6aae89326fe2fa827134672922d6d",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:5565cf491b95259b184e6b3d5a93b86b185f5f6e64dc43915454d8d1122f467d",
+      "digest": "sha256:b3e1fc02b25250ed197fdcbaa20dba37f22d85e996c2ae72c09fe3355a5cf16b",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5243,23 +5243,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 756.8,
-    "tick_us_max": 2279,
-    "knowledge_us_per_tick": 234.6,
-    "challenge_us_per_probe_tick": 3346.0,
+    "tick_us_mean": 763.4,
+    "tick_us_max": 2240,
+    "knowledge_us_per_tick": 233.3,
+    "challenge_us_per_probe_tick": 3635.0,
     "rays_per_tick": 378.0,
-    "event_bytes_per_s": 8925.9,
+    "event_bytes_per_s": 8925.7,
     "event_lines": 681,
     "snapshot_bytes_per_s": 3607.5,
-    "feed_bytes_per_s": 70664.5,
-    "scoring_ms_live": 9.8,
+    "feed_bytes_per_s": 70601.7,
+    "scoring_ms_live": 10.9,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641293
+    "memory_static_peak_bytes": 44927747
    },
    "exit_codes": [
     0,
@@ -5270,7 +5270,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unchecked_audio_channel/events.ndjson",
-     "sha256": "sha256:b49c02f8ecf5a8b277fe859e4e5638b550fb3aac0b8f24e2da5161c8d11a4c91",
+     "sha256": "sha256:3a316aba8c24a93606ec74ce97d72d10c39e3122e5c4d6d8b3dcd16e80b93a33",
      "lines": 681
     }
    }
@@ -5408,7 +5408,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:59e22b745452828a7efc3f40c8785651f3fceafad0cfba9fc4eaefe28af8cd33",
+    "packet": "sha256:6c4e8e9dd8f40cd24361073c7b029df1c94c9f4b27cc6d9957f12fd7c698c488",
     "experimental": false,
     "label": null
    },
@@ -5422,11 +5422,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:24184e0327fb68356b0dcd0a935c3241c9783063efcee7fbdeef86fef55d6afa",
+     "packet": "sha256:01d4e0014d93525d2115765f4defef12ccabaf0cbe40837c22e924c989592c60",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:a4b38fc293c729b0a5ebb2d0ddcd39a8b198d5e3f0c21801e8c8f0365f7aff58",
+      "digest": "sha256:ce729785da98c9c018df8f4b996c1bbc79fb4f837101c9c00d3b27720200dc09",
       "events": 330
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5554,11 +5554,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:ca93e14be6d9d424d1e14508034d94929f69c923253be0919d4284d7312cbf0e",
+     "packet": "sha256:6ec1672b18b40183f0c7deaed3dec043e0ef788ef4e44c45ecc0e0d957730aa5",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:625ce660b78db5bf0924195078e1f0a01754c58475021875fe667136b3fea0fe",
+      "digest": "sha256:0abd85c235173b96a8dd974a69c90c1b541d9cdb23ed544e773eb16533776c87",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5682,11 +5682,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:59e22b745452828a7efc3f40c8785651f3fceafad0cfba9fc4eaefe28af8cd33",
+     "packet": "sha256:6c4e8e9dd8f40cd24361073c7b029df1c94c9f4b27cc6d9957f12fd7c698c488",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:65396232e01f450df4a2cc40bdf114a977729420e03ec7c7ff7519c120e2724f",
+      "digest": "sha256:d3281daa7bd05ca22e2caafef839dd2d4be64523a63cc7a236c47cec89a778ca",
       "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5828,23 +5828,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 764.8,
-    "tick_us_max": 1926,
-    "knowledge_us_per_tick": 246.7,
-    "challenge_us_per_probe_tick": 3582.0,
+    "tick_us_mean": 753.1,
+    "tick_us_max": 1759,
+    "knowledge_us_per_tick": 244.9,
+    "challenge_us_per_probe_tick": 3272.0,
     "rays_per_tick": 351.2,
-    "event_bytes_per_s": 13063.4,
+    "event_bytes_per_s": 13062.1,
     "event_lines": 980,
-    "snapshot_bytes_per_s": 4664.9,
-    "feed_bytes_per_s": 83562.7,
-    "scoring_ms_live": 16.5,
+    "snapshot_bytes_per_s": 4664.8,
+    "feed_bytes_per_s": 83491.6,
+    "scoring_ms_live": 21.4,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641293
+    "memory_static_peak_bytes": 44927747
    },
    "exit_codes": [
     0,
@@ -5855,7 +5855,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unknowable_hidden_enemy/events.ndjson",
-     "sha256": "sha256:afa05cb2097d8795cefa35645e1a034badcaf6d416868dc45d5f571b506d483c",
+     "sha256": "sha256:8a08bd901a1196fee2f8dc6dc82516604de9103a34f937a639dac5e74e1326d1",
      "lines": 980
     }
    }
@@ -5964,7 +5964,7 @@
      "detail": ""
     },
     "graph": "sha256:cfac11f634fb0275a5a70cfb2022f75615bfb83e2300c8356fb0c9aa5ce51303",
-    "packet": "sha256:9da6364ad699cf387d8f67931f21b485bc56f982da318ddb37c804ac2d9b5867",
+    "packet": "sha256:c2a235de65c48e27d6ef7ef2c57ba97f2f89a890139f8a9cfe06c1e4a069d8d4",
     "experimental": false,
     "label": null
    },
@@ -5978,11 +5978,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:cead3b64917c039171a942610ac6a58f67b43a0f5bb5475140bad586bb7d0086",
+     "packet": "sha256:f78e41610548a9fe9a32de9f93bdea700298d351a8f8d7313211270e35c2d7b7",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:d23ee48219493f89bcdbc91dc480f9d6d88325360cf9012c9e4a260845f2f85e",
+      "digest": "sha256:e70bdde71e88a108d93851839f9966fb62cfc1a19caa2d2d597a307472dafc9a",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -6110,11 +6110,11 @@
       "hidden"
      ],
      "graph": "sha256:cfac11f634fb0275a5a70cfb2022f75615bfb83e2300c8356fb0c9aa5ce51303",
-     "packet": "sha256:9da6364ad699cf387d8f67931f21b485bc56f982da318ddb37c804ac2d9b5867",
+     "packet": "sha256:c2a235de65c48e27d6ef7ef2c57ba97f2f89a890139f8a9cfe06c1e4a069d8d4",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:e47ffd3f2b1ca51359cd046497ed709ad83993527dbd5e25ccc10ce681516340",
+      "digest": "sha256:6f38592644c37c50d1fa7d39e45579a22815ef35eaf855c8016ab25a745566ec",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -6256,23 +6256,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 750.7,
-    "tick_us_max": 2215,
-    "knowledge_us_per_tick": 232.8,
-    "challenge_us_per_probe_tick": 3249.0,
+    "tick_us_mean": 755.3,
+    "tick_us_max": 2509,
+    "knowledge_us_per_tick": 233.8,
+    "challenge_us_per_probe_tick": 3396.0,
     "rays_per_tick": 378.0,
-    "event_bytes_per_s": 9170.1,
+    "event_bytes_per_s": 9170.6,
     "event_lines": 681,
-    "snapshot_bytes_per_s": 3606.8,
-    "feed_bytes_per_s": 71021.9,
-    "scoring_ms_live": 11.3,
+    "snapshot_bytes_per_s": 3607.3,
+    "feed_bytes_per_s": 71080.4,
+    "scoring_ms_live": 12.3,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641341
+    "memory_static_peak_bytes": 44927795
    },
    "exit_codes": [
     0,
@@ -6283,7 +6283,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unknowable_hidden_tracked/events.ndjson",
-     "sha256": "sha256:ae7dafda3a0472c0d50c2d8063994650e354f37f41c5cdced84d783a4bb31d74",
+     "sha256": "sha256:b2d767766149d8fc3a4868bdbbf2ac0ef886861d436f1e7d793d85298c027e59",
      "lines": 681
     }
    }
@@ -6315,7 +6315,7 @@
      "wire"
     ],
     "observations": [
-     "obs-aa708247f09735c9031d9f53"
+     "obs-7b2f9f06da6f207b6c43c198"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -6348,12 +6348,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 342,
+      "events": 323,
       "statuses": {
-       "known": 342
+       "known": 323
       },
       "causes": {
-       "seen": 342
+       "seen": 323
       },
       "latest": {
        "t_ms": 30000,
@@ -6388,8 +6388,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:b8de78d2993bda8ca4107b8d521198e943a1ca562a1b86169cb78f21ba1f3b2c",
-    "packet": "sha256:9e20157cfcaea4cedb7e8ed338915dea34d84bc546568f439cfac478c9d5481d",
+    "graph": "sha256:f26a9244b94569a31295221fd4770f277e186bffd9ae03958ed538e2c39cd79c",
+    "packet": "sha256:5faa0a38c310e0ccbf69b6275122ac45ea8b656508e7fbd24724c4216300bff1",
     "experimental": false,
     "label": null
    },
@@ -6403,11 +6403,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:2e77c6ead42a6a09e29035111fd512c3b0088f80343df4f94404f80841d23cc7",
+     "packet": "sha256:e2eff33b1a28fd920056ce2a2a816f1163432b38eacee7cb08830f6d6ec42c9b",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:f30609aa9dfa491dff7bb260b7c4d36b2cc302d383e9545797c546d1d4c70383",
+      "digest": "sha256:05fbe16c8831b12b4e3c4a19467ee550a1a1822d12a433492f7a3f36845254c5",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -6529,17 +6529,17 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-aa708247f09735c9031d9f53"
+      "obs-7b2f9f06da6f207b6c43c198"
      ],
      "kinds": [
       "wire"
      ],
-     "graph": "sha256:b8de78d2993bda8ca4107b8d521198e943a1ca562a1b86169cb78f21ba1f3b2c",
-     "packet": "sha256:9e20157cfcaea4cedb7e8ed338915dea34d84bc546568f439cfac478c9d5481d",
+     "graph": "sha256:f26a9244b94569a31295221fd4770f277e186bffd9ae03958ed538e2c39cd79c",
+     "packet": "sha256:5faa0a38c310e0ccbf69b6275122ac45ea8b656508e7fbd24724c4216300bff1",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:833bb65dbcd3fe0708878a7c7a259e64a1f41c990e13145ff70454b05772aaf5",
+      "digest": "sha256:834bf715f084f4a2621d5a0552baec4b4cda9a22ce6af431f60b0bbeb2580caa",
       "events": 420
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -6679,15 +6679,15 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 255.6,
-    "tick_us_max": 853,
-    "knowledge_us_per_tick": 24.6,
-    "challenge_us_per_probe_tick": 3740.0,
-    "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9838.1,
+    "tick_us_mean": 258.7,
+    "tick_us_max": 839,
+    "knowledge_us_per_tick": 25.0,
+    "challenge_us_per_probe_tick": 3669.0,
+    "rays_per_tick": 2.3,
+    "event_bytes_per_s": 9659.9,
     "event_lines": 720,
     "snapshot_bytes_per_s": 3600.4,
-    "feed_bytes_per_s": 77528.1,
+    "feed_bytes_per_s": 77483.1,
     "scoring_ms_live": 11.7,
     "parse_errors": 0,
     "verdicts": {
@@ -6695,7 +6695,7 @@
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641101
+    "memory_static_peak_bytes": 44927555
    },
    "exit_codes": [
     0,
@@ -6706,7 +6706,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/wire_vs_picture/events.ndjson",
-     "sha256": "sha256:27fc520599e61e1b3e50cce423bdff9c3a079b31560e34a662594a2680c633a0",
+     "sha256": "sha256:069c48051f4dcc57b8e2d85546e5e8aa4dea76ba0f58a7fb8248c83c1eeaaafb",
      "lines": 720
     }
    }
@@ -6728,199 +6728,14 @@
   "visible_scenario": "exposed_challenge_control",
   "hidden_checks": 7,
   "hidden_pixels": 0,
-  "hidden_bot_checks_with_pixels": 15,
+  "hidden_bot_checks_with_pixels": 14,
   "hidden_frame_stable": true,
   "visible_checks": 8,
-  "visible_pixels": 1490,
+  "visible_pixels": 1536,
   "pass": true,
   "problems": [],
-  "statement": "PLAYER PIXEL PROOF  hidden: 0 challenge pixels in 7 checks  visible control: 1490 changed pixels  PASS",
+  "statement": "PLAYER PIXEL PROOF  hidden: 0 challenge pixels in 7 checks  visible control: 1536 changed pixels  PASS",
   "runs": {
-   "active_challenge": {
-    "match_id": "arena-active_challenge-1",
-    "observed": {
-     "decision": "review",
-     "automated_action": "none",
-     "kinds": [
-      "occluded_motion_replay"
-     ],
-     "observations": [
-      "obs-465d84da45371505086b13d1"
-     ],
-     "eligibility": {
-      "speed": "eligible",
-      "fire_rate": "eligible",
-      "metronome": "not_applicable",
-      "recoil_floor": "insufficient_samples",
-      "mirror": "eligible",
-      "recoil_learned": "not_applicable",
-      "accuracy": "insufficient_samples",
-      "headshot_rate": "insufficient_samples",
-      "median_distance": "insufficient_samples",
-      "geometry_rate": "insufficient_samples",
-      "extra": "disabled",
-      "rank_tail": "insufficient_samples",
-      "view_snaps": "telemetry_unavailable",
-      "acquire_timing": "telemetry_unavailable",
-      "supporting_extra": "disabled",
-      "account_jump": "telemetry_unavailable",
-      "hidden": "eligible",
-      "quiet_aim": "telemetry_unavailable",
-      "wire": "eligible",
-      "occluded_motion_replay": "eligible",
-      "leftover": "baseline_too_thin",
-      "voice": "not_applicable"
-     },
-     "challenge": {
-      "challenge_id": "ch-a2403f951a427432acdd80d5",
-      "status": "followed",
-      "cause": null,
-      "verification": "per_sample",
-      "eligible_samples": 141,
-      "tracked_samples": 134,
-      "verified_samples": 141,
-      "total_ms": 13350.0,
-      "not_counted": {
-       "seen": 7
-      }
-     },
-     "fusion": null,
-     "knowledge": {
-      "arena-bot-a": "known",
-      "arena-bot-b": "unknowable"
-     },
-     "knowledge_detail": {
-      "arena-bot-a": {
-       "events": 189,
-       "statuses": {
-        "known": 189
-       },
-       "causes": {
-        "seen": 189
-       },
-       "latest": {
-        "t_ms": 32000,
-        "status": "known",
-        "cause": "seen",
-        "channels": {
-         "audio": "known",
-         "recent_perception": "known",
-         "vision": "known"
-        },
-        "required": [
-         "vision",
-         "audio"
-        ],
-        "since_perceived_ms": 0.0,
-        "hidden_track_ms": null,
-        "event_type": "movement"
-       },
-       "majority": "known"
-      },
-      "arena-bot-b": {
-       "events": 11,
-       "statuses": {
-        "unknowable": 11
-       },
-       "causes": {
-        "unknowable": 11
-       },
-       "latest": {
-        "t_ms": 29000,
-        "status": "unknowable",
-        "cause": "unknowable",
-        "channels": {
-         "audio": "absent",
-         "recent_perception": "unchecked",
-         "vision": "absent"
-        },
-        "required": [
-         "vision",
-         "audio"
-        ],
-        "since_perceived_ms": null,
-        "hidden_track_ms": null,
-        "event_type": "movement"
-       },
-       "majority": "unknowable"
-      }
-     },
-     "speed": {
-      "eligible": 320,
-      "excluded_innocent": 0,
-      "excluded_unknown": 0,
-      "excluded_airborne": 0,
-      "missing_cap": 0,
-      "violations": 0,
-      "longest_run": 0,
-      "sustained": false,
-      "spike_samples": 0,
-      "cap_source": "server",
-      "detail": ""
-     },
-     "graph": "sha256:1ca62d4999f07b1984d74b44abe576074334908a5b6af7b93e4c073a93ba32be",
-     "packet": "sha256:5382cf748ebb8556ba7d281f006d39a94957b7b84268e040f4f358e4e15522b0",
-     "experimental": true,
-     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
-    },
-    "as_expected": true,
-    "problems": [],
-    "live_vs_offline": "identical",
-    "pixels": {
-     "checks": 16,
-     "probe_checks_drawn": 7,
-     "probe_pixels_max": 0,
-     "probe_checks_with_pixels": 0,
-     "bot_checks_with_pixels": 15,
-     "bot_pixels_max": 6387,
-     "unchanged_frame_pixels_max": 0,
-     "screenshots": [
-      "view-000100.png",
-      "view-002100.png",
-      "view-004100.png",
-      "view-006100.png",
-      "view-008100.png",
-      "view-010100.png",
-      "view-012100.png",
-      "view-014100.png",
-      "view-016100.png",
-      "view-018100.png",
-      "view-020100.png",
-      "view-022150.png",
-      "view-024150.png",
-      "view-026150.png",
-      "view-028150.png",
-      "view-030150.png"
-     ],
-     "resolution": "640x360, software OpenGL in a private virtual display"
-    },
-    "timing": {
-     "server_tick_hz": 60,
-     "match_ms": 32000,
-     "ticks": 1920,
-     "tick_us_mean": 955.2,
-     "tick_us_max": 2178,
-     "knowledge_us_per_tick": 347.9,
-     "challenge_us_per_probe_tick": 195.6,
-     "rays_per_tick": 421.0,
-     "event_bytes_per_s": 12423.1,
-     "event_lines": 1023,
-     "snapshot_bytes_per_s": 5245.6,
-     "feed_bytes_per_s": 94120.2,
-     "scoring_ms_live": 13.8,
-     "parse_errors": 0,
-     "verdicts": {
-      "audio": {
-       "absent": 849
-      },
-      "vision": {
-       "absent": 849
-      }
-     },
-     "probe_ticks": 849,
-     "memory_static_peak_bytes": 43641061
-    }
-   },
    "exposed_challenge_control": {
     "match_id": "arena-exposed_challenge_control-1",
     "observed": {
@@ -6949,11 +6764,11 @@
       "quiet_aim": "telemetry_unavailable",
       "wire": "eligible",
       "occluded_motion_replay": "not_applicable",
-      "leftover": "baseline_too_thin",
+      "leftover": "insufficient_samples",
       "voice": "not_applicable"
      },
      "challenge": {
-      "challenge_id": "ch-f6d2de2f2dc5258959d55552",
+      "challenge_id": "ch-76e31ec49c70b49dc6e69d6a",
       "status": "abstained",
       "cause": "seen",
       "verification": "per_sample",
@@ -6962,7 +6777,7 @@
       "verified_samples": 0,
       "total_ms": 0,
       "not_counted": {
-       "seen": 142
+       "seen": 144
       }
      },
      "fusion": null,
@@ -6972,12 +6787,12 @@
      },
      "knowledge_detail": {
       "arena-bot-a": {
-       "events": 186,
+       "events": 182,
        "statuses": {
-        "known": 186
+        "known": 182
        },
        "causes": {
-        "seen": 186
+        "seen": 182
        },
        "latest": {
         "t_ms": 32000,
@@ -6999,15 +6814,15 @@
        "majority": "known"
       },
       "arena-bot-b": {
-       "events": 11,
+       "events": 10,
        "statuses": {
-        "unknowable": 11
+        "unknowable": 10
        },
        "causes": {
-        "unknowable": 11
+        "unknowable": 10
        },
        "latest": {
-        "t_ms": 30300,
+        "t_ms": 29700,
         "status": "unknowable",
         "cause": "unknowable",
         "channels": {
@@ -7040,7 +6855,7 @@
       "detail": ""
      },
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:f1a41f3e65c9e2a4c339d88e03a419aec4a5360a69c7c286f962f1b8f97cae51",
+     "packet": "sha256:da42697f4df122ce3299ec379c2d505bc35158883175e56d8e7b6e4ac5345160",
      "experimental": true,
      "label": null
     },
@@ -7050,10 +6865,10 @@
     "pixels": {
      "checks": 16,
      "probe_checks_drawn": 8,
-     "probe_pixels_max": 1490,
+     "probe_pixels_max": 1536,
      "probe_checks_with_pixels": 8,
-     "bot_checks_with_pixels": 13,
-     "bot_pixels_max": 12848,
+     "bot_checks_with_pixels": 14,
+     "bot_pixels_max": 16074,
      "unchanged_frame_pixels_max": 0,
      "screenshots": [
       "view-000100.png",
@@ -7064,11 +6879,11 @@
       "view-010100.png",
       "view-012100.png",
       "view-014100.png",
-      "view-016150.png",
+      "view-016100.png",
       "view-018150.png",
       "view-020150.png",
       "view-022150.png",
-      "view-024150.png",
+      "view-024100.png",
       "view-026150.png",
       "view-028150.png",
       "view-030150.png"
@@ -7079,27 +6894,212 @@
      "server_tick_hz": 60,
      "match_ms": 32000,
      "ticks": 1920,
-     "tick_us_mean": 878.5,
-     "tick_us_max": 2408,
-     "knowledge_us_per_tick": 258.2,
-     "challenge_us_per_probe_tick": 234.7,
-     "rays_per_tick": 350.5,
-     "event_bytes_per_s": 12275.6,
-     "event_lines": 996,
-     "snapshot_bytes_per_s": 5248.4,
-     "feed_bytes_per_s": 93207.6,
-     "scoring_ms_live": 15.2,
+     "tick_us_mean": 852.1,
+     "tick_us_max": 2015,
+     "knowledge_us_per_tick": 258.0,
+     "challenge_us_per_probe_tick": 171.9,
+     "rays_per_tick": 350.4,
+     "event_bytes_per_s": 12181.7,
+     "event_lines": 990,
+     "snapshot_bytes_per_s": 5259.6,
+     "feed_bytes_per_s": 93186.5,
+     "scoring_ms_live": 13.3,
      "parse_errors": 0,
      "verdicts": {
       "audio": {
-       "absent": 850
+       "absent": 867
       },
       "vision": {
-       "known": 850
+       "known": 867
       }
      },
-     "probe_ticks": 850,
-     "memory_static_peak_bytes": 43641149
+     "probe_ticks": 867,
+     "memory_static_peak_bytes": 44927603
+    }
+   },
+   "active_challenge": {
+    "match_id": "arena-active_challenge-1",
+    "observed": {
+     "decision": "review",
+     "automated_action": "none",
+     "kinds": [
+      "occluded_motion_replay"
+     ],
+     "observations": [
+      "obs-a6b7b9ac72dfa9bd26398e81"
+     ],
+     "eligibility": {
+      "speed": "eligible",
+      "fire_rate": "eligible",
+      "metronome": "not_applicable",
+      "recoil_floor": "insufficient_samples",
+      "mirror": "eligible",
+      "recoil_learned": "not_applicable",
+      "accuracy": "insufficient_samples",
+      "headshot_rate": "insufficient_samples",
+      "median_distance": "insufficient_samples",
+      "geometry_rate": "insufficient_samples",
+      "extra": "disabled",
+      "rank_tail": "insufficient_samples",
+      "view_snaps": "telemetry_unavailable",
+      "acquire_timing": "telemetry_unavailable",
+      "supporting_extra": "disabled",
+      "account_jump": "telemetry_unavailable",
+      "hidden": "eligible",
+      "quiet_aim": "telemetry_unavailable",
+      "wire": "eligible",
+      "occluded_motion_replay": "eligible",
+      "leftover": "insufficient_samples",
+      "voice": "not_applicable"
+     },
+     "challenge": {
+      "challenge_id": "ch-77edca26f8e4799447f9c09c",
+      "status": "followed",
+      "cause": null,
+      "verification": "per_sample",
+      "eligible_samples": 147,
+      "tracked_samples": 136,
+      "verified_samples": 147,
+      "total_ms": 13600.0,
+      "not_counted": {
+       "seen": 11
+      }
+     },
+     "fusion": null,
+     "knowledge": {
+      "arena-bot-a": "known",
+      "arena-bot-b": "unknowable"
+     },
+     "knowledge_detail": {
+      "arena-bot-a": {
+       "events": 179,
+       "statuses": {
+        "known": 179
+       },
+       "causes": {
+        "seen": 179
+       },
+       "latest": {
+        "t_ms": 32000,
+        "status": "known",
+        "cause": "seen",
+        "channels": {
+         "audio": "known",
+         "recent_perception": "known",
+         "vision": "known"
+        },
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "since_perceived_ms": 0.0,
+        "hidden_track_ms": null,
+        "event_type": "movement"
+       },
+       "majority": "known"
+      },
+      "arena-bot-b": {
+       "events": 12,
+       "statuses": {
+        "unknowable": 12
+       },
+       "causes": {
+        "unknowable": 12
+       },
+       "latest": {
+        "t_ms": 30400,
+        "status": "unknowable",
+        "cause": "unknowable",
+        "channels": {
+         "audio": "absent",
+         "recent_perception": "unchecked",
+         "vision": "absent"
+        },
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "since_perceived_ms": null,
+        "hidden_track_ms": null,
+        "event_type": "movement"
+       },
+       "majority": "unknowable"
+      }
+     },
+     "speed": {
+      "eligible": 320,
+      "excluded_innocent": 0,
+      "excluded_unknown": 0,
+      "excluded_airborne": 0,
+      "missing_cap": 0,
+      "violations": 0,
+      "longest_run": 0,
+      "sustained": false,
+      "spike_samples": 0,
+      "cap_source": "server",
+      "detail": ""
+     },
+     "graph": "sha256:aaae4c10f81ae12fa82d72625db009bf1de3018085546fdc059170583e217744",
+     "packet": "sha256:367c6ae42e2a0a1799397c440bd1fd5d5f8fff5cd72725381959cdfa74a0ea62",
+     "experimental": true,
+     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
+    },
+    "as_expected": true,
+    "problems": [],
+    "live_vs_offline": "identical",
+    "pixels": {
+     "checks": 16,
+     "probe_checks_drawn": 7,
+     "probe_pixels_max": 0,
+     "probe_checks_with_pixels": 0,
+     "bot_checks_with_pixels": 14,
+     "bot_pixels_max": 11725,
+     "unchanged_frame_pixels_max": 0,
+     "screenshots": [
+      "view-000100.png",
+      "view-002100.png",
+      "view-004100.png",
+      "view-006100.png",
+      "view-008100.png",
+      "view-010100.png",
+      "view-012100.png",
+      "view-014100.png",
+      "view-016100.png",
+      "view-018100.png",
+      "view-020100.png",
+      "view-022100.png",
+      "view-024100.png",
+      "view-026100.png",
+      "view-028100.png",
+      "view-030100.png"
+     ],
+     "resolution": "640x360, software OpenGL in a private virtual display"
+    },
+    "timing": {
+     "server_tick_hz": 60,
+     "match_ms": 32000,
+     "ticks": 1920,
+     "tick_us_mean": 958.2,
+     "tick_us_max": 2223,
+     "knowledge_us_per_tick": 370.3,
+     "challenge_us_per_probe_tick": 119.0,
+     "rays_per_tick": 423.4,
+     "event_bytes_per_s": 12371.5,
+     "event_lines": 1020,
+     "snapshot_bytes_per_s": 5263.2,
+     "feed_bytes_per_s": 93943.4,
+     "scoring_ms_live": 12.3,
+     "parse_errors": 0,
+     "verdicts": {
+      "audio": {
+       "absent": 880
+      },
+      "vision": {
+       "absent": 880
+      }
+     },
+     "probe_ticks": 880,
+     "memory_static_peak_bytes": 44927515
     }
    }
   }
@@ -7112,5 +7112,5 @@
   "exit_code": 3,
   "listener_after_exit": false
  },
- "digest": "sha256:91eaec7553dcc7cede2bb9c381eeb261cba5c831ac7610325945e1308da1510f"
+ "digest": "sha256:22be69947a049cc19c22cc18fc9cd3a81fa9196fcb56149930187455e43b52b7"
 }

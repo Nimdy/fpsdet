@@ -6,7 +6,7 @@ One player, one or two server-driven bots, one rifle, one compact training map, 
 
 It is a **reference FPS, a security lab and an interactive evidence demo**. It is not a game, not a product, and not a benchmark. fpsdet is not changed to fit it: every finding, decision, eligibility, knowledge state, packet and graph on screen comes from `fpsdet` as it ships, over the NDJSON the server wrote. Expected behaviour lives in each scenario's metadata; actual behaviour comes from fpsdet; where they disagree the panel says `EXPECTED != ACTUAL` and the harness fails.
 
-![The lab in developer mode during the active challenge: the player's view shows walls; the server's view shows the probe in the chamber with its verdicts; the panels show the knowledge chips, the eligibility table, the review, the packet and the graph](../../docs/arena/lab-challenge.png)
+![The lab in developer mode during the active challenge: the player's view shows walls; the server's view shows the probe in the chamber with its verdicts; the panels show the knowledge chips, the detectors grouped by status, the review, the packet and the graph](../../docs/arena/lab-challenge.png)
 
 ![The lab in demo mode: a bot runs behind the wall, the server hears its footsteps, fpsdet says known (heard), and the hidden-mover check counts nothing](../../docs/arena/lab-demo-audible.png)
 
@@ -87,16 +87,16 @@ Each one shows a card first: what this tests, what the player can know, what the
 | --- | --- | --- |
 | 1 | Normal play | `insufficient_data`, **not clean**: no finding, and no human baseline to compare against; speed, fire rate, hidden mover and wire all eligible |
 | 2 | Impossible speed | `review`: a run of 151 over-cap samples (15.1 s at 10 Hz) against the cap the server declared |
-| 3 | Fire rate | `review`: 130 of 236 gaps under 85 ms on a 100 ms cycle; the metronome stays `not_applicable` on a server-paced trigger |
+| 3 | Fire rate | `review`: 126 of 237 gaps under 85 ms on a 100 ms cycle; the metronome stays `not_applicable` on a server-paced trigger |
 | 4 | Recoil floor | `review`: 15 kicks in a row under 25% of the declared 0.8° floor |
 | 5 | Recoil mirror | `review`: the command is the kick, flipped, on the same tick (r −1.00 over 208 shots) and not a shot later (r −0.05), after the spray pattern is removed |
 | 6 | Hidden enemy, audible | `known` (heard). The hidden-mover check is eligible and makes nothing of a scripted stand-in aiming at the bot through the wall |
 | 7 | Hidden and unknowable | `unknowable`. Eligible; honest play makes nothing. `t` switches the scripted stand-in on |
 | t | Hidden and unknowable, tracked | `review`: 27.0 s of aim over 81 shots on an enemy this client could neither see nor hear |
 | 8 | Unknown: audio telemetry missing | `unknown`. The same aim, no evidence: the hidden-mover check is `telemetry_unavailable` |
-| 9 | Wire vs picture | `review`: 77 wire-led shots, 7.7 s of delay; median error 0.26° to the wire, 2.62° to the picture |
-| c | Active challenge | `review`: followed, 140 of 149 verified moments, 14.0 s, bound to the plan. **Experimental** |
-| h | Angle hold | `review`: 153 of 153 moments, 15.3 s, and nobody followed anything. **Experimental: not production qualified** |
+| 9 | Wire vs picture | `review`: 78 wire-led shots, 7.8 s of delay; median error 0.26° to the wire, 2.56° to the picture |
+| c | Active challenge | `review`: followed, 133 of 147 verified moments, 13.3 s, bound to the plan. **Experimental** |
+| h | Angle hold | `review`: 145 of 145 moments, 14.4 s, and nobody followed anything. **Experimental: not production qualified** |
 | e | External evidence | native `insufficient_data` → `watch` by rule A, labelled `EXTERNAL EVIDENCE CAUSED THIS WATCH`; it cannot make a review |
 | o | Exposed challenge: positive control | the probe placed in the open: the player's renderer draws it, the server says seen, the challenge abstains. The pixel proof's positive control |
 
@@ -106,8 +106,8 @@ The server's raycast is not taken on trust. `qualify` also runs two matches with
 
 ```text
 PLAYER PIXEL PROOF
-hidden:          0 challenge pixels in 7 checks, in the sealed chamber (the same checks found up to 6387 pixels of visible bots)
-visible control: 1490 changed pixels, with the same probe placed in the open lane
+hidden:          0 challenge pixels in 7 checks, in the sealed chamber (the same checks found up to 11725 pixels of visible bots)
+visible control: 1536 changed pixels, with the same probe placed in the open lane
 PASS
 ```
 
@@ -117,11 +117,13 @@ The numbers are from [result.json](result.json) (`pixel_proof`). The developer p
 
 - **PLAYER STATE**: position, speed against the declared cap, view, aim, ammo, shots sent and accepted, the last kick and the command on that tick, the client's raw command, and whether a stand-in holds the aim.
 - **SERVER KNOWLEDGE**: for each body, the server's vision and audio verdict, when it was last perceived, whether the aim cone holds it, and fpsdet's `KnowledgeState` with its cause (seen, heard, recent, unknowable, unchecked). The resolved word is looked up in a table fpsdet wrote at startup for every channel combination; the view computes none of it.
-- **DETECTOR ELIGIBILITY**: every native detector, its status, how many observations it has and the role it would play.
+- **DETECTORS** (DETECTOR ELIGIBILITY in developer mode): every native detector under its status, the ones that fired in bold with their count, and in developer mode the role each would play. The ones that could not run here are listed under that line, by status.
 - **CASE**: the decision, `automated_action: none` in plain sight, the reasons as fpsdet wrote them, the `INSUFFICIENT DATA: this is not a clean verdict` line when that is the decision, the native result, the external record and the final state when external records were given, `EXPECTED == ACTUAL` once the match is final, and the AI brief when it is on.
-- **FINDINGS**: one row per observation: kind, role, family, key, a one-line summary from its evidence, its id.
+- **FINDINGS**: one row per observation: kind, role, family, key, a one-line summary from its evidence, its id. Demo mode folds the findings into the CASE panel, one line each.
 - **PACKET / GRAPH**: the packet recipe, status and digest; the graph recipe, digest, node and edge counts and a drawing of it; the detector, profile and input digests; whether the packet and graph verify.
-- **The strip**: scenario, match time, the actor label, phase (baseline play, the fault or stand-in in force), the offline replay badge, the AI badge, and the experimental badge on a challenge review. The security pane carries the actor label in large type as well.
+- **SCENARIO** (demo mode): the actor, what this tests and the expected fpsdet behaviour, with the challenge's verdicts under it while one runs. Developer mode has the same on the fourth panel's challenge and scenario tabs.
+- **The strip**: scenario, match time, match id and phase (baseline play, the fault or stand-in in force) on the first line; the actor label, the offline replay badge, the AI badge and the experimental badge on a challenge review on the second. The security pane carries the actor label in large type as well, and each body it draws carries its name, the two channel verdicts and the resolved knowledge state.
+- **The scenario card**: for eight seconds when a scenario starts, a box low in the views with the title, the actor, the instructions, what this tests and the expected behaviour. Nothing on it is measured; the panels under it are.
 
 ## Reproduce and check
 
@@ -152,4 +154,4 @@ python examples/fps-arena/harness/arena.py replay --run <run> --match <match id>
 
 The server binds `127.0.0.1` and refuses a public address. No process inspects, injects into, hooks or reads any other program; nothing touches a commercial game or any anti-cheat; no driver or service is installed; Godot is a portable binary and its user data is pointed inside the run folder. Player ids are fictional (`arena-player`, `arena-bot-a`, `arena-bot-b`); no name, account, machine identity or address is recorded, and the qualification scans for them. The operator link is a separate node at a separate path, gated by a token in the run's private folder: a stock client has no method that could receive the feed.
 
-The challenge probe is sent to the subject's client as an ordinary body, as fpsdet's challenge type requires, and the stock client draws it as it draws any body: behind the chamber's 4 m walls, where the pixel proof above finds no pixel of it. The server reported it unseen and unheard at every one of 894 probe ticks of the qualified challenge run; the client received 298 snapshot updates of it and logged no sound of it.
+The challenge probe is sent to the subject's client as an ordinary body, as fpsdet's challenge type requires, and the stock client draws it as it draws any body: behind the chamber's 4 m walls, where the pixel proof above finds no pixel of it. The server reported it unseen and unheard at every one of 882 probe ticks of the qualified challenge run; the client received 294 snapshot updates of it and logged no sound of it.

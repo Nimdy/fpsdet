@@ -3,7 +3,7 @@
   "notice": "Public plan: challenge ids, windows and commitments. It holds no key and no realization. Keep it on the server until the match is over, because its windows say when each challenge runs.",
   "game_id": "fpsdet-arena",
   "match_id": "arena-angle_hold_false_positive-1",
-  "nonce": "fff6dccc8c5e282a292513614228465e",
+  "nonce": "a9bb7ffc5f892b18431607f949c9b79f",
   "challenge_type": "occluded_motion_replay",
   "version": 2,
   "schedule": {
@@ -28,18 +28,18 @@
   ],
   "challenges": [
     {
-      "challenge_id": "ch-7cf6db94b646f12951ab368e",
+      "challenge_id": "ch-bf4f25b386a3f12538df3cbe",
       "challenge_type": "occluded_motion_replay",
       "version": 2,
       "game_id": "fpsdet-arena",
       "match_id": "arena-angle_hold_false_positive-1",
       "subject_id": "arena-player",
       "counter": 0,
-      "nonce": "fff6dccc8c5e282a292513614228465e",
-      "start_ms": 12611,
-      "end_ms": 27958,
-      "commitment": "sha256:f03990b7b8cb4dee23fcf712d1281ea33e2d430b1247faef17c057e203c9fcdd",
-      "plan": "sha256:376c1965c69faf05ffe0c616cc9ac78334db2fbb0799ba684aeb50a4cb3f456a"
+      "nonce": "a9bb7ffc5f892b18431607f949c9b79f",
+      "start_ms": 9584,
+      "end_ms": 24083,
+      "commitment": "sha256:88c64596421c2c408ed855d3e9363e45faa23ece82ca17bc96a49d3922feb503",
+      "plan": "sha256:3652ca1976eada12ba1803b0b21d3dabbee8f64d269eeeb06514f9316c84aa23"
     }
   ]
 }

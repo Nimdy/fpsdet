@@ -122,7 +122,7 @@ func _build_hud(viewport: Viewport) -> void:
 	banner_label = Label.new()
 	banner_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	banner_label.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	banner_label.position.y = 60
+	banner_label.position.y = 210
 	banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner_label.add_theme_font_size_override("font_size", 34)
 	banner_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.8))
@@ -235,7 +235,7 @@ func banner(new_title: String, new_instructions: String, new_duration_ms: int) -
 	instructions = new_instructions
 	duration_ms = new_duration_ms
 	banner_at_ms = latest_ms
-	title_until = Time.get_ticks_msec() + 4000
+	title_until = Time.get_ticks_msec() + 3000
 	_log({"kind": "banner", "title": new_title})
 
 

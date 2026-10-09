@@ -59,15 +59,19 @@ var card_until := 0
 var world: Node3D
 var camera: Camera3D
 var rays: MeshInstance3D
-var markers := {}  # id -> {"body": MeshInstance3D, "label": Label3D, "wire": MeshInstance3D, "picture": MeshInstance3D}
+var markers := {}  # id -> {"body": MeshInstance3D, "label": Label, "anchor": Vector3, "wire": MeshInstance3D, "picture": MeshInstance3D}
 var probe_node: MeshInstance3D
-var probe_label: Label3D
+var probe_label: Label
+var probe_anchor := Vector3.ZERO
+var tag_layer: CanvasLayer
 var subject_node: MeshInstance3D
 var sound_rings := []
 var panels := {}  # key -> RichTextLabel
 var panel_titles := {}  # key -> Label
 var strip: RichTextLabel
+var badges: RichTextLabel
 var card: RichTextLabel
+var card_box: PanelContainer
 var graph_view: Control
 var timeline_view: Control
 var panel_root: Control
@@ -115,9 +119,9 @@ func attach(viewport: Viewport, panel_parent: Control) -> void:
 		subject_node = _ghost(Color(0.35, 0.65, 1.0, 0.55), false)
 		probe_node = _ghost(Arena.COLOR_PROBE, true)
 		probe_node.visible = false
-		probe_label = _label3d()
-		probe_label.visible = false
 		_build_overlay(viewport if not standalone else null)
+		probe_label = _tag()
+		probe_label.visible = false
 	if standalone:
 		panel_root = Control.new()
 		panel_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -433,15 +437,16 @@ func _draw_world(_delta: float) -> void:
 		var audio := String(enemy.get("audio", "unchecked"))
 		var known := _enemy_knowledge(vision, audio, enemy.get("since_ms"))
 		var color := _color(String(known.status))
-		marker.label.position = true_pos + Vector3(0, Arena.BODY_HEIGHT + 0.5, 0)
-		marker.label.text = "%s\nvision %s · audio %s\n%s (%s)%s" % [id, vision, audio, String(known.status).to_upper(), known.cause, "  ◎ in cone" if bool(enemy.get("in_cone", false)) else ""]
+		marker.anchor = true_pos + Vector3(0, Arena.BODY_HEIGHT + 0.25, 0)
+		marker.label.text = "%s  ·  vision %s · audio %s\n%s (%s)%s" % [id, vision, audio, String(known.status).to_upper(), known.cause, "  ◎ in cone" if bool(enemy.get("in_cone", false)) else ""]
 		marker.label.modulate = color
 		(marker.body.material_override as StandardMaterial3D).albedo_color = Color(color, 0.55)
 		# The vision ray: eye to chest, green when the server's query says seen, red when it says not.
 		mesh.surface_set_color(Color(0.3, 0.9, 0.4, 0.8) if vision == "known" else Color(1.0, 0.3, 0.3, 0.8))
 		mesh.surface_add_vertex(eye)
 		mesh.surface_add_vertex(chest)
-		if enemy.has("wire") and enemy.has("picture"):
+		var show_ghosts: bool = enemy.has("wire") and enemy.has("picture") and (mode != "demo" or String(latest.get("scenario", "")) == "wire_vs_picture")
+		if show_ghosts:
 			marker.wire.visible = true
 			marker.picture.visible = true
 			marker.wire.position = Arena.from_v3(enemy.wire) + Vector3(0, Arena.BODY_HEIGHT / 2, 0)
@@ -464,9 +469,9 @@ func _draw_world(_delta: float) -> void:
 		probe_node.visible = true
 		probe_label.visible = true
 		probe_node.position = probe_pos + Vector3(0, Arena.BODY_HEIGHT / 2, 0)
-		probe_label.position = probe_pos + Vector3(0, Arena.BODY_HEIGHT + 1.6, 0)  # above a bot's label when both share the chamber
+		probe_anchor = probe_pos + Vector3(0, Arena.BODY_HEIGHT + 0.25, 0)
 		var body_known := _body_knowledge(String(probe.vision), String(probe.audio))
-		probe_label.text = "CHALLENGE PROBE %s\nvision %s · audio %s\nbody %s%s" % [String(probe.challenge_id).substr(0, 12), probe.vision, probe.audio,
+		probe_label.text = "CHALLENGE PROBE %s  ·  vision %s · audio %s\nbody %s%s" % [String(probe.challenge_id).substr(0, 12), probe.vision, probe.audio,
 			String(body_known.status).to_upper(), "  ◎ in cone" if bool(probe.get("in_cone", false)) else ""]
 		probe_label.modulate = Arena.COLOR_PROBE
 		mesh.surface_set_color(Color(1.0, 0.6, 0.1, 0.8))
@@ -487,11 +492,59 @@ func _draw_world(_delta: float) -> void:
 			mesh.surface_add_vertex(at + Vector3(cos(a) * radius, 0.05, sin(a) * radius))
 			mesh.surface_add_vertex(at + Vector3(cos(b) * radius, 0.05, sin(b) * radius))
 	mesh.surface_end()
+	var tags := []
+	for id in markers:
+		if markers[id].label.visible:
+			tags.append({"label": markers[id].label, "anchor": markers[id].anchor})
+	if probe_label.visible:
+		tags.append({"label": probe_label, "anchor": probe_anchor})
+	_place_tags(tags)
+
+
+## Project each tag to the screen just above its body, then push any tag that would cover another one upward,
+## so the tags stack when bodies line up behind each other instead of writing over each other.
+func _place_tags(tags: Array) -> void:
+	var view := camera.get_viewport().get_visible_rect().size
+	var top_limit := 28.0 + 27.0 * overlay.get_line_count() + 6.0  # under the actor label, which nothing may cover
+	var placed: Array[Rect2] = []
+	var rows := []
+	for tag in tags:
+		var label: Label = tag.label
+		if camera.is_position_behind(tag.anchor):
+			label.visible = false
+			continue
+		label.reset_size()
+		var foot: Vector3 = tag.anchor - Vector3(0, Arena.BODY_HEIGHT + 0.25, 0)
+		rows.append({"label": label, "at": camera.unproject_position(tag.anchor), "foot": camera.unproject_position(foot)})
+	rows.sort_custom(func(a, b): return a.at.y > b.at.y)  # the nearest to the bottom of the pane first
+	for row in rows:
+		var label: Label = row.label
+		var size: Vector2 = label.size
+		var x := clampf(row.at.x - size.x / 2.0, 4.0, maxf(4.0, view.x - size.x - 4.0))
+		var rect := Rect2(Vector2(x, row.at.y - size.y), size)
+		var down := false  # a stack that would reach the actor label continues under the body instead
+		var moved := true
+		var guard := 0
+		while moved and guard < 24:
+			guard += 1
+			moved = false
+			if not down and rect.position.y < top_limit:
+				down = true
+				rect.position.y = row.foot.y + 4.0
+				moved = true
+				continue
+			for other in placed:
+				if rect.intersects(other.grow(3.0)):
+					rect.position.y = (other.end.y + 4.0) if down else (other.position.y - size.y - 4.0)
+					moved = true
+		rect.position.y = clampf(rect.position.y, 0.0, maxf(0.0, view.y - size.y))
+		placed.append(rect)
+		label.position = rect.position
 
 
 func _marker_for(id: String) -> Dictionary:
 	if not markers.has(id):
-		markers[id] = {"body": _ghost(Arena.COLOR_ENEMY, true), "label": _label3d(),
+		markers[id] = {"body": _ghost(Arena.COLOR_ENEMY, true), "label": _tag(), "anchor": Vector3.ZERO,
 			"wire": _ghost(Color(1.0, 0.95, 0.4, 0.35), true), "picture": _ghost(Color(0.4, 0.9, 1.0, 0.35), true)}
 	return markers[id]
 
@@ -509,16 +562,15 @@ func _ghost(color: Color, through_walls: bool) -> MeshInstance3D:
 	return node
 
 
-func _label3d() -> Label3D:
-	var label := Label3D.new()
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.no_depth_test = true
-	label.fixed_size = true  # the same size on screen near or far, so a close body does not fill the pane
-	label.font_size = 48
-	label.pixel_size = 0.0015
-	label.outline_size = 14
+## A body's tag: two lines of screen text over the security pane, placed by _place_tags each frame.
+func _tag() -> Label:
+	var label := Label.new()
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	world.add_child(label)
+	label.add_theme_font_size_override("font_size", 15)
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	label.add_theme_constant_override("outline_size", 5)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tag_layer.add_child(label)
 	return label
 
 
@@ -531,11 +583,13 @@ func _build_overlay(viewport: Viewport) -> void:
 		viewport.add_child(layer)
 	else:
 		add_child(layer)
+	tag_layer = layer
 	overlay = Label.new()
-	overlay.position = Vector2(14, 28)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE, Control.PRESET_MODE_MINSIZE, 14)
+	overlay.offset_top = 28
+	overlay.offset_bottom = 118
 	overlay.autowrap_mode = TextServer.AUTOWRAP_WORD
-	overlay.size = Vector2(920, 90)
-	overlay.add_theme_font_size_override("font_size", 22)
+	overlay.add_theme_font_size_override("font_size", 20)
 	overlay.add_theme_color_override("font_color", Color(1.0, 0.72, 0.25))
 	overlay.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	overlay.add_theme_constant_override("outline_size", 6)
@@ -578,37 +632,66 @@ func build_panels(parent: Control) -> void:
 	parent.theme = theme
 	var box := VBoxContainer.new()
 	box.set_anchors_preset(Control.PRESET_FULL_RECT)
-	box.add_theme_constant_override("separation", 6)
+	box.add_theme_constant_override("separation", 4)
 	parent.add_child(box)
-	strip = RichTextLabel.new()
-	strip.bbcode_enabled = true
-	strip.fit_content = true
-	strip.scroll_active = false
-	strip.custom_minimum_size = Vector2(0, 30)
-	strip.add_theme_font_size_override("normal_font_size", 16)
-	box.add_child(strip)
+	strip = _line_label(box, 17)
+	badges = _line_label(box, 15)
 	var columns := HBoxContainer.new()
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	columns.add_theme_constant_override("separation", 6)
 	box.add_child(columns)
 	if mode == "demo":
-		_column(columns, [["knowledge", "SERVER KNOWLEDGE"]], 1.0)
-		_column(columns, [["detectors", "DETECTOR ELIGIBILITY"]], 1.1)
-		_column(columns, [["case", "CASE"], ["findings", "FINDINGS"]], 1.1)
-		_column(columns, [["card", "SCENARIO"], ["challenge", "ACTIVE CHALLENGE"]], 1.0)
+		_column(columns, [["knowledge", "SERVER KNOWLEDGE"]], 0.85)
+		_column(columns, [["detectors", "DETECTORS"]], 1.05)
+		_column(columns, [["case", "CASE  ·  fpsdet's decision and findings"]], 1.2)
+		_column(columns, [["scenario", "SCENARIO"]], 0.95)
 	else:
 		_column(columns, [["player", "PLAYER STATE"], ["knowledge", "SERVER KNOWLEDGE"]], 0.95)
 		_column(columns, [["detectors", "DETECTOR ELIGIBILITY"]], 1.05)
 		_column(columns, [["case", "CASE"], ["findings", "FINDINGS"]], 1.15)
 		_column(columns, [["tab", "PACKET / GRAPH"]], 1.15)
+	if card_box == null:
+		_build_card()
+
+
+## One line of text that never wraps into the panels below it.
+func _line_label(parent: Control, size: int) -> RichTextLabel:
+	var label := RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.scroll_active = false
+	label.clip_contents = true
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.custom_minimum_size = Vector2(0, size + 12)
+	label.add_theme_font_size_override("normal_font_size", size)
+	parent.add_child(label)
+	return label
+
+
+## The scenario card: a box over the 3D views for eight seconds when a scenario starts, in its own layer, so it
+## never sits on top of the panels.
+func _build_card() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 10
+	add_child(layer)
+	card_box = PanelContainer.new()
+	card_box.theme = theme
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.06, 0.08, 0.97)
+	style.border_color = Color(1.0, 0.62, 0.11)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(8)
+	style.set_content_margin_all(16)
+	card_box.add_theme_stylebox_override("panel", style)
+	card_box.custom_minimum_size = Vector2(900, 0)
+	card_box.visible = false
+	layer.add_child(card_box)
 	card = RichTextLabel.new()
 	card.bbcode_enabled = true
 	card.fit_content = true
 	card.scroll_active = false
-	card.visible = false
-	card.custom_minimum_size = Vector2(560, 0)
+	card.custom_minimum_size = Vector2(860, 0)
 	card.add_theme_font_size_override("normal_font_size", 17)
-	parent.add_child(card)
+	card_box.add_child(card)
 
 
 func _column(parent: HBoxContainer, items: Array, weight: float) -> void:
@@ -642,7 +725,7 @@ func _column(parent: HBoxContainer, items: Array, weight: float) -> void:
 		text.bbcode_enabled = true
 		text.scroll_active = true
 		text.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		text.add_theme_font_size_override("normal_font_size", 18 if mode == "demo" else 14)
+		text.add_theme_font_size_override("normal_font_size", 16 if mode == "demo" else 14)
 		inner.add_child(text)
 		panels[item[0]] = text
 
@@ -658,6 +741,22 @@ func _chip(word: String, label: String = "") -> String:
 
 func _dim(text: String) -> String:
 	return "[color=#8b95a3]%s[/color]" % text
+
+
+## The actor, as a line of bold orange text that wraps cleanly (a chip cannot).
+func _actor_text(text: String) -> String:
+	return "[color=#ff9f1c][b]%s[/b][/color]" % text
+
+
+## The actor in a few words, for the badge row; the full label is over the security pane.
+func _actor_short(frame: Dictionary) -> String:
+	var kind := String(frame.get("standin", ""))
+	var open := bool(frame.get("standin_open", kind != "")) if not bool(frame.get("replay", false)) else kind != ""
+	if kind != "" and open:
+		return ("CONTROLLED FOLLOWER" if kind == "follower" else ("HONEST-STYLE STAND-IN" if kind == "holder" else "SCRIPTED STAND-IN: " + kind)) + " · NOT A HUMAN"
+	if String(frame.get("subject_input", latest.get("subject_input", "human"))) == "autopilot":
+		return "HONEST AUTOPILOT · SCRIPTED · NOT A HUMAN"
+	return "A PERSON AT THE KEYBOARD"
 
 
 func _subject_case() -> Dictionary:
@@ -679,7 +778,8 @@ func _subject_case() -> Dictionary:
 		return {"decision": chosen.decision, "automated_action": "none", "recommended_action": full.get("recommended_action", ""), "findings": findings,
 			"eligibility_rollup": chosen.eligibility, "challenges": chosen.get("challenges", []), "packet": full.get("packet", {}), "graph": full.get("graph", {}),
 			"provenance": full.get("provenance", {}), "knowledge": full.get("knowledge", {}), "fusion": full.get("fusion"), "reasons": full.get("reasons", []),
-			"notes": full.get("notes", []), "checks": chosen.kinds, "at_ms": chosen.t_ms, "events": chosen.get("events", 0), "replay": true}
+			"notes": full.get("notes", []), "checks": chosen.kinds, "at_ms": chosen.t_ms, "events": chosen.get("events", 0), "replay": true,
+			"speed_cadence": full.get("speed_cadence", {})}
 	var subject = live.get("subject")
 	return subject if typeof(subject) == TYPE_DICTIONARY else {}
 
@@ -695,43 +795,47 @@ func _refresh_panels() -> void:
 	panels["knowledge"].text = _knowledge_text(frame, subject)
 	panels["detectors"].text = _detectors_text(subject)
 	panels["case"].text = _case_text(subject, spec)
-	panels["findings"].text = _findings_text(subject)
+	if panels.has("findings"):
+		panels["findings"].text = _findings_text(subject)
 	if panels.has("tab"):
 		_refresh_tab(subject, frame)
-	if panels.has("card"):
-		panels["card"].text = _card_text(spec, true)
-	if panels.has("challenge"):
-		panels["challenge"].text = _challenge_text(frame, subject)
-	var show_card := Time.get_ticks_msec() < card_until and scenario_id != Scenario.LOBBY and mode == "demo" and not replaying
-	card.visible = show_card
+	if panels.has("scenario"):
+		panels["scenario"].text = _scenario_text(spec, frame, subject)
+	var show_card := card_box != null and Time.get_ticks_msec() < card_until and scenario_id != Scenario.LOBBY and not replaying
+	if card_box != null:
+		card_box.visible = show_card
 	if show_card:
-		card.text = _card_text(spec, false)
-		card.position = Vector2(panel_root.size.x / 2 - 280, 10)
+		var text := _card_text(spec, "overlay")
+		if card.text != text:
+			card.text = text
+		card_box.reset_size()
+		# Low in the views, where there is only floor, clear of the player's HUD and of the actor label.
+		var width := get_viewport().get_visible_rect().size.x
+		var bottom := panel_root.global_position.y if panel_root != null and panel_root.global_position.y > 100 else 560.0
+		card_box.position = Vector2((width - card_box.size.x) / 2.0, bottom - card_box.size.y - 16)
 
 
 func _refresh_strip(frame: Dictionary, spec: Dictionary, subject: Dictionary) -> void:
-	var parts := []
-	parts.append("[b]fpsdet ARENA[/b]")
-	parts.append(String(spec.get("title", "Lobby")))
+	var parts := ["[b]fpsdet ARENA[/b]", "[b]%s[/b]" % String(spec.get("title", "Lobby"))]
 	if replaying:
 		parts.append(_chip("experimental", "REPLAY  %s  %d ms  %s" % [replay_match, int(frame.get("t_ms", 0)), "▶" if replay_playing else "❚❚"]))
 	else:
 		parts.append("t %5.1f s" % (float(latest.get("t_ms", 0)) / 1000.0))
 		parts.append(_dim(String(latest.get("match_id", ""))))
 		parts.append(String(latest.get("phase", "")))
-	parts.append(_chip("experimental", _actor_line(frame)))
+	strip.text = "   ".join(parts)
+	var chips := [_chip("experimental", _actor_short(frame))]
 	var badge = live.get("live_vs_offline") if not replaying else replay_case.get("live_vs_offline")
 	if badge != null:
-		parts.append(_chip(String(badge), "OFFLINE REPLAY: " + String(badge).to_upper()))
+		chips.append(_chip(String(badge), "OFFLINE REPLAY: " + String(badge).to_upper()))
 	var ai: Dictionary = status.get("ai", {})
 	if not ai.is_empty():
-		parts.append(_chip("on" if bool(ai.get("enabled", false)) else "off", "AI brief " + ("on" if bool(ai.get("enabled", false)) else "off") + ("" if bool(ai.get("configured", false)) else " (not configured)")))
+		chips.append(_chip("on" if bool(ai.get("enabled", false)) else "off", "AI brief: " + ("on" if bool(ai.get("enabled", false)) else "off")))
 	if bool(spec.get("experimental", false)) and subject.get("decision") == "review":
-		parts.append(_chip("experimental", "EXPERIMENTAL: NOT PRODUCTION QUALIFIED"))
+		chips.append(_chip("experimental", "EXPERIMENTAL: NOT PRODUCTION QUALIFIED"))
 	if not accepted:
-		parts.append(_chip("conflict", "operator link not accepted"))
-	parts.append(_dim("esc mouse · tab panels · r replay"))
-	strip.text = "  ".join(parts)
+		chips.append(_chip("conflict", "operator link not accepted"))
+	badges.text = "  ".join(chips)
 
 
 func _player_text(frame: Dictionary) -> String:
@@ -752,39 +856,47 @@ func _player_text(frame: Dictionary) -> String:
 	if not cmd.is_empty():
 		lines.append(_dim("client command  move %s  yaw %.1f  pitch %.1f  fire %s  #%s" % [cmd.get("move", []), float(cmd.get("yaw", 0)), float(cmd.get("pitch", 0)), cmd.get("fire", false), cmd.get("seq", 0)]))
 	if bool(s.get("override", false)):
-		lines.append(_chip("experimental", "STAND-IN AIMS: " + String(frame.get("standin", ""))) + _dim(" server-side, not a client program"))
+		lines.append(_actor_text("STAND-IN HOLDS THE AIM: " + String(frame.get("standin", "")) + " · scripted · not a human · not real cheat software"))
 	return "\n".join(lines)
 
 
 func _knowledge_text(frame: Dictionary, subject: Dictionary) -> String:
 	var lines := []
 	var declared: Array = table.get("required", ["vision", "audio"])
-	lines.append(_dim("declared channels: %s   grace %s ms   audio query %s" % [", ".join(declared), table.get("hidden_grace_ms", "?"), _chip("on" if bool(frame.get("audio_query", true)) else "unchecked", "on" if bool(frame.get("audio_query", true)) else "OFF")]))
+	var audio_on := bool(frame.get("audio_query", true))
+	if mode != "demo":
+		lines.append(_dim("declared channels: %s   grace %s ms   audio query %s" % [", ".join(declared), table.get("hidden_grace_ms", "?"), _chip("on" if audio_on else "unchecked", "on" if audio_on else "OFF")]))
+	elif not audio_on:
+		lines.append(_chip("unchecked", "AUDIO QUERY OFF") + _dim("  the server does not listen, and says so"))
 	for enemy in frame.get("enemies", []):
 		var vision := String(enemy.get("vision", "unchecked"))
 		var audio := String(enemy.get("audio", "unchecked"))
 		var since = enemy.get("since_ms")
 		var known := _enemy_knowledge(vision, audio, since)
-		var recent := "never" if since == null else ("%d ms ago" % int(since))
-		lines.append("[b]%s[/b]  %s  vision %s  audio %s  perceived %s" % [enemy.id, "◎ in cone" if bool(enemy.get("in_cone", false)) else "  ", _chip(vision), _chip(audio), recent])
-		lines.append("    KnowledgeState %s %s" % [_chip(String(known.status)), _dim("(%s)" % known.cause)])
+		var cone := "  ◎ in cone" if bool(enemy.get("in_cone", false)) else ""
+		lines.append("[b]%s[/b]%s" % [enemy.id, cone])
+		lines.append("  vision %s  audio %s" % [_chip(vision), _chip(audio)])
+		lines.append("  →  %s %s" % [_chip(String(known.status)), _dim("(%s)" % known.cause)])
+		if mode != "demo":
+			lines.append(_dim("  perceived %s" % ("never" if since == null else ("%d ms ago" % int(since)))))
 	var probe = frame.get("probe")
 	if probe != null and typeof(probe) == TYPE_DICTIONARY:
 		var body := _body_knowledge(String(probe.vision), String(probe.audio))
-		lines.append("[b]challenge body[/b]  %s  vision %s  audio %s" % ["◎ in cone" if bool(probe.get("in_cone", false)) else "  ", _chip(String(probe.vision)), _chip(String(probe.audio))])
-		lines.append("    KnowledgeState %s %s" % [_chip(String(body.status)), _dim("(%s; recent perception not applicable)" % body.cause)])
+		lines.append("[b]challenge body[/b]%s" % ("  ◎ in cone" if bool(probe.get("in_cone", false)) else ""))
+		lines.append("  vision %s  audio %s" % [_chip(String(probe.vision)), _chip(String(probe.audio))])
+		lines.append("  →  %s %s" % [_chip(String(body.status)), _dim("(%s)" % body.cause)])
 	if frame.get("enemies", []).is_empty() and probe == null:
 		lines.append(_dim("no enemy in play"))
 	lines.append(_dim("unchecked ≠ absent · missing telemetry → unknown → abstain"))
 	var fpsdet: Dictionary = subject.get("knowledge", {}) if not subject.is_empty() else {}
-	if not fpsdet.is_empty():
+	if mode != "demo" and not fpsdet.is_empty():
 		lines.append(_dim("fpsdet, over the subject's events so far:"))
 		for enemy in fpsdet:
 			var row: Dictionary = fpsdet[enemy]
 			var counts := []
 			for key in row.get("statuses", {}):
 				counts.append("%s %s" % [key, row.statuses[key]])
-			lines.append("    %s  %s  %s" % [enemy, _chip(String(row.get("majority", "?"))), _dim(", ".join(counts))])
+			lines.append("  %s  %s  %s" % [enemy, _chip(String(row.get("majority", "?"))), _dim(", ".join(counts))])
 	return "\n".join(lines)
 
 
@@ -797,28 +909,30 @@ func _detectors_text(subject: Dictionary) -> String:
 	var counts := {}
 	for finding in subject.get("findings", []):
 		counts[finding.kind] = int(counts.get(finding.kind, 0)) + 1
-	var cells := []
-	var quiet := {}
+	# Grouped by status: the chip, then the detectors under it, the ones that fired in bold.
+	var groups := {}
 	for kind in kinds:
 		var entry: Dictionary = eligibility.get(kind, {})
 		var statusword := String(entry.get("rollup", rollup.get(kind, "?")))
-		var count := int(counts.get(kind, 0))
-		if mode == "demo" and statusword in ["telemetry_unavailable", "disabled", "not_applicable"] and count == 0:
-			quiet[statusword] = int(quiet.get(statusword, 0)) + 1
+		var shown: String = ("[b]%s ×%d[/b]" % [kind, int(counts[kind])]) if counts.has(kind) else String(kind)
+		if mode != "demo" and entry.get("role", "") != "":
+			shown += _dim(" " + String(entry.role))
+		groups[statusword] = groups.get(statusword, []) + [shown]
+	var lines := []
+	var quiet := []
+	for statusword in ["eligible", "baseline_too_thin", "insufficient_samples", "conflict", "telemetry_unavailable", "disabled", "not_applicable"]:
+		if not groups.has(statusword):
 			continue
-		var fired := "  [b]x%d[/b]" % count if count else ""
-		var role := _dim(" " + String(entry.get("role", "")))
-		cells.append("%s %s%s%s" % [_chip(statusword), kind, fired, "" if mode == "demo" else role])
-	var out := "[table=%d]" % (1 if mode == "demo" else 2)
-	for cell in cells:
-		out += "[cell]%s[/cell]" % cell
-	out += "[/table]"
+		if mode == "demo" and statusword in ["telemetry_unavailable", "disabled", "not_applicable"]:
+			quiet.append(_dim("    %s: %s" % [statusword.replace("_", " "), " · ".join(groups[statusword])]))
+			continue
+		lines.append(_chip(statusword))
+		lines.append("    " + " · ".join(groups[statusword]))
 	if not quiet.is_empty():
-		var parts := []
-		for word in quiet:
-			parts.append("%d %s" % [quiet[word], word])
-		out += "\n" + _dim("could not run here: " + ", ".join(parts) + " (a check that cannot run is never a zero)")
-	return out
+		lines.append(_dim("could not run here"))
+		lines.append_array(quiet)
+	lines.append(_dim("a check that cannot run is never a zero"))
+	return "\n".join(lines)
 
 
 func _case_text(subject: Dictionary, spec: Dictionary) -> String:
@@ -826,34 +940,47 @@ func _case_text(subject: Dictionary, spec: Dictionary) -> String:
 		return _dim("no case yet")
 	var lines := []
 	var decision := String(subject.get("decision", ""))
-	lines.append("decision %s   recommended %s   [b]automated_action: %s[/b]" % [_chip(decision), subject.get("recommended_action", ""), _chip("none", String(subject.get("automated_action", "none")))])
+	var head := "decision %s   [b]automated_action: %s[/b]" % [_chip(decision), _chip("none", String(subject.get("automated_action", "none")))]
+	if mode != "demo":
+		head += "   recommended " + String(subject.get("recommended_action", ""))
+	lines.append(head)
 	if decision == "insufficient_data":
-		lines.append("[b]INSUFFICIENT DATA[/b]  This is not a clean verdict. Nothing was comparable: the telemetry and sample volume are not enough for a stronger conclusion. fpsdet writes clean only after at least one number was compared against a thick enough cohort.")
+		lines.append("[b]INSUFFICIENT DATA: This is not a clean verdict.[/b] Nothing was comparable, and the telemetry is not enough for a stronger conclusion. fpsdet writes clean only after a number was compared against a thick enough cohort.")
 	if bool(spec.get("experimental", false)) and decision == "review":
-		lines.append(_chip("experimental", "EXPERIMENTAL CHALLENGE RESULT  ·  NOT PRODUCTION QUALIFIED"))
+		lines.append(_chip("experimental", "EXPERIMENTAL CHALLENGE RESULT · NOT PRODUCTION QUALIFIED"))
 		if String(spec.get("id", "")) == "angle_hold_false_positive":
 			lines.append("geometric alignment is not the same thing as responding to hidden information")
 	var fusion = subject.get("fusion")
 	if fusion != null and typeof(fusion) == TYPE_DICTIONARY:
-		lines.append("native fpsdet result %s   external evidence: %s   final case state %s  (rule %s)" % [_chip(String(fusion.native_decision)),
-			"%d adverse fictional provider record%s" % [int(fusion.signals), "" if int(fusion.signals) == 1 else "s"] if int(fusion.signals) else "context only", _chip(String(fusion.decision)), fusion.rule])
+		lines.append("native fpsdet result %s  →  external evidence: %s  →  final %s" % [_chip(String(fusion.native_decision)),
+			("%d adverse fictional provider record%s" % [int(fusion.signals), "" if int(fusion.signals) == 1 else "s"]) if int(fusion.signals) else "context only", _chip(String(fusion.decision))])
 		if String(fusion.decision) != String(fusion.native_decision):
-			lines.append("[b]EXTERNAL EVIDENCE CAUSED THIS WATCH[/b]  Native fpsdet evidence did not create it. External evidence cannot create a review.")
+			lines.append("[b]EXTERNAL EVIDENCE CAUSED THIS WATCH.[/b] Native fpsdet evidence did not create it. External evidence cannot create a review.")
 		for finding in subject.get("findings", []):
 			if String(finding.get("source", "")) == "external":
 				var auth: Dictionary = finding.get("evidence", {}).get("authenticity", {})
 				lines.append(_dim("record %s: signature %s. A signature verifies origin, not truth." % [finding.get("key", ""), String(auth.get("status", "unsigned"))]))
-	for reason in subject.get("reasons", []):
+	var reasons: Array = subject.get("reasons", [])
+	for reason in reasons.slice(0, 2 if mode == "demo" else reasons.size()):
 		lines.append("• " + String(reason))
-	if subject.has("at_ms"):
-		lines.append(_dim("as it stood at %d ms, on %d events" % [int(subject.at_ms), int(subject.get("events", 0))]))
-	elif not live.is_empty():
-		lines.append(_dim("scored %d events in %.1f ms, up to t %d ms" % [int(live.get("events", 0)), float(live.get("scoring_ms", 0)), int(live.get("scored_at_t_ms", 0))]))
+	if mode == "demo" and reasons.size() > 2:
+		lines.append(_dim("• and %d more" % (reasons.size() - 2)))
+	if mode == "demo":
+		var findings: Array = subject.get("findings", [])
+		for finding in findings:
+			var source := " · external record, not fpsdet's own" if String(finding.get("source", "")) == "external" else ""
+			lines.append("%s [b]%s[/b]%s  %s" % [_chip(String(finding.role)), finding.kind, _dim(source), _dim(String(finding.get("summary", "")))])
+		if findings.is_empty():
+			lines.append(_dim("no observation: a detector that could run and found nothing writes none"))
 	var problems: Array = live.get("problems", []) if not replaying else replay_case.get("problems", [])
 	if bool(live.get("final", false)) or replaying:
 		lines.append(_chip("identical" if problems.is_empty() else "mismatch", "EXPECTED == ACTUAL" if problems.is_empty() else "EXPECTED != ACTUAL"))
 		for problem in problems:
 			lines.append(_dim("  " + String(problem)))
+	if subject.has("at_ms"):
+		lines.append(_dim("as it stood at %d ms, on %d events" % [int(subject.at_ms), int(subject.get("events", 0))]))
+	elif not live.is_empty():
+		lines.append(_dim("scored %d events in %.1f ms, up to t %d ms" % [int(live.get("events", 0)), float(live.get("scoring_ms", 0)), int(live.get("scored_at_t_ms", 0))]))
 	var brief := String(live.get("ai_brief", "")) if not replaying else String(replay_case.get("ai_brief", ""))
 	if brief != "":
 		var ai: Dictionary = live.get("ai", {})
@@ -873,7 +1000,7 @@ func _findings_text(subject: Dictionary) -> String:
 		var source := "external record, not fpsdet's own evidence" if String(finding.get("source", "")) == "external" else String(finding.family)
 		lines.append("[b]%s[/b] %s %s  %s" % [finding.kind, _chip(String(finding.role)), _dim(source), finding.get("key", "")])
 		lines.append("    %s" % finding.get("summary", ""))
-		if finding.kind == "speed" and mode != "demo":
+		if finding.kind == "speed":
 			var cadence: Dictionary = subject.get("speed_cadence", {})
 			if not cadence.is_empty():
 				lines.append(_dim("    over-cap samples: %d   movement sample interval: %d ms (as emitted)   approx observed run duration: %d ms   the bar counts samples, not milliseconds" % [
@@ -906,20 +1033,36 @@ func _challenge_text(frame: Dictionary, subject: Dictionary) -> String:
 	return "\n".join(lines)
 
 
-func _card_text(spec: Dictionary, compact: bool) -> String:
+## The demo's fourth panel: the card's essentials, and the challenge when one is planned.
+func _scenario_text(spec: Dictionary, frame: Dictionary, subject: Dictionary) -> String:
+	var lines := [_card_text(spec, "panel")]
+	var probe = frame.get("probe")
+	if (probe != null and typeof(probe) == TYPE_DICTIONARY) or not subject.get("challenges", []).is_empty():
+		lines.append("")
+		lines.append("[b]ACTIVE CHALLENGE[/b]")
+		lines.append(_challenge_text(frame, subject))
+	return "\n".join(lines)
+
+
+## The scenario card. ``form`` is "overlay" (the box over the views at scenario start), "panel" (the demo's
+## scenario panel: the essentials) or "full" (the developer tab: everything, with the caveats).
+func _card_text(spec: Dictionary, form: String) -> String:
 	var card_spec: Dictionary = spec.get("card", {})
 	if card_spec.is_empty():
 		return _dim(String(spec.get("instructions", "")))
 	var lines := []
-	if not compact:
-		lines.append("[b]%s[/b]" % spec.get("title", ""))
-	lines.append(_chip("experimental", String(spec.get("actor", ""))))
+	if form != "panel":
+		lines.append("[font_size=22][b]%s[/b][/font_size]" % spec.get("title", ""))
+	lines.append(_actor_text(String(spec.get("actor", ""))))
+	if form == "overlay":
+		lines.append(String(spec.get("instructions", "")))
 	lines.append("[b]WHAT THIS TESTS[/b]  %s" % card_spec.get("what_this_tests", ""))
-	lines.append("[b]WHAT THE PLAYER CAN KNOW[/b]  %s" % card_spec.get("player_can_know", ""))
-	lines.append("[b]WHAT THE SERVER KNOWS[/b]  %s" % card_spec.get("server_knows", ""))
+	if form == "full":
+		lines.append("[b]WHAT THE PLAYER CAN KNOW[/b]  %s" % card_spec.get("player_can_know", ""))
+		lines.append("[b]WHAT THE SERVER KNOWS[/b]  %s" % card_spec.get("server_knows", ""))
 	lines.append("[b]EXPECTED FPSDET BEHAVIOR[/b]  %s" % card_spec.get("expected_fpsdet_behavior", ""))
-	lines.append("[b]WHAT WOULD MAKE THIS INVALID[/b]  %s" % card_spec.get("invalid_if", ""))
-	if compact:
+	if form == "full":
+		lines.append("[b]WHAT WOULD MAKE THIS INVALID[/b]  %s" % card_spec.get("invalid_if", ""))
 		for caveat in spec.get("caveats", []):
 			lines.append(_dim("caveat: " + String(caveat)))
 	return "\n".join(lines)
@@ -953,7 +1096,7 @@ func _refresh_tab(subject: Dictionary, frame: Dictionary) -> void:
 				timeline_view.queue_redraw()
 				text.text = _replay_text()
 			else:
-				text.text = _card_text(spec, true) + "\n" + _dim("r replays the last finished match: ← → scrub, shift for 1 s, space plays, home/end, r again to leave")
+				text.text = _card_text(spec, "full") + "\n" + _dim("r replays the last finished match: ← → scrub, shift for 1 s, space plays, home/end, r again to leave")
 
 
 func _dim_plain(text: String) -> String:

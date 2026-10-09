@@ -108,11 +108,11 @@ From [result.json](../result.json): thirteen matches of about 30 s each, run sev
 
 | | |
 | --- | --- |
-| Server tick | 478 µs mean (median over scenarios; 224 to 1,063 µs across them), 3.1 ms worst single tick, against a 16.7 ms budget |
-| Knowledge queries | 122 µs and 177 rays per tick (median); 70 to 158 µs per probe tick for the challenge |
-| Telemetry | about 10.5 KB/s of events, 3.6 KB/s of snapshots to the client, 78 KB/s of operator feed |
-| fpsdet | 8 to 19 ms per scoring pass over 652 to 1,022 events |
-| Server memory | 44 MB static peak |
+| Server tick | 430 µs mean (median over scenarios; 156 to 929 µs across them), 9.9 ms worst single tick, against a 16.7 ms budget |
+| Knowledge queries | 113 µs and 176 rays per tick (median); 51 to 112 µs per probe tick for the challenge |
+| Telemetry | about 10.4 KB/s of events, 3.6 KB/s of snapshots to the client, 78 KB/s of operator feed |
+| fpsdet | 8 to 21 ms per scoring pass over 651 to 1,021 events |
+| Server memory | 45 MB static peak |
 | Headless autopilot client | 145 frames a second; the lab window reports its own rate on the performance tab |
 
 None of these is a target. The operator feed is the one cost that does not exist in a game: it is the security view's, not the server's.
