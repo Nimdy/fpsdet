@@ -4,7 +4,7 @@
   "key": "t",
   "title": "Hidden and unknowable, tracked",
   "duration_ms": 30000,
-  "instructions": "The same silent bot behind the wall. A stand-in tracks it through the wall and fires, as a wallhack would.",
+  "instructions": "The same silent bot behind the wall. A scripted stand-in (not a human, not cheat software) aims your avatar at it through the wall and fires, as a reader of hidden positions would.",
   "card": {
     "what_this_tests": "Sustained aim on an enemy this client could neither see nor hear.",
     "player_can_know": "No: no line of sight, no sound, never perceived.",
@@ -62,5 +62,6 @@
   },
   "caveats": [
     "A server-side stand-in aims the subject: the behaviour such software produces, not cheat code."
-  ]
+  ],
+  "actor": "SCRIPTED TEST STAND-IN (reader of hidden positions) \u00b7 NOT A HUMAN \u00b7 NOT REAL CHEAT SOFTWARE"
 }

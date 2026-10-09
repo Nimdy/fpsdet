@@ -1,0 +1,106 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "exposed_challenge_control",
+  "key": "o",
+  "title": "Exposed challenge: positive control",
+  "duration_ms": 32000,
+  "instructions": "The positive control of the pixel proof: the server breaks the placement rule on purpose and puts the probe body in the open lane, in plain sight. You will see a red body nobody can shoot. The server's own verdict says seen, and fpsdet must abstain. A controlled follower, a scripted stand-in that is not a human and not cheat software, aims your avatar at it.",
+  "card": {
+    "what_this_tests": "That the player's renderer draws a probe placed in the open (so the pixel proof's zero in the sealed chamber means something), and that a body the client could see voids the challenge.",
+    "player_can_know": "Yes: the body stands in the open lane and the stock client draws it like any body.",
+    "server_knows": "Vision known on the body at every moment of the window; it does not end the challenge, so that only the per-moment verdict stands between a visible body and evidence.",
+    "expected_fpsdet_behavior": "The challenge abstains (seen). No finding, no review, whatever the aim did.",
+    "invalid_if": "The renderer draws no pixel of a body in the open, or fpsdet counts a moment the server reported seen."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "tracker"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -10,
+          4
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          -10,
+          8
+        ]
+      ],
+      "speed": 3.0,
+      "pause_ms": 0,
+      "fires": false
+    },
+    {
+      "id": "arena-bot-b",
+      "path": [
+        [
+          -12,
+          -5
+        ],
+        [
+          -6,
+          -5
+        ]
+      ],
+      "speed": 1.5,
+      "pause_ms": 1500,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {
+    "kind": "follower",
+    "from_ms": 0,
+    "to_ms": 32000
+  },
+  "challenge": {
+    "version": 2,
+    "exposed": true,
+    "schedule": {
+      "from_ms": 6000,
+      "to_ms": 30000,
+      "count": 1,
+      "cooldown_ms": 0,
+      "min_duration_ms": 14000,
+      "max_duration_ms": 16000
+    }
+  },
+  "expected": {
+    "decision": [
+      "clean",
+      "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "challenge": {
+      "status": "abstained",
+      "cause": "seen",
+      "verification": "per_sample"
+    },
+    "eligibility": {
+      "occluded_motion_replay": "not_applicable"
+    }
+  },
+  "experimental": true,
+  "actor": "CONTROLLED FOLLOWER \u00b7 SCRIPTED TEST STAND-IN \u00b7 NOT A HUMAN \u00b7 NOT REAL CHEAT SOFTWARE",
+  "caveats": [
+    "A qualification control, kept as a scenario so the rule it shows is visible: one moment where the server reports the body seen or heard voids the whole challenge. Challenge reviews are experimental and not production-qualified."
+  ]
+}

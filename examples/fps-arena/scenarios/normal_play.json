@@ -9,7 +9,7 @@
     "what_this_tests": "Ordinary movement and shooting make no case.",
     "player_can_know": "Yes: the bot is in the open lane, in plain sight.",
     "server_knows": "Vision known on every aimed shot; every speed sample under the cap; every accepted shot on the rifle's cycle.",
-    "expected_fpsdet_behavior": "clean or insufficient_data. One player is not a human baseline, so the aim numbers are not compared; the gear rules and the information checks still run and find nothing.",
+    "expected_fpsdet_behavior": "insufficient_data: not a clean verdict. One player is not a human baseline, so the aim numbers are never compared; the gear rules and the information checks still run and find nothing. fpsdet writes clean only when at least one number was actually compared against a thick enough cohort.",
     "invalid_if": "Any review or watch appears, or the knowledge chip reads anything but known while the bot is in view."
   },
   "subject": {
@@ -30,11 +30,11 @@
           4
         ],
         [
-          10,
+          6,
           4
         ],
         [
-          10,
+          6,
           8
         ],
         [
@@ -67,5 +67,6 @@
   },
   "caveats": [
     "With no frozen baseline the aim numbers (accuracy, headshots, distance) are never compared: a server with one player has no humans to compare against, and fpsdet says insufficient_data rather than clean."
-  ]
+  ],
+  "actor": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)"
 }

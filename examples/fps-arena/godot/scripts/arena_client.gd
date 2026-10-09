@@ -345,7 +345,8 @@ func _process(_delta: float) -> void:
 	var left := maxi(0, int((duration_ms - (latest_ms - banner_at_ms)) / 1000.0)) if duration_ms > 0 else 0
 	var clock := ("   %d:%02d left" % [left / 60, left % 60]) if duration_ms > 0 else ""
 	var ammo_text := "reloading" if me.reloading else "%d / 30" % me.ammo
-	status.text = "health %d   ammo %s%s\n%s" % [me.health, ammo_text, clock, instructions]
+	var held := "\nSCRIPTED TEST STAND-IN HOLDS YOUR AIM: a server-side script, not a human, not real cheat software" if me.override else ""
+	status.text = "health %d   ammo %s%s\n%s%s" % [me.health, ammo_text, clock, instructions, held]
 	banner_label.text = title if now < title_until else ""
 
 

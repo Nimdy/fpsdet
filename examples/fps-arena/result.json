@@ -12,12 +12,13 @@
  "code": {
   "examples/fps-arena/godot/project.godot": "sha256:7542f7694a2f2d384529aaa3aa2483fdb934be05ec761cb8994b2a9283dd1e57",
   "examples/fps-arena/godot/main.tscn": "sha256:227df0fb6efd7611bfd69e0393df885446ce8bc521cad7f4450753d59da4a1eb",
-  "examples/fps-arena/godot/main.gd": "sha256:a6a6ff70766a0b8aa0b779435fcbaf91bb7f815afc942cd58579b415a8457314",
-  "examples/fps-arena/godot/scripts/arena_map.gd": "sha256:19b1b577b968140735758f8cb3ba26ae3222245fe670cfadecb7340100f0ccc4",
-  "examples/fps-arena/godot/scripts/arena_server.gd": "sha256:12ffafd344e143bd7d04a7fa7fec591aa30500559d6e09e3cb91e68422e4c240",
+  "examples/fps-arena/godot/main.gd": "sha256:4136072126c4b4e5e864d93ee6f48cc95d38a1ffebb0e2a0742394859242ef72",
+  "examples/fps-arena/godot/scripts/arena_map.gd": "sha256:06de1cceceaf5ee106e3b9b9c936af44c1600e377d626bd13193116f11d6aeff",
+  "examples/fps-arena/godot/scripts/arena_server.gd": "sha256:d41d321517d7ac852b526f4e183355308523102b66a0def141117ed638965453",
   "examples/fps-arena/godot/scripts/server_operator.gd": "sha256:142c36ceaac8ca2f9a6250f6b92a1a3a4b57e45ddca2879528d8c912d77571d2",
-  "examples/fps-arena/godot/scripts/arena_client.gd": "sha256:8204cdf8124e78346933febce85e71ac61add0396da472c7823203c1d4b14608",
-  "examples/fps-arena/godot/scripts/operator_view.gd": "sha256:a2298c8e37dd17eb0ca0f7bbf29eb8fd51e815de9f83cc9648bb10ea0a6fdaac",
+  "examples/fps-arena/godot/scripts/arena_client.gd": "sha256:9dea6b4cdc81038e4824eeb0f8d4be9a74e2e88916081cfc3fdda4c69632b4bb",
+  "examples/fps-arena/godot/scripts/pixel_check_client.gd": "sha256:fd3fed7c809b5780cec08cea09f2961d8fd983fc1452893a2b5e4e8cddd3bf0f",
+  "examples/fps-arena/godot/scripts/operator_view.gd": "sha256:bcf64b75bceb11140490134d4b3e2e977c61695dd784d7e6458f4f52374016da",
   "examples/fps-arena/godot/scripts/lab.gd": "sha256:bcd276c1c3366156e71510ce906b735edb6db6c4b6fad9415b54aa5bf3da8e83",
   "examples/fps-arena/godot/scripts/autopilot.gd": "sha256:747c0f4550ec06961d09931238ec23fd278f69bfe7d3497a48438ee23968fdce",
   "examples/fps-arena/godot/scripts/bots.gd": "sha256:fd208fb3502aaf9c37cc05cd36b281bfeb41863b8a04b626bf8a383b0e1c0983",
@@ -25,7 +26,7 @@
   "examples/fps-arena/godot/scripts/weapon.gd": "sha256:419c1e43ad89363aabd21b03bf9ecaa37407e3c225a5a4a8ec0a0faa9cf412e1",
   "examples/fps-arena/godot/scripts/recipe.gd": "sha256:1d77e38dd63624bd3a9950ff9db8542568457362e8cd1284a6a7944480ef24e0",
   "examples/fps-arena/godot/scripts/sounds.gd": "sha256:b070a8770ac6d10a756fbe7c39249f0487c8bf8d82b45b388f610f8432dac5e8",
-  "examples/fps-arena/harness/arena.py": "sha256:407c82b135a315e22b7cf1213eb32ce1f647f82691dbd31e4b46a7c7ca9a61ff"
+  "examples/fps-arena/harness/arena.py": "sha256:c1eeac342db0c73f0714b9995a2ca395ab4d48469e10177a4b48559b2104fd9a"
  },
  "profile": "sha256:dc38c508650510687c1868a7e61c113213715a6e51b831036da45515c53b2663",
  "scenarios": [
@@ -33,6 +34,13 @@
    "id": "active_challenge",
    "title": "Active challenge",
    "match_id": "arena-active_challenge-1",
+   "actor": {
+    "label": "CONTROLLED FOLLOWER · SCRIPTED TEST STAND-IN · NOT A HUMAN · NOT REAL CHEAT SOFTWARE",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": "follower",
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "review",
     "kinds": [
@@ -53,11 +61,11 @@
      "occluded_motion_replay"
     ],
     "observations": [
-     "obs-4f7c0e23823679692de60513"
+     "obs-5e207030890a4b41faef16a3"
     ],
     "eligibility": {
      "speed": "eligible",
-     "fire_rate": "insufficient_samples",
+     "fire_rate": "eligible",
      "metronome": "not_applicable",
      "recoil_floor": "insufficient_samples",
      "mirror": "eligible",
@@ -80,16 +88,16 @@
      "voice": "not_applicable"
     },
     "challenge": {
-     "challenge_id": "ch-8ab5b8b63d4ed976152307a1",
+     "challenge_id": "ch-b52b24eaaa6ab8fad315bfb1",
      "status": "followed",
      "cause": null,
      "verification": "per_sample",
      "eligible_samples": 153,
-     "tracked_samples": 150,
+     "tracked_samples": 142,
      "verified_samples": 153,
-     "total_ms": 14983.0,
+     "total_ms": 14200.0,
      "not_counted": {
-      "seen": 3
+      "seen": 11
      }
     },
     "fusion": null,
@@ -99,15 +107,15 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 101,
+      "events": 171,
       "statuses": {
-       "known": 101
+       "known": 171
       },
       "causes": {
-       "seen": 101
+       "seen": 171
       },
       "latest": {
-       "t_ms": 11900,
+       "t_ms": 32000,
        "status": "known",
        "cause": "seen",
        "channels": {
@@ -126,15 +134,15 @@
       "majority": "known"
      },
      "arena-bot-b": {
-      "events": 9,
+      "events": 14,
       "statuses": {
-       "unknowable": 9
+       "unknowable": 14
       },
       "causes": {
-       "unknowable": 9
+       "unknowable": 14
       },
       "latest": {
-       "t_ms": 8300,
+       "t_ms": 30900,
        "status": "unknowable",
        "cause": "unknowable",
        "channels": {
@@ -166,8 +174,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:ce639bc17217c2b415bdf821e499a70b98ebb42557ce2aa105c35bc0b9c78e11",
-    "packet": "sha256:59f8bfc8048ee9327d51487f77d3ad2e6d7eb1db02ebf8fb840f759df23624ec",
+    "graph": "sha256:154743c891820fad49222c288c373e135aff83f0043c7a1024e98533b00af993",
+    "packet": "sha256:59db4d5327f95cd277dcaad4e19b4ee4eadc17d3afa6e8860bee93fcdf5876ef",
     "experimental": true,
     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
    },
@@ -181,12 +189,12 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:a88ea3abafb7e046a3816b9b84bbc61ffc35889b20c54f3cb1360343e700384f",
+     "packet": "sha256:78d7a686d627674ad69f8e0b0b412b331346775365d723c060354b42ed026dcb",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:5d1b32eb7acfcb7942b5c036e0aa070d408521600a41721c282409480642f90c",
-      "events": 336
+      "digest": "sha256:8b4f022c20a3fa6652bc8df0e866a7b3159bb4a263fec282b56150435a7c3f73",
+      "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -198,7 +206,7 @@
        ]
       },
       "fire_rate": {
-       "insufficient_samples": [
+       "eligible": [
         "rifle"
        ]
       },
@@ -313,11 +321,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:786414622d4475f1346b0774a839062865145443be2923647fa4a415c7dd8fb0",
+     "packet": "sha256:e90ea6cf571b9bebb9cab15512101d104c891d89aa8072d17aca22e972b2780e",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:db0bd90861b534ba563212f9d0157b4dcb059bffad6390181e01d89e31169332",
+      "digest": "sha256:18158e4396e51e7fc1a1dfd4c360de0405e29bf5e6d7421fee5a3b8ea05fd7e2",
       "events": 320
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -439,31 +447,31 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-4f7c0e23823679692de60513"
+      "obs-5e207030890a4b41faef16a3"
      ],
      "kinds": [
       "occluded_motion_replay"
      ],
-     "graph": "sha256:ce639bc17217c2b415bdf821e499a70b98ebb42557ce2aa105c35bc0b9c78e11",
-     "packet": "sha256:59f8bfc8048ee9327d51487f77d3ad2e6d7eb1db02ebf8fb840f759df23624ec",
+     "graph": "sha256:154743c891820fad49222c288c373e135aff83f0043c7a1024e98533b00af993",
+     "packet": "sha256:59db4d5327f95cd277dcaad4e19b4ee4eadc17d3afa6e8860bee93fcdf5876ef",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/3",
-      "digest": "sha256:37abfa9d8d9dbb0503d27ca0f82d9bc6a25553289a587660ab7897f3f6473c50",
-      "events": 337
+      "digest": "sha256:87067855386352f6fd8c6f9ba60ca20fc7c6ffa15071095d4c4bfd9bc754982c",
+      "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [
       {
-       "challenge_id": "ch-8ab5b8b63d4ed976152307a1",
-       "plan": "sha256:2782108ad95767a5337143ca2b3d3311846b19c88bf7b3435684aa50b767d8c6",
+       "challenge_id": "ch-b52b24eaaa6ab8fad315bfb1",
+       "plan": "sha256:9c3049a749e593d34dc6217d94d4b11081c8034c3fb283b2f77a4a23ca832a54",
        "match_id": "arena-active_challenge-1",
        "status": "followed",
        "eligible_samples": 153,
-       "tracked_samples": 150,
-       "total_ms": 14983.0,
+       "tracked_samples": 142,
+       "total_ms": 14200.0,
        "not_counted": {
-        "seen": 3
+        "seen": 11
        },
        "verification": "per_sample",
        "verified_samples": 153
@@ -477,7 +485,7 @@
        ]
       },
       "fire_rate": {
-       "insufficient_samples": [
+       "eligible": [
         "rifle"
        ]
       },
@@ -572,7 +580,7 @@
       },
       "occluded_motion_replay": {
        "eligible": [
-        "ch-8ab5b8b63d4ed976152307a1"
+        "ch-b52b24eaaa6ab8fad315bfb1"
        ]
       },
       "leftover": {
@@ -591,7 +599,7 @@
    "realization": {
     "status": "reproduced",
     "challenges": [
-     "ch-8ab5b8b63d4ed976152307a1"
+     "ch-b52b24eaaa6ab8fad315bfb1"
     ],
     "problems": []
    },
@@ -599,36 +607,36 @@
    "personal_data": [],
    "client": {
     "entities_received": 3,
-    "probe_updates": 307,
+    "probe_updates": 304,
     "probe_sounds": 0,
-    "sounds": 56,
+    "sounds": 110,
     "fps_median": 145.0
    },
    "timing": {
     "server_tick_hz": 60,
     "match_ms": 32000,
     "ticks": 1920,
-    "tick_us_mean": 1348.9,
-    "tick_us_max": 4094,
-    "knowledge_us_per_tick": 510.4,
-    "challenge_us_per_probe_tick": 180.1,
-    "rays_per_tick": 601.7,
-    "event_bytes_per_s": 11624.2,
-    "event_lines": 993,
-    "snapshot_bytes_per_s": 5286.9,
-    "feed_bytes_per_s": 86227.8,
-    "scoring_ms_live": 17.4,
+    "tick_us_mean": 1258.0,
+    "tick_us_max": 3382,
+    "knowledge_us_per_tick": 415.8,
+    "challenge_us_per_probe_tick": 381.5,
+    "rays_per_tick": 426.5,
+    "event_bytes_per_s": 12361.6,
+    "event_lines": 1020,
+    "snapshot_bytes_per_s": 5288.8,
+    "feed_bytes_per_s": 94345.4,
+    "scoring_ms_live": 18.8,
     "parse_errors": 0,
     "verdicts": {
      "audio": {
-      "absent": 922
+      "absent": 913
      },
      "vision": {
-      "absent": 922
+      "absent": 913
      }
     },
-    "probe_ticks": 922,
-    "memory_static_peak_bytes": 42150914
+    "probe_ticks": 913,
+    "memory_static_peak_bytes": 43641501
    },
    "exit_codes": [
     0,
@@ -639,12 +647,12 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/active_challenge/events.ndjson",
-     "sha256": "sha256:30a7fdde9e6c4e175951a08307363617d3441c138e805cbd11acf2406447cde0",
-     "lines": 993
+     "sha256": "sha256:c409fe0d9c10022c558393dead8a08f2891d9b0f424fca57dab442772474d00d",
+     "lines": 1020
     },
     "plan.json": {
      "file": "examples/fps-arena/captures/active_challenge/plan.json",
-     "sha256": "sha256:78f1da3765a4101db7ec2a872cc1451dc54b0a204b16eed18576d32c08d3b4dd"
+     "sha256": "sha256:dc795b7863230c031faf3d846d70ea1b62e0baa3518e17510bde871019388fac"
     }
    }
   },
@@ -652,6 +660,13 @@
    "id": "angle_hold_false_positive",
    "title": "Angle hold: experimental challenge failure",
    "match_id": "arena-angle_hold_false_positive-1",
+   "actor": {
+    "label": "HONEST-STYLE SCRIPTED STAND-IN (holds an angle) · NOT A HUMAN",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": "holder",
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "review",
     "kinds": [
@@ -672,7 +687,7 @@
      "occluded_motion_replay"
     ],
     "observations": [
-     "obs-ad3d92abb339df81c9111de6"
+     "obs-ff977c47d0d8621534c58784"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -699,14 +714,14 @@
      "voice": "not_applicable"
     },
     "challenge": {
-     "challenge_id": "ch-4aac104b0f76f075fafd93ed",
+     "challenge_id": "ch-da0d610ea81fae2959e0231d",
      "status": "followed",
      "cause": null,
      "verification": "per_sample",
-     "eligible_samples": 153,
-     "tracked_samples": 153,
-     "verified_samples": 153,
-     "total_ms": 15274.0,
+     "eligible_samples": 142,
+     "tracked_samples": 142,
+     "verified_samples": 142,
+     "total_ms": 14199.0,
      "not_counted": {}
     },
     "fusion": null,
@@ -725,8 +740,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:a42e492ada3f629f406b261884983760e6563df6dd1aac7afb5e57a868186651",
-    "packet": "sha256:042941262b6ed211c98225a7f9b3d2570c9113f847982f1952e5e6c10b896650",
+    "graph": "sha256:890e754a9d76ea519b32a1f7deae1edbc76de145d8bb6ce77ff755ba4904f8f6",
+    "packet": "sha256:0b2c39208639f2c371105f1ee5d98c690ca9385e84c4e3eb00ad6ea12fafe6f1",
     "experimental": true,
     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
    },
@@ -994,32 +1009,32 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-ad3d92abb339df81c9111de6"
+      "obs-ff977c47d0d8621534c58784"
      ],
      "kinds": [
       "occluded_motion_replay"
      ],
-     "graph": "sha256:a42e492ada3f629f406b261884983760e6563df6dd1aac7afb5e57a868186651",
-     "packet": "sha256:042941262b6ed211c98225a7f9b3d2570c9113f847982f1952e5e6c10b896650",
+     "graph": "sha256:890e754a9d76ea519b32a1f7deae1edbc76de145d8bb6ce77ff755ba4904f8f6",
+     "packet": "sha256:0b2c39208639f2c371105f1ee5d98c690ca9385e84c4e3eb00ad6ea12fafe6f1",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/3",
-      "digest": "sha256:a8e70e0cb8ab257f09af3f77b0e334f1a7ff93a6d8dac942a863eb4478dbd365",
+      "digest": "sha256:59d9178e2eaf244ee7686cc3e3fd830e39e1d6d88b995165c403c94075937144",
       "events": 338
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [
       {
-       "challenge_id": "ch-4aac104b0f76f075fafd93ed",
-       "plan": "sha256:dd45b6223534df91f1d1d2ea45a77f4a672d88ebedb2a36f9cb341de5c8d4804",
+       "challenge_id": "ch-da0d610ea81fae2959e0231d",
+       "plan": "sha256:39f7eb83bf011efca4e5aa6c88258e04490869ace45bd621925cf653f386fa95",
        "match_id": "arena-angle_hold_false_positive-1",
        "status": "followed",
-       "eligible_samples": 153,
-       "tracked_samples": 153,
-       "total_ms": 15274.0,
+       "eligible_samples": 142,
+       "tracked_samples": 142,
+       "total_ms": 14199.0,
        "not_counted": {},
        "verification": "per_sample",
-       "verified_samples": 153
+       "verified_samples": 142
       }
      ],
      "fusion": null,
@@ -1125,7 +1140,7 @@
       },
       "occluded_motion_replay": {
        "eligible": [
-        "ch-4aac104b0f76f075fafd93ed"
+        "ch-da0d610ea81fae2959e0231d"
        ]
       },
       "leftover": {
@@ -1144,7 +1159,7 @@
    "realization": {
     "status": "reproduced",
     "challenges": [
-     "ch-4aac104b0f76f075fafd93ed"
+     "ch-da0d610ea81fae2959e0231d"
     ],
     "problems": []
    },
@@ -1152,7 +1167,7 @@
    "personal_data": [],
    "client": {
     "entities_received": 3,
-    "probe_updates": 307,
+    "probe_updates": 284,
     "probe_sounds": 0,
     "sounds": 58,
     "fps_median": 145.0
@@ -1161,27 +1176,27 @@
     "server_tick_hz": 60,
     "match_ms": 32000,
     "ticks": 1920,
-    "tick_us_mean": 1269.2,
-    "tick_us_max": 3817,
-    "knowledge_us_per_tick": 507.3,
-    "challenge_us_per_probe_tick": 76.0,
-    "rays_per_tick": 588.1,
-    "event_bytes_per_s": 11127.5,
+    "tick_us_mean": 1376.8,
+    "tick_us_max": 4823,
+    "knowledge_us_per_tick": 518.8,
+    "challenge_us_per_probe_tick": 189.0,
+    "rays_per_tick": 582.3,
+    "event_bytes_per_s": 11079.7,
     "event_lines": 978,
-    "snapshot_bytes_per_s": 5232.6,
-    "feed_bytes_per_s": 84194.4,
-    "scoring_ms_live": 19.0,
+    "snapshot_bytes_per_s": 5189.5,
+    "feed_bytes_per_s": 87190.6,
+    "scoring_ms_live": 21.9,
     "parse_errors": 0,
     "verdicts": {
      "audio": {
-      "absent": 922
+      "absent": 852
      },
      "vision": {
-      "absent": 922
+      "absent": 852
      }
     },
-    "probe_ticks": 922,
-    "memory_static_peak_bytes": 42151130
+    "probe_ticks": 852,
+    "memory_static_peak_bytes": 43641717
    },
    "exit_codes": [
     0,
@@ -1192,12 +1207,12 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/angle_hold_false_positive/events.ndjson",
-     "sha256": "sha256:29f03233f6b84c4c8dbe863fb960d4473b29e8174a0abed3f170951a45ecc50b",
+     "sha256": "sha256:40be1d579cb5e66e64ca563d734d7e90862427918c63f4ad878a77f470d95921",
      "lines": 978
     },
     "plan.json": {
      "file": "examples/fps-arena/captures/angle_hold_false_positive/plan.json",
-     "sha256": "sha256:38c14ff14feb1bdf6c8cc53ff073e6ce4f30cf8ced58a404445a5c053add62d7"
+     "sha256": "sha256:a25ab9b92eadc30350315bfe1656e2ba25c0ddda58099dc9dc45ee88ea0ae12a"
     }
    }
   },
@@ -1205,6 +1220,13 @@
    "id": "audible_hidden_enemy",
    "title": "Hidden enemy, audible",
    "match_id": "arena-audible_hidden_enemy-1",
+   "actor": {
+    "label": "SCRIPTED TEST STAND-IN (reader of hidden positions) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": "wallhack",
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": [
      "clean",
@@ -1296,7 +1318,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:49d1eb9ace6b19b25df818757988ace7106de3784d01970659071c403040a249",
+    "packet": "sha256:2322067607f4f2c626791f1844d8514b717b678a76aeb8fcdc84b6bc22029ebf",
     "experimental": false,
     "label": null
    },
@@ -1310,11 +1332,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:45c6b2e7e21ca5d22991f4959c9aff2cd07f85346a23c3376217e80e80f967bd",
+     "packet": "sha256:ef664f43f7c9c18ca5ab3e77df5bf429dc625a5c9849ff9ddaf8d0e32e68c4bf",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:9deec129a6cb1571d91a48f2399e6c66ff314e7755a259c43f34dabaca1f40f8",
+      "digest": "sha256:64f283fab261a0dabe37a575fd701dcb5b41a8a8b4f7b7e286b068bf2cf2ab29",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1438,11 +1460,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:49d1eb9ace6b19b25df818757988ace7106de3784d01970659071c403040a249",
+     "packet": "sha256:2322067607f4f2c626791f1844d8514b717b678a76aeb8fcdc84b6bc22029ebf",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:d9739837aa248e320fd900c93682c43ba98f63b2be44b0348d569c0f795822f3",
+      "digest": "sha256:baa00d7b346e7a373779d462ee9543628091b86a0e9c3840257aea80785bb879",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1584,23 +1606,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 883.3,
-    "tick_us_max": 2991,
-    "knowledge_us_per_tick": 269.4,
-    "challenge_us_per_probe_tick": 4078.0,
+    "tick_us_mean": 953.7,
+    "tick_us_max": 3764,
+    "knowledge_us_per_tick": 282.1,
+    "challenge_us_per_probe_tick": 4712.0,
     "rays_per_tick": 377.7,
-    "event_bytes_per_s": 9292.8,
+    "event_bytes_per_s": 9293.0,
     "event_lines": 681,
-    "snapshot_bytes_per_s": 3607.1,
-    "feed_bytes_per_s": 69990.4,
-    "scoring_ms_live": 10.9,
+    "snapshot_bytes_per_s": 3606.1,
+    "feed_bytes_per_s": 74179.2,
+    "scoring_ms_live": 12.9,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42151010
+    "memory_static_peak_bytes": 43641597
    },
    "exit_codes": [
     0,
@@ -1611,8 +1633,626 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/audible_hidden_enemy/events.ndjson",
-     "sha256": "sha256:0125955382164fdfa1bd8806a644d49df565e724eeaac2d3da8f51ddd7b21941",
+     "sha256": "sha256:2e055f7542fb20c458a1bc160bdf02a2b62345b03d8b4a798f4ef08b65c1f36a",
      "lines": 681
+    }
+   }
+  },
+  {
+   "id": "exposed_challenge_control",
+   "title": "Exposed challenge: positive control",
+   "match_id": "arena-exposed_challenge_control-1",
+   "actor": {
+    "label": "CONTROLLED FOLLOWER · SCRIPTED TEST STAND-IN · NOT A HUMAN · NOT REAL CHEAT SOFTWARE",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": "follower",
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
+   "expected": {
+    "decision": [
+     "clean",
+     "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "challenge": {
+     "status": "abstained",
+     "cause": "seen",
+     "verification": "per_sample"
+    },
+    "eligibility": {
+     "occluded_motion_replay": "not_applicable"
+    }
+   },
+   "observed": {
+    "decision": "insufficient_data",
+    "automated_action": "none",
+    "kinds": [],
+    "observations": [],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "insufficient_samples",
+     "headshot_rate": "insufficient_samples",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "insufficient_samples",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "not_applicable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": {
+     "challenge_id": "ch-b255dc9555594a82a99540c1",
+     "status": "abstained",
+     "cause": "seen",
+     "verification": "per_sample",
+     "eligible_samples": 0,
+     "tracked_samples": 0,
+     "verified_samples": 0,
+     "total_ms": 0,
+     "not_counted": {
+      "seen": 145
+     }
+    },
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known",
+     "arena-bot-b": "unknowable"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 178,
+      "statuses": {
+       "known": 178
+      },
+      "causes": {
+       "seen": 178
+      },
+      "latest": {
+       "t_ms": 32000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     },
+     "arena-bot-b": {
+      "events": 10,
+      "statuses": {
+       "unknowable": 10
+      },
+      "causes": {
+       "unknowable": 10
+      },
+      "latest": {
+       "t_ms": 30600,
+       "status": "unknowable",
+       "cause": "unknowable",
+       "channels": {
+        "audio": "absent",
+        "recent_perception": "unchecked",
+        "vision": "absent"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": null,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "unknowable"
+     }
+    },
+    "speed": {
+     "eligible": 320,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+    "packet": "sha256:884e074e3411850ea442f2b8e7624be98d0ee77abfc1b2d5ac2eb5dfbc6c8798",
+    "experimental": true,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:94ed17c1dafd6dc6d5c3cacab94fea1b1233d0b2b84e93d81bb7d287459d3ce1",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:85cc1686d8e12e50a4a915f25fb0c4ef87c388bd56b7bc6652cc22d709abde60",
+      "events": 320
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-bot-b": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
+     "packet": "sha256:a32a7f249bcf2239b9b76f885304039377e6fa3081ac0f2267afcf2f433a8926",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:d782bc3b30329f35c16d84a75ae02d8ef8acc5c3a9884eea89f79110b9ae2d13",
+      "events": 320
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+     "packet": "sha256:884e074e3411850ea442f2b8e7624be98d0ee77abfc1b2d5ac2eb5dfbc6c8798",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:128452695b954246fd77f7b3dd4ef91ea43ea75f28fbed5736fce46592fb2621",
+      "events": 353
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [
+      {
+       "challenge_id": "ch-b255dc9555594a82a99540c1",
+       "plan": "sha256:3c85e71ac483009cc8c0a49024253f5ff86a219d6ec3b85f07eb35127b4d90ae",
+       "match_id": "arena-exposed_challenge_control-1",
+       "status": "abstained",
+       "eligible_samples": 0,
+       "tracked_samples": 0,
+       "total_ms": 0,
+       "not_counted": {
+        "seen": 145
+       },
+       "cause": "seen",
+       "verification": "per_sample",
+       "verified_samples": 0
+      }
+     ],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "not_applicable": [
+        "ch-b255dc9555594a82a99540c1"
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "reproduced",
+    "challenges": [
+     "ch-b255dc9555594a82a99540c1"
+    ],
+    "problems": []
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 3,
+    "probe_updates": 291,
+    "probe_sounds": 0,
+    "sounds": 80,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 32000,
+    "ticks": 1920,
+    "tick_us_mean": 1013.3,
+    "tick_us_max": 3357,
+    "knowledge_us_per_tick": 303.4,
+    "challenge_us_per_probe_tick": 114.2,
+    "rays_per_tick": 350.2,
+    "event_bytes_per_s": 12197.9,
+    "event_lines": 993,
+    "snapshot_bytes_per_s": 5265.0,
+    "feed_bytes_per_s": 93289.1,
+    "scoring_ms_live": 17.9,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {
+      "absent": 871
+     },
+     "vision": {
+      "known": 871
+     }
+    },
+    "probe_ticks": 871,
+    "memory_static_peak_bytes": 43641717
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 34.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/exposed_challenge_control/events.ndjson",
+     "sha256": "sha256:8703bfc2cb225faf7fa8ff97e091b7deb229aa88fbcd436d94f94d03c5f9efab",
+     "lines": 993
+    },
+    "plan.json": {
+     "file": "examples/fps-arena/captures/exposed_challenge_control/plan.json",
+     "sha256": "sha256:2ed7dbb424194ea3ec103f6d4ccd99cae249a2eb885508418ade4289a1f31770"
     }
    }
   },
@@ -1620,6 +2260,13 @@
    "id": "external_record",
    "title": "External evidence",
    "match_id": "arena-external_record-1",
+   "actor": {
+    "label": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": null,
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "watch",
     "kinds": [
@@ -1687,12 +2334,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 316,
+      "events": 314,
       "statuses": {
-       "known": 316
+       "known": 314
       },
       "causes": {
-       "seen": 316
+       "seen": 314
       },
       "latest": {
        "t_ms": 30000,
@@ -1728,7 +2375,7 @@
      "detail": ""
     },
     "graph": "sha256:906155e739e1c46b1755eddb67fcf99f60098ca45583bfd900fd0c1b7ece9bfa",
-    "packet": "sha256:3b0cca4afc2b3b9c6fa3522d0d2806a7894ef19680850b98718550946a75e06b",
+    "packet": "sha256:4fed278117dee06a764b1b5d910eb35fa12de5a56953ed9d5a5b01098d266f04",
     "experimental": false,
     "label": null
    },
@@ -1742,11 +2389,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:94009eda097f550e64336daaf852847888c4d45f3e334fe8115459b2b0b7b9f0",
+     "packet": "sha256:51f787b588656979f933f913abe94721a8db832f9c32e1f10563b9b21c2abd57",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:64817de4c97c5dcd4050425af0617aa37b30ba17e8e8c76f2c7982a0dfc90920",
+      "digest": "sha256:47e2218a19f2b1eedc6c727ee0811e5b5dc9ede498cf179d00f3e29029b0a11c",
       "events": 330
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1887,12 +2534,12 @@
       "external_signal"
      ],
      "graph": "sha256:906155e739e1c46b1755eddb67fcf99f60098ca45583bfd900fd0c1b7ece9bfa",
-     "packet": "sha256:3b0cca4afc2b3b9c6fa3522d0d2806a7894ef19680850b98718550946a75e06b",
+     "packet": "sha256:4fed278117dee06a764b1b5d910eb35fa12de5a56953ed9d5a5b01098d266f04",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:ab36f3aef4c460fd93d524a263a81076764146e5403553698571c6a2fbad03b0",
-      "events": 354
+      "digest": "sha256:9c8a79039e766ccf3003be00c53e23e0e355d6c3ec7684a31a7a8f2e9704946c",
+      "events": 353
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -2046,23 +2693,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 298.6,
-    "tick_us_max": 2156,
-    "knowledge_us_per_tick": 28.4,
-    "challenge_us_per_probe_tick": 4442.0,
+    "tick_us_mean": 334.5,
+    "tick_us_max": 3106,
+    "knowledge_us_per_tick": 33.5,
+    "challenge_us_per_probe_tick": 4915.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9234.4,
-    "event_lines": 684,
-    "snapshot_bytes_per_s": 3466.4,
-    "feed_bytes_per_s": 70620.9,
-    "scoring_ms_live": 14.4,
+    "event_bytes_per_s": 9209.5,
+    "event_lines": 683,
+    "snapshot_bytes_per_s": 3466.5,
+    "feed_bytes_per_s": 74921.6,
+    "scoring_ms_live": 15.6,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42150890
+    "memory_static_peak_bytes": 43641477
    },
    "exit_codes": [
     0,
@@ -2073,8 +2720,8 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/external_record/events.ndjson",
-     "sha256": "sha256:bc97c3417b747f7cc89a6f6e112e677764dbe272f222981f4c8ce39981b884cf",
-     "lines": 684
+     "sha256": "sha256:1e8654a3b4e15d8e6dec238ab18ca2dcebd4e975ba11557821d02ba4c33105af",
+     "lines": 683
     },
     "external.ndjson": {
      "file": "examples/fps-arena/captures/external_record/external.ndjson",
@@ -2086,6 +2733,13 @@
    "id": "fire_rate",
    "title": "Fire rate",
    "match_id": "arena-fire_rate-1",
+   "actor": {
+    "label": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": null,
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "review",
     "kinds": [
@@ -2103,7 +2757,7 @@
      "fire_rate"
     ],
     "observations": [
-     "obs-777d1163caef9890063a186c"
+     "obs-5518fda556da3182bff7dd58"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -2136,12 +2790,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 494,
+      "events": 492,
       "statuses": {
-       "known": 494
+       "known": 492
       },
       "causes": {
-       "seen": 494
+       "seen": 492
       },
       "latest": {
        "t_ms": 30000,
@@ -2176,8 +2830,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:8e5e006098913d24c1f416a7f55d0df46f0260c2d0be5aef185b402d67a5ee1b",
-    "packet": "sha256:7df66dce1593489f34359df99e4692ab49128d37ef974131ec7d4f1b07bb3df0",
+    "graph": "sha256:89910819a69699abf43bc4c4e88126b7a5eb5af1c7c26e2e3b6e76a9e6665503",
+    "packet": "sha256:4cf2e56e5ceb73790f2a1c9545a7cb54a22ba3b5837eb344e0e58a562329ce59",
     "experimental": false,
     "label": null
    },
@@ -2191,11 +2845,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:cbffb09c2f82b5baaeabe52119d7dae4ce32719d64d6bfcd5b0f29c0ea163e04",
+     "packet": "sha256:e89081e153c0b0d98393a8b78c7182c354b212b9e5d65764e9c3e5e521401afb",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:e9d74834653fe525e4db2c66fd66290d7997f0edf25bcdda260b0f21d106680a",
+      "digest": "sha256:21cfe7d91b97716196661158427f68c437237905508a09ce2bf0f1b291676fcf",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2317,17 +2971,17 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-777d1163caef9890063a186c"
+      "obs-5518fda556da3182bff7dd58"
      ],
      "kinds": [
       "fire_rate"
      ],
-     "graph": "sha256:8e5e006098913d24c1f416a7f55d0df46f0260c2d0be5aef185b402d67a5ee1b",
-     "packet": "sha256:7df66dce1593489f34359df99e4692ab49128d37ef974131ec7d4f1b07bb3df0",
+     "graph": "sha256:89910819a69699abf43bc4c4e88126b7a5eb5af1c7c26e2e3b6e76a9e6665503",
+     "packet": "sha256:4cf2e56e5ceb73790f2a1c9545a7cb54a22ba3b5837eb344e0e58a562329ce59",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:ac9f4187b0076354f9b1df3a7f06e6c753fe90a588adc46fc3a340e444c6658e",
+      "digest": "sha256:95538d83604dcd099c108cee1f5c1ebbcec7b334265fda3d35569230efc07b1d",
       "events": 538
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2467,34 +3121,34 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 313.9,
-    "tick_us_max": 1923,
-    "knowledge_us_per_tick": 29.3,
-    "challenge_us_per_probe_tick": 4391.0,
+    "tick_us_mean": 344.9,
+    "tick_us_max": 3559,
+    "knowledge_us_per_tick": 31.4,
+    "challenge_us_per_probe_tick": 5506.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 12137.6,
+    "event_bytes_per_s": 12105.2,
     "event_lines": 838,
     "snapshot_bytes_per_s": 3519.5,
-    "feed_bytes_per_s": 74850.4,
-    "scoring_ms_live": 25.4,
+    "feed_bytes_per_s": 79176.7,
+    "scoring_ms_live": 24.9,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42150746
+    "memory_static_peak_bytes": 43641333
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.4,
+   "wall_s": 32.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/fire_rate/events.ndjson",
-     "sha256": "sha256:d3663001600337c9c75e541d6b5949c575ee4b98e5b5c1ec6499654c9c71dac4",
+     "sha256": "sha256:05e25e1473b808e238d46c7b5e4e702f092c2d43d6101b3d84a832e6d39956da",
      "lines": 838
     }
    }
@@ -2503,6 +3157,13 @@
    "id": "impossible_speed",
    "title": "Impossible speed",
    "match_id": "arena-impossible_speed-1",
+   "actor": {
+    "label": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": null,
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "review",
     "kinds": [
@@ -2529,7 +3190,7 @@
      "mirror": "eligible",
      "recoil_learned": "not_applicable",
      "accuracy": "baseline_too_thin",
-     "headshot_rate": "insufficient_samples",
+     "headshot_rate": "baseline_too_thin",
      "median_distance": "insufficient_samples",
      "geometry_rate": "insufficient_samples",
      "extra": "disabled",
@@ -2552,15 +3213,15 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 240,
+      "events": 264,
       "statuses": {
-       "known": 240
+       "known": 264
       },
       "causes": {
-       "seen": 240
+       "seen": 264
       },
       "latest": {
-       "t_ms": 30000,
+       "t_ms": 29700,
        "status": "known",
        "cause": "seen",
        "channels": {
@@ -2593,7 +3254,7 @@
      "detail": "Ground speed stayed over the gear cap for 151 samples with displacement_cause none. Cap source: server. If this was a ragdoll or explosion, the server did not mark it."
     },
     "graph": "sha256:0dcf9c7867e75c074704b6c892e7cc4421b886d536fb197c50c6d88ce1ebf7f5",
-    "packet": "sha256:ebea9c49d68d294ffc45adec8d5362427d18565a3faa03aa6f4fbea653efa445",
+    "packet": "sha256:ff7ce1b2be3e564d587b9e359470fc43a5e574a40bc02e1402cde464c543e758",
     "experimental": false,
     "label": null
    },
@@ -2607,11 +3268,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:f92207b81191d7525b810e49fe00ce199f32c6cd68d9e91e24633557043f60fc",
+     "packet": "sha256:89743307d3f16f3e1a6b4fc1f738bb786d4ccb2ab5eabcc90fa466c72fc23e0f",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:82bc44a69fa2feed3e485d2984a698b8ff19b1a8d0d5d38947089b99aadcd26f",
+      "digest": "sha256:9ad51ddd2396de11bfda00df5c3543bbe3f2b50d2d9d04abd2e7a3cce25ef8c6",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2739,432 +3400,12 @@
       "speed"
      ],
      "graph": "sha256:0dcf9c7867e75c074704b6c892e7cc4421b886d536fb197c50c6d88ce1ebf7f5",
-     "packet": "sha256:ebea9c49d68d294ffc45adec8d5362427d18565a3faa03aa6f4fbea653efa445",
+     "packet": "sha256:ff7ce1b2be3e564d587b9e359470fc43a5e574a40bc02e1402cde464c543e758",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:2eb402115d2fd617b49eb51dd698e98c0070799d1edf7ff908d443ed06c2e19b",
-      "events": 350
-     },
-     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
-     "challenges": [],
-     "fusion": null,
-     "eligibility": {
-      "speed": {
-       "eligible": [
-        ""
-       ]
-      },
-      "fire_rate": {
-       "eligible": [
-        "rifle"
-       ]
-      },
-      "metronome": {
-       "not_applicable": [
-        "rifle"
-       ]
-      },
-      "recoil_floor": {
-       "insufficient_samples": [
-        "arena-rifle|"
-       ]
-      },
-      "mirror": {
-       "eligible": [
-        "arena-rifle|"
-       ]
-      },
-      "recoil_learned": {
-       "not_applicable": [
-        "arena-rifle|"
-       ]
-      },
-      "accuracy": {
-       "baseline_too_thin": [
-        "rifle"
-       ]
-      },
-      "headshot_rate": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "median_distance": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "geometry_rate": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "extra": {
-       "disabled": [
-        ""
-       ]
-      },
-      "rank_tail": {
-       "baseline_too_thin": [
-        "accuracy:rifle"
-       ],
-       "insufficient_samples": [
-        "geometry_rate:rifle",
-        "headshot_rate:rifle",
-        "median_distance:rifle",
-        "recoil:arena-rifle|"
-       ]
-      },
-      "view_snaps": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "acquire_timing": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "supporting_extra": {
-       "disabled": [
-        ""
-       ]
-      },
-      "account_jump": {
-       "telemetry_unavailable": [
-        ""
-       ]
-      },
-      "hidden": {
-       "eligible": [
-        "rifle"
-       ]
-      },
-      "quiet_aim": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "wire": {
-       "eligible": [
-        "rifle"
-       ]
-      },
-      "occluded_motion_replay": {
-       "telemetry_unavailable": [
-        ""
-       ]
-      },
-      "leftover": {
-       "baseline_too_thin": [
-        "rifle"
-       ]
-      },
-      "voice": {
-       "not_applicable": [
-        ""
-       ]
-      }
-     }
-    }
-   },
-   "realization": {
-    "status": "no_challenge"
-   },
-   "secret_leaks": [],
-   "personal_data": [],
-   "client": {
-    "entities_received": 1,
-    "probe_updates": 0,
-    "probe_sounds": 0,
-    "sounds": 70,
-    "fps_median": 145.0
-   },
-   "timing": {
-    "server_tick_hz": 60,
-    "match_ms": 30000,
-    "ticks": 1800,
-    "tick_us_mean": 311.8,
-    "tick_us_max": 1972,
-    "knowledge_us_per_tick": 30.9,
-    "challenge_us_per_probe_tick": 4264.0,
-    "rays_per_tick": 15.1,
-    "event_bytes_per_s": 8264.8,
-    "event_lines": 650,
-    "snapshot_bytes_per_s": 3464.9,
-    "feed_bytes_per_s": 69507.7,
-    "scoring_ms_live": 12.0,
-    "parse_errors": 0,
-    "verdicts": {
-     "audio": {},
-     "vision": {}
-    },
-    "probe_ticks": 0,
-    "memory_static_peak_bytes": 42150914
-   },
-   "exit_codes": [
-    0,
-    0
-   ],
-   "wall_s": 32.4,
-   "deterministic": false,
-   "files": {
-    "events.ndjson": {
-     "file": "examples/fps-arena/captures/impossible_speed/events.ndjson",
-     "sha256": "sha256:5f42f12b578e4c0e7e52847be96613011c4be0dbe5937988302ed6697654794e",
-     "lines": 650
-    }
-   }
-  },
-  {
-   "id": "normal_play",
-   "title": "Normal play",
-   "match_id": "arena-normal_play-1",
-   "expected": {
-    "decision": [
-     "clean",
-     "insufficient_data"
-    ],
-    "no_review": true,
-    "kinds": [],
-    "eligibility": {
-     "speed": "eligible",
-     "hidden": "eligible"
-    },
-    "knowledge": {
-     "arena-bot-a": "known"
-    }
-   },
-   "observed": {
-    "decision": "insufficient_data",
-    "automated_action": "none",
-    "kinds": [],
-    "observations": [],
-    "eligibility": {
-     "speed": "eligible",
-     "fire_rate": "eligible",
-     "metronome": "not_applicable",
-     "recoil_floor": "insufficient_samples",
-     "mirror": "eligible",
-     "recoil_learned": "not_applicable",
-     "accuracy": "baseline_too_thin",
-     "headshot_rate": "baseline_too_thin",
-     "median_distance": "insufficient_samples",
-     "geometry_rate": "insufficient_samples",
-     "extra": "disabled",
-     "rank_tail": "baseline_too_thin",
-     "view_snaps": "telemetry_unavailable",
-     "acquire_timing": "telemetry_unavailable",
-     "supporting_extra": "disabled",
-     "account_jump": "telemetry_unavailable",
-     "hidden": "eligible",
-     "quiet_aim": "telemetry_unavailable",
-     "wire": "eligible",
-     "occluded_motion_replay": "telemetry_unavailable",
-     "leftover": "baseline_too_thin",
-     "voice": "not_applicable"
-    },
-    "challenge": null,
-    "fusion": null,
-    "knowledge": {
-     "arena-bot-a": "known"
-    },
-    "knowledge_detail": {
-     "arena-bot-a": {
-      "events": 311,
-      "statuses": {
-       "known": 311
-      },
-      "causes": {
-       "seen": 311
-      },
-      "latest": {
-       "t_ms": 30000,
-       "status": "known",
-       "cause": "seen",
-       "channels": {
-        "audio": "known",
-        "recent_perception": "known",
-        "vision": "known"
-       },
-       "required": [
-        "vision",
-        "audio"
-       ],
-       "since_perceived_ms": 0.0,
-       "hidden_track_ms": null,
-       "event_type": "movement"
-      },
-      "majority": "known"
-     }
-    },
-    "speed": {
-     "eligible": 300,
-     "excluded_innocent": 0,
-     "excluded_unknown": 0,
-     "excluded_airborne": 0,
-     "missing_cap": 0,
-     "violations": 0,
-     "longest_run": 0,
-     "sustained": false,
-     "spike_samples": 0,
-     "cap_source": "server",
-     "detail": ""
-    },
-    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:9232a5fce50c45f325433af09cfda30015d940631967d94191f37dd4eafe5659",
-    "experimental": false,
-    "label": null
-   },
-   "problems": [],
-   "as_expected": true,
-   "live_vs_offline": "identical",
-   "case_problems": {},
-   "cases": {
-    "arena-bot-a": {
-     "decision": "insufficient_data",
-     "observations": [],
-     "kinds": [],
-     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:85a2b6326e3654738a18efb039fe5c9c196ee88f57feae30c64e7ef925fb441b",
-     "packet_recipe": "fpsdet.packet/5",
-     "inputs": {
-      "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:04e698b87c7486bdec75dc18cd94ce48e1428c52b688289281137d7f4e2d6086",
-      "events": 330
-     },
-     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
-     "challenges": [],
-     "fusion": null,
-     "eligibility": {
-      "speed": {
-       "eligible": [
-        ""
-       ]
-      },
-      "fire_rate": {
-       "eligible": [
-        "rifle"
-       ]
-      },
-      "metronome": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "recoil_floor": {
-       "insufficient_samples": [
-        "arena-rifle|"
-       ]
-      },
-      "mirror": {
-       "eligible": [
-        "arena-rifle|"
-       ]
-      },
-      "recoil_learned": {
-       "not_applicable": [
-        "arena-rifle|"
-       ]
-      },
-      "accuracy": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "headshot_rate": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "median_distance": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "geometry_rate": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "extra": {
-       "disabled": [
-        ""
-       ]
-      },
-      "rank_tail": {
-       "insufficient_samples": [
-        "accuracy:rifle",
-        "geometry_rate:rifle",
-        "headshot_rate:rifle",
-        "median_distance:rifle",
-        "recoil:arena-rifle|"
-       ]
-      },
-      "view_snaps": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "acquire_timing": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "supporting_extra": {
-       "disabled": [
-        ""
-       ]
-      },
-      "account_jump": {
-       "telemetry_unavailable": [
-        ""
-       ]
-      },
-      "hidden": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "quiet_aim": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "wire": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "occluded_motion_replay": {
-       "telemetry_unavailable": [
-        ""
-       ]
-      },
-      "leftover": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "voice": {
-       "not_applicable": [
-        ""
-       ]
-      }
-     }
-    },
-    "arena-player": {
-     "decision": "insufficient_data",
-     "observations": [],
-     "kinds": [],
-     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:9232a5fce50c45f325433af09cfda30015d940631967d94191f37dd4eafe5659",
-     "packet_recipe": "fpsdet.packet/5",
-     "inputs": {
-      "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:b0844717b7c50a51e11b081848ac9f1b563cc7eef9bfd28656f36a5be6101e9d",
-      "events": 349
+      "digest": "sha256:1a86946472943209ab0a5c535febeb83ccdaf28fac7cd43684e7234363545f2f",
+      "events": 357
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -3298,6 +3539,433 @@
     "entities_received": 1,
     "probe_updates": 0,
     "probe_sounds": 0,
+    "sounds": 75,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 334.9,
+    "tick_us_max": 3834,
+    "knowledge_us_per_tick": 33.1,
+    "challenge_us_per_probe_tick": 4791.0,
+    "rays_per_tick": 2.3,
+    "event_bytes_per_s": 8500.8,
+    "event_lines": 657,
+    "snapshot_bytes_per_s": 3468.1,
+    "feed_bytes_per_s": 74599.9,
+    "scoring_ms_live": 9.0,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 43641501
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/impossible_speed/events.ndjson",
+     "sha256": "sha256:8120b34a34be008ea4bb8d33a9e22e5ea08534e9119d459d00ae3c0928dc66ad",
+     "lines": 657
+    }
+   }
+  },
+  {
+   "id": "normal_play",
+   "title": "Normal play",
+   "match_id": "arena-normal_play-1",
+   "actor": {
+    "label": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": null,
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
+   "expected": {
+    "decision": [
+     "clean",
+     "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+     "speed": "eligible",
+     "hidden": "eligible"
+    },
+    "knowledge": {
+     "arena-bot-a": "known"
+    }
+   },
+   "observed": {
+    "decision": "insufficient_data",
+    "automated_action": "none",
+    "kinds": [],
+    "observations": [],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "baseline_too_thin",
+     "geometry_rate": "baseline_too_thin",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 311,
+      "statuses": {
+       "known": 311
+      },
+      "causes": {
+       "seen": 311
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+    "packet": "sha256:7d59e06584ad5b92209b1d6b9970ed767dc75fd6af3de1049ff54ede32c18c49",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:08c25d95f4a91080a1e6f904a6dfda9e2acd17ea1813da37b6fb6b078808b926",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:04ea35b3f52830f407494e6f7dd7505ec4a97ba2905718004bbba8648e040c18",
+      "events": 330
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+     "packet": "sha256:7d59e06584ad5b92209b1d6b9970ed767dc75fd6af3de1049ff54ede32c18c49",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:d6facb177051dd520aa19a7d3d83f8e65e6013a2f3b8d201fa81e2ff0698b810",
+      "events": 352
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "insufficient_samples": [
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
     "sounds": 105,
     "fps_median": 145.0
    },
@@ -3305,35 +3973,35 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 298.3,
-    "tick_us_max": 3154,
-    "knowledge_us_per_tick": 29.2,
-    "challenge_us_per_probe_tick": 4546.0,
+    "tick_us_mean": 336.5,
+    "tick_us_max": 2965,
+    "knowledge_us_per_tick": 33.0,
+    "challenge_us_per_probe_tick": 5042.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9049.1,
-    "event_lines": 679,
-    "snapshot_bytes_per_s": 3464.8,
-    "feed_bytes_per_s": 70239.9,
-    "scoring_ms_live": 14.4,
+    "event_bytes_per_s": 9097.4,
+    "event_lines": 682,
+    "snapshot_bytes_per_s": 3466.5,
+    "feed_bytes_per_s": 74745.5,
+    "scoring_ms_live": 14.3,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42150794
+    "memory_static_peak_bytes": 43641381
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.5,
+   "wall_s": 32.4,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/normal_play/events.ndjson",
-     "sha256": "sha256:f0a1d0f76d81435deccc4d524497498e65a8aacb5a9042f6ee85cfb2ef1bf2e4",
-     "lines": 679
+     "sha256": "sha256:b07d6ec3f52df37e6b2b0ba5d1389b033305d2439bb1e2b1ad177d241ff09ba1",
+     "lines": 682
     }
    }
   },
@@ -3341,6 +4009,13 @@
    "id": "recoil_floor",
    "title": "Recoil floor",
    "match_id": "arena-recoil_floor-1",
+   "actor": {
+    "label": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": null,
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "review",
     "kinds": [
@@ -3431,7 +4106,7 @@
      "detail": ""
     },
     "graph": "sha256:7058168a8eedc891d46544307488596cb53685d06b606f1fd29d12cf2f0323a8",
-    "packet": "sha256:2d811950fe358fd53a6117707853836e2d76bb247703c658fd2cc9d88a0ea545",
+    "packet": "sha256:d370d13159d11d2ab39a6ab0736e62cbf8565cbe9710c06efab50ccde8dfa103",
     "experimental": false,
     "label": null
    },
@@ -3445,11 +4120,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:4d3623c892837c8e7f8c7c1c4cffc85b8f489bb29c281b27f2f76b6acc87269f",
+     "packet": "sha256:3f66c751abc40cb2f735f073c97f39af45a85847dddaa63881ab51ca4c23ae36",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:29f6c7d37903a91dabee3f64463ba2be152d9d4a07dc5951db7fe7784d8d58e2",
+      "digest": "sha256:d40fef2a8817bdd85a48a1c97b0d9a4e8e470863d0b9c18ccb9df3cd277ada82",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -3577,11 +4252,11 @@
       "recoil_floor"
      ],
      "graph": "sha256:7058168a8eedc891d46544307488596cb53685d06b606f1fd29d12cf2f0323a8",
-     "packet": "sha256:2d811950fe358fd53a6117707853836e2d76bb247703c658fd2cc9d88a0ea545",
+     "packet": "sha256:d370d13159d11d2ab39a6ab0736e62cbf8565cbe9710c06efab50ccde8dfa103",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:a068cf2eab430f0eb0c5bab73d1a94c42715e78ce07baf858b0e9c90f9770eb6",
+      "digest": "sha256:bcdf75a4f620a649f3fbe24f8309b44c67b8feebb99f6546a518332f8da2cccf",
       "events": 508
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -3723,23 +4398,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 226.2,
-    "tick_us_max": 718,
-    "knowledge_us_per_tick": 20.7,
-    "challenge_us_per_probe_tick": 2769.0,
+    "tick_us_mean": 274.8,
+    "tick_us_max": 2836,
+    "knowledge_us_per_tick": 27.2,
+    "challenge_us_per_probe_tick": 3487.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 11713.1,
+    "event_bytes_per_s": 11662.7,
     "event_lines": 808,
-    "snapshot_bytes_per_s": 3482.8,
-    "feed_bytes_per_s": 74242.7,
-    "scoring_ms_live": 11.2,
+    "snapshot_bytes_per_s": 3479.5,
+    "feed_bytes_per_s": 77157.2,
+    "scoring_ms_live": 15.1,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42150818
+    "memory_static_peak_bytes": 43641405
    },
    "exit_codes": [
     0,
@@ -3750,7 +4425,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/recoil_floor/events.ndjson",
-     "sha256": "sha256:6b4242662e9eae1d4be3b4b46db517fdc8cc2f8174f9d760241085ecfe588225",
+     "sha256": "sha256:1a3b47f3acb6750977da2ef1ce5458bb31ed8573c26cd5a94df89035ec927c11",
      "lines": 808
     }
    }
@@ -3759,6 +4434,13 @@
    "id": "recoil_mirror",
    "title": "Recoil mirror",
    "match_id": "arena-recoil_mirror-1",
+   "actor": {
+    "label": "SCRIPTED TEST STAND-IN (same-tick recoil mirror) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": "mirror",
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "review",
     "kinds": [
@@ -3808,12 +4490,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 449,
+      "events": 450,
       "statuses": {
-       "known": 449
+       "known": 450
       },
       "causes": {
-       "seen": 449
+       "seen": 450
       },
       "latest": {
        "t_ms": 30000,
@@ -3849,7 +4531,7 @@
      "detail": ""
     },
     "graph": "sha256:f8ae819d8ac2a31010322cae1af27793c710fa9d1893975a988444c049f7fa91",
-    "packet": "sha256:da6a2828034785392c03f8fe7657e67484a466ff56f48925767e1c7156ac3e46",
+    "packet": "sha256:a0b09073611900f7376304ce52fb02732689853027ea009d0388e5163169bfcb",
     "experimental": false,
     "label": null
    },
@@ -3995,11 +4677,11 @@
       "mirror"
      ],
      "graph": "sha256:f8ae819d8ac2a31010322cae1af27793c710fa9d1893975a988444c049f7fa91",
-     "packet": "sha256:da6a2828034785392c03f8fe7657e67484a466ff56f48925767e1c7156ac3e46",
+     "packet": "sha256:a0b09073611900f7376304ce52fb02732689853027ea009d0388e5163169bfcb",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:0f833a33e2574039c2962937c09a16a66c0ee02e479b23b20d331b4119e8b969",
+      "digest": "sha256:91543e9ddaf09b314ad1db042b3aa3945cdb60d65083cdab0565efdad3839034",
       "events": 508
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4139,23 +4821,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 215.4,
-    "tick_us_max": 1073,
-    "knowledge_us_per_tick": 19.9,
-    "challenge_us_per_probe_tick": 2693.0,
+    "tick_us_mean": 271.8,
+    "tick_us_max": 1407,
+    "knowledge_us_per_tick": 25.5,
+    "challenge_us_per_probe_tick": 3744.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 11578.7,
+    "event_bytes_per_s": 11584.3,
     "event_lines": 808,
-    "snapshot_bytes_per_s": 3542.8,
-    "feed_bytes_per_s": 74404.8,
-    "scoring_ms_live": 10.5,
+    "snapshot_bytes_per_s": 3543.1,
+    "feed_bytes_per_s": 78495.1,
+    "scoring_ms_live": 14.0,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42150842
+    "memory_static_peak_bytes": 43641429
    },
    "exit_codes": [
     0,
@@ -4166,7 +4848,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/recoil_mirror/events.ndjson",
-     "sha256": "sha256:f6d4eb4de563d10885a00d667f05b12e580f1da01e4794bcdc28791a959a9046",
+     "sha256": "sha256:f8283fe46eaeae17260a829c877a398c15d454d2064d2e9d5fe3a1b4e430c857",
      "lines": 808
     }
    }
@@ -4175,6 +4857,13 @@
    "id": "unchecked_audio_channel",
    "title": "Unknown: audio telemetry missing",
    "match_id": "arena-unchecked_audio_channel-1",
+   "actor": {
+    "label": "SCRIPTED TEST STAND-IN (reader of hidden positions) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": "wallhack",
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": [
      "clean",
@@ -4266,7 +4955,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:3fd6b7f95924a68b749d4a03219cdb35c9d6260b8f5f2c45fd3d3a40cf6cb143",
+    "packet": "sha256:22333f1c9599c9e195128bb7aa8327a9749951f838063e18ac8b296f4ca15257",
     "experimental": false,
     "label": null
    },
@@ -4408,11 +5097,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:3fd6b7f95924a68b749d4a03219cdb35c9d6260b8f5f2c45fd3d3a40cf6cb143",
+     "packet": "sha256:22333f1c9599c9e195128bb7aa8327a9749951f838063e18ac8b296f4ca15257",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:36304d05bcdae825430703fbaabc9bb2bcef83296c1d137ac144d54e6e5fb569",
+      "digest": "sha256:0247bdb3a9c07bb6be5c28ff5a418408b2f332bf6ca4d981547fbd1e72b9c9d9",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4554,23 +5243,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 682.2,
-    "tick_us_max": 1987,
-    "knowledge_us_per_tick": 217.0,
-    "challenge_us_per_probe_tick": 2621.0,
+    "tick_us_mean": 785.8,
+    "tick_us_max": 3105,
+    "knowledge_us_per_tick": 242.5,
+    "challenge_us_per_probe_tick": 3645.0,
     "rays_per_tick": 378.0,
-    "event_bytes_per_s": 8925.9,
+    "event_bytes_per_s": 8925.5,
     "event_lines": 681,
-    "snapshot_bytes_per_s": 3607.3,
-    "feed_bytes_per_s": 66335.2,
-    "scoring_ms_live": 8.1,
+    "snapshot_bytes_per_s": 3607.1,
+    "feed_bytes_per_s": 70654.1,
+    "scoring_ms_live": 11.7,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42151082
+    "memory_static_peak_bytes": 43641669
    },
    "exit_codes": [
     0,
@@ -4581,7 +5270,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unchecked_audio_channel/events.ndjson",
-     "sha256": "sha256:314bce2d1acba501297eb0141f15642c271d6e10fd7f3c6cd4f64738e1e6f50e",
+     "sha256": "sha256:673e93f903ab1435c4c2ba79bdfe27cf361ccf244902147088f9fe1c52d7bb46",
      "lines": 681
     }
    }
@@ -4590,6 +5279,13 @@
    "id": "unknowable_hidden_enemy",
    "title": "Hidden and unknowable",
    "match_id": "arena-unknowable_hidden_enemy-1",
+   "actor": {
+    "label": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": null,
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": [
      "clean",
@@ -4621,8 +5317,8 @@
      "recoil_learned": "not_applicable",
      "accuracy": "baseline_too_thin",
      "headshot_rate": "baseline_too_thin",
-     "median_distance": "insufficient_samples",
-     "geometry_rate": "insufficient_samples",
+     "median_distance": "baseline_too_thin",
+     "geometry_rate": "baseline_too_thin",
      "extra": "disabled",
      "rank_tail": "baseline_too_thin",
      "view_snaps": "telemetry_unavailable",
@@ -4644,12 +5340,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 294,
+      "events": 301,
       "statuses": {
-       "known": 294
+       "known": 301
       },
       "causes": {
-       "seen": 294
+       "seen": 301
       },
       "latest": {
        "t_ms": 30000,
@@ -4671,15 +5367,15 @@
       "majority": "known"
      },
      "arena-bot-b": {
-      "events": 23,
+      "events": 17,
       "statuses": {
-       "unknowable": 23
+       "unknowable": 17
       },
       "causes": {
-       "unknowable": 23
+       "unknowable": 17
       },
       "latest": {
-       "t_ms": 27100,
+       "t_ms": 28633,
        "status": "unknowable",
        "cause": "unknowable",
        "channels": {
@@ -4692,8 +5388,8 @@
         "audio"
        ],
        "since_perceived_ms": null,
-       "hidden_track_ms": null,
-       "event_type": "movement"
+       "hidden_track_ms": 33.333,
+       "event_type": "shot"
       },
       "majority": "unknowable"
      }
@@ -4712,7 +5408,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:28a04beb00f384fa6cdf84365851cd882924a3b9a998e984b9443c66024c0462",
+    "packet": "sha256:85724cf0bd0d7019cfb1788d0ce1e211559c9a7de525745e8305cd11746f1380",
     "experimental": false,
     "label": null
    },
@@ -4726,11 +5422,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:0c115fa8d462115b4cd208ac04835625d1abd2ba39c4182ad428e7e5cb6ca49c",
+     "packet": "sha256:d19e5c2f8dd6c77e9dc9bccf35b15772e39fdb45ab144ecbc382de8528697dbc",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:18339acc9534ea70bad30d2fa6bb014802aee30e3a99444f3506b76a9b6d93be",
+      "digest": "sha256:4a2f03c5566a28628a6726c01dd69a05aba809d43619151c1f16caf4fbdcceae",
       "events": 330
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4858,11 +5554,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:0c11503806047e9fcd54fec52c354120efc6637434f4dfccdd6fd19882033c6d",
+     "packet": "sha256:06a2e4418b28d268b81e166372d378332848988d80c151e3c0bc8c4f9bb78495",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:dc9023ec4a659b7c20c44ac24a02b5ff76f5de3432961b9bf6df7bfe832fe023",
+      "digest": "sha256:88cd2c326934b4a486660f9a4e7808d5631afaf525eb6f76d6a33edd3d83e85a",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4986,12 +5682,12 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:28a04beb00f384fa6cdf84365851cd882924a3b9a998e984b9443c66024c0462",
+     "packet": "sha256:85724cf0bd0d7019cfb1788d0ce1e211559c9a7de525745e8305cd11746f1380",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:d040d33cdf4326a604a8696d888c303285d929f00448faf5132cbf55070583c8",
-      "events": 352
+      "digest": "sha256:9b03db70cbab3397460d3cef2864240e6ecb556338ac387111b3c7cf1a0d448d",
+      "events": 357
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -5038,12 +5734,12 @@
        ]
       },
       "median_distance": {
-       "insufficient_samples": [
+       "baseline_too_thin": [
         "rifle"
        ]
       },
       "geometry_rate": {
-       "insufficient_samples": [
+       "baseline_too_thin": [
         "rifle"
        ]
       },
@@ -5055,11 +5751,11 @@
       "rank_tail": {
        "baseline_too_thin": [
         "accuracy:rifle",
-        "headshot_rate:rifle"
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
        ],
        "insufficient_samples": [
-        "geometry_rate:rifle",
-        "median_distance:rifle",
         "recoil:arena-rifle|"
        ]
       },
@@ -5132,23 +5828,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 686.4,
-    "tick_us_max": 1787,
-    "knowledge_us_per_tick": 228.7,
-    "challenge_us_per_probe_tick": 2816.0,
-    "rays_per_tick": 351.2,
-    "event_bytes_per_s": 13067.6,
-    "event_lines": 982,
-    "snapshot_bytes_per_s": 4666.7,
-    "feed_bytes_per_s": 79250.5,
-    "scoring_ms_live": 11.7,
+    "tick_us_mean": 802.1,
+    "tick_us_max": 2196,
+    "knowledge_us_per_tick": 251.8,
+    "challenge_us_per_probe_tick": 3482.0,
+    "rays_per_tick": 350.5,
+    "event_bytes_per_s": 13143.3,
+    "event_lines": 987,
+    "snapshot_bytes_per_s": 4668.7,
+    "feed_bytes_per_s": 83785.7,
+    "scoring_ms_live": 16.5,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42151082
+    "memory_static_peak_bytes": 43641669
    },
    "exit_codes": [
     0,
@@ -5159,8 +5855,8 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unknowable_hidden_enemy/events.ndjson",
-     "sha256": "sha256:84e9def5597fa024bd8abb212a5e0924f30ba69bf2a86b0dc75112d1ccd5a3e6",
-     "lines": 982
+     "sha256": "sha256:31f7ec15cf94f8fadd677201a35dc328c182073911af2ea12c22e642378a4e3b",
+     "lines": 987
     }
    }
   },
@@ -5168,6 +5864,13 @@
    "id": "unknowable_hidden_tracked",
    "title": "Hidden and unknowable, tracked",
    "match_id": "arena-unknowable_hidden_tracked-1",
+   "actor": {
+    "label": "SCRIPTED TEST STAND-IN (reader of hidden positions) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": "wallhack",
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "review",
     "kinds": [
@@ -5261,7 +5964,7 @@
      "detail": ""
     },
     "graph": "sha256:cfac11f634fb0275a5a70cfb2022f75615bfb83e2300c8356fb0c9aa5ce51303",
-    "packet": "sha256:2b62d9b056310e0cac0bb8067c3d5c4f8657b6dad2e7aaeabc2daeb1b70d2552",
+    "packet": "sha256:2e03ad77361d0d4d186624d4d384a96f7735ae348048c6d3547d23b387b5d947",
     "experimental": false,
     "label": null
    },
@@ -5275,11 +5978,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:aa7c42ef3b471670de66279daf4a4c4d343ef9e48084c5aa4a0f8cf787a89cf5",
+     "packet": "sha256:a99bbeb3a20987ae3eb9a8ee72e676b9c93bc18a5b4b8d696e81d48941d5678c",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:360024d976bd3edfa448503c115ec8f911ea494007577c91cb14ab02a98784cd",
+      "digest": "sha256:f164458f302986e97c59346ba510b1a402c14af54af860ae7e4079bb8a882cf6",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5407,11 +6110,11 @@
       "hidden"
      ],
      "graph": "sha256:cfac11f634fb0275a5a70cfb2022f75615bfb83e2300c8356fb0c9aa5ce51303",
-     "packet": "sha256:2b62d9b056310e0cac0bb8067c3d5c4f8657b6dad2e7aaeabc2daeb1b70d2552",
+     "packet": "sha256:2e03ad77361d0d4d186624d4d384a96f7735ae348048c6d3547d23b387b5d947",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:bc75f1d35de46ecca16cbd6b37ed36e69b3d43824baa11e4ca5332f24def2eb5",
+      "digest": "sha256:ac83524930c85859e30d255e89ce699216723c3bced6821447f851fe173883ae",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5553,23 +6256,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 673.0,
-    "tick_us_max": 1915,
-    "knowledge_us_per_tick": 218.8,
-    "challenge_us_per_probe_tick": 2537.0,
+    "tick_us_mean": 778.1,
+    "tick_us_max": 2857,
+    "knowledge_us_per_tick": 242.2,
+    "challenge_us_per_probe_tick": 3582.0,
     "rays_per_tick": 378.0,
-    "event_bytes_per_s": 9170.4,
+    "event_bytes_per_s": 9170.1,
     "event_lines": 681,
-    "snapshot_bytes_per_s": 3607.1,
-    "feed_bytes_per_s": 66702.7,
-    "scoring_ms_live": 11.9,
+    "snapshot_bytes_per_s": 3607.2,
+    "feed_bytes_per_s": 71165.2,
+    "scoring_ms_live": 11.3,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42151130
+    "memory_static_peak_bytes": 43641717
    },
    "exit_codes": [
     0,
@@ -5580,7 +6283,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unknowable_hidden_tracked/events.ndjson",
-     "sha256": "sha256:7964c61258eed38e6f66dce38500eaafe793b110746c42b806a114876bf6b9a6",
+     "sha256": "sha256:f17e7364d031b17d721daef962870126db117bcf146a0a94b3403ba1af9535c3",
      "lines": 681
     }
    }
@@ -5589,6 +6292,13 @@
    "id": "wire_vs_picture",
    "title": "Wire vs picture",
    "match_id": "arena-wire_vs_picture-1",
+   "actor": {
+    "label": "SCRIPTED TEST STAND-IN (reader of the newest snapshot) · NOT A HUMAN · NOT REAL CHEAT SOFTWARE",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": "packet_reader",
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
    "expected": {
     "decision": "review",
     "kinds": [
@@ -5605,7 +6315,7 @@
      "wire"
     ],
     "observations": [
-     "obs-41d96dfbc324ff037372216e"
+     "obs-9f3cb52387b67b6010e81b33"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -5638,12 +6348,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 351,
+      "events": 344,
       "statuses": {
-       "known": 351
+       "known": 344
       },
       "causes": {
-       "seen": 351
+       "seen": 344
       },
       "latest": {
        "t_ms": 30000,
@@ -5678,8 +6388,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:7d04224c3c55c7d32578858e2fc03c065626581baaac46992fe16607f1f5fd63",
-    "packet": "sha256:ceb4ab0a267037659477a94517aa605b3533ebcbf79fce42b3aab56b1b379e64",
+    "graph": "sha256:b4a7a2c78eb7d378d56393d5059ca04e0a8c9d41be2a29eebbf27f4375b708fd",
+    "packet": "sha256:e6d3d92fe842649fda723ee261512e853fd449a0f032bc724f49dee21ca2635b",
     "experimental": false,
     "label": null
    },
@@ -5693,11 +6403,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:d0d3b85859b9e65b309631791f13475ed6d6cdf64201827d37806de222d1566f",
+     "packet": "sha256:76a16e4bdbc0438bb4f01a970a2662d663333c0f87013fd73cbc60c29c4d2d45",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:d9be06439d0db7400a5b08cdaef3ebbc721a23efc544092bd3ee44f79bc5dcbd",
+      "digest": "sha256:a4c27c46fbbed7b03e5eb7ee6b87efb491f57a0e7c9e64f682a5c0e6c460701c",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5819,18 +6529,18 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-41d96dfbc324ff037372216e"
+      "obs-9f3cb52387b67b6010e81b33"
      ],
      "kinds": [
       "wire"
      ],
-     "graph": "sha256:7d04224c3c55c7d32578858e2fc03c065626581baaac46992fe16607f1f5fd63",
-     "packet": "sha256:ceb4ab0a267037659477a94517aa605b3533ebcbf79fce42b3aab56b1b379e64",
+     "graph": "sha256:b4a7a2c78eb7d378d56393d5059ca04e0a8c9d41be2a29eebbf27f4375b708fd",
+     "packet": "sha256:e6d3d92fe842649fda723ee261512e853fd449a0f032bc724f49dee21ca2635b",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:d647617802df964b61b4bf15ad0fdd588a181954b9e7c35a8e3830f2db1a34db",
-      "events": 421
+      "digest": "sha256:ed79809e073f5198392d6e741420e8567c84cf130fe9b174d0e310358846b448",
+      "events": 422
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -5969,23 +6679,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 217.1,
-    "tick_us_max": 726,
-    "knowledge_us_per_tick": 20.4,
-    "challenge_us_per_probe_tick": 2536.0,
+    "tick_us_mean": 261.5,
+    "tick_us_max": 1234,
+    "knowledge_us_per_tick": 24.9,
+    "challenge_us_per_probe_tick": 3320.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9904.5,
-    "event_lines": 721,
-    "snapshot_bytes_per_s": 3600.8,
-    "feed_bytes_per_s": 73333.2,
-    "scoring_ms_live": 9.5,
+    "event_bytes_per_s": 9884.1,
+    "event_lines": 722,
+    "snapshot_bytes_per_s": 3601.2,
+    "feed_bytes_per_s": 77661.7,
+    "scoring_ms_live": 11.7,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 42150890
+    "memory_static_peak_bytes": 43641477
    },
    "exit_codes": [
     0,
@@ -5996,8 +6706,8 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/wire_vs_picture/events.ndjson",
-     "sha256": "sha256:217a3ce33657ce2aba7cc350767f59a317e632432802b09de7571a7b8a5c0dd9",
-     "lines": 721
+     "sha256": "sha256:845d85991a509ba2dfbd472236916d5979a9f73781483bf00ebbce22bb8f410d",
+     "lines": 722
     }
    }
   }
@@ -6006,10 +6716,401 @@
   "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED",
   "applies_to": [
    "active_challenge",
-   "angle_hold_false_positive"
+   "angle_hold_false_positive",
+   "exposed_challenge_control"
   ],
   "note": "Challenge reviews are experimental and not production-qualified. The angle-hold scenario is kept as a false-positive control: its review is the known weakness of the time-on-body bar, shown, not fixed."
  },
- "no_person": "Every subject in this result is a scripted autopilot or a server-side stand-in. No person played these matches, and nothing here is a human result.",
- "digest": "sha256:0bd9f893eb4cf307f5ddb615e940a7336c480cde27ac292f8c4ce462e2d85a06"
+ "no_person": "Every subject in this result is a scripted autopilot or a server-side stand-in. No person played these matches, no real cheat software was run, and nothing here is a human result or a detection rate.",
+ "pixel_proof": {
+  "method": "the P12 pilot's: freeze the frame, draw it again with each body hidden in turn, count the pixels that changed",
+  "hidden_scenario": "active_challenge",
+  "visible_scenario": "exposed_challenge_control",
+  "hidden_checks": 8,
+  "hidden_pixels": 0,
+  "hidden_bot_checks_with_pixels": 14,
+  "hidden_frame_stable": true,
+  "visible_checks": 7,
+  "visible_pixels": 1769,
+  "pass": true,
+  "problems": [],
+  "statement": "PLAYER PIXEL PROOF  hidden: 0 challenge pixels in 8 checks  visible control: 1769 changed pixels  PASS",
+  "runs": {
+   "exposed_challenge_control": {
+    "match_id": "arena-exposed_challenge_control-1",
+    "observed": {
+     "decision": "insufficient_data",
+     "automated_action": "none",
+     "kinds": [],
+     "observations": [],
+     "eligibility": {
+      "speed": "eligible",
+      "fire_rate": "eligible",
+      "metronome": "not_applicable",
+      "recoil_floor": "insufficient_samples",
+      "mirror": "eligible",
+      "recoil_learned": "not_applicable",
+      "accuracy": "insufficient_samples",
+      "headshot_rate": "insufficient_samples",
+      "median_distance": "insufficient_samples",
+      "geometry_rate": "insufficient_samples",
+      "extra": "disabled",
+      "rank_tail": "insufficient_samples",
+      "view_snaps": "telemetry_unavailable",
+      "acquire_timing": "telemetry_unavailable",
+      "supporting_extra": "disabled",
+      "account_jump": "telemetry_unavailable",
+      "hidden": "eligible",
+      "quiet_aim": "telemetry_unavailable",
+      "wire": "eligible",
+      "occluded_motion_replay": "not_applicable",
+      "leftover": "insufficient_samples",
+      "voice": "not_applicable"
+     },
+     "challenge": {
+      "challenge_id": "ch-39c328b254fa7e5cc2a83253",
+      "status": "abstained",
+      "cause": "seen",
+      "verification": "per_sample",
+      "eligible_samples": 0,
+      "tracked_samples": 0,
+      "verified_samples": 0,
+      "total_ms": 0,
+      "not_counted": {
+       "seen": 152
+      }
+     },
+     "fusion": null,
+     "knowledge": {
+      "arena-bot-a": "known",
+      "arena-bot-b": "unknowable"
+     },
+     "knowledge_detail": {
+      "arena-bot-a": {
+       "events": 174,
+       "statuses": {
+        "known": 174
+       },
+       "causes": {
+        "seen": 174
+       },
+       "latest": {
+        "t_ms": 32000,
+        "status": "known",
+        "cause": "seen",
+        "channels": {
+         "audio": "known",
+         "recent_perception": "known",
+         "vision": "known"
+        },
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "since_perceived_ms": 0.0,
+        "hidden_track_ms": null,
+        "event_type": "movement"
+       },
+       "majority": "known"
+      },
+      "arena-bot-b": {
+       "events": 12,
+       "statuses": {
+        "unknowable": 12
+       },
+       "causes": {
+        "unknowable": 12
+       },
+       "latest": {
+        "t_ms": 30500,
+        "status": "unknowable",
+        "cause": "unknowable",
+        "channels": {
+         "audio": "absent",
+         "recent_perception": "unchecked",
+         "vision": "absent"
+        },
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "since_perceived_ms": null,
+        "hidden_track_ms": null,
+        "event_type": "movement"
+       },
+       "majority": "unknowable"
+      }
+     },
+     "speed": {
+      "eligible": 320,
+      "excluded_innocent": 0,
+      "excluded_unknown": 0,
+      "excluded_airborne": 0,
+      "missing_cap": 0,
+      "violations": 0,
+      "longest_run": 0,
+      "sustained": false,
+      "spike_samples": 0,
+      "cap_source": "server",
+      "detail": ""
+     },
+     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+     "packet": "sha256:25c298cc710bb116a4ea42d3e7ddd367a862219353dff9745f615458e7dd8d4f",
+     "experimental": true,
+     "label": null
+    },
+    "as_expected": true,
+    "problems": [],
+    "live_vs_offline": "identical",
+    "pixels": {
+     "checks": 16,
+     "probe_checks_drawn": 7,
+     "probe_pixels_max": 1769,
+     "probe_checks_with_pixels": 7,
+     "bot_checks_with_pixels": 13,
+     "bot_pixels_max": 6534,
+     "unchanged_frame_pixels_max": 0,
+     "screenshots": [
+      "view-000100.png",
+      "view-002100.png",
+      "view-004100.png",
+      "view-006100.png",
+      "view-008100.png",
+      "view-010100.png",
+      "view-012100.png",
+      "view-014150.png",
+      "view-016100.png",
+      "view-018100.png",
+      "view-020150.png",
+      "view-022150.png",
+      "view-024100.png",
+      "view-026150.png",
+      "view-028150.png",
+      "view-030150.png"
+     ],
+     "resolution": "640x360, software OpenGL in a private virtual display"
+    },
+    "timing": {
+     "server_tick_hz": 60,
+     "match_ms": 32000,
+     "ticks": 1920,
+     "tick_us_mean": 888.5,
+     "tick_us_max": 2011,
+     "knowledge_us_per_tick": 266.6,
+     "challenge_us_per_probe_tick": 186.5,
+     "rays_per_tick": 350.4,
+     "event_bytes_per_s": 12176.7,
+     "event_lines": 990,
+     "snapshot_bytes_per_s": 5291.2,
+     "feed_bytes_per_s": 93497.5,
+     "scoring_ms_live": 12.1,
+     "parse_errors": 0,
+     "verdicts": {
+      "audio": {
+       "absent": 909
+      },
+      "vision": {
+       "known": 909
+      }
+     },
+     "probe_ticks": 909,
+     "memory_static_peak_bytes": 43641525
+    }
+   },
+   "active_challenge": {
+    "match_id": "arena-active_challenge-1",
+    "observed": {
+     "decision": "review",
+     "automated_action": "none",
+     "kinds": [
+      "occluded_motion_replay"
+     ],
+     "observations": [
+      "obs-959d44048380c30da0639fef"
+     ],
+     "eligibility": {
+      "speed": "eligible",
+      "fire_rate": "eligible",
+      "metronome": "not_applicable",
+      "recoil_floor": "insufficient_samples",
+      "mirror": "eligible",
+      "recoil_learned": "not_applicable",
+      "accuracy": "insufficient_samples",
+      "headshot_rate": "insufficient_samples",
+      "median_distance": "insufficient_samples",
+      "geometry_rate": "insufficient_samples",
+      "extra": "disabled",
+      "rank_tail": "insufficient_samples",
+      "view_snaps": "telemetry_unavailable",
+      "acquire_timing": "telemetry_unavailable",
+      "supporting_extra": "disabled",
+      "account_jump": "telemetry_unavailable",
+      "hidden": "eligible",
+      "quiet_aim": "telemetry_unavailable",
+      "wire": "eligible",
+      "occluded_motion_replay": "eligible",
+      "leftover": "insufficient_samples",
+      "voice": "not_applicable"
+     },
+     "challenge": {
+      "challenge_id": "ch-223bd49254313c0eeac07ce0",
+      "status": "followed",
+      "cause": null,
+      "verification": "per_sample",
+      "eligible_samples": 152,
+      "tracked_samples": 144,
+      "verified_samples": 152,
+      "total_ms": 14388.0,
+      "not_counted": {
+       "seen": 8
+      }
+     },
+     "fusion": null,
+     "knowledge": {
+      "arena-bot-a": "known",
+      "arena-bot-b": "unknowable"
+     },
+     "knowledge_detail": {
+      "arena-bot-a": {
+       "events": 176,
+       "statuses": {
+        "known": 176
+       },
+       "causes": {
+        "seen": 176
+       },
+       "latest": {
+        "t_ms": 32000,
+        "status": "known",
+        "cause": "seen",
+        "channels": {
+         "audio": "known",
+         "recent_perception": "known",
+         "vision": "known"
+        },
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "since_perceived_ms": 0.0,
+        "hidden_track_ms": null,
+        "event_type": "movement"
+       },
+       "majority": "known"
+      },
+      "arena-bot-b": {
+       "events": 11,
+       "statuses": {
+        "unknowable": 11
+       },
+       "causes": {
+        "unknowable": 11
+       },
+       "latest": {
+        "t_ms": 28650,
+        "status": "unknowable",
+        "cause": "unknowable",
+        "channels": {
+         "audio": "absent",
+         "recent_perception": "unchecked",
+         "vision": "absent"
+        },
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "since_perceived_ms": null,
+        "hidden_track_ms": 100.0,
+        "event_type": "shot"
+       },
+       "majority": "unknowable"
+      }
+     },
+     "speed": {
+      "eligible": 320,
+      "excluded_innocent": 0,
+      "excluded_unknown": 0,
+      "excluded_airborne": 0,
+      "missing_cap": 0,
+      "violations": 0,
+      "longest_run": 0,
+      "sustained": false,
+      "spike_samples": 0,
+      "cap_source": "server",
+      "detail": ""
+     },
+     "graph": "sha256:99836b5c61e85e245c10be85920680a3bd812f8ebfce2bb98b1470a2d84f0469",
+     "packet": "sha256:c6168ae693c446d27dc4270e1191e576dcc65d770b46ed0666730d4d1441d66e",
+     "experimental": true,
+     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
+    },
+    "as_expected": true,
+    "problems": [],
+    "live_vs_offline": "identical",
+    "pixels": {
+     "checks": 16,
+     "probe_checks_drawn": 8,
+     "probe_pixels_max": 0,
+     "probe_checks_with_pixels": 0,
+     "bot_checks_with_pixels": 14,
+     "bot_pixels_max": 9491,
+     "unchanged_frame_pixels_max": 0,
+     "screenshots": [
+      "view-000100.png",
+      "view-002100.png",
+      "view-004100.png",
+      "view-006100.png",
+      "view-008100.png",
+      "view-010100.png",
+      "view-012100.png",
+      "view-014100.png",
+      "view-016100.png",
+      "view-018100.png",
+      "view-020150.png",
+      "view-022150.png",
+      "view-024150.png",
+      "view-026150.png",
+      "view-028150.png",
+      "view-030150.png"
+     ],
+     "resolution": "640x360, software OpenGL in a private virtual display"
+    },
+    "timing": {
+     "server_tick_hz": 60,
+     "match_ms": 32000,
+     "ticks": 1920,
+     "tick_us_mean": 926.4,
+     "tick_us_max": 2142,
+     "knowledge_us_per_tick": 363.5,
+     "challenge_us_per_probe_tick": 73.8,
+     "rays_per_tick": 426.1,
+     "event_bytes_per_s": 12365.6,
+     "event_lines": 1019,
+     "snapshot_bytes_per_s": 5293.9,
+     "feed_bytes_per_s": 94141.2,
+     "scoring_ms_live": 11.8,
+     "parse_errors": 0,
+     "verdicts": {
+      "audio": {
+       "absent": 915
+      },
+      "vision": {
+       "absent": 915
+      }
+     },
+     "probe_ticks": 915,
+     "memory_static_peak_bytes": 43641437
+    }
+   }
+  }
+ },
+ "network": {
+  "default_bind": "127.0.0.1",
+  "default_in_source": true,
+  "public_address_tried": "203.0.113.5 (TEST-NET-3, never routed)",
+  "public_bind_refused": true,
+  "exit_code": 3,
+  "listener_after_exit": false
+ },
+ "digest": "sha256:f3ad5551afb07902db0b3adfc8169ed107453056961291eaa278317e77325b32"
 }

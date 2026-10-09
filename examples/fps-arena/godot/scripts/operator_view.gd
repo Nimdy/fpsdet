@@ -73,6 +73,7 @@ var timeline_view: Control
 var panel_root: Control
 var theme: Theme
 var draws := false
+var overlay: Label
 
 
 func _ready() -> void:
@@ -116,6 +117,7 @@ func attach(viewport: Viewport, panel_parent: Control) -> void:
 		probe_node.visible = false
 		probe_label = _label3d()
 		probe_label.visible = false
+		_build_overlay(viewport if not standalone else null)
 	if standalone:
 		panel_root = Control.new()
 		panel_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -370,6 +372,8 @@ func _process(delta: float) -> void:
 		last_frame_ms = 0
 	if draws:
 		_draw_world(delta)
+		if overlay != null:
+			overlay.text = _actor_line(_frame())
 	if panel_root != null or not panels.is_empty():
 		_refresh_panels()
 
@@ -380,7 +384,8 @@ func _frame() -> Dictionary:
 		var row: Dictionary = replay_rows[replay_index]
 		return {"subject": {"pos": row.subject.pos, "yaw": row.subject.yaw, "pitch": row.subject.pitch, "aim": row.subject.aim, "recoil_offset": row.subject.recoil_offset,
 				"override": row.subject.get("override", false), "speed": row.subject.speed}, "enemies": row.enemies, "probe": row.probe, "t_ms": row.t_ms,
-			"audio_query": row.get("audio_query", true), "phase": row.get("phase", ""), "sounds": [], "replay": true}
+			"audio_query": row.get("audio_query", true), "phase": row.get("phase", ""), "sounds": [], "replay": true,
+			"standin": row.get("standin", ""), "subject_input": row.get("subject_input", "human"), "actor": row.get("actor", "")}
 	return latest
 
 
@@ -515,6 +520,38 @@ func _label3d() -> Label3D:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	world.add_child(label)
 	return label
+
+
+## A persistent label over the security view: who is at the keyboard and which scripted stand-in, if any, holds
+## the aim. Large, so a clip of the pane cannot be mistaken for a person or for real cheat software.
+func _build_overlay(viewport: Viewport) -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "ActorOverlay"
+	if viewport != null:
+		viewport.add_child(layer)
+	else:
+		add_child(layer)
+	overlay = Label.new()
+	overlay.position = Vector2(14, 28)
+	overlay.autowrap_mode = TextServer.AUTOWRAP_WORD
+	overlay.size = Vector2(920, 90)
+	overlay.add_theme_font_size_override("font_size", 22)
+	overlay.add_theme_color_override("font_color", Color(1.0, 0.72, 0.25))
+	overlay.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	overlay.add_theme_constant_override("outline_size", 6)
+	layer.add_child(overlay)
+
+
+## The actor line for a frame: the scenario's own label while a stand-in holds the aim, or who is at the keyboard.
+func _actor_line(frame: Dictionary) -> String:
+	var kind := String(frame.get("standin", ""))
+	var open := bool(frame.get("standin_open", kind != "")) if not bool(frame.get("replay", false)) else kind != ""
+	var actor := String(frame.get("actor", latest.get("actor", "")))
+	if kind != "" and open and actor != "":
+		return actor
+	if String(frame.get("subject_input", latest.get("subject_input", "human"))) == "autopilot":
+		return "HONEST AUTOPILOT AT THE KEYBOARD · SCRIPTED · NOT A HUMAN"
+	return "A PERSON AT THE KEYBOARD · no stand-in holds the aim"
 
 
 # Panels.
@@ -682,6 +719,7 @@ func _refresh_strip(frame: Dictionary, spec: Dictionary, subject: Dictionary) ->
 		parts.append("t %5.1f s" % (float(latest.get("t_ms", 0)) / 1000.0))
 		parts.append(_dim(String(latest.get("match_id", ""))))
 		parts.append(String(latest.get("phase", "")))
+	parts.append(_chip("experimental", _actor_line(frame)))
 	var badge = live.get("live_vs_offline") if not replaying else replay_case.get("live_vs_offline")
 	if badge != null:
 		parts.append(_chip(String(badge), "OFFLINE REPLAY: " + String(badge).to_upper()))
@@ -789,13 +827,22 @@ func _case_text(subject: Dictionary, spec: Dictionary) -> String:
 	var lines := []
 	var decision := String(subject.get("decision", ""))
 	lines.append("decision %s   recommended %s   [b]automated_action: %s[/b]" % [_chip(decision), subject.get("recommended_action", ""), _chip("none", String(subject.get("automated_action", "none")))])
+	if decision == "insufficient_data":
+		lines.append("[b]INSUFFICIENT DATA[/b]  This is not a clean verdict. Nothing was comparable: the telemetry and sample volume are not enough for a stronger conclusion. fpsdet writes clean only after at least one number was compared against a thick enough cohort.")
 	if bool(spec.get("experimental", false)) and decision == "review":
 		lines.append(_chip("experimental", "EXPERIMENTAL CHALLENGE RESULT  ·  NOT PRODUCTION QUALIFIED"))
 		if String(spec.get("id", "")) == "angle_hold_false_positive":
 			lines.append("geometric alignment is not the same thing as responding to hidden information")
 	var fusion = subject.get("fusion")
 	if fusion != null and typeof(fusion) == TYPE_DICTIONARY:
-		lines.append("native %s → fused %s  rule %s  signals %s  context %s" % [_chip(String(fusion.native_decision)), _chip(String(fusion.decision)), fusion.rule, fusion.signals, fusion.context])
+		lines.append("native fpsdet result %s   external evidence: %s   final case state %s  (rule %s)" % [_chip(String(fusion.native_decision)),
+			"%d adverse fictional provider record%s" % [int(fusion.signals), "" if int(fusion.signals) == 1 else "s"] if int(fusion.signals) else "context only", _chip(String(fusion.decision)), fusion.rule])
+		if String(fusion.decision) != String(fusion.native_decision):
+			lines.append("[b]EXTERNAL EVIDENCE CAUSED THIS WATCH[/b]  Native fpsdet evidence did not create it. External evidence cannot create a review.")
+		for finding in subject.get("findings", []):
+			if String(finding.get("source", "")) == "external":
+				var auth: Dictionary = finding.get("evidence", {}).get("authenticity", {})
+				lines.append(_dim("record %s: signature %s. A signature verifies origin, not truth." % [finding.get("key", ""), String(auth.get("status", "unsigned"))]))
 	for reason in subject.get("reasons", []):
 		lines.append("• " + String(reason))
 	if subject.has("at_ms"):
@@ -823,8 +870,14 @@ func _findings_text(subject: Dictionary) -> String:
 		return _dim("no observation. A detector that could run and found nothing writes none; one that could not run says so above.")
 	var lines := []
 	for finding in findings:
-		lines.append("[b]%s[/b] %s %s  %s" % [finding.kind, _chip(String(finding.role)), _dim(String(finding.family)), finding.get("key", "")])
+		var source := "external record, not fpsdet's own evidence" if String(finding.get("source", "")) == "external" else String(finding.family)
+		lines.append("[b]%s[/b] %s %s  %s" % [finding.kind, _chip(String(finding.role)), _dim(source), finding.get("key", "")])
 		lines.append("    %s" % finding.get("summary", ""))
+		if finding.kind == "speed" and mode != "demo":
+			var cadence: Dictionary = subject.get("speed_cadence", {})
+			if not cadence.is_empty():
+				lines.append(_dim("    over-cap samples: %d   movement sample interval: %d ms (as emitted)   approx observed run duration: %d ms   the bar counts samples, not milliseconds" % [
+					int(finding.get("evidence", {}).get("longest_run", 0)), int(cadence.get("interval_ms", 0)), int(cadence.get("run_ms", 0))]))
 		lines.append(_dim("    %s  matches %s" % [finding.observation_id, ", ".join(finding.get("match_ids", []))]))
 	return "\n".join(lines)
 
@@ -860,6 +913,7 @@ func _card_text(spec: Dictionary, compact: bool) -> String:
 	var lines := []
 	if not compact:
 		lines.append("[b]%s[/b]" % spec.get("title", ""))
+	lines.append(_chip("experimental", String(spec.get("actor", ""))))
 	lines.append("[b]WHAT THIS TESTS[/b]  %s" % card_spec.get("what_this_tests", ""))
 	lines.append("[b]WHAT THE PLAYER CAN KNOW[/b]  %s" % card_spec.get("player_can_know", ""))
 	lines.append("[b]WHAT THE SERVER KNOWS[/b]  %s" % card_spec.get("server_knows", ""))
@@ -981,6 +1035,12 @@ func _performance_text() -> String:
 	var verdicts: Dictionary = perf.get("verdicts", {})
 	if not verdicts.is_empty():
 		lines.append(_dim("probe verdicts so far: vision %s  audio %s" % [verdicts.get("vision", {}), verdicts.get("audio", {})]))
+	var proof: Dictionary = status.get("pixel_proof", {})
+	if not proof.is_empty():
+		lines.append("[b]PLAYER PIXEL PROOF[/b] (qualification, this code)  hidden: %s challenge pixels in %s checks   visible control: %s changed pixels   %s" % [
+			proof.get("hidden_pixels", "?"), proof.get("hidden_checks", "?"), proof.get("visible_pixels", "?"), _chip("identical" if bool(proof.get("pass", false)) else "mismatch", "PASS" if bool(proof.get("pass", false)) else "FAIL")])
+	else:
+		lines.append(_dim("player pixel proof: this code has not been qualified (run arena.py qualify)"))
 	lines.append(_dim("state %s" % status.get("state", "")) + (_dim("  " + String(status.get("error", ""))) if status.has("error") else ""))
 	return "\n".join(lines)
 
@@ -989,7 +1049,7 @@ func _replay_text() -> String:
 	var frame := _frame()
 	var subject := _subject_case()
 	var lines := []
-	lines.append("[b]%s[/b]  t %d ms  %s" % [replay_match, int(frame.get("t_ms", 0)), "playing" if replay_playing else "paused"])
+	lines.append("[b]%s[/b]  t %d ms  %s   %s" % [replay_match, int(frame.get("t_ms", 0)), "playing" if replay_playing else "paused", _chip("experimental", _actor_line(frame))])
 	lines.append("← → 100 ms   shift ← → 1 s   space play   home/end   r leaves replay")
 	if not subject.is_empty():
 		lines.append("case then: %s   findings %s" % [_chip(String(subject.get("decision", ""))), subject.get("checks", [])])

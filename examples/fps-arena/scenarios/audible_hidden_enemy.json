@@ -4,7 +4,7 @@
   "key": "6",
   "title": "Hidden enemy, audible",
   "duration_ms": 30000,
-  "instructions": "A bot runs behind the solid wall; you can hear its footsteps. A stand-in tracks it through the wall and fires, as a wallhack would.",
+  "instructions": "A bot runs behind the solid wall; you can hear its footsteps. A scripted stand-in (not a human, not cheat software) aims your avatar at it through the wall and fires, as a reader of hidden positions would.",
   "card": {
     "what_this_tests": "Legal tracking through sound: a critical false-positive control.",
     "player_can_know": "Yes: the server emitted footsteps the client could hear.",
@@ -64,5 +64,6 @@
   },
   "caveats": [
     "Hearing is modelled as a server sound event within 30 m in the last 500 ms. A real game's audio query is engine work; a wrong one frames players."
-  ]
+  ],
+  "actor": "SCRIPTED TEST STAND-IN (reader of hidden positions) \u00b7 NOT A HUMAN \u00b7 NOT REAL CHEAT SOFTWARE"
 }

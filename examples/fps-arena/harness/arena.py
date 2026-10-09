@@ -57,11 +57,14 @@ PLANS_PER_CHALLENGE_SCENARIO = 4
 LIVE_EVERY_S = 1.0
 TIMELINE_STEP_MS = 1000
 CODE = ("project.godot", "main.tscn", "main.gd", "scripts/arena_map.gd", "scripts/arena_server.gd", "scripts/server_operator.gd",
-        "scripts/arena_client.gd", "scripts/operator_view.gd", "scripts/lab.gd", "scripts/autopilot.gd", "scripts/bots.gd",
-        "scripts/scenario.gd", "scripts/weapon.gd", "scripts/recipe.gd", "scripts/sounds.gd")
+        "scripts/arena_client.gd", "scripts/pixel_check_client.gd", "scripts/operator_view.gd", "scripts/lab.gd", "scripts/autopilot.gd",
+        "scripts/bots.gd", "scripts/scenario.gd", "scripts/weapon.gd", "scripts/recipe.gd", "scripts/sounds.gd")
 REQUIRED_SCENARIOS = ("normal_play", "impossible_speed", "fire_rate", "recoil_floor", "recoil_mirror", "audible_hidden_enemy",
                       "unknowable_hidden_enemy", "unknowable_hidden_tracked", "unchecked_audio_channel", "wire_vs_picture",
-                      "active_challenge", "angle_hold_false_positive", "external_record")
+                      "active_challenge", "angle_hold_false_positive", "external_record", "exposed_challenge_control")
+# The player pixel proof: the hidden control is the real challenge in the sealed chamber; the positive control puts the
+# same probe in the open. Both are run with the pixel-check client, drawing in a private virtual display.
+PIXEL_HIDDEN, PIXEL_VISIBLE = "active_challenge", "exposed_challenge_control"
 CARD_FIELDS = ("what_this_tests", "player_can_know", "server_knows", "expected_fpsdet_behavior", "invalid_if")
 EXPERIMENTAL_LABEL = "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
 
@@ -187,14 +190,16 @@ def godot_env(run: Path) -> dict:
 
 
 def server_command(godot: str, run: Path, port: int, scenario: str | None = None, match: str | None = None, once: bool = False,
-                   deterministic: bool = False, headless: bool = True) -> list[str]:
+                   deterministic: bool = False, headless: bool = True, subject_input: str = "autopilot", bind: str | None = None) -> list[str]:
     command = [godot]
     if headless:
         command.append("--headless")
     if deterministic:
         command += ["--fixed-fps", "60"]
     command += ["--path", str(PROJECT), "--", "--role=server", f"--run={run}", f"--scenarios={SCENARIOS}", f"--port={port}",
-                f"--secret-file={run / 'private' / 'secret.hex'}", f"--operator-token-file={operator_token(run)}"]
+                f"--secret-file={run / 'private' / 'secret.hex'}", f"--operator-token-file={operator_token(run)}", f"--subject-input={subject_input}"]
+    if bind:
+        command.append(f"--bind={bind}")
     if scenario:
         command.append(f"--scenario={scenario}")
     if match:
@@ -206,13 +211,20 @@ def server_command(godot: str, run: Path, port: int, scenario: str | None = None
     return command
 
 
-def client_command(godot: str, run: Path, port: int, behaviour: str | None, log: Path, headless: bool = True) -> list[str]:
+def client_command(godot: str, run: Path, port: int, behaviour: str | None, log: Path, headless: bool = True, pixels: Path | None = None) -> list[str]:
     command = [godot]
-    if headless:
+    role = "client"
+    if pixels is not None:
+        # The pixel-check client (the stock client plus the frame check), drawing in a private virtual display with software OpenGL.
+        role = "pixel-client"
+        command = ["xvfb-run", "-a", "-s", "-screen 0 1280x720x24", godot, "--rendering-driver", "opengl3", "--resolution", "640x360", "--audio-driver", "Dummy"]
+    elif headless:
         command += ["--headless", "--audio-driver", "Dummy"]
-    command += ["--path", str(PROJECT), "--", "--role=client", f"--name={SUBJECT}", f"--port={port}", f"--log={log}", "--timeout-ms=600000"]
+    command += ["--path", str(PROJECT), "--", f"--role={role}", f"--name={SUBJECT}", f"--port={port}", f"--log={log}", "--timeout-ms=600000"]
     if behaviour:
         command += ["--input=standin", f"--behaviour={behaviour}"]
+    if pixels is not None:
+        command += ["--check-every-ms=2000", f"--shots={pixels}"]
     return command
 
 
@@ -437,8 +449,26 @@ def panel_case(case: dict, folder: Path, until_ms: int | None = None) -> dict:
         "provenance": {"detector": evidence["provenance"]["detector"]["digest"], "profile": evidence["provenance"]["profile"]["digest"],
                        "inputs": evidence["provenance"]["inputs"], "cohort": evidence["provenance"].get("cohort")},
         "speed": case.get("speed"),
+        "speed_cadence": speed_cadence(folder, case),
         "knowledge": knowledge_of(folder, until_ms),
     }
+
+
+def speed_cadence(folder: Path, case: dict) -> dict:
+    """The movement cadence the server actually emitted for the subject, and what the speed check's sample-count run spans
+    at that cadence. Interpretation only: the bar counts samples, and nothing here changes it."""
+    from fpsdet.parse import load_events
+
+    events, _errors = load_events(folder / "events.ndjson")
+    stamps = sorted(event.t_ms for event in events if event.player_id == SUBJECT and event.event_type == "movement")
+    gaps = sorted(b - a for a, b in zip(stamps, stamps[1:]) if b > a)
+    if not gaps:
+        return {}
+    interval = gaps[len(gaps) // 2]
+    speed = case.get("speed") or {}
+    return {"interval_ms": interval, "samples": len(stamps), "longest_run": speed.get("longest_run", 0), "run_ms": int(speed.get("longest_run", 0)) * interval,
+            "bar_samples": profile().speed_min_run, "bar_ms_at_this_cadence": profile().speed_min_run * interval,
+            "note": "the speed run is counted in consecutive samples; at this emitter's cadence that is the duration shown"}
 
 
 def case_timeline(folder: Path, step_ms: int = TIMELINE_STEP_MS) -> list[dict]:
@@ -611,7 +641,7 @@ def wait_for(path: Path, timeout_s: float) -> bool:
     return False
 
 
-def run_scenario(godot: str, scenario_id: str, run: Path, port: int, deterministic: bool = False, number: int = 1) -> dict:
+def run_scenario(godot: str, scenario_id: str, run: Path, port: int, deterministic: bool = False, number: int = 1, pixels: bool = False) -> dict:
     found = scenarios()
     scenario = found[scenario_id]
     run = new_run(run)
@@ -625,7 +655,11 @@ def run_scenario(godot: str, scenario_id: str, run: Path, port: int, determinist
     behaviour = scenario.get("subject", {}).get("autopilot", "tracker")
     if not deterministic:
         time.sleep(1.5)
-        processes.append(start(client_command(godot, run, port, behaviour, run / "public" / "client.jsonl"), run, "client.out"))
+        shots = None
+        if pixels:
+            shots = run / "public" / "shots"
+            shots.mkdir(parents=True, exist_ok=True)
+        processes.append(start(client_command(godot, run, port, behaviour, run / "public" / "client.jsonl", pixels=shots), run, "client.out"))
     codes = []
     for process in processes:
         try:
@@ -634,7 +668,73 @@ def run_scenario(godot: str, scenario_id: str, run: Path, port: int, determinist
             process.kill()
             codes.append("timeout")
     return {"scenario": scenario_id, "match_id": match_id, "folder": folder, "plan": plan, "secret": run / "private" / "secret.hex",
-            "exit_codes": codes, "wall_s": round(time.time() - started, 1), "deterministic": deterministic, "run": run}
+            "exit_codes": codes, "wall_s": round(time.time() - started, 1), "deterministic": deterministic, "run": run, "pixels": pixels}
+
+
+def pixel_facts(run: Path, match_record: dict) -> dict:
+    """What the pixel-check client drew: for the probe and for the bots, how many checks found each drawn, and the most
+    pixels any check found each contributing. The probe is named from the server's own record, never by the client."""
+    ids = match_record.get("entities", {})
+    probe = ids.get("probe")
+    bots = {ids[name] for name in ids if name not in ("probe", SUBJECT)}
+    rows = [json.loads(line) for line in (run / "public" / "client.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
+    checks = [row for row in rows if row.get("kind") == "pixels"]
+    probe_pixels = [cell["pixels"] for row in checks for cell in row["entities"] if cell["entity"] == probe and cell["drawn"]]
+    bot_pixels = [cell["pixels"] for row in checks for cell in row["entities"] if cell["entity"] in bots and cell["drawn"]]
+    return {
+        "checks": len(checks),
+        "probe_checks_drawn": len(probe_pixels),
+        "probe_pixels_max": max(probe_pixels, default=0),
+        "probe_checks_with_pixels": sum(1 for value in probe_pixels if value > 0),
+        "bot_checks_with_pixels": sum(1 for value in bot_pixels if value > 0),
+        "bot_pixels_max": max(bot_pixels, default=0),
+        "unchanged_frame_pixels_max": max((row["unchanged_frame_pixels"] for row in checks), default=0),
+        "screenshots": sorted(row["screenshot"] for row in checks if row.get("screenshot")),
+        "resolution": "640x360, software OpenGL in a private virtual display",
+    }
+
+
+def pixel_proof(hidden: dict, visible: dict) -> dict:
+    """The player pixel proof: in the sealed chamber the probe was drawn as a body and contributed no pixel, while the same
+    method found pixels for the bots and, in the positive control, for the probe placed in the open. Not a scoring rule:
+    qualification only."""
+    reasons = []
+    if hidden["probe_checks_drawn"] == 0:
+        reasons.append("hidden control: the client never drew the probe (it was not received, or never in its window)")
+    if hidden["probe_pixels_max"] != 0:
+        reasons.append(f"hidden control: the probe contributed {hidden['probe_pixels_max']} pixels")
+    if hidden["unchanged_frame_pixels_max"] != 0:
+        reasons.append("hidden control: the frozen frame was not stable, so the method cannot be trusted")
+    if hidden["bot_checks_with_pixels"] == 0:
+        reasons.append("hidden control: the method found no pixels for any visible bot either")
+    if visible["probe_checks_with_pixels"] == 0:
+        reasons.append("positive control: the probe placed in the open changed no pixel, so the method could not detect a visible probe")
+    return {
+        "method": "the P12 pilot's: freeze the frame, draw it again with each body hidden in turn, count the pixels that changed",
+        "hidden_scenario": PIXEL_HIDDEN, "visible_scenario": PIXEL_VISIBLE,
+        "hidden_checks": hidden["probe_checks_drawn"], "hidden_pixels": hidden["probe_pixels_max"],
+        "hidden_bot_checks_with_pixels": hidden["bot_checks_with_pixels"], "hidden_frame_stable": hidden["unchanged_frame_pixels_max"] == 0,
+        "visible_checks": visible["probe_checks_with_pixels"], "visible_pixels": visible["probe_pixels_max"],
+        "pass": not reasons, "problems": reasons,
+        "statement": (f"PLAYER PIXEL PROOF  hidden: {hidden['probe_pixels_max']} challenge pixels in {hidden['probe_checks_drawn']} checks  "
+                      f"visible control: {visible['probe_pixels_max']} changed pixels  {'PASS' if not reasons else 'FAIL'}"),
+    }
+
+
+def bind_refusal(godot: str, run: Path, port: int) -> dict:
+    """The server asked to bind a public address must refuse and exit, and the default must be loopback."""
+    run = new_run(run)
+    process = start(server_command(godot, run, port, "normal_play", "arena-bind-check", once=True, bind="203.0.113.5"), run, "server.out")
+    try:
+        code = process.wait(timeout=60)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        code = "timeout"
+    log = [json.loads(line) for line in (run / "public" / "server.log").read_text(encoding="utf-8").splitlines() if line.strip()] if (run / "public" / "server.log").exists() else []
+    refused = any(row.get("kind") == "error" and "refusing a public one" in str(row.get("detail", "")) for row in log)
+    source = (PROJECT / "scripts" / "arena_server.gd").read_text(encoding="utf-8")
+    return {"default_bind": "127.0.0.1", "default_in_source": 'options.get("bind", "127.0.0.1")' in source, "public_address_tried": "203.0.113.5 (TEST-NET-3, never routed)",
+            "public_bind_refused": refused and code == 3, "exit_code": code, "listener_after_exit": False}
 
 
 def judge(live: dict, scenario: dict) -> dict:
@@ -663,10 +763,15 @@ def judge(live: dict, scenario: dict) -> dict:
         client = {"entities_received": len(received), "probe_updates": received.get(probe, {}).get("updates", 0) if probe else 0,
                   "probe_sounds": sum(count for key, count in summary.get("sounds", {}).items() if probe and key.split(":")[0] == probe),
                   "sounds": sum(summary.get("sounds", {}).values()), "fps_median": sorted(summary["fps"])[len(summary["fps"]) // 2] if summary.get("fps") else None}
+    pixels = pixel_facts(run, match_record) if live.get("pixels") else None
     return {
         "id": scenario["id"],
         "title": scenario["title"],
         "match_id": live["match_id"],
+        "actor": {"label": scenario.get("actor", ""), "subject_input": "honest autopilot (scripted, not a human)",
+                  "standin": scenario.get("standin", {}).get("kind") or None,
+                  "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."},
+        "pixels": pixels,
         "expected": scenario.get("expected", {}),
         "observed": found,
         "problems": as_expected(scenario, found),
@@ -700,23 +805,41 @@ def judge(live: dict, scenario: dict) -> dict:
 # Qualification: every scenario, the capture, and fpsdet.arena/1.
 
 
-def qualify(godot: str, root: Path, port: int, parallel: int, only: list[str] | None = None, deterministic: bool = False) -> list[dict]:
+def qualify(godot: str, root: Path, port: int, parallel: int, only: list[str] | None = None, deterministic: bool = False, pixels: bool = True) -> dict:
     found = scenarios()
     names = only or list(found)
     rows = []
+    proof = None
+    jobs = [(name, root / name, False) for name in names]
+    if pixels and not only:
+        jobs += [(PIXEL_HIDDEN, root / "pixel-hidden", True), (PIXEL_VISIBLE, root / "pixel-visible", True)]
+    pixel_rows = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, parallel)) as pool:
-        futures = {pool.submit(run_scenario, godot, name, root / name, port + offset, deterministic): name for offset, name in enumerate(names)}
+        futures = {pool.submit(run_scenario, godot, name, folder, port + offset, deterministic, 1, pixel): (name, pixel) for offset, (name, folder, pixel) in enumerate(jobs)}
         for future in concurrent.futures.as_completed(futures):
             live = future.result()
             row = judge(live, found[live["scenario"]])
-            rows.append(row)
-            print(f"{row['id']}: {row['observed']['decision']} {row['observed']['kinds']} -> {'as expected' if row['as_expected'] else row['problems']}; "
-                  f"offline {row['live_vs_offline']}", flush=True)
+            label = f"{row['id']} (pixel run)" if live.get("pixels") else row["id"]
+            print(f"{label}: {row['observed']['decision']} {row['observed']['kinds']} -> {'as expected' if row['as_expected'] else row['problems']}; "
+                  f"offline {row['live_vs_offline']}; actor: {row['actor']['label']}", flush=True)
+            if live.get("pixels"):
+                pixel_rows[row["id"]] = row
+            else:
+                rows.append(row)
     rows.sort(key=lambda row: names.index(row["id"]))
-    return rows
+    if pixel_rows:
+        proof = pixel_proof(pixel_rows[PIXEL_HIDDEN]["pixels"], pixel_rows[PIXEL_VISIBLE]["pixels"])
+        proof["runs"] = {name: {key: row[key] for key in ("match_id", "observed", "as_expected", "problems", "live_vs_offline", "pixels", "timing")} for name, row in pixel_rows.items()}
+        print(proof["statement"], flush=True)
+        for problem in proof["problems"]:
+            print(f"  {problem}", flush=True)
+    network = bind_refusal(godot, root / "bind-check", port + len(jobs) + 1) if not only else None
+    if network:
+        print(f"network: default bind 127.0.0.1; public address refused: {network['public_bind_refused']}", flush=True)
+    return {"rows": rows, "pixel_proof": proof, "network": network}
 
 
-def capture(rows: list[dict], godot: str) -> dict:
+def capture(rows: list[dict], godot: str, proof: dict | None = None, network: dict | None = None) -> dict:
     """Copy each scenario's public telemetry (events, plan, external record) into the repository and build fpsdet.arena/1."""
     CAPTURED.mkdir(exist_ok=True)
     out = []
@@ -746,7 +869,9 @@ def capture(rows: list[dict], godot: str) -> dict:
         "scenarios": out,
         "experimental": {"label": EXPERIMENTAL_LABEL, "applies_to": [row["id"] for row in rows if row["observed"].get("experimental")],
                          "note": "Challenge reviews are experimental and not production-qualified. The angle-hold scenario is kept as a false-positive control: its review is the known weakness of the time-on-body bar, shown, not fixed."},
-        "no_person": "Every subject in this result is a scripted autopilot or a server-side stand-in. No person played these matches, and nothing here is a human result.",
+        "no_person": "Every subject in this result is a scripted autopilot or a server-side stand-in. No person played these matches, no real cheat software was run, and nothing here is a human result or a detection rate.",
+        "pixel_proof": proof,
+        "network": network,
     }
     body["digest"] = digest(body)
     RESULT.write_text(json.dumps(body, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -799,8 +924,15 @@ def verify(result_path: Path = RESULT) -> list[str]:
                 problems.append(f"{row['id']}: {problem}")
             if row["id"] in ("active_challenge", "angle_hold_false_positive") and observed.get("label") != EXPERIMENTAL_LABEL:
                 problems.append(f"{row['id']}: the experimental label is missing")
+            if not row.get("actor", {}).get("label"):
+                problems.append(f"{row['id']}: no actor label")
             problems += [f"{row['id']}: {leak}" for leak in leak_scan(sorted(folder.iterdir()), None, None)]
             problems += [f"{row['id']}: {hit}" for hit in personal_data(sorted(folder.iterdir()))]
+    proof = result.get("pixel_proof") or {}
+    if not proof.get("pass") or proof.get("hidden_pixels") != 0 or not proof.get("hidden_checks") or not proof.get("visible_pixels"):
+        problems.append("the player pixel proof is missing or did not pass")
+    if not (result.get("network") or {}).get("public_bind_refused"):
+        problems.append("the public-address refusal was not recorded")
     return problems
 
 
@@ -821,11 +953,14 @@ class Scorer:
         self.timelines: dict[str, list] = {}
         self.ai_enabled = False
         self.stop = threading.Event()
+        self.proof = qualified_pixel_proof()
         (self.live / "knowledge-table.json").write_text(json.dumps(knowledge_table(), indent=1) + "\n", encoding="utf-8")
         self._status({"state": "waiting"})
 
     def _status(self, extra: dict) -> None:
         body = {"ai": {**ai_status(), "enabled": self.ai_enabled}, "live_every_s": LIVE_EVERY_S, **extra}
+        if self.proof is not None:
+            body["pixel_proof"] = self.proof
         self._write(self.live / "status.json", body)
 
     def _write(self, path: Path, body: dict) -> None:
@@ -915,6 +1050,20 @@ class Scorer:
         self._write(self.live / f"{match_id}.json", body)
         self._write(self.live / "current.json", body)
         self._status({"state": "finished" if final else "scoring", "match_id": match_id, "scoring_ms": scored["scoring_ms"], "events": scored["events"]})
+
+
+def qualified_pixel_proof() -> dict | None:
+    """The committed result's player pixel proof, when it was made from the code that is running; else None."""
+    if not RESULT.exists():
+        return None
+    try:
+        result = json.loads(RESULT.read_text(encoding="utf-8"))
+    except ValueError:
+        return None
+    if result.get("code") != code_identity() or not result.get("pixel_proof"):
+        return None
+    proof = result["pixel_proof"]
+    return {key: proof.get(key) for key in ("hidden_checks", "hidden_pixels", "visible_checks", "visible_pixels", "pass", "statement")}
 
 
 def last_t_ms(folder: Path) -> int:
@@ -1014,7 +1163,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     (run / "public" / "control" / "ai.json").write_text(json.dumps({"enabled": bool(args.ai)}) + "\n", encoding="utf-8")
     print(f"Run folder: {run}")
     print("Server: 127.0.0.1 only. Secret and realizations: private/ (owner only). Press Esc in the lab to free the mouse; 1-9 and letters start scenarios.")
-    server = start(server_command(args.godot, run, args.port, headless=not args.show_server), run, "server.out")
+    server = start(server_command(args.godot, run, args.port, headless=not args.show_server, subject_input="autopilot" if args.behaviour else "human"), run, "server.out")
     time.sleep(1.5)
     windows = []
     if args.separate:
@@ -1081,15 +1230,22 @@ def cmd_scenario(args: argparse.Namespace) -> int:
 
 def cmd_qualify(args: argparse.Namespace) -> int:
     root = Path(args.out).expanduser()
-    rows = qualify(args.godot, root, args.port, args.parallel, args.only, args.deterministic)
+    found = qualify(args.godot, root, args.port, args.parallel, args.only, args.deterministic, pixels=not args.no_pixels)
+    rows = found["rows"]
     if args.only:
         for row in rows:
             print(f"{row['id']}: {'as expected' if row['as_expected'] else row['problems']}")
         print("Not written to result.json: --only runs a subset.")
         return 0 if all(row["as_expected"] and row["live_vs_offline"] == "identical" for row in rows) else 1
-    body = capture(rows, args.godot)
+    if found["pixel_proof"] is None:
+        raise SystemExit("the player pixel proof did not run; result.json is not written without it")
+    body = capture(rows, args.godot, found["pixel_proof"], found["network"])
     failed = [row["id"] for row in body["scenarios"] if not row["as_expected"] or row["live_vs_offline"] != "identical" or row["secret_leaks"]
               or row["personal_data"] or row["case_problems"] or row["realization"].get("status") not in ("reproduced", "no_challenge")]
+    if not body["pixel_proof"]["pass"]:
+        failed.append("pixel_proof")
+    if not body["network"]["public_bind_refused"]:
+        failed.append("network")
     print(f"Wrote {RESULT.relative_to(ROOT)} ({body['digest']}) and {len(rows)} captures. Not as expected: {failed or 'none'}.")
     return 1 if failed else 0
 
@@ -1167,6 +1323,7 @@ def main(argv: list[str] | None = None) -> int:
     qualify_.add_argument("--parallel", type=int, default=4)
     qualify_.add_argument("--only", action="append", help="Run only this scenario (repeatable); result.json is not written")
     qualify_.add_argument("--deterministic", action="store_true")
+    qualify_.add_argument("--no-pixels", action="store_true", help="Skip the player pixel proof (result.json is then not written)")
     qualify_.set_defaults(func=cmd_qualify)
     check = sub.add_parser("verify", help="Offline: score the committed captures again and compare with result.json")
     check.set_defaults(func=cmd_verify)

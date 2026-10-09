@@ -30,11 +30,11 @@
           4
         ],
         [
-          10,
+          6,
           4
         ],
         [
-          10,
+          6,
           8
         ],
         [
@@ -67,5 +67,6 @@
   "caveats": [
     "The metronome check stays quiet on a held trigger: the server paces those shots at the rifle's own cycle, and the profile says shots are stamped on server ticks (shot_clock server_tick, tick_ms 17).",
     "The lab lowers the server's own cycle enforcement on purpose, standing in for a server that accepts what a macro sends. The detector reads what the server accepted."
-  ]
+  ],
+  "actor": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)"
 }

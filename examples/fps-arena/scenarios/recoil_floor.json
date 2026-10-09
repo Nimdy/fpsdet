@@ -30,11 +30,11 @@
           4
         ],
         [
-          10,
+          6,
           4
         ],
         [
-          10,
+          6,
           8
         ],
         [
@@ -65,5 +65,6 @@
   },
   "caveats": [
     "The lab scales the kick the server applies on purpose, standing in for recoil the server measured under its own floor."
-  ]
+  ],
+  "actor": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)"
 }

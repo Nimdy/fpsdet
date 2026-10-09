@@ -13,6 +13,7 @@ extends Node
 const Server = preload("res://scripts/arena_server.gd")
 const ServerOperator = preload("res://scripts/server_operator.gd")
 const Client = preload("res://scripts/arena_client.gd")
+const PixelClient = preload("res://scripts/pixel_check_client.gd")
 const OperatorView = preload("res://scripts/operator_view.gd")
 const Lab = preload("res://scripts/lab.gd")
 
@@ -38,6 +39,13 @@ func _ready() -> void:
 			client.set("options", options)
 			add_child(client)
 			client.attach(get_viewport(), null)
+		"pixel-client":
+			# Qualification only: the stock client plus a pixel check of each drawn body (examples/fps-arena/harness).
+			var checked := PixelClient.new()
+			checked.name = "Game"
+			checked.set("options", options)
+			add_child(checked)
+			checked.attach(get_viewport(), null)
 		"operator":
 			var view := OperatorView.new()
 			view.name = "Operator"

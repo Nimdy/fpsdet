@@ -4,7 +4,7 @@
   "key": "7",
   "title": "Hidden and unknowable",
   "duration_ms": 30000,
-  "instructions": "A bot creeps silently behind the solid wall while another patrols the lane in view. Shoot the one you can see. Press T to switch on the wallhack stand-in.",
+  "instructions": "A bot creeps silently behind the solid wall while another patrols the lane in view. Shoot the one you can see. Press T to switch on the scripted stand-in that aims at it through the wall.",
   "card": {
     "what_this_tests": "An enemy this client could neither see nor hear: the information checks may act, and only then.",
     "player_can_know": "No: no line of sight, no sound, never perceived.",
@@ -30,11 +30,11 @@
           4
         ],
         [
-          10,
+          6,
           4
         ],
         [
-          10,
+          6,
           8
         ],
         [
@@ -85,5 +85,6 @@
   },
   "caveats": [
     "No finding is manufactured: the honest autopilot never aims at what it cannot see. The tracked variant (scenario T) shows the finding."
-  ]
+  ],
+  "actor": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)"
 }

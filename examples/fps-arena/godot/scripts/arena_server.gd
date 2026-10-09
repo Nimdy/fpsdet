@@ -14,7 +14,7 @@ extends Node3D
 ## P12 pilot's, byte for byte (tests/test_fps_arena.py compares them with examples/pilot/godot/scripts/server.gd).
 ##
 ## Options (after "--"): --run --scenarios --port --bind --scenario --match --once --deterministic --wait-ms
-## --secret-file --operator-token-file --log
+## --secret-file --operator-token-file --log --subject-input (human | autopilot: who the launcher put at the keyboard; a label, never a judgement)
 
 const Arena = preload("res://scripts/arena_map.gd")
 const Recipe = preload("res://scripts/recipe.gd")
@@ -53,6 +53,7 @@ var started := false
 var finished := false
 var wait_until_ms := 0
 var match_counter := {}
+var subject_input := "human"
 
 var players := {}  # name -> state (the subject and the bots)
 var order := []
@@ -90,6 +91,7 @@ var perf := {}
 func _ready() -> void:
 	run_dir = options.get("run", "")
 	once = options.get("once", "false") == "true"
+	subject_input = String(options.get("subject-input", "human"))
 	deterministic = options.get("deterministic", "false") == "true"
 	public_dir = run_dir.path_join("public")
 	private_dir = run_dir.path_join("private")
@@ -309,7 +311,8 @@ func _finish_match(why: String) -> void:
 	perf["match_ms"] = Arena.t_ms(tick)
 	var record := {"match_id": match_id, "scenario": scenario.id, "ended": true, "why": why, "ticks": tick, "t_ms": Arena.t_ms(tick),
 		"scoreboard": scores, "entities": entity_ids, "perf": perf, "challenge": not challenges.is_empty(), "external": scenario.has("external"),
-		"audio_query": bool(scenario.get("audio_query", true)), "experimental": bool(scenario.get("experimental", false))}
+		"audio_query": bool(scenario.get("audio_query", true)), "experimental": bool(scenario.get("experimental", false)),
+		"subject_input": subject_input, "standin": String(scenario.get("standin", {}).get("kind", "")), "actor": String(scenario.get("actor", ""))}
 	_log({"kind": "match_end", "match_id": match_id, "scenario": scenario.id, "why": why, "ticks": tick, "t_ms": Arena.t_ms(tick), "scoreboard": scores})
 	if events != null:
 		events.close()
@@ -630,7 +633,9 @@ func _update_challenge() -> void:
 	var source: Dictionary = players[active.source]
 	var then: int = tick - int(active.delay_ticks)
 	var position: Vector3 = active.anchor + _turn(_track_at(source, then) - active.base, active.heading)
-	position = Vector3(clampf(position.x, Arena.CHAMBER_MIN.x, Arena.CHAMBER_MAX.x), 0, clampf(position.z, Arena.CHAMBER_MIN.y, Arena.CHAMBER_MAX.y))
+	var low: Vector2 = Arena.EXPOSED_MIN if active.exposed else Arena.CHAMBER_MIN
+	var high: Vector2 = Arena.EXPOSED_MAX if active.exposed else Arena.CHAMBER_MAX
+	position = Vector3(clampf(position.x, low.x, high.x), 0, clampf(position.z, low.y, high.y))
 	active.position = position
 	active.yaw = wrapf(float(_yaw_at(source, then)) + active.heading, -180.0, 180.0)
 	probe_history.append([tick, position])
@@ -646,10 +651,14 @@ func _begin(entry: Dictionary) -> void:
 	sources.sort()
 	var source: String = sources[int(parameters.route_pick) % sources.size()] if not sources.is_empty() else SUBJECT
 	var delay_ticks := int(round(int(parameters.replay_delay_ms) / Arena.TICK_MS))
+	# The positive control of the pixel proof breaks the placement rule on purpose: the body goes in the open, the
+	# server's own verdict says seen, and fpsdet must abstain. Every other scenario keeps the sealed chamber.
+	var exposed := bool(scenario.get("challenge", {}).get("exposed", false))
+	var anchor: Vector3 = Arena.EXPOSED_PLACEMENT if exposed else Arena.CHAMBER_CENTER
 	entry.ran = true
-	active = {"entry": entry, "plan": entry.plan, "source": source, "placement": 0, "anchor": Arena.CHAMBER_CENTER,
+	active = {"entry": entry, "plan": entry.plan, "source": source, "placement": 0, "anchor": anchor, "exposed": exposed,
 		"heading": float(parameters.heading_offset_deg), "delay_ticks": delay_ticks,
-		"base": _track_at(players[source], tick - delay_ticks), "position": Arena.CHAMBER_CENTER, "yaw": 0.0,
+		"base": _track_at(players[source], tick - delay_ticks), "position": anchor, "yaw": 0.0,
 		"ticks": 0, "first_ms": Arena.t_ms(tick), "ended": ""}
 	accumulator = {}
 	_log({"kind": "challenge_start", "challenge_id": entry.plan.challenge_id, "t_ms": Arena.t_ms(tick)})
@@ -728,8 +737,10 @@ func _observe() -> void:
 	perf.verdicts.audio[audio] = perf.verdicts.audio.get(audio, 0) + 1
 	var tracked := _in_cone(subject, aim, active.position + Vector3(0, Arena.CHEST_HEIGHT, 0))
 	probe_verdict = {"vision": vision, "audio": audio, "in_cone": tracked}
-	if vision == "known" or audio == "known":
-		_end("perceivable")  # the type's rule: a body the client could perceive is no longer a challenge
+	if (vision == "known" or audio == "known") and not bool(active.exposed):
+		# The type's rule: a body the client could perceive is no longer a challenge. The exposed control switches it
+		# off on purpose, so that only the per-moment verdict stands between a visible body and evidence.
+		_end("perceivable")
 		return
 	accumulator["ticks"] = int(accumulator.get("ticks", 0)) + 1
 	accumulator["tracked"] = int(accumulator.get("tracked", 0)) + (1 if tracked else 0)
@@ -1069,6 +1080,7 @@ func _feed() -> void:
 		"tick": tick, "t_ms": now, "match_id": match_id, "scenario": scenario.id, "in_match": in_match, "match_ms": match_ms,
 		"phase": Scenario.phase(scenario, now), "audio_query": bool(scenario.get("audio_query", true)),
 		"fault_open": Scenario.window_open(faults, now), "standin_open": Scenario.window_open(standin, now), "standin": standin.get("kind", ""),
+		"subject_input": subject_input, "actor": String(scenario.get("actor", "")),
 		"subject": {
 			"id": SUBJECT, "entity": entity_ids.get(SUBJECT, ""), "pos": Arena.v3(_position(SUBJECT)), "vel": Arena.v3(body.velocity),
 			"speed": snappedf(Vector2(body.velocity.x, body.velocity.z).length(), 0.01), "cap": Arena.SPEED_CAP, "on_ground": body.is_on_floor(),
@@ -1106,7 +1118,8 @@ func _feed() -> void:
 	if timeline != null and in_match:
 		var row := {"t_ms": now, "subject": {"pos": state.subject.pos, "yaw": state.subject.yaw, "pitch": state.subject.pitch, "aim": state.subject.aim,
 			"recoil_offset": state.subject.recoil_offset, "speed": state.subject.speed, "override": subject.override, "fire": bool(subject.cmd.fire)},
-			"enemies": enemies, "probe": probe, "phase": state.phase, "audio_query": state.audio_query}
+			"enemies": enemies, "probe": probe, "phase": state.phase, "audio_query": state.audio_query,
+			"standin": String(standin.get("kind", "")) if Scenario.window_open(standin, now) else "", "subject_input": subject_input, "actor": state.actor}
 		timeline.store_string(JSON.stringify(row, "", true) + "\n")
 
 

@@ -4,7 +4,7 @@
   "key": "9",
   "title": "Wire vs picture",
   "duration_ms": 30000,
-  "instructions": "A bot strafes across the lane. From 5 s to 25 s a stand-in aims at the newest snapshot the server sent, not at the body your client draws.",
+  "instructions": "A bot strafes across the lane. From 5 s to 25 s a scripted stand-in (not a human, not cheat software) aims at the newest snapshot the server sent, not at the body your client draws.",
   "card": {
     "what_this_tests": "Aim that matches the wire snapshot ahead of the picture the official client draws, one interpolation delay later.",
     "player_can_know": "A person sees the picture: the body drawn 100 ms behind the newest snapshot.",
@@ -58,6 +58,7 @@
     }
   },
   "caveats": [
-    "This does not catch every packet reader: a cheat that waits out the interpolation delay, or reads the drawn frame, aims at the picture too."
-  ]
+    "This does not cover every packet reader: a cheat that waits out the interpolation delay, or reads the drawn frame, aims at the picture too."
+  ],
+  "actor": "SCRIPTED TEST STAND-IN (reader of the newest snapshot) \u00b7 NOT A HUMAN \u00b7 NOT REAL CHEAT SOFTWARE"
 }

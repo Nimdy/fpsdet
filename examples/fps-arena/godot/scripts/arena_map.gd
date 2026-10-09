@@ -61,6 +61,11 @@ const WALLS := [
 const CHAMBER_MIN := Vector2(-2.65, -2.35)  # x, z
 const CHAMBER_MAX := Vector2(-1.75, -0.95)
 const CHAMBER_CENTER := Vector3(-2.2, 0, -1.65)
+# Only for the exposed_challenge_control scenario, which breaks the placement rule on purpose: in the open lane,
+# in plain sight of the spawn, so the player's renderer must draw it and the server's verdict must say seen.
+const EXPOSED_MIN := Vector2(1, 3)
+const EXPOSED_MAX := Vector2(5, 6)
+const EXPOSED_PLACEMENT := Vector3(3, 0, 4.5)
 # The doorway's left frame edge, at eye height: the angle the holder stand-in keeps.
 const FRAME_EDGE := Vector3(-0.7, 1.6, 0.3)
 # Where the holder stands: the line from here through the frame edge runs through the chamber's centre.

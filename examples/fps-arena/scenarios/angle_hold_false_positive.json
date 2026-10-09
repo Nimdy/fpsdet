@@ -4,7 +4,7 @@
   "key": "h",
   "title": "Angle hold: experimental challenge failure",
   "duration_ms": 32000,
-  "instructions": "A stand-in holds the doorway's left frame from across the room, as a player waiting for a push would. A near-still probe rests in the chamber behind that frame. Nobody is following anything.",
+  "instructions": "An honest-style scripted stand-in (not a human) holds the doorway's left frame from across the room, as a player waiting for a push would. A near-still probe rests in the chamber behind that frame. Nobody is following anything.",
   "card": {
     "what_this_tests": "The known weakness of the time-on-body bar: ordinary angle holding over a probe that happens to rest behind the held angle.",
     "player_can_know": "No. And the player is not responding to anything: the aim never moves.",
@@ -86,5 +86,6 @@
   "caveats": [
     "Challenge reviews are experimental and not production-qualified. The bar counts time on the body, not intent.",
     "This failure is preserved on purpose: it is why the consented human pilot exists and why occluded_motion_replay/3 asks whether the aim turns with secret turns instead."
-  ]
+  ],
+  "actor": "HONEST-STYLE SCRIPTED STAND-IN (holds an angle) \u00b7 NOT A HUMAN"
 }

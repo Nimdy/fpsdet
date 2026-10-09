@@ -24,7 +24,8 @@ GODOT = ARENA / "godot"
 PILOT = ROOT / "examples" / "pilot" / "godot" / "scripts"
 
 REQUIRED = ("normal_play", "impossible_speed", "fire_rate", "recoil_floor", "recoil_mirror", "audible_hidden_enemy", "unknowable_hidden_enemy",
-            "unknowable_hidden_tracked", "unchecked_audio_channel", "wire_vs_picture", "active_challenge", "angle_hold_false_positive", "external_record")
+            "unknowable_hidden_tracked", "unchecked_audio_channel", "wire_vs_picture", "active_challenge", "angle_hold_false_positive", "external_record",
+            "exposed_challenge_control")
 CARD = ("what_this_tests", "player_can_know", "server_knows", "expected_fpsdet_behavior", "invalid_if")
 
 
@@ -65,6 +66,25 @@ class ScenarioMetadataTest(unittest.TestCase):
         keys = [spec["key"] for spec in found.values()]
         self.assertEqual(len(keys), len(set(keys)), "two scenarios share a key")
 
+    def test_every_scenario_names_its_actor_and_no_scenario_calls_a_stand_in_a_cheat(self):
+        found = harness().scenarios()
+        for name, spec in found.items():
+            kind = spec.get("standin", {}).get("kind")
+            if kind:
+                self.assertIn("NOT A HUMAN", spec["actor"], name)
+            else:
+                self.assertIn("honest autopilot (scripted, not a human)", spec["actor"], name)
+            if kind == "holder":
+                self.assertIn("HONEST-STYLE SCRIPTED STAND-IN", spec["actor"])
+            elif kind:
+                self.assertIn("SCRIPTED TEST STAND-IN", spec["actor"])
+                self.assertIn("NOT REAL CHEAT SOFTWARE", spec["actor"])
+            text = json.dumps(spec).lower()
+            for phrase in ("proves cheating", "only a cheat", "cannot happen honestly", "detects packet readers", "caught a cheater", "as a wallhack would"):
+                self.assertNotIn(phrase, text, name)
+        self.assertIn("CONTROLLED FOLLOWER", found["active_challenge"]["actor"])
+        self.assertIn("not a clean verdict", found["normal_play"]["card"]["expected_fpsdet_behavior"])
+
     def test_the_knowledge_scenarios_declare_the_three_answers(self):
         found = harness().scenarios()
         self.assertEqual(found["audible_hidden_enemy"]["expected"]["knowledge"], {"arena-bot-b": "known"})
@@ -83,6 +103,10 @@ class ScenarioMetadataTest(unittest.TestCase):
             self.assertEqual(found[name]["expected"]["challenge"], {"status": "followed", "verification": "per_sample"})
         self.assertEqual(found["angle_hold_false_positive"]["standin"]["kind"], "holder")
         self.assertIn("not the same thing as responding to hidden information", found["angle_hold_false_positive"]["card"]["expected_fpsdet_behavior"])
+        control = found["exposed_challenge_control"]
+        self.assertTrue(control["challenge"]["exposed"])
+        self.assertEqual(control["expected"]["challenge"], {"status": "abstained", "cause": "seen", "verification": "per_sample"})
+        self.assertTrue(control["expected"]["no_review"])
 
     def test_the_profile_declares_vision_and_audio_and_counts_the_speed_run_in_samples(self):
         from fpsdet.parse import load_profile
@@ -144,6 +168,9 @@ class ServerCodeTest(unittest.TestCase):
         self.assertNotIn('"hidden_track_ms": hidden', server)
         # Hidden time is measured only when the audio query ran: unchecked is never reported as absent.
         self.assertIn('if name == SUBJECT and bool(scenario.get("audio_query", true)):', server)
+        # Only the exposed positive control may keep a perceivable body alive, and it says so.
+        self.assertIn('and not bool(active.exposed):', server)
+        self.assertIn('bool(scenario.get("challenge", {}).get("exposed", false))', server)
 
     def test_the_stock_client_knows_nothing_of_challenges_or_the_operator_feed(self):
         client = (GODOT / "scripts" / "arena_client.gd").read_text(encoding="utf-8")
@@ -158,6 +185,24 @@ class ServerCodeTest(unittest.TestCase):
         main = (GODOT / "main.gd").read_text(encoding="utf-8")
         self.assertIn('"client":', main)
         self.assertNotIn("ServerOperator", main.split('"client":')[1].split('"operator":')[0])
+
+    def test_the_pixel_check_client_extends_the_stock_client_and_replaces_none_of_it(self):
+        check = (GODOT / "scripts" / "pixel_check_client.gd").read_text(encoding="utf-8")
+        self.assertTrue(check.startswith('extends "res://scripts/arena_client.gd"'))
+        for name in ("_keyboard", "_stand_in", "feed_input", "_physics_process", "input_cmd", "snapshot", "_drawn"):
+            self.assertNotIn(f"func {name}(", check, "the check must not replace the client it checks")
+        self.assertIn("RenderingServer.frame_post_draw", check)
+        self.assertNotIn("challenge", "\n".join(line for line in check.splitlines() if not line.strip().startswith("#")).lower())
+        main = (GODOT / "main.gd").read_text(encoding="utf-8")
+        self.assertIn('"pixel-client":', main)
+
+    def test_the_operator_view_labels_actors_and_explains_insufficient_data_and_external_evidence(self):
+        view = (GODOT / "scripts" / "operator_view.gd").read_text(encoding="utf-8")
+        for words in ("NOT A HUMAN", "HONEST AUTOPILOT AT THE KEYBOARD", "This is not a clean verdict", "EXTERNAL EVIDENCE CAUSED THIS WATCH",
+                      "External evidence cannot create a review", "A signature verifies origin, not truth", "the bar counts samples, not milliseconds", "PLAYER PIXEL PROOF"):
+            self.assertIn(words, view)
+        client = (GODOT / "scripts" / "arena_client.gd").read_text(encoding="utf-8")
+        self.assertIn("SCRIPTED TEST STAND-IN HOLDS YOUR AIM", client)
 
     def test_the_operator_view_computes_no_knowledge_state_itself(self):
         view = (GODOT / "scripts" / "operator_view.gd").read_text(encoding="utf-8")
@@ -217,6 +262,45 @@ class QualificationResultTest(unittest.TestCase):
                 self.assertEqual(row["timing"]["parse_errors"], 0)
                 for case in row["cases"].values():
                     self.assertEqual(case["packet_recipe"], "fpsdet.packet/5")
+
+    def test_the_player_pixel_proof_has_a_hidden_control_and_a_positive_control(self):
+        proof = result()["pixel_proof"]
+        self.assertTrue(proof["pass"], proof["problems"])
+        self.assertEqual(proof["hidden_pixels"], 0)
+        self.assertGreater(proof["hidden_checks"], 0)  # the probe was drawn as a body, behind the chamber's walls
+        self.assertGreater(proof["hidden_bot_checks_with_pixels"], 0)  # the same method saw the visible bots
+        self.assertTrue(proof["hidden_frame_stable"])
+        self.assertGreater(proof["visible_pixels"], 0)  # the same probe placed in the open was drawn
+        self.assertGreater(proof["visible_checks"], 0)
+        self.assertEqual((proof["hidden_scenario"], proof["visible_scenario"]), ("active_challenge", "exposed_challenge_control"))
+        hidden, visible = proof["runs"]["active_challenge"], proof["runs"]["exposed_challenge_control"]
+        self.assertEqual(hidden["observed"]["challenge"]["status"], "followed")
+        self.assertEqual((visible["observed"]["challenge"]["status"], visible["observed"]["challenge"]["cause"]), ("abstained", "seen"))
+        self.assertTrue(hidden["as_expected"] and visible["as_expected"])
+        self.assertEqual(visible["timing"]["verdicts"]["vision"].get("absent", 0), 0)  # in the open, the server never said absent
+        self.assertIn("PASS", proof["statement"])
+
+    def test_the_exposed_control_voids_the_challenge(self):
+        row = scenario_result("exposed_challenge_control")
+        self.assertEqual((row["observed"]["challenge"]["status"], row["observed"]["challenge"]["cause"]), ("abstained", "seen"))
+        self.assertNotEqual(row["observed"]["decision"], "review")
+        self.assertEqual(row["observed"]["kinds"], [])
+
+    def test_the_server_refuses_a_public_address(self):
+        network = result()["network"]
+        self.assertEqual(network["default_bind"], "127.0.0.1")
+        self.assertTrue(network["default_in_source"])
+        self.assertTrue(network["public_bind_refused"])
+        self.assertEqual(network["exit_code"], 3)
+
+    def test_every_qualified_row_names_a_scripted_actor(self):
+        for row in result()["scenarios"]:
+            label = row["actor"]["label"]
+            self.assertTrue("NOT A HUMAN" in label or "honest autopilot (scripted, not a human)" in label, (row["id"], label))
+            self.assertEqual(row["actor"]["subject_input"], "honest autopilot (scripted, not a human)")
+            if row["actor"]["standin"]:
+                self.assertIn("SCRIPTED", label)
+        self.assertIn("no real cheat software", result()["no_person"])
 
     def test_the_result_was_made_by_this_arena_code(self):
         """Change the server, the client, the views or the harness, and the arena must be qualified again."""

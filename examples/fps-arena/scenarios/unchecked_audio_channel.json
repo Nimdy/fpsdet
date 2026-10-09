@@ -64,5 +64,6 @@
   },
   "caveats": [
     "Unchecked is not absent. A channel the server did not report makes the answer unknown, and the information checks abstain."
-  ]
+  ],
+  "actor": "SCRIPTED TEST STAND-IN (reader of hidden positions) \u00b7 NOT A HUMAN \u00b7 NOT REAL CHEAT SOFTWARE"
 }

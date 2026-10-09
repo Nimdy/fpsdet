@@ -4,7 +4,7 @@
   "key": "c",
   "title": "Active challenge",
   "duration_ms": 32000,
-  "instructions": "A planned challenge runs inside the sealed chamber behind the doorway's left frame. You cannot see or hear it. A stand-in follows it, as a reader of the body it was sent would.",
+  "instructions": "A planned challenge runs inside the sealed chamber behind the doorway's left frame. You cannot see or hear it. A controlled follower, a scripted stand-in that is not a human and not cheat software, aims your avatar at it, as a reader of the body it was sent would.",
   "card": {
     "what_this_tests": "A real occluded_motion_replay/2 challenge: planned from the server secret, sent to this client only, hidden by geometry, verified by the server's own vision and audio verdict at every moment.",
     "player_can_know": "No: the chamber is sealed, the body makes no sound, and the stock client draws nothing of it.",
@@ -30,11 +30,11 @@
           4
         ],
         [
-          10,
+          6,
           4
         ],
         [
-          10,
+          6,
           8
         ],
         [
@@ -97,6 +97,7 @@
   "experimental": true,
   "caveats": [
     "Challenge reviews are experimental and not production-qualified. The bar counts time on the body, not intent.",
-    "One chamber: placement_pick always lands here. The secret still picks the route, the heading and the replay delay, and the commitment binds all of it."
-  ]
+    "One chamber: the secret's placement draw always lands here. The secret still picks the route, the heading and the replay delay, and the commitment binds all of it."
+  ],
+  "actor": "CONTROLLED FOLLOWER \u00b7 SCRIPTED TEST STAND-IN \u00b7 NOT A HUMAN \u00b7 NOT REAL CHEAT SOFTWARE"
 }

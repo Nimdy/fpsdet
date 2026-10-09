@@ -30,11 +30,11 @@
           4
         ],
         [
-          10,
+          6,
           4
         ],
         [
-          10,
+          6,
           8
         ],
         [
@@ -80,5 +80,6 @@
   },
   "caveats": [
     "No adapter or signing key for any commercial anti-cheat exists; this provider is fictional. A signature, when there is one, proves who signed a record, not that it is true."
-  ]
+  ],
+  "actor": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)"
 }

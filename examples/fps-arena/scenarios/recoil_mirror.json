@@ -30,11 +30,11 @@
           4
         ],
         [
-          10,
+          6,
           4
         ],
         [
-          10,
+          6,
           8
         ],
         [
@@ -65,5 +65,6 @@
   },
   "caveats": [
     "The pattern is learnable, so the mean kick and command at each spray index are subtracted first; only the fresh random part, which nobody can anticipate, is tested."
-  ]
+  ],
+  "actor": "SCRIPTED TEST STAND-IN (same-tick recoil mirror) \u00b7 NOT A HUMAN \u00b7 NOT REAL CHEAT SOFTWARE"
 }
