@@ -1,10 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 (2026-10-09): secret turns and declared clocks
+
+Nothing here changes a default. Plans still default to `occluded_motion_replay`/2, profiles without the new fields score as before, and Benchmark v1 and the human pilot reproduce. Challenge reviews remain experimental and not production-qualified, and no person has played the human pilot yet.
 
 ### Added
 
-- **`occluded_motion_replay`/3: secret turns.** The body turns at six secret times, each a secret way, and the finding is whether the aim turned with it, against 1,000 shuffled schedules drawn from the challenge id. Followed when p ≤ 0.01 and four turns moved the aim more than 2° their own way. It answers the dry run's doorway holder, which version 2's time-on-body bar cannot. New event fields `view_yaw_deg`, `challenge_turn_index` and `challenge_turn_sign`, digested as `fpsdet.player-events/4`. Versions 1 and 2, Benchmark v1 and the human pilot are unchanged; plans still default to version 2, and no emitter sends version 3 yet. Tested on simulated aim, and live in Godot by machine stand-ins.
+- **`occluded_motion_replay`/3: secret turns.** The body turns at six secret times, each a secret way, and the finding is whether the aim turned with it, against 1,000 shuffled schedules drawn from the challenge id. Followed when p ≤ 0.01 and four turns moved the aim more than 2° their own way. It answers the dry run's doorway holder, which version 2's time-on-body bar cannot. New event fields `view_yaw_deg`, `challenge_turn_index` and `challenge_turn_sign`, digested as `fpsdet.player-events/4`. Versions 1 and 2, Benchmark v1 and the human pilot are unchanged; plans still default to version 2, and the human pilot's server does not send version 3. Tested on simulated aim, and live in Godot by machine stand-ins.
 - **Version 3 in the live Godot server** (`examples/turns-pilot`). New files beside the frozen study server: `turns.tscn`, `scripts/turns_server.gd` (extends `study_server.gd`), `scripts/turns_recipe.gd`. The published run: no honest stand-in followed in 24 challenges, the controlled follower in 8 of 8, every turn the secret's. An earlier run had one sweeper followed at p = 0.00999, the 1 in 100 the bar allows; docs/challenges.md reports all three runs and what a stricter bar would cost.
 
 - **Profiles can declare their clocks.** Three opt-in fields; a profile without them scores as before and keeps its digest, so Benchmark v1 still verifies.
