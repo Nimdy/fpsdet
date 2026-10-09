@@ -1,0 +1,45 @@
+{
+  "format": "fpsdet.challenge-plans/1",
+  "notice": "Public plan: challenge ids, windows and commitments. It holds no key and no realization. Keep it on the server until the match is over, because its windows say when each challenge runs.",
+  "game_id": "fpsdet-arena",
+  "match_id": "arena-active_challenge-1",
+  "nonce": "2d9de368e545aa1567d0bd79739f86a4",
+  "challenge_type": "occluded_motion_replay",
+  "version": 2,
+  "schedule": {
+    "count": 1,
+    "from_ms": 6000,
+    "to_ms": 30000,
+    "cooldown_ms": 0,
+    "min_duration_ms": 14000,
+    "max_duration_ms": 16000
+  },
+  "requirements": [
+    "Place the body only where this client's line-of-sight and audio queries both fail, for the whole window; end it early if either would succeed.",
+    "Send it to this client only.",
+    "Never draw it in the stock client, and never show it in the scoreboard, kill feed, radar, minimap or any other UI.",
+    "It makes no sound.",
+    "It has no collision: it blocks no player, projectile or trace.",
+    "It cannot be hit, damaged or killed, and deals no damage.",
+    "It changes no movement, score, objective, economy or match result.",
+    "Send it with the same fields as a real player: no decoy bit.",
+    "Keep it away from any enemy this client can see or hear, so the aim on a real enemy does not cross it.",
+    "Query this client's line-of-sight and audio against the body at every server tick of the window, and send the verdict over the time each event covers on every event that names the challenge: challenge_vision_state and challenge_audio_state, known if the query succeeded at any tick, unchecked if it did not run at every tick, absent otherwise."
+  ],
+  "challenges": [
+    {
+      "challenge_id": "ch-8ab5b8b63d4ed976152307a1",
+      "challenge_type": "occluded_motion_replay",
+      "version": 2,
+      "game_id": "fpsdet-arena",
+      "match_id": "arena-active_challenge-1",
+      "subject_id": "arena-player",
+      "counter": 0,
+      "nonce": "2d9de368e545aa1567d0bd79739f86a4",
+      "start_ms": 10117,
+      "end_ms": 25480,
+      "commitment": "sha256:68560c440100595e55fbc04d9f4c2cf5851c12bd8a0297a45d003f55fc2f5f69",
+      "plan": "sha256:2782108ad95767a5337143ca2b3d3311846b19c88bf7b3435684aa50b767d8c6"
+    }
+  ]
+}

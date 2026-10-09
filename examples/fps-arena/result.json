@@ -1,0 +1,6015 @@
+{
+ "format": "fpsdet.arena/1",
+ "arena": "fpsdet-arena",
+ "class": "interactive_reference_demo",
+ "statement": "An interactive reference demo: scripted stand-ins where a cheat would be, one player, one or two bots, one small map. Demonstration and integration evidence, never a benchmark population, a deployment or a detection rate. Not Benchmark v1.",
+ "engine": {
+  "name": "Godot",
+  "version": "4.7.2.stable.official.ed1daf0bf",
+  "binary_sha256": "sha256:8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+  "release_sha512": "9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65"
+ },
+ "code": {
+  "examples/fps-arena/godot/project.godot": "sha256:7542f7694a2f2d384529aaa3aa2483fdb934be05ec761cb8994b2a9283dd1e57",
+  "examples/fps-arena/godot/main.tscn": "sha256:227df0fb6efd7611bfd69e0393df885446ce8bc521cad7f4450753d59da4a1eb",
+  "examples/fps-arena/godot/main.gd": "sha256:a6a6ff70766a0b8aa0b779435fcbaf91bb7f815afc942cd58579b415a8457314",
+  "examples/fps-arena/godot/scripts/arena_map.gd": "sha256:19b1b577b968140735758f8cb3ba26ae3222245fe670cfadecb7340100f0ccc4",
+  "examples/fps-arena/godot/scripts/arena_server.gd": "sha256:12ffafd344e143bd7d04a7fa7fec591aa30500559d6e09e3cb91e68422e4c240",
+  "examples/fps-arena/godot/scripts/server_operator.gd": "sha256:142c36ceaac8ca2f9a6250f6b92a1a3a4b57e45ddca2879528d8c912d77571d2",
+  "examples/fps-arena/godot/scripts/arena_client.gd": "sha256:8204cdf8124e78346933febce85e71ac61add0396da472c7823203c1d4b14608",
+  "examples/fps-arena/godot/scripts/operator_view.gd": "sha256:a2298c8e37dd17eb0ca0f7bbf29eb8fd51e815de9f83cc9648bb10ea0a6fdaac",
+  "examples/fps-arena/godot/scripts/lab.gd": "sha256:bcd276c1c3366156e71510ce906b735edb6db6c4b6fad9415b54aa5bf3da8e83",
+  "examples/fps-arena/godot/scripts/autopilot.gd": "sha256:747c0f4550ec06961d09931238ec23fd278f69bfe7d3497a48438ee23968fdce",
+  "examples/fps-arena/godot/scripts/bots.gd": "sha256:fd208fb3502aaf9c37cc05cd36b281bfeb41863b8a04b626bf8a383b0e1c0983",
+  "examples/fps-arena/godot/scripts/scenario.gd": "sha256:8d7fc3bb79870d8ac11b87d7603e0dcf47dadfba06eb23a7892371421af7d670",
+  "examples/fps-arena/godot/scripts/weapon.gd": "sha256:419c1e43ad89363aabd21b03bf9ecaa37407e3c225a5a4a8ec0a0faa9cf412e1",
+  "examples/fps-arena/godot/scripts/recipe.gd": "sha256:1d77e38dd63624bd3a9950ff9db8542568457362e8cd1284a6a7944480ef24e0",
+  "examples/fps-arena/godot/scripts/sounds.gd": "sha256:b070a8770ac6d10a756fbe7c39249f0487c8bf8d82b45b388f610f8432dac5e8",
+  "examples/fps-arena/harness/arena.py": "sha256:407c82b135a315e22b7cf1213eb32ce1f647f82691dbd31e4b46a7c7ca9a61ff"
+ },
+ "profile": "sha256:dc38c508650510687c1868a7e61c113213715a6e51b831036da45515c53b2663",
+ "scenarios": [
+  {
+   "id": "active_challenge",
+   "title": "Active challenge",
+   "match_id": "arena-active_challenge-1",
+   "expected": {
+    "decision": "review",
+    "kinds": [
+     "occluded_motion_replay"
+    ],
+    "challenge": {
+     "status": "followed",
+     "verification": "per_sample"
+    },
+    "eligibility": {
+     "occluded_motion_replay": "eligible"
+    }
+   },
+   "observed": {
+    "decision": "review",
+    "automated_action": "none",
+    "kinds": [
+     "occluded_motion_replay"
+    ],
+    "observations": [
+     "obs-4f7c0e23823679692de60513"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "insufficient_samples",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "insufficient_samples",
+     "headshot_rate": "insufficient_samples",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "insufficient_samples",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "eligible",
+     "leftover": "insufficient_samples",
+     "voice": "not_applicable"
+    },
+    "challenge": {
+     "challenge_id": "ch-8ab5b8b63d4ed976152307a1",
+     "status": "followed",
+     "cause": null,
+     "verification": "per_sample",
+     "eligible_samples": 153,
+     "tracked_samples": 150,
+     "verified_samples": 153,
+     "total_ms": 14983.0,
+     "not_counted": {
+      "seen": 3
+     }
+    },
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known",
+     "arena-bot-b": "unknowable"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 101,
+      "statuses": {
+       "known": 101
+      },
+      "causes": {
+       "seen": 101
+      },
+      "latest": {
+       "t_ms": 11900,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     },
+     "arena-bot-b": {
+      "events": 9,
+      "statuses": {
+       "unknowable": 9
+      },
+      "causes": {
+       "unknowable": 9
+      },
+      "latest": {
+       "t_ms": 8300,
+       "status": "unknowable",
+       "cause": "unknowable",
+       "channels": {
+        "audio": "absent",
+        "recent_perception": "unchecked",
+        "vision": "absent"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": null,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "unknowable"
+     }
+    },
+    "speed": {
+     "eligible": 320,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:ce639bc17217c2b415bdf821e499a70b98ebb42557ce2aa105c35bc0b9c78e11",
+    "packet": "sha256:59f8bfc8048ee9327d51487f77d3ad2e6d7eb1db02ebf8fb840f759df23624ec",
+    "experimental": true,
+    "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:a88ea3abafb7e046a3816b9b84bbc61ffc35889b20c54f3cb1360343e700384f",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:5d1b32eb7acfcb7942b5c036e0aa070d408521600a41721c282409480642f90c",
+      "events": 336
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-bot-b": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
+     "packet": "sha256:786414622d4475f1346b0774a839062865145443be2923647fa4a415c7dd8fb0",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:db0bd90861b534ba563212f9d0157b4dcb059bffad6390181e01d89e31169332",
+      "events": 320
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "review",
+     "observations": [
+      "obs-4f7c0e23823679692de60513"
+     ],
+     "kinds": [
+      "occluded_motion_replay"
+     ],
+     "graph": "sha256:ce639bc17217c2b415bdf821e499a70b98ebb42557ce2aa105c35bc0b9c78e11",
+     "packet": "sha256:59f8bfc8048ee9327d51487f77d3ad2e6d7eb1db02ebf8fb840f759df23624ec",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:37abfa9d8d9dbb0503d27ca0f82d9bc6a25553289a587660ab7897f3f6473c50",
+      "events": 337
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [
+      {
+       "challenge_id": "ch-8ab5b8b63d4ed976152307a1",
+       "plan": "sha256:2782108ad95767a5337143ca2b3d3311846b19c88bf7b3435684aa50b767d8c6",
+       "match_id": "arena-active_challenge-1",
+       "status": "followed",
+       "eligible_samples": 153,
+       "tracked_samples": 150,
+       "total_ms": 14983.0,
+       "not_counted": {
+        "seen": 3
+       },
+       "verification": "per_sample",
+       "verified_samples": 153
+      }
+     ],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "eligible": [
+        "ch-8ab5b8b63d4ed976152307a1"
+       ]
+      },
+      "leftover": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "reproduced",
+    "challenges": [
+     "ch-8ab5b8b63d4ed976152307a1"
+    ],
+    "problems": []
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 3,
+    "probe_updates": 307,
+    "probe_sounds": 0,
+    "sounds": 56,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 32000,
+    "ticks": 1920,
+    "tick_us_mean": 1348.9,
+    "tick_us_max": 4094,
+    "knowledge_us_per_tick": 510.4,
+    "challenge_us_per_probe_tick": 180.1,
+    "rays_per_tick": 601.7,
+    "event_bytes_per_s": 11624.2,
+    "event_lines": 993,
+    "snapshot_bytes_per_s": 5286.9,
+    "feed_bytes_per_s": 86227.8,
+    "scoring_ms_live": 17.4,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {
+      "absent": 922
+     },
+     "vision": {
+      "absent": 922
+     }
+    },
+    "probe_ticks": 922,
+    "memory_static_peak_bytes": 42150914
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 34.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/active_challenge/events.ndjson",
+     "sha256": "sha256:30a7fdde9e6c4e175951a08307363617d3441c138e805cbd11acf2406447cde0",
+     "lines": 993
+    },
+    "plan.json": {
+     "file": "examples/fps-arena/captures/active_challenge/plan.json",
+     "sha256": "sha256:78f1da3765a4101db7ec2a872cc1451dc54b0a204b16eed18576d32c08d3b4dd"
+    }
+   }
+  },
+  {
+   "id": "angle_hold_false_positive",
+   "title": "Angle hold: experimental challenge failure",
+   "match_id": "arena-angle_hold_false_positive-1",
+   "expected": {
+    "decision": "review",
+    "kinds": [
+     "occluded_motion_replay"
+    ],
+    "challenge": {
+     "status": "followed",
+     "verification": "per_sample"
+    },
+    "eligibility": {
+     "occluded_motion_replay": "eligible"
+    }
+   },
+   "observed": {
+    "decision": "review",
+    "automated_action": "none",
+    "kinds": [
+     "occluded_motion_replay"
+    ],
+    "observations": [
+     "obs-ad3d92abb339df81c9111de6"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "insufficient_samples",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "insufficient_samples",
+     "headshot_rate": "insufficient_samples",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "insufficient_samples",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "telemetry_unavailable",
+     "occluded_motion_replay": "eligible",
+     "leftover": "insufficient_samples",
+     "voice": "not_applicable"
+    },
+    "challenge": {
+     "challenge_id": "ch-4aac104b0f76f075fafd93ed",
+     "status": "followed",
+     "cause": null,
+     "verification": "per_sample",
+     "eligible_samples": 153,
+     "tracked_samples": 153,
+     "verified_samples": 153,
+     "total_ms": 15274.0,
+     "not_counted": {}
+    },
+    "fusion": null,
+    "knowledge": {},
+    "knowledge_detail": {},
+    "speed": {
+     "eligible": 320,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:a42e492ada3f629f406b261884983760e6563df6dd1aac7afb5e57a868186651",
+    "packet": "sha256:042941262b6ed211c98225a7f9b3d2570c9113f847982f1952e5e6c10b896650",
+    "experimental": true,
+    "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:7b82b56e123fe9e1ccf31bcf4f81d0c0ad7d9be70ce3df43729987a37ac8a82e",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:61dc07c7ec966bab720b1793a1792486c29ec0ab5f1568c00ac6abb04d908273",
+      "events": 320
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-bot-b": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
+     "packet": "sha256:fc89d40ba31ad894e82c2b12beb9953fbc835c66a645d166618598f80b27c530",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:f07d23bfdb3d21676f86527f201bcd8bff14d07f99f38ba3080e4cdf25849048",
+      "events": 320
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "not_applicable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "review",
+     "observations": [
+      "obs-ad3d92abb339df81c9111de6"
+     ],
+     "kinds": [
+      "occluded_motion_replay"
+     ],
+     "graph": "sha256:a42e492ada3f629f406b261884983760e6563df6dd1aac7afb5e57a868186651",
+     "packet": "sha256:042941262b6ed211c98225a7f9b3d2570c9113f847982f1952e5e6c10b896650",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/3",
+      "digest": "sha256:a8e70e0cb8ab257f09af3f77b0e334f1a7ff93a6d8dac942a863eb4478dbd365",
+      "events": 338
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [
+      {
+       "challenge_id": "ch-4aac104b0f76f075fafd93ed",
+       "plan": "sha256:dd45b6223534df91f1d1d2ea45a77f4a672d88ebedb2a36f9cb341de5c8d4804",
+       "match_id": "arena-angle_hold_false_positive-1",
+       "status": "followed",
+       "eligible_samples": 153,
+       "tracked_samples": 153,
+       "total_ms": 15274.0,
+       "not_counted": {},
+       "verification": "per_sample",
+       "verified_samples": 153
+      }
+     ],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "eligible": [
+        "ch-4aac104b0f76f075fafd93ed"
+       ]
+      },
+      "leftover": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "reproduced",
+    "challenges": [
+     "ch-4aac104b0f76f075fafd93ed"
+    ],
+    "problems": []
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 3,
+    "probe_updates": 307,
+    "probe_sounds": 0,
+    "sounds": 58,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 32000,
+    "ticks": 1920,
+    "tick_us_mean": 1269.2,
+    "tick_us_max": 3817,
+    "knowledge_us_per_tick": 507.3,
+    "challenge_us_per_probe_tick": 76.0,
+    "rays_per_tick": 588.1,
+    "event_bytes_per_s": 11127.5,
+    "event_lines": 978,
+    "snapshot_bytes_per_s": 5232.6,
+    "feed_bytes_per_s": 84194.4,
+    "scoring_ms_live": 19.0,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {
+      "absent": 922
+     },
+     "vision": {
+      "absent": 922
+     }
+    },
+    "probe_ticks": 922,
+    "memory_static_peak_bytes": 42151130
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 34.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/angle_hold_false_positive/events.ndjson",
+     "sha256": "sha256:29f03233f6b84c4c8dbe863fb960d4473b29e8174a0abed3f170951a45ecc50b",
+     "lines": 978
+    },
+    "plan.json": {
+     "file": "examples/fps-arena/captures/angle_hold_false_positive/plan.json",
+     "sha256": "sha256:38c14ff14feb1bdf6c8cc53ff073e6ce4f30cf8ced58a404445a5c053add62d7"
+    }
+   }
+  },
+  {
+   "id": "audible_hidden_enemy",
+   "title": "Hidden enemy, audible",
+   "match_id": "arena-audible_hidden_enemy-1",
+   "expected": {
+    "decision": [
+     "clean",
+     "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+     "hidden": "eligible"
+    },
+    "knowledge": {
+     "arena-bot-b": "known"
+    }
+   },
+   "observed": {
+    "decision": "insufficient_data",
+    "automated_action": "none",
+    "kinds": [],
+    "observations": [],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "insufficient_samples",
+     "recoil_floor": "eligible",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "insufficient_samples",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-b": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-b": {
+      "events": 349,
+      "statuses": {
+       "known": 349
+      },
+      "causes": {
+       "heard": 349
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "heard",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "absent"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+    "packet": "sha256:49d1eb9ace6b19b25df818757988ace7106de3784d01970659071c403040a249",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-b": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
+     "packet": "sha256:45c6b2e7e21ca5d22991f4959c9aff2cd07f85346a23c3376217e80e80f967bd",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:9deec129a6cb1571d91a48f2399e6c66ff314e7755a259c43f34dabaca1f40f8",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+     "packet": "sha256:49d1eb9ace6b19b25df818757988ace7106de3784d01970659071c403040a249",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:d9739837aa248e320fd900c93682c43ba98f63b2be44b0348d569c0f795822f3",
+      "events": 381
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "recoil:arena-rifle|"
+       ],
+       "insufficient_samples": [
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 72,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 883.3,
+    "tick_us_max": 2991,
+    "knowledge_us_per_tick": 269.4,
+    "challenge_us_per_probe_tick": 4078.0,
+    "rays_per_tick": 377.7,
+    "event_bytes_per_s": 9292.8,
+    "event_lines": 681,
+    "snapshot_bytes_per_s": 3607.1,
+    "feed_bytes_per_s": 69990.4,
+    "scoring_ms_live": 10.9,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42151010
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/audible_hidden_enemy/events.ndjson",
+     "sha256": "sha256:0125955382164fdfa1bd8806a644d49df565e724eeaac2d3da8f51ddd7b21941",
+     "lines": 681
+    }
+   }
+  },
+  {
+   "id": "external_record",
+   "title": "External evidence",
+   "match_id": "arena-external_record-1",
+   "expected": {
+    "decision": "watch",
+    "kinds": [
+     "external_signal"
+    ],
+    "fusion": {
+     "rule": "A",
+     "native_decision": [
+      "clean",
+      "insufficient_data"
+     ]
+    },
+    "no_review": true
+   },
+   "observed": {
+    "decision": "watch",
+    "automated_action": "none",
+    "kinds": [
+     "external_signal"
+    ],
+    "observations": [
+     "obs-705639f779c1a64936748bf8"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": {
+     "policy": "fpsdet.fusion/1",
+     "native_decision": "insufficient_data",
+     "decision": "watch",
+     "rule": "A",
+     "signals": 1,
+     "context": 0,
+     "provider_groups": [
+      "example-lab-integrity"
+     ],
+     "telemetry_domains": [
+      "endpoint_memory"
+     ]
+    },
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 316,
+      "statuses": {
+       "known": 316
+      },
+      "causes": {
+       "seen": 316
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:906155e739e1c46b1755eddb67fcf99f60098ca45583bfd900fd0c1b7ece9bfa",
+    "packet": "sha256:3b0cca4afc2b3b9c6fa3522d0d2806a7894ef19680850b98718550946a75e06b",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:94009eda097f550e64336daaf852847888c4d45f3e334fe8115459b2b0b7b9f0",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:64817de4c97c5dcd4050425af0617aa37b30ba17e8e8c76f2c7982a0dfc90920",
+      "events": 330
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": {
+      "policy": "fpsdet.fusion/1",
+      "native_decision": "insufficient_data",
+      "decision": "insufficient_data",
+      "rule": "none",
+      "signals": 0,
+      "context": 0,
+      "provider_groups": [],
+      "telemetry_domains": []
+     },
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "watch",
+     "observations": [
+      "obs-705639f779c1a64936748bf8"
+     ],
+     "kinds": [
+      "external_signal"
+     ],
+     "graph": "sha256:906155e739e1c46b1755eddb67fcf99f60098ca45583bfd900fd0c1b7ece9bfa",
+     "packet": "sha256:3b0cca4afc2b3b9c6fa3522d0d2806a7894ef19680850b98718550946a75e06b",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:ab36f3aef4c460fd93d524a263a81076764146e5403553698571c6a2fbad03b0",
+      "events": 354
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": {
+      "policy": "fpsdet.fusion/1",
+      "native_decision": "insufficient_data",
+      "decision": "watch",
+      "rule": "A",
+      "signals": 1,
+      "context": 0,
+      "provider_groups": [
+       "example-lab-integrity"
+      ],
+      "telemetry_domains": [
+       "endpoint_memory"
+      ]
+     },
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "headshot_rate:rifle"
+       ],
+       "insufficient_samples": [
+        "geometry_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 105,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 298.6,
+    "tick_us_max": 2156,
+    "knowledge_us_per_tick": 28.4,
+    "challenge_us_per_probe_tick": 4442.0,
+    "rays_per_tick": 2.4,
+    "event_bytes_per_s": 9234.4,
+    "event_lines": 684,
+    "snapshot_bytes_per_s": 3466.4,
+    "feed_bytes_per_s": 70620.9,
+    "scoring_ms_live": 14.4,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42150890
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/external_record/events.ndjson",
+     "sha256": "sha256:bc97c3417b747f7cc89a6f6e112e677764dbe272f222981f4c8ce39981b884cf",
+     "lines": 684
+    },
+    "external.ndjson": {
+     "file": "examples/fps-arena/captures/external_record/external.ndjson",
+     "sha256": "sha256:b9c71aba2ee76f95f31456c5bfe4c765675682a0164214d133b81e2c72efb29f"
+    }
+   }
+  },
+  {
+   "id": "fire_rate",
+   "title": "Fire rate",
+   "match_id": "arena-fire_rate-1",
+   "expected": {
+    "decision": "review",
+    "kinds": [
+     "fire_rate"
+    ],
+    "eligibility": {
+     "fire_rate": "eligible",
+     "metronome": "not_applicable"
+    }
+   },
+   "observed": {
+    "decision": "review",
+    "automated_action": "none",
+    "kinds": [
+     "fire_rate"
+    ],
+    "observations": [
+     "obs-777d1163caef9890063a186c"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "eligible",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "baseline_too_thin",
+     "geometry_rate": "baseline_too_thin",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 494,
+      "statuses": {
+       "known": 494
+      },
+      "causes": {
+       "seen": 494
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:8e5e006098913d24c1f416a7f55d0df46f0260c2d0be5aef185b402d67a5ee1b",
+    "packet": "sha256:7df66dce1593489f34359df99e4692ab49128d37ef974131ec7d4f1b07bb3df0",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:cbffb09c2f82b5baaeabe52119d7dae4ce32719d64d6bfcd5b0f29c0ea163e04",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:e9d74834653fe525e4db2c66fd66290d7997f0edf25bcdda260b0f21d106680a",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "review",
+     "observations": [
+      "obs-777d1163caef9890063a186c"
+     ],
+     "kinds": [
+      "fire_rate"
+     ],
+     "graph": "sha256:8e5e006098913d24c1f416a7f55d0df46f0260c2d0be5aef185b402d67a5ee1b",
+     "packet": "sha256:7df66dce1593489f34359df99e4692ab49128d37ef974131ec7d4f1b07bb3df0",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:ac9f4187b0076354f9b1df3a7f06e6c753fe90a588adc46fc3a340e444c6658e",
+      "events": 538
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 75,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 313.9,
+    "tick_us_max": 1923,
+    "knowledge_us_per_tick": 29.3,
+    "challenge_us_per_probe_tick": 4391.0,
+    "rays_per_tick": 2.4,
+    "event_bytes_per_s": 12137.6,
+    "event_lines": 838,
+    "snapshot_bytes_per_s": 3519.5,
+    "feed_bytes_per_s": 74850.4,
+    "scoring_ms_live": 25.4,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42150746
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/fire_rate/events.ndjson",
+     "sha256": "sha256:d3663001600337c9c75e541d6b5949c575ee4b98e5b5c1ec6499654c9c71dac4",
+     "lines": 838
+    }
+   }
+  },
+  {
+   "id": "impossible_speed",
+   "title": "Impossible speed",
+   "match_id": "arena-impossible_speed-1",
+   "expected": {
+    "decision": "review",
+    "kinds": [
+     "speed"
+    ],
+    "eligibility": {
+     "speed": "eligible"
+    }
+   },
+   "observed": {
+    "decision": "review",
+    "automated_action": "none",
+    "kinds": [
+     "speed"
+    ],
+    "observations": [
+     "obs-d9775c3f4b71dca2145f9ef4"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "insufficient_samples",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 240,
+      "statuses": {
+       "known": 240
+      },
+      "causes": {
+       "seen": 240
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 151,
+     "longest_run": 151,
+     "sustained": true,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": "Ground speed stayed over the gear cap for 151 samples with displacement_cause none. Cap source: server. If this was a ragdoll or explosion, the server did not mark it."
+    },
+    "graph": "sha256:0dcf9c7867e75c074704b6c892e7cc4421b886d536fb197c50c6d88ce1ebf7f5",
+    "packet": "sha256:ebea9c49d68d294ffc45adec8d5362427d18565a3faa03aa6f4fbea653efa445",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:f92207b81191d7525b810e49fe00ce199f32c6cd68d9e91e24633557043f60fc",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:82bc44a69fa2feed3e485d2984a698b8ff19b1a8d0d5d38947089b99aadcd26f",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "review",
+     "observations": [
+      "obs-d9775c3f4b71dca2145f9ef4"
+     ],
+     "kinds": [
+      "speed"
+     ],
+     "graph": "sha256:0dcf9c7867e75c074704b6c892e7cc4421b886d536fb197c50c6d88ce1ebf7f5",
+     "packet": "sha256:ebea9c49d68d294ffc45adec8d5362427d18565a3faa03aa6f4fbea653efa445",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:2eb402115d2fd617b49eb51dd698e98c0070799d1edf7ff908d443ed06c2e19b",
+      "events": 350
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle"
+       ],
+       "insufficient_samples": [
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 70,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 311.8,
+    "tick_us_max": 1972,
+    "knowledge_us_per_tick": 30.9,
+    "challenge_us_per_probe_tick": 4264.0,
+    "rays_per_tick": 15.1,
+    "event_bytes_per_s": 8264.8,
+    "event_lines": 650,
+    "snapshot_bytes_per_s": 3464.9,
+    "feed_bytes_per_s": 69507.7,
+    "scoring_ms_live": 12.0,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42150914
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/impossible_speed/events.ndjson",
+     "sha256": "sha256:5f42f12b578e4c0e7e52847be96613011c4be0dbe5937988302ed6697654794e",
+     "lines": 650
+    }
+   }
+  },
+  {
+   "id": "normal_play",
+   "title": "Normal play",
+   "match_id": "arena-normal_play-1",
+   "expected": {
+    "decision": [
+     "clean",
+     "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+     "speed": "eligible",
+     "hidden": "eligible"
+    },
+    "knowledge": {
+     "arena-bot-a": "known"
+    }
+   },
+   "observed": {
+    "decision": "insufficient_data",
+    "automated_action": "none",
+    "kinds": [],
+    "observations": [],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 311,
+      "statuses": {
+       "known": 311
+      },
+      "causes": {
+       "seen": 311
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+    "packet": "sha256:9232a5fce50c45f325433af09cfda30015d940631967d94191f37dd4eafe5659",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:85a2b6326e3654738a18efb039fe5c9c196ee88f57feae30c64e7ef925fb441b",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:04e698b87c7486bdec75dc18cd94ce48e1428c52b688289281137d7f4e2d6086",
+      "events": 330
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+     "packet": "sha256:9232a5fce50c45f325433af09cfda30015d940631967d94191f37dd4eafe5659",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:b0844717b7c50a51e11b081848ac9f1b563cc7eef9bfd28656f36a5be6101e9d",
+      "events": 349
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "headshot_rate:rifle"
+       ],
+       "insufficient_samples": [
+        "geometry_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 105,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 298.3,
+    "tick_us_max": 3154,
+    "knowledge_us_per_tick": 29.2,
+    "challenge_us_per_probe_tick": 4546.0,
+    "rays_per_tick": 2.4,
+    "event_bytes_per_s": 9049.1,
+    "event_lines": 679,
+    "snapshot_bytes_per_s": 3464.8,
+    "feed_bytes_per_s": 70239.9,
+    "scoring_ms_live": 14.4,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42150794
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.5,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/normal_play/events.ndjson",
+     "sha256": "sha256:f0a1d0f76d81435deccc4d524497498e65a8aacb5a9042f6ee85cfb2ef1bf2e4",
+     "lines": 679
+    }
+   }
+  },
+  {
+   "id": "recoil_floor",
+   "title": "Recoil floor",
+   "match_id": "arena-recoil_floor-1",
+   "expected": {
+    "decision": "review",
+    "kinds": [
+     "recoil_floor"
+    ],
+    "eligibility": {
+     "recoil_floor": "eligible"
+    }
+   },
+   "observed": {
+    "decision": "review",
+    "automated_action": "none",
+    "kinds": [
+     "recoil_floor"
+    ],
+    "observations": [
+     "obs-ac11288e74637a97b37cc63a"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "eligible",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "baseline_too_thin",
+     "geometry_rate": "baseline_too_thin",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 482,
+      "statuses": {
+       "known": 482
+      },
+      "causes": {
+       "seen": 482
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:7058168a8eedc891d46544307488596cb53685d06b606f1fd29d12cf2f0323a8",
+    "packet": "sha256:2d811950fe358fd53a6117707853836e2d76bb247703c658fd2cc9d88a0ea545",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:4d3623c892837c8e7f8c7c1c4cffc85b8f489bb29c281b27f2f76b6acc87269f",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:29f6c7d37903a91dabee3f64463ba2be152d9d4a07dc5951db7fe7784d8d58e2",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "review",
+     "observations": [
+      "obs-ac11288e74637a97b37cc63a"
+     ],
+     "kinds": [
+      "recoil_floor"
+     ],
+     "graph": "sha256:7058168a8eedc891d46544307488596cb53685d06b606f1fd29d12cf2f0323a8",
+     "packet": "sha256:2d811950fe358fd53a6117707853836e2d76bb247703c658fd2cc9d88a0ea545",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:a068cf2eab430f0eb0c5bab73d1a94c42715e78ce07baf858b0e9c90f9770eb6",
+      "events": 508
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ],
+       "not_applicable": [
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 75,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 226.2,
+    "tick_us_max": 718,
+    "knowledge_us_per_tick": 20.7,
+    "challenge_us_per_probe_tick": 2769.0,
+    "rays_per_tick": 2.4,
+    "event_bytes_per_s": 11713.1,
+    "event_lines": 808,
+    "snapshot_bytes_per_s": 3482.8,
+    "feed_bytes_per_s": 74242.7,
+    "scoring_ms_live": 11.2,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42150818
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/recoil_floor/events.ndjson",
+     "sha256": "sha256:6b4242662e9eae1d4be3b4b46db517fdc8cc2f8174f9d760241085ecfe588225",
+     "lines": 808
+    }
+   }
+  },
+  {
+   "id": "recoil_mirror",
+   "title": "Recoil mirror",
+   "match_id": "arena-recoil_mirror-1",
+   "expected": {
+    "decision": "review",
+    "kinds": [
+     "mirror"
+    ],
+    "eligibility": {
+     "mirror": "eligible"
+    }
+   },
+   "observed": {
+    "decision": "review",
+    "automated_action": "none",
+    "kinds": [
+     "mirror"
+    ],
+    "observations": [
+     "obs-f559cc5a6d19e090e564ce1e"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "eligible",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "baseline_too_thin",
+     "geometry_rate": "baseline_too_thin",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 449,
+      "statuses": {
+       "known": 449
+      },
+      "causes": {
+       "seen": 449
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:f8ae819d8ac2a31010322cae1af27793c710fa9d1893975a988444c049f7fa91",
+    "packet": "sha256:da6a2828034785392c03f8fe7657e67484a466ff56f48925767e1c7156ac3e46",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:39e298a328279d3056916ea6bc2388636e08be484c2cee626fa00a2ebe7fde4b",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:3bfa192201705940e7865b73892da60b5bfcd2c55170fc604be15c21f4914362",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "review",
+     "observations": [
+      "obs-f559cc5a6d19e090e564ce1e"
+     ],
+     "kinds": [
+      "mirror"
+     ],
+     "graph": "sha256:f8ae819d8ac2a31010322cae1af27793c710fa9d1893975a988444c049f7fa91",
+     "packet": "sha256:da6a2828034785392c03f8fe7657e67484a466ff56f48925767e1c7156ac3e46",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:0f833a33e2574039c2962937c09a16a66c0ee02e479b23b20d331b4119e8b969",
+      "events": 508
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 75,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 215.4,
+    "tick_us_max": 1073,
+    "knowledge_us_per_tick": 19.9,
+    "challenge_us_per_probe_tick": 2693.0,
+    "rays_per_tick": 2.4,
+    "event_bytes_per_s": 11578.7,
+    "event_lines": 808,
+    "snapshot_bytes_per_s": 3542.8,
+    "feed_bytes_per_s": 74404.8,
+    "scoring_ms_live": 10.5,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42150842
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/recoil_mirror/events.ndjson",
+     "sha256": "sha256:f6d4eb4de563d10885a00d667f05b12e580f1da01e4794bcdc28791a959a9046",
+     "lines": 808
+    }
+   }
+  },
+  {
+   "id": "unchecked_audio_channel",
+   "title": "Unknown: audio telemetry missing",
+   "match_id": "arena-unchecked_audio_channel-1",
+   "expected": {
+    "decision": [
+     "clean",
+     "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+     "hidden": "telemetry_unavailable"
+    },
+    "knowledge": {
+     "arena-bot-b": "unknown"
+    }
+   },
+   "observed": {
+    "decision": "insufficient_data",
+    "automated_action": "none",
+    "kinds": [],
+    "observations": [],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "insufficient_samples",
+     "recoil_floor": "eligible",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "insufficient_samples",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "telemetry_unavailable",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-b": "unknown"
+    },
+    "knowledge_detail": {
+     "arena-bot-b": {
+      "events": 352,
+      "statuses": {
+       "unknown": 352
+      },
+      "causes": {
+       "unchecked": 352
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "unknown",
+       "cause": "unchecked",
+       "channels": {
+        "audio": "unchecked",
+        "recent_perception": "unchecked",
+        "vision": "absent"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": null,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "unknown"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+    "packet": "sha256:3fd6b7f95924a68b749d4a03219cdb35c9d6260b8f5f2c45fd3d3a40cf6cb143",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-b": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
+     "packet": "sha256:298febf970529424d19cbb59c091fb9b815f49169f00e42190888903bcc7d27c",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:0e494758ec2bd5ec87325473367d2fe76ad9a30ef13e4a273869a0ae1ce0492f",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+     "packet": "sha256:3fd6b7f95924a68b749d4a03219cdb35c9d6260b8f5f2c45fd3d3a40cf6cb143",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:36304d05bcdae825430703fbaabc9bb2bcef83296c1d137ac144d54e6e5fb569",
+      "events": 381
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "recoil:arena-rifle|"
+       ],
+       "insufficient_samples": [
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 0,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 682.2,
+    "tick_us_max": 1987,
+    "knowledge_us_per_tick": 217.0,
+    "challenge_us_per_probe_tick": 2621.0,
+    "rays_per_tick": 378.0,
+    "event_bytes_per_s": 8925.9,
+    "event_lines": 681,
+    "snapshot_bytes_per_s": 3607.3,
+    "feed_bytes_per_s": 66335.2,
+    "scoring_ms_live": 8.1,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42151082
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/unchecked_audio_channel/events.ndjson",
+     "sha256": "sha256:314bce2d1acba501297eb0141f15642c271d6e10fd7f3c6cd4f64738e1e6f50e",
+     "lines": 681
+    }
+   }
+  },
+  {
+   "id": "unknowable_hidden_enemy",
+   "title": "Hidden and unknowable",
+   "match_id": "arena-unknowable_hidden_enemy-1",
+   "expected": {
+    "decision": [
+     "clean",
+     "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+     "hidden": "eligible"
+    },
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_seen": {
+     "arena-bot-b": "unknowable"
+    }
+   },
+   "observed": {
+    "decision": "insufficient_data",
+    "automated_action": "none",
+    "kinds": [],
+    "observations": [],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known",
+     "arena-bot-b": "unknowable"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 294,
+      "statuses": {
+       "known": 294
+      },
+      "causes": {
+       "seen": 294
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     },
+     "arena-bot-b": {
+      "events": 23,
+      "statuses": {
+       "unknowable": 23
+      },
+      "causes": {
+       "unknowable": 23
+      },
+      "latest": {
+       "t_ms": 27100,
+       "status": "unknowable",
+       "cause": "unknowable",
+       "channels": {
+        "audio": "absent",
+        "recent_perception": "unchecked",
+        "vision": "absent"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": null,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "unknowable"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+    "packet": "sha256:28a04beb00f384fa6cdf84365851cd882924a3b9a998e984b9443c66024c0462",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:0c115fa8d462115b4cd208ac04835625d1abd2ba39c4182ad428e7e5cb6ca49c",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:18339acc9534ea70bad30d2fa6bb014802aee30e3a99444f3506b76a9b6d93be",
+      "events": 330
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-bot-b": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
+     "packet": "sha256:0c11503806047e9fcd54fec52c354120efc6637434f4dfccdd6fd19882033c6d",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:dc9023ec4a659b7c20c44ac24a02b5ff76f5de3432961b9bf6df7bfe832fe023",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+     "packet": "sha256:28a04beb00f384fa6cdf84365851cd882924a3b9a998e984b9443c66024c0462",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:d040d33cdf4326a604a8696d888c303285d929f00448faf5132cbf55070583c8",
+      "events": 352
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "headshot_rate:rifle"
+       ],
+       "insufficient_samples": [
+        "geometry_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 2,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 105,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 686.4,
+    "tick_us_max": 1787,
+    "knowledge_us_per_tick": 228.7,
+    "challenge_us_per_probe_tick": 2816.0,
+    "rays_per_tick": 351.2,
+    "event_bytes_per_s": 13067.6,
+    "event_lines": 982,
+    "snapshot_bytes_per_s": 4666.7,
+    "feed_bytes_per_s": 79250.5,
+    "scoring_ms_live": 11.7,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42151082
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/unknowable_hidden_enemy/events.ndjson",
+     "sha256": "sha256:84e9def5597fa024bd8abb212a5e0924f30ba69bf2a86b0dc75112d1ccd5a3e6",
+     "lines": 982
+    }
+   }
+  },
+  {
+   "id": "unknowable_hidden_tracked",
+   "title": "Hidden and unknowable, tracked",
+   "match_id": "arena-unknowable_hidden_tracked-1",
+   "expected": {
+    "decision": "review",
+    "kinds": [
+     "hidden"
+    ],
+    "eligibility": {
+     "hidden": "eligible"
+    },
+    "knowledge": {
+     "arena-bot-b": "unknowable"
+    }
+   },
+   "observed": {
+    "decision": "review",
+    "automated_action": "none",
+    "kinds": [
+     "hidden"
+    ],
+    "observations": [
+     "obs-79f5fa00d0ede69513045681"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "insufficient_samples",
+     "recoil_floor": "eligible",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "insufficient_samples",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-b": "unknowable"
+    },
+    "knowledge_detail": {
+     "arena-bot-b": {
+      "events": 352,
+      "statuses": {
+       "unknowable": 352
+      },
+      "causes": {
+       "unknowable": 352
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "unknowable",
+       "cause": "unknowable",
+       "channels": {
+        "audio": "absent",
+        "recent_perception": "unchecked",
+        "vision": "absent"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": null,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "unknowable"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:cfac11f634fb0275a5a70cfb2022f75615bfb83e2300c8356fb0c9aa5ce51303",
+    "packet": "sha256:2b62d9b056310e0cac0bb8067c3d5c4f8657b6dad2e7aaeabc2daeb1b70d2552",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-b": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
+     "packet": "sha256:aa7c42ef3b471670de66279daf4a4c4d343ef9e48084c5aa4a0f8cf787a89cf5",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:360024d976bd3edfa448503c115ec8f911ea494007577c91cb14ab02a98784cd",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "review",
+     "observations": [
+      "obs-79f5fa00d0ede69513045681"
+     ],
+     "kinds": [
+      "hidden"
+     ],
+     "graph": "sha256:cfac11f634fb0275a5a70cfb2022f75615bfb83e2300c8356fb0c9aa5ce51303",
+     "packet": "sha256:2b62d9b056310e0cac0bb8067c3d5c4f8657b6dad2e7aaeabc2daeb1b70d2552",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:bc75f1d35de46ecca16cbd6b37ed36e69b3d43824baa11e4ca5332f24def2eb5",
+      "events": 381
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "recoil:arena-rifle|"
+       ],
+       "insufficient_samples": [
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 0,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 673.0,
+    "tick_us_max": 1915,
+    "knowledge_us_per_tick": 218.8,
+    "challenge_us_per_probe_tick": 2537.0,
+    "rays_per_tick": 378.0,
+    "event_bytes_per_s": 9170.4,
+    "event_lines": 681,
+    "snapshot_bytes_per_s": 3607.1,
+    "feed_bytes_per_s": 66702.7,
+    "scoring_ms_live": 11.9,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42151130
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/unknowable_hidden_tracked/events.ndjson",
+     "sha256": "sha256:7964c61258eed38e6f66dce38500eaafe793b110746c42b806a114876bf6b9a6",
+     "lines": 681
+    }
+   }
+  },
+  {
+   "id": "wire_vs_picture",
+   "title": "Wire vs picture",
+   "match_id": "arena-wire_vs_picture-1",
+   "expected": {
+    "decision": "review",
+    "kinds": [
+     "wire"
+    ],
+    "eligibility": {
+     "wire": "eligible"
+    }
+   },
+   "observed": {
+    "decision": "review",
+    "automated_action": "none",
+    "kinds": [
+     "wire"
+    ],
+    "observations": [
+     "obs-41d96dfbc324ff037372216e"
+    ],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "eligible",
+     "recoil_floor": "eligible",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "baseline_too_thin",
+     "geometry_rate": "baseline_too_thin",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 351,
+      "statuses": {
+       "known": 351
+      },
+      "causes": {
+       "seen": 351
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:7d04224c3c55c7d32578858e2fc03c065626581baaac46992fe16607f1f5fd63",
+    "packet": "sha256:ceb4ab0a267037659477a94517aa605b3533ebcbf79fce42b3aab56b1b379e64",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:d0d3b85859b9e65b309631791f13475ed6d6cdf64201827d37806de222d1566f",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:d9be06439d0db7400a5b08cdaef3ebbc721a23efc544092bd3ee44f79bc5dcbd",
+      "events": 300
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "metronome": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_floor": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "mirror": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "recoil_learned": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "accuracy": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "headshot_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "median_distance": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "geometry_rate": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "review",
+     "observations": [
+      "obs-41d96dfbc324ff037372216e"
+     ],
+     "kinds": [
+      "wire"
+     ],
+     "graph": "sha256:7d04224c3c55c7d32578858e2fc03c065626581baaac46992fe16607f1f5fd63",
+     "packet": "sha256:ceb4ab0a267037659477a94517aa605b3533ebcbf79fce42b3aab56b1b379e64",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:d647617802df964b61b4bf15ad0fdd588a181954b9e7c35a8e3830f2db1a34db",
+      "events": 421
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 75,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 217.1,
+    "tick_us_max": 726,
+    "knowledge_us_per_tick": 20.4,
+    "challenge_us_per_probe_tick": 2536.0,
+    "rays_per_tick": 2.4,
+    "event_bytes_per_s": 9904.5,
+    "event_lines": 721,
+    "snapshot_bytes_per_s": 3600.8,
+    "feed_bytes_per_s": 73333.2,
+    "scoring_ms_live": 9.5,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 42150890
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/wire_vs_picture/events.ndjson",
+     "sha256": "sha256:217a3ce33657ce2aba7cc350767f59a317e632432802b09de7571a7b8a5c0dd9",
+     "lines": 721
+    }
+   }
+  }
+ ],
+ "experimental": {
+  "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED",
+  "applies_to": [
+   "active_challenge",
+   "angle_hold_false_positive"
+  ],
+  "note": "Challenge reviews are experimental and not production-qualified. The angle-hold scenario is kept as a false-positive control: its review is the known weakness of the time-on-body bar, shown, not fixed."
+ },
+ "no_person": "Every subject in this result is a scripted autopilot or a server-side stand-in. No person played these matches, and nothing here is a human result.",
+ "digest": "sha256:0bd9f893eb4cf307f5ddb615e940a7336c480cde27ac292f8c4ce462e2d85a06"
+}

@@ -30,7 +30,7 @@ jobs:
       - name: Signature checking (the optional auth extra)
         run: pip install "cryptography>=42"
       - name: Unit tests
-        run: PYTHONPATH=src python -m unittest tests.test_fpsdet tests.test_golden tests.test_observations tests.test_provenance tests.test_packet tests.test_event_order tests.test_knowledge tests.test_challenge tests.test_external tests.test_graph tests.test_auth tests.test_calibration tests.test_eligibility tests.test_strength tests.test_benchmark tests.test_tf2bench tests.test_pilot tests.test_human_pilot -v
+        run: PYTHONPATH=src python -m unittest tests.test_fpsdet tests.test_golden tests.test_observations tests.test_provenance tests.test_packet tests.test_event_order tests.test_knowledge tests.test_challenge tests.test_external tests.test_graph tests.test_auth tests.test_calibration tests.test_eligibility tests.test_strength tests.test_benchmark tests.test_tf2bench tests.test_pilot tests.test_human_pilot tests.test_fps_arena -v
       - name: Planted demo
         # Writes demo/board.html. Exits non-zero if any planted case got the wrong decision.
         run: PYTHONPATH=src python -m fpsdet demo
