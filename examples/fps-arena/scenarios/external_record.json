@@ -1,0 +1,84 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "external_record",
+  "key": "e",
+  "title": "External evidence",
+  "duration_ms": 30000,
+  "instructions": "Normal play, while a fictional provider sends one adverse record about this player in this match.",
+  "card": {
+    "what_this_tests": "A record from another integrity system can move a clean case to watch. It cannot create a review.",
+    "player_can_know": "Not relevant.",
+    "server_knows": "Nothing new: the record comes from outside the server, in the fpsdet.external/1 format, and is carried exactly as given.",
+    "expected_fpsdet_behavior": "Native decision clean or insufficient_data; fused decision watch (rule A). An external observation with its provider, class, direction and confidence; automated_action still none.",
+    "invalid_if": "The record names another match (then it is context), or anyone treats a provider's claim as fpsdet's finding."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "tracker"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -10,
+          4
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          -10,
+          8
+        ]
+      ],
+      "speed": 3.0,
+      "pause_ms": 0,
+      "fires": true
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {},
+  "external": {
+    "provider": "example-lab-integrity",
+    "source_class": "client_integrity",
+    "telemetry_domain": "endpoint_memory",
+    "kind": "memory_integrity_anomaly",
+    "direction": "adverse",
+    "confidence": 71,
+    "confidence_scale": "score",
+    "confidence_meaning": "a fictional provider's anomaly score from 0 to 100; higher is more anomalous; not a probability",
+    "provider_record_id": "LAB-0001",
+    "metadata": {
+      "module": "overlay-x"
+    }
+  },
+  "expected": {
+    "decision": "watch",
+    "kinds": [
+      "external_signal"
+    ],
+    "fusion": {
+      "rule": "A",
+      "native_decision": [
+        "clean",
+        "insufficient_data"
+      ]
+    },
+    "no_review": true
+  },
+  "caveats": [
+    "No adapter or signing key for any commercial anti-cheat exists; this provider is fictional. A signature, when there is one, proves who signed a record, not that it is true."
+  ]
+}

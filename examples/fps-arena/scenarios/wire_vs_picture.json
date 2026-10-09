@@ -1,0 +1,63 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "wire_vs_picture",
+  "key": "9",
+  "title": "Wire vs picture",
+  "duration_ms": 30000,
+  "instructions": "A bot strafes across the lane. From 5 s to 25 s a stand-in aims at the newest snapshot the server sent, not at the body your client draws.",
+  "card": {
+    "what_this_tests": "Aim that matches the wire snapshot ahead of the picture the official client draws, one interpolation delay later.",
+    "player_can_know": "A person sees the picture: the body drawn 100 ms behind the newest snapshot.",
+    "server_knows": "The angular error from the aim to the snapshot it just sent (wire), to the position the client draws (picture), and the delay between them, all from its own record of what it sent.",
+    "expected_fpsdet_behavior": "The wire check fires: at least 8 wire-led shots whose delays add to 1200 ms (12 shots at 100 ms). Decision review. The honest autopilot in normal play aims at the picture and never leads.",
+    "invalid_if": "The server scores the aim against a timeline the client was never shown, or the body is standing still (the two positions coincide and nothing counts)."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "tracker"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -6,
+          5
+        ],
+        [
+          6,
+          5
+        ]
+      ],
+      "speed": 4.5,
+      "pause_ms": 0,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {
+    "kind": "packet_reader",
+    "target": "arena-bot-a",
+    "from_ms": 5000,
+    "to_ms": 25000,
+    "fire_every_ms": 150
+  },
+  "expected": {
+    "decision": "review",
+    "kinds": [
+      "wire"
+    ],
+    "eligibility": {
+      "wire": "eligible"
+    }
+  },
+  "caveats": [
+    "This does not catch every packet reader: a cheat that waits out the interpolation delay, or reads the drawn frame, aims at the picture too."
+  ]
+}

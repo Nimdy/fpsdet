@@ -1,0 +1,70 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "impossible_speed",
+  "key": "2",
+  "title": "Impossible speed",
+  "duration_ms": 30000,
+  "instructions": "Keep running down the lane. From 5 s to 20 s the server lets your body move at twice the cap.",
+  "card": {
+    "what_this_tests": "A basic server-rule break: ground speed over the declared cap, sustained.",
+    "player_can_know": "Not relevant: this is a gear rule, not an information check.",
+    "server_knows": "The speed it measured on each sample, the cap it declared on the same sample (5.5 m/s), the ground flag and the displacement cause.",
+    "expected_fpsdet_behavior": "The speed check fires: a run of at least 25 consecutive over-cap samples (2.5 s at 10 Hz) with displacement_cause none. Decision review.",
+    "invalid_if": "The server tags the samples with an innocence cause, the cap field is missing, or the run is shorter than 25 samples."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "runner"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -10,
+          4
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          -10,
+          8
+        ]
+      ],
+      "speed": 3.0,
+      "pause_ms": 0,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {
+    "from_ms": 5000,
+    "to_ms": 20000,
+    "speed_multiplier": 2.0
+  },
+  "standin": {},
+  "expected": {
+    "decision": "review",
+    "kinds": [
+      "speed"
+    ],
+    "eligibility": {
+      "speed": "eligible"
+    }
+  },
+  "caveats": [
+    "The speed run is counted in samples: 25 consecutive over-cap samples at this server's 10 Hz movement cadence is 2.5 s. A profile can measure it in milliseconds instead (speed_min_run_ms with movement_clock), which this arena does not set, so it shows the default as it is.",
+    "The lab moves the body past the cap on purpose. It stands in for a server that trusts client positions, or a movement exploit; the server still records the speed it measured and the cap it should have held."
+  ]
+}

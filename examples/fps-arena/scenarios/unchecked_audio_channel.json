@@ -1,0 +1,68 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "unchecked_audio_channel",
+  "key": "8",
+  "title": "Unknown: audio telemetry missing",
+  "duration_ms": 30000,
+  "instructions": "The same silent bot and the same wallhack stand-in, but the server's audio query is switched off.",
+  "card": {
+    "what_this_tests": "Missing telemetry does not mean absent information.",
+    "player_can_know": "Nobody checked whether they could hear it, so fpsdet cannot say they could not.",
+    "server_knows": "Vision absent. Audio unchecked: the query did not run, and the server says so instead of saying absent. It cannot measure hidden time either, so it sends none.",
+    "expected_fpsdet_behavior": "KnowledgeState unknown. The hidden-mover check abstains (telemetry_unavailable). No evidence, whatever the aim did.",
+    "invalid_if": "A server reports unchecked as absent. That manufactures the previous scenario's review from nothing."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "tracker"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-b",
+      "path": [
+        [
+          -12,
+          -5
+        ],
+        [
+          -6,
+          -5
+        ]
+      ],
+      "speed": 1.5,
+      "pause_ms": 1500,
+      "fires": false
+    }
+  ],
+  "audio_query": false,
+  "faults": {},
+  "standin": {
+    "kind": "wallhack",
+    "target": "arena-bot-b",
+    "from_ms": 3000,
+    "to_ms": 30000,
+    "fire_every_ms": 300
+  },
+  "expected": {
+    "decision": [
+      "clean",
+      "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+      "hidden": "telemetry_unavailable"
+    },
+    "knowledge": {
+      "arena-bot-b": "unknown"
+    }
+  },
+  "caveats": [
+    "Unchecked is not absent. A channel the server did not report makes the answer unknown, and the information checks abstain."
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "unknowable_hidden_tracked",
+  "key": "t",
+  "title": "Hidden and unknowable, tracked",
+  "duration_ms": 30000,
+  "instructions": "The same silent bot behind the wall. A stand-in tracks it through the wall and fires, as a wallhack would.",
+  "card": {
+    "what_this_tests": "Sustained aim on an enemy this client could neither see nor hear.",
+    "player_can_know": "No: no line of sight, no sound, never perceived.",
+    "server_knows": "Vision absent and audio absent for the hidden bot, both checked every tick; the aim cone held it between shots.",
+    "expected_fpsdet_behavior": "KnowledgeState unknowable. The hidden-mover check fires: at least 8 shots with hidden time and 1200 ms in all. Decision review.",
+    "invalid_if": "The bot made a sound, was seen, or was perceived within the last second: any of those makes it known."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "tracker"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-b",
+      "path": [
+        [
+          -12,
+          -5
+        ],
+        [
+          -6,
+          -5
+        ]
+      ],
+      "speed": 1.5,
+      "pause_ms": 1500,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {
+    "kind": "wallhack",
+    "target": "arena-bot-b",
+    "from_ms": 3000,
+    "to_ms": 30000,
+    "fire_every_ms": 300
+  },
+  "expected": {
+    "decision": "review",
+    "kinds": [
+      "hidden"
+    ],
+    "eligibility": {
+      "hidden": "eligible"
+    },
+    "knowledge": {
+      "arena-bot-b": "unknowable"
+    }
+  },
+  "caveats": [
+    "A server-side stand-in aims the subject: the behaviour such software produces, not cheat code."
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "angle_hold_false_positive",
+  "key": "h",
+  "title": "Angle hold: experimental challenge failure",
+  "duration_ms": 32000,
+  "instructions": "A stand-in holds the doorway's left frame from across the room, as a player waiting for a push would. A near-still probe rests in the chamber behind that frame. Nobody is following anything.",
+  "card": {
+    "what_this_tests": "The known weakness of the time-on-body bar: ordinary angle holding over a probe that happens to rest behind the held angle.",
+    "player_can_know": "No. And the player is not responding to anything: the aim never moves.",
+    "server_knows": "Vision absent and audio absent for the body at every moment; the aim cone held the body because the chamber is behind the frame.",
+    "expected_fpsdet_behavior": "Challenge followed, decision review: the same evidence as the follower. EXPERIMENTAL, NOT PRODUCTION QUALIFIED. Geometric alignment is not the same thing as responding to hidden information.",
+    "invalid_if": "The holder's aim moves with the body, which would make it a follower. Here the body is near-still and the aim is still."
+  },
+  "subject": {
+    "spawn": [
+      6.8,
+      0,
+      10.0
+    ],
+    "yaw": 0.0,
+    "autopilot": "holder"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-b",
+      "path": [
+        [
+          10,
+          -12
+        ]
+      ],
+      "speed": 0.0,
+      "pause_ms": 0,
+      "fires": false
+    },
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          12,
+          12
+        ],
+        [
+          12,
+          3
+        ]
+      ],
+      "speed": 2.0,
+      "pause_ms": 0,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {
+    "kind": "holder",
+    "from_ms": 0,
+    "to_ms": 32000
+  },
+  "challenge": {
+    "version": 2,
+    "schedule": {
+      "from_ms": 6000,
+      "to_ms": 30000,
+      "count": 1,
+      "cooldown_ms": 0,
+      "min_duration_ms": 14000,
+      "max_duration_ms": 16000
+    }
+  },
+  "expected": {
+    "decision": "review",
+    "kinds": [
+      "occluded_motion_replay"
+    ],
+    "challenge": {
+      "status": "followed",
+      "verification": "per_sample"
+    },
+    "eligibility": {
+      "occluded_motion_replay": "eligible"
+    }
+  },
+  "experimental": true,
+  "caveats": [
+    "Challenge reviews are experimental and not production-qualified. The bar counts time on the body, not intent.",
+    "This failure is preserved on purpose: it is why the consented human pilot exists and why occluded_motion_replay/3 asks whether the aim turns with secret turns instead."
+  ]
+}

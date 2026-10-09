@@ -1,0 +1,69 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "recoil_mirror",
+  "key": "5",
+  "title": "Recoil mirror",
+  "duration_ms": 30000,
+  "instructions": "Hold the trigger on the bot. A stand-in supplies the view command a mirror script would: the kick, flipped, on the same tick, for the whole round.",
+  "card": {
+    "what_this_tests": "The player's view command cancels the server's kick on the same tick. A person reacts a shot later.",
+    "player_can_know": "A person feels the kick after it lands; the random part of it cannot be known before the shot.",
+    "server_knows": "The kick it applied (applied_recoil_pitch_deg), the view command on that tick (compensation_pitch_deg), and the spray index, so the learnable pattern can be removed first.",
+    "expected_fpsdet_behavior": "The mirror check fires after the spray pattern is removed: at least 16 shots, same-tick correlation at or under -0.90 and at least 0.25 more negative than at a one-shot lag. Decision review.",
+    "invalid_if": "The game has a fixed spray pattern and the profile says recoil_pattern random, or the server sends no spray_index."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "trigger"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -10,
+          4
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          -10,
+          8
+        ]
+      ],
+      "speed": 3.0,
+      "pause_ms": 0,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {
+    "kind": "mirror",
+    "from_ms": 0,
+    "to_ms": 30000
+  },
+  "expected": {
+    "decision": "review",
+    "kinds": [
+      "mirror"
+    ],
+    "eligibility": {
+      "mirror": "eligible"
+    }
+  },
+  "caveats": [
+    "The pattern is learnable, so the mean kick and command at each spray index are subtracted first; only the fresh random part, which nobody can anticipate, is tested."
+  ]
+}

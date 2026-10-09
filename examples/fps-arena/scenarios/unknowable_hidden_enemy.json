@@ -1,0 +1,89 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "unknowable_hidden_enemy",
+  "key": "7",
+  "title": "Hidden and unknowable",
+  "duration_ms": 30000,
+  "instructions": "A bot creeps silently behind the solid wall while another patrols the lane in view. Shoot the one you can see. Press T to switch on the wallhack stand-in.",
+  "card": {
+    "what_this_tests": "An enemy this client could neither see nor hear: the information checks may act, and only then.",
+    "player_can_know": "No: no line of sight, no sound, never perceived.",
+    "server_knows": "Vision absent and audio absent for the hidden bot, both checked every tick; vision known for the bot in the lane.",
+    "expected_fpsdet_behavior": "KnowledgeState unknowable for the hidden bot. The hidden-mover check is eligible. Honest play makes no finding; a stand-in that tracks the hidden bot does.",
+    "invalid_if": "The server reports the hidden bot visible, or the audio query is switched off (that is the next scenario)."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "tracker"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -10,
+          4
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          -10,
+          8
+        ]
+      ],
+      "speed": 3.0,
+      "pause_ms": 0,
+      "fires": true
+    },
+    {
+      "id": "arena-bot-b",
+      "path": [
+        [
+          -12,
+          -5
+        ],
+        [
+          -6,
+          -5
+        ]
+      ],
+      "speed": 1.5,
+      "pause_ms": 1500,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {},
+  "expected": {
+    "decision": [
+      "clean",
+      "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+      "hidden": "eligible"
+    },
+    "knowledge": {
+      "arena-bot-a": "known"
+    },
+    "knowledge_seen": {
+      "arena-bot-b": "unknowable"
+    }
+  },
+  "caveats": [
+    "No finding is manufactured: the honest autopilot never aims at what it cannot see. The tracked variant (scenario T) shows the finding."
+  ]
+}

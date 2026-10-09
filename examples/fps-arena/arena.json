@@ -1,0 +1,21 @@
+{
+  "game_id": "fpsdet-arena",
+  "notes": "The fpsdet Arena: a tiny reference FPS in a Godot 4 dedicated server, built to show what fpsdet sees. One player, one or two server-driven bots, one rifle. Its numbers are the arena's own, not a population's. The speed run is counted in samples at 10 Hz (25 samples = 2.5 s), as every profile without speed_min_run_ms is.",
+  "knowledge_channels": ["vision", "audio"],
+  "hidden_track_min_ms": 1200,
+  "hidden_track_min_samples": 8,
+  "hidden_grace_ms": 1000,
+  "aim_group": "weapon_class",
+  "recoil_pattern": "learnable",
+  "shot_clock": "server_tick",
+  "tick_ms": 17,
+  "weapons": {
+    "rifle": {
+      "min_shot_interval_ms": 100,
+      "interval_slack_ms": 15,
+      "min_intervals": 20,
+      "min_violations": 10,
+      "min_violation_rate": 0.3
+    }
+  }
+}

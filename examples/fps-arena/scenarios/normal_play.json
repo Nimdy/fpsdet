@@ -1,0 +1,71 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "normal_play",
+  "key": "1",
+  "title": "Normal play",
+  "duration_ms": 30000,
+  "instructions": "Move with W A S D, aim with the mouse, shoot the bot in the lane. Nothing is wrong here.",
+  "card": {
+    "what_this_tests": "Ordinary movement and shooting make no case.",
+    "player_can_know": "Yes: the bot is in the open lane, in plain sight.",
+    "server_knows": "Vision known on every aimed shot; every speed sample under the cap; every accepted shot on the rifle's cycle.",
+    "expected_fpsdet_behavior": "clean or insufficient_data. One player is not a human baseline, so the aim numbers are not compared; the gear rules and the information checks still run and find nothing.",
+    "invalid_if": "Any review or watch appears, or the knowledge chip reads anything but known while the bot is in view."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "tracker"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -10,
+          4
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          -10,
+          8
+        ]
+      ],
+      "speed": 3.0,
+      "pause_ms": 0,
+      "fires": true
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {},
+  "expected": {
+    "decision": [
+      "clean",
+      "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+      "speed": "eligible",
+      "hidden": "eligible"
+    },
+    "knowledge": {
+      "arena-bot-a": "known"
+    }
+  },
+  "caveats": [
+    "With no frozen baseline the aim numbers (accuracy, headshots, distance) are never compared: a server with one player has no humans to compare against, and fpsdet says insufficient_data rather than clean."
+  ]
+}

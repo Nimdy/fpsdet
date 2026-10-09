@@ -1,0 +1,68 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "audible_hidden_enemy",
+  "key": "6",
+  "title": "Hidden enemy, audible",
+  "duration_ms": 30000,
+  "instructions": "A bot runs behind the solid wall; you can hear its footsteps. A stand-in tracks it through the wall and fires, as a wallhack would.",
+  "card": {
+    "what_this_tests": "Legal tracking through sound: a critical false-positive control.",
+    "player_can_know": "Yes: the server emitted footsteps the client could hear.",
+    "server_knows": "Vision absent (its rays hit the wall), audio known (a footstep from that body within hearing range in the last 500 ms).",
+    "expected_fpsdet_behavior": "KnowledgeState known (heard). The hidden-mover check is eligible, counts nothing, and makes no finding. No review.",
+    "invalid_if": "Audio telemetry is missing or wrong: a server that never reports footsteps turns this into the unknowable case."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "tracker"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-b",
+      "path": [
+        [
+          -12,
+          -5
+        ],
+        [
+          -6,
+          -5
+        ]
+      ],
+      "speed": 4.5,
+      "pause_ms": 400,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {},
+  "standin": {
+    "kind": "wallhack",
+    "target": "arena-bot-b",
+    "from_ms": 3000,
+    "to_ms": 30000,
+    "fire_every_ms": 300
+  },
+  "expected": {
+    "decision": [
+      "clean",
+      "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+      "hidden": "eligible"
+    },
+    "knowledge": {
+      "arena-bot-b": "known"
+    }
+  },
+  "caveats": [
+    "Hearing is modelled as a server sound event within 30 m in the last 500 ms. A real game's audio query is engine work; a wrong one frames players."
+  ]
+}

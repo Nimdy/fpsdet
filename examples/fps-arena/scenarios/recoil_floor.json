@@ -1,0 +1,69 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "recoil_floor",
+  "key": "4",
+  "title": "Recoil floor",
+  "duration_ms": 30000,
+  "instructions": "Hold the trigger on the bot. From 5 s to 25 s the kick that lands on your view is a tenth of what the rifle applies.",
+  "card": {
+    "what_this_tests": "Recoil far under the minimum the server declares for this weapon (no-recoil).",
+    "player_can_know": "Not relevant: a gear rule.",
+    "server_knows": "The kick it applied on each shot, the spray index, and the floor it declares for the build: 0.8 degrees.",
+    "expected_fpsdet_behavior": "The recoil-floor check fires: a run of at least 10 shots at spray index 3 or more with a kick under 25% of the floor (0.2 degrees). Decision review.",
+    "invalid_if": "A compensator or attachment lowers the real floor and the server did not declare the lower floor on the shot."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "trigger"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -10,
+          4
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          -10,
+          8
+        ]
+      ],
+      "speed": 3.0,
+      "pause_ms": 0,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {
+    "from_ms": 5000,
+    "to_ms": 25000,
+    "recoil_multiplier": 0.1
+  },
+  "standin": {},
+  "expected": {
+    "decision": "review",
+    "kinds": [
+      "recoil_floor"
+    ],
+    "eligibility": {
+      "recoil_floor": "eligible"
+    }
+  },
+  "caveats": [
+    "The lab scales the kick the server applies on purpose, standing in for recoil the server measured under its own floor."
+  ]
+}

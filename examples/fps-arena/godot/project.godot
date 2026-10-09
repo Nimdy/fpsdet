@@ -1,0 +1,29 @@
+; The fpsdet Arena: a tiny reference FPS that shows what fpsdet sees (examples/fps-arena).
+; Run it with examples/fps-arena/harness/arena.py, which passes everything after "--" (see main.gd).
+
+config_version=5
+
+[application]
+
+config/name="fpsdet-arena"
+run/main_scene="res://main.tscn"
+
+[physics]
+
+common/physics_ticks_per_second=60
+common/max_physics_steps_per_frame=8
+
+[debug]
+
+file_logging/enable_file_logging=false
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+anti_aliasing/quality/msaa_3d=1

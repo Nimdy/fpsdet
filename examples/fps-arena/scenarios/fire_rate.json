@@ -1,0 +1,71 @@
+{
+  "format": "fpsdet.arena-scenario/1",
+  "id": "fire_rate",
+  "key": "3",
+  "title": "Fire rate",
+  "duration_ms": 30000,
+  "instructions": "Hold the trigger on the bot. From 5 s to 20 s the server accepts shots every 50 ms, twice the rifle's cycle.",
+  "card": {
+    "what_this_tests": "Shots accepted faster than the weapon's declared cycle.",
+    "player_can_know": "Not relevant: a gear rule.",
+    "server_knows": "The server time of every shot it accepted. The profile declares the rifle's cycle: 100 ms, 15 ms slack.",
+    "expected_fpsdet_behavior": "The fire-rate check fires: gaps under 85 ms, at least 20 gaps and 10 violations in matches where they are the habit. Decision review.",
+    "invalid_if": "Shot timestamps are not the server's, or the profile's cycle does not match the weapon."
+  },
+  "subject": {
+    "spawn": [
+      0,
+      0,
+      11
+    ],
+    "yaw": 0.0,
+    "autopilot": "trigger"
+  },
+  "bots": [
+    {
+      "id": "arena-bot-a",
+      "path": [
+        [
+          -10,
+          4
+        ],
+        [
+          10,
+          4
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          -10,
+          8
+        ]
+      ],
+      "speed": 3.0,
+      "pause_ms": 0,
+      "fires": false
+    }
+  ],
+  "audio_query": true,
+  "faults": {
+    "from_ms": 5000,
+    "to_ms": 20000,
+    "fire_cycle_ticks": 3
+  },
+  "standin": {},
+  "expected": {
+    "decision": "review",
+    "kinds": [
+      "fire_rate"
+    ],
+    "eligibility": {
+      "fire_rate": "eligible",
+      "metronome": "not_applicable"
+    }
+  },
+  "caveats": [
+    "The metronome check stays quiet on a held trigger: the server paces those shots at the rifle's own cycle, and the profile says shots are stamped on server ticks (shot_clock server_tick, tick_ms 17).",
+    "The lab lowers the server's own cycle enforcement on purpose, standing in for a server that accepts what a macro sends. The detector reads what the server accepted."
+  ]
+}
