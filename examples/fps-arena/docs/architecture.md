@@ -108,10 +108,10 @@ From [result.json](../result.json): thirteen matches of about 30 s each, run sev
 
 | | |
 | --- | --- |
-| Server tick | 562 µs mean (median over scenarios; 262 to 1,377 µs across them), 4.8 ms worst single tick, against a 16.7 ms budget |
-| Knowledge queries | 138 µs and 176 rays per tick (median); 114 to 382 µs per probe tick for the challenge |
-| Telemetry | about 10.5 KB/s of events, 3.6 KB/s of snapshots to the client, 77 KB/s of operator feed |
-| fpsdet | 9 to 25 ms per scoring pass over 657 to 1,020 events |
+| Server tick | 478 µs mean (median over scenarios; 224 to 1,063 µs across them), 3.1 ms worst single tick, against a 16.7 ms budget |
+| Knowledge queries | 122 µs and 177 rays per tick (median); 70 to 158 µs per probe tick for the challenge |
+| Telemetry | about 10.5 KB/s of events, 3.6 KB/s of snapshots to the client, 78 KB/s of operator feed |
+| fpsdet | 8 to 19 ms per scoring pass over 652 to 1,022 events |
 | Server memory | 44 MB static peak |
 | Headless autopilot client | 145 frames a second; the lab window reports its own rate on the performance tab |
 

@@ -1081,6 +1081,19 @@ def last_t_ms(folder: Path) -> int:
 # Commands.
 
 
+def require_godot(path: str) -> str:
+    """The engine binary, or a plain message instead of a traceback when it is not where the command was told."""
+    found = Path(path).expanduser()
+    if not found.is_file() or not os.access(found, os.X_OK):
+        raise SystemExit(
+            f"Godot is not at {found}.\n"
+            "Download the pinned build first (user-local, checked against its SHA-512; nothing is installed system-wide):\n"
+            "  python examples/pilot/pilot.py godot --dest ~/godot-4.7.2\n"
+            "then pass --godot ~/godot-4.7.2/Godot_v4.7.2-stable_linux.x86_64, or run arena.py doctor --godot PATH to check a machine."
+        )
+    return str(found)
+
+
 def godot_version(godot: str) -> str:
     try:
         done = subprocess.run([godot, "--version"], capture_output=True, text=True, timeout=30)
@@ -1158,6 +1171,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
 def cmd_run(args: argparse.Namespace) -> int:
     found = scenarios()
+    args.godot = require_godot(args.godot)
     run = new_run(Path(args.out).expanduser() if args.out else Path(tempfile.mkdtemp(prefix="fpsdet-arena-")))
     plan_all(run, found)
     (run / "public" / "control" / "ai.json").write_text(json.dumps({"enabled": bool(args.ai)}) + "\n", encoding="utf-8")
@@ -1216,6 +1230,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 def cmd_scenario(args: argparse.Namespace) -> int:
     found = scenarios()
+    args.godot = require_godot(args.godot)
     if args.id not in found:
         raise SystemExit(f"unknown scenario {args.id}; one of {', '.join(found)}")
     run = Path(args.out).expanduser() if args.out else Path(tempfile.mkdtemp(prefix=f"fpsdet-arena-{args.id}-"))
@@ -1230,6 +1245,7 @@ def cmd_scenario(args: argparse.Namespace) -> int:
 
 def cmd_qualify(args: argparse.Namespace) -> int:
     root = Path(args.out).expanduser()
+    args.godot = require_godot(args.godot)
     found = qualify(args.godot, root, args.port, args.parallel, args.only, args.deterministic, pixels=not args.no_pixels)
     rows = found["rows"]
     if args.only:

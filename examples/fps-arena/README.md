@@ -87,16 +87,16 @@ Each one shows a card first: what this tests, what the player can know, what the
 | --- | --- | --- |
 | 1 | Normal play | `insufficient_data`, **not clean**: no finding, and no human baseline to compare against; speed, fire rate, hidden mover and wire all eligible |
 | 2 | Impossible speed | `review`: a run of 151 over-cap samples (15.1 s at 10 Hz) against the cap the server declared |
-| 3 | Fire rate | `review`: 126 of 237 gaps under 85 ms on a 100 ms cycle; the metronome stays `not_applicable` on a server-paced trigger |
+| 3 | Fire rate | `review`: 130 of 236 gaps under 85 ms on a 100 ms cycle; the metronome stays `not_applicable` on a server-paced trigger |
 | 4 | Recoil floor | `review`: 15 kicks in a row under 25% of the declared 0.8° floor |
 | 5 | Recoil mirror | `review`: the command is the kick, flipped, on the same tick (r −1.00 over 208 shots) and not a shot later (r −0.05), after the spray pattern is removed |
 | 6 | Hidden enemy, audible | `known` (heard). The hidden-mover check is eligible and makes nothing of a scripted stand-in aiming at the bot through the wall |
 | 7 | Hidden and unknowable | `unknowable`. Eligible; honest play makes nothing. `t` switches the scripted stand-in on |
 | t | Hidden and unknowable, tracked | `review`: 27.0 s of aim over 81 shots on an enemy this client could neither see nor hear |
 | 8 | Unknown: audio telemetry missing | `unknown`. The same aim, no evidence: the hidden-mover check is `telemetry_unavailable` |
-| 9 | Wire vs picture | `review`: 78 wire-led shots, 7.8 s of delay; median error 0.25° to the wire, 2.56° to the picture |
-| c | Active challenge | `review`: followed, 142 of 153 verified moments, 14.2 s, bound to the plan. **Experimental** |
-| h | Angle hold | `review`: 142 of 142 moments, 14.2 s, and nobody followed anything. **Experimental: not production qualified** |
+| 9 | Wire vs picture | `review`: 77 wire-led shots, 7.7 s of delay; median error 0.26° to the wire, 2.62° to the picture |
+| c | Active challenge | `review`: followed, 140 of 149 verified moments, 14.0 s, bound to the plan. **Experimental** |
+| h | Angle hold | `review`: 153 of 153 moments, 15.3 s, and nobody followed anything. **Experimental: not production qualified** |
 | e | External evidence | native `insufficient_data` → `watch` by rule A, labelled `EXTERNAL EVIDENCE CAUSED THIS WATCH`; it cannot make a review |
 | o | Exposed challenge: positive control | the probe placed in the open: the player's renderer draws it, the server says seen, the challenge abstains. The pixel proof's positive control |
 
@@ -106,8 +106,8 @@ The server's raycast is not taken on trust. `qualify` also runs two matches with
 
 ```text
 PLAYER PIXEL PROOF
-hidden:          0 challenge pixels in 8 checks, in the sealed chamber (the same checks found up to 9491 pixels of visible bots)
-visible control: 1769 changed pixels, with the same probe placed in the open lane
+hidden:          0 challenge pixels in 7 checks, in the sealed chamber (the same checks found up to 6387 pixels of visible bots)
+visible control: 1490 changed pixels, with the same probe placed in the open lane
 PASS
 ```
 
@@ -152,4 +152,4 @@ python examples/fps-arena/harness/arena.py replay --run <run> --match <match id>
 
 The server binds `127.0.0.1` and refuses a public address. No process inspects, injects into, hooks or reads any other program; nothing touches a commercial game or any anti-cheat; no driver or service is installed; Godot is a portable binary and its user data is pointed inside the run folder. Player ids are fictional (`arena-player`, `arena-bot-a`, `arena-bot-b`); no name, account, machine identity or address is recorded, and the qualification scans for them. The operator link is a separate node at a separate path, gated by a token in the run's private folder: a stock client has no method that could receive the feed.
 
-The challenge probe is sent to the subject's client as an ordinary body, as fpsdet's challenge type requires, and the stock client draws it as it draws any body: behind the chamber's 4 m walls, where the pixel proof above finds no pixel of it. The server reported it unseen and unheard at every one of 913 probe ticks of the qualified challenge run; the client received 304 snapshot updates of it and logged no sound of it.
+The challenge probe is sent to the subject's client as an ordinary body, as fpsdet's challenge type requires, and the stock client draws it as it draws any body: behind the chamber's 4 m walls, where the pixel proof above finds no pixel of it. The server reported it unseen and unheard at every one of 894 probe ticks of the qualified challenge run; the client received 298 snapshot updates of it and logged no sound of it.

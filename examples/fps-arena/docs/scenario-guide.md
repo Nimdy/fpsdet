@@ -211,7 +211,7 @@ Bots: `arena-bot-a` at 3.0 m/s (fires), `arena-bot-b` at 1.5 m/s. Subject autopi
 | Expected fpsdet behavior | Challenge followed: at least 8 verified moments and 1200 ms on the body. Decision review, bound to the plan's id, digest and commitment. |
 | What would make this invalid | The server reports the body seen or heard at any moment (the challenge voids), or the events name an id the plan does not have. |
 
-**Qualified.** decision `review`; findings ['occluded_motion_replay']; occluded_motion_replay `eligible`; arena-bot-a `known`; arena-bot-b `unknowable`; challenge `followed`, 142 of 153 moments counted, 153 verified, 14200 ms, not counted {'seen': 11}. Offline replay identical; realization reproduced.
+**Qualified.** decision `review`; findings ['occluded_motion_replay']; occluded_motion_replay `eligible`; arena-bot-a `known`; arena-bot-b `unknowable`; challenge `followed`, 140 of 149 moments counted, 149 verified, 14000 ms, not counted {'seen': 8}. Offline replay identical; realization reproduced.
 
 **EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED.** Controlled behaviour from a labelled script; not a cheat-detection rate.
 
@@ -233,7 +233,7 @@ Bots: `arena-bot-b` at 0.0 m/s, `arena-bot-a` at 2.0 m/s. Subject autopilot: `ho
 | Expected fpsdet behavior | Challenge followed, decision review: the same evidence as the follower. EXPERIMENTAL, NOT PRODUCTION QUALIFIED. Geometric alignment is not the same thing as responding to hidden information. |
 | What would make this invalid | The holder's aim moves with the body, which would make it a follower. Here the body is near-still and the aim is still. |
 
-**Qualified.** decision `review`; findings ['occluded_motion_replay']; occluded_motion_replay `eligible`; challenge `followed`, 142 of 142 moments counted, 142 verified, 14199 ms. Offline replay identical; realization reproduced.
+**Qualified.** decision `review`; findings ['occluded_motion_replay']; occluded_motion_replay `eligible`; challenge `followed`, 153 of 153 moments counted, 153 verified, 15289 ms. Offline replay identical; realization reproduced.
 
 **EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED.** Controlled behaviour from a labelled script; not a cheat-detection rate.
 
@@ -274,7 +274,7 @@ Bots: `arena-bot-a` at 3.0 m/s, `arena-bot-b` at 1.5 m/s. Subject autopilot: `tr
 | Expected fpsdet behavior | The challenge abstains (seen). No finding, no review, whatever the aim did. |
 | What would make this invalid | The renderer draws no pixel of a body in the open, or fpsdet counts a moment the server reported seen. |
 
-**Qualified.** decision `insufficient_data` (not a clean verdict: nothing was comparable); findings none; occluded_motion_replay `not_applicable`; arena-bot-a `known`; arena-bot-b `unknowable`; challenge `abstained` (seen), 0 of 0 moments counted, 0 verified, 0 ms, not counted {'seen': 145}. Offline replay identical; realization reproduced.
+**Qualified.** decision `insufficient_data` (not a clean verdict: nothing was comparable); findings none; occluded_motion_replay `not_applicable`; arena-bot-a `known`; arena-bot-b `unknowable`; challenge `abstained` (seen), 0 of 0 moments counted, 0 verified, 0 ms, not counted {'seen': 146}. Offline replay identical; realization reproduced.
 
 **EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED.** Controlled behaviour from a labelled script; not a cheat-detection rate.
 
@@ -286,7 +286,7 @@ Two of these scenarios ran once more with the pixel-check client, drawing in a p
 
 ```text
 PLAYER PIXEL PROOF
-hidden:          0 challenge pixels in 8 checks (the same checks found pixels of visible bots 14 times; the frozen frame was stable)
-visible control: 1769 changed pixels in 7 checks
+hidden:          0 challenge pixels in 7 checks (the same checks found pixels of visible bots 15 times; the frozen frame was stable)
+visible control: 1490 changed pixels in 8 checks
 PASS
 ```

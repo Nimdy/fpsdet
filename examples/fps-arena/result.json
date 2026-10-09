@@ -26,7 +26,7 @@
   "examples/fps-arena/godot/scripts/weapon.gd": "sha256:419c1e43ad89363aabd21b03bf9ecaa37407e3c225a5a4a8ec0a0faa9cf412e1",
   "examples/fps-arena/godot/scripts/recipe.gd": "sha256:1d77e38dd63624bd3a9950ff9db8542568457362e8cd1284a6a7944480ef24e0",
   "examples/fps-arena/godot/scripts/sounds.gd": "sha256:b070a8770ac6d10a756fbe7c39249f0487c8bf8d82b45b388f610f8432dac5e8",
-  "examples/fps-arena/harness/arena.py": "sha256:c1eeac342db0c73f0714b9995a2ca395ab4d48469e10177a4b48559b2104fd9a"
+  "examples/fps-arena/harness/arena.py": "sha256:852f95855499e3ec7517a931945579ecac531cc96f73c63a44fe2c719617c46c"
  },
  "profile": "sha256:dc38c508650510687c1868a7e61c113213715a6e51b831036da45515c53b2663",
  "scenarios": [
@@ -61,7 +61,7 @@
      "occluded_motion_replay"
     ],
     "observations": [
-     "obs-5e207030890a4b41faef16a3"
+     "obs-15ebe3383b11de99d71da6b0"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -88,16 +88,16 @@
      "voice": "not_applicable"
     },
     "challenge": {
-     "challenge_id": "ch-b52b24eaaa6ab8fad315bfb1",
+     "challenge_id": "ch-e008989beb8a9da6a8c1347f",
      "status": "followed",
      "cause": null,
      "verification": "per_sample",
-     "eligible_samples": 153,
-     "tracked_samples": 142,
-     "verified_samples": 153,
-     "total_ms": 14200.0,
+     "eligible_samples": 149,
+     "tracked_samples": 140,
+     "verified_samples": 149,
+     "total_ms": 14000.0,
      "not_counted": {
-      "seen": 11
+      "seen": 8
      }
     },
     "fusion": null,
@@ -107,12 +107,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 171,
+      "events": 183,
       "statuses": {
-       "known": 171
+       "known": 183
       },
       "causes": {
-       "seen": 171
+       "seen": 183
       },
       "latest": {
        "t_ms": 32000,
@@ -134,15 +134,15 @@
       "majority": "known"
      },
      "arena-bot-b": {
-      "events": 14,
+      "events": 11,
       "statuses": {
-       "unknowable": 14
+       "unknowable": 11
       },
       "causes": {
-       "unknowable": 14
+       "unknowable": 11
       },
       "latest": {
-       "t_ms": 30900,
+       "t_ms": 30400,
        "status": "unknowable",
        "cause": "unknowable",
        "channels": {
@@ -174,8 +174,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:154743c891820fad49222c288c373e135aff83f0043c7a1024e98533b00af993",
-    "packet": "sha256:59db4d5327f95cd277dcaad4e19b4ee4eadc17d3afa6e8860bee93fcdf5876ef",
+    "graph": "sha256:019de2d9a3efbe5cfa394525663a8140c419dd00d464c9bc6629a8b64853c9f6",
+    "packet": "sha256:f871a7ec7006f2bac47b917241a7846121b9b8414c9eb8bc890b31264013872b",
     "experimental": true,
     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
    },
@@ -189,11 +189,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:78d7a686d627674ad69f8e0b0b412b331346775365d723c060354b42ed026dcb",
+     "packet": "sha256:194daa805caf63077bfc5a710609508482e42f8c75d567be4ad1e2f0843d215c",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:8b4f022c20a3fa6652bc8df0e866a7b3159bb4a263fec282b56150435a7c3f73",
+      "digest": "sha256:27b737fb4db19a966ee20555f3ca9b2188f625ebacdd87e527442306dcaadbdd",
       "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -321,11 +321,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:e90ea6cf571b9bebb9cab15512101d104c891d89aa8072d17aca22e972b2780e",
+     "packet": "sha256:b6ae80b603e2482066e4182b0941be66a08a480fe933aadedf04ebef9a17291a",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:18158e4396e51e7fc1a1dfd4c360de0405e29bf5e6d7421fee5a3b8ea05fd7e2",
+      "digest": "sha256:c9005c25639e356a92d7cfc2dabb41825b8a8f89139adffe5833271dafc90ad4",
       "events": 320
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -447,34 +447,34 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-5e207030890a4b41faef16a3"
+      "obs-15ebe3383b11de99d71da6b0"
      ],
      "kinds": [
       "occluded_motion_replay"
      ],
-     "graph": "sha256:154743c891820fad49222c288c373e135aff83f0043c7a1024e98533b00af993",
-     "packet": "sha256:59db4d5327f95cd277dcaad4e19b4ee4eadc17d3afa6e8860bee93fcdf5876ef",
+     "graph": "sha256:019de2d9a3efbe5cfa394525663a8140c419dd00d464c9bc6629a8b64853c9f6",
+     "packet": "sha256:f871a7ec7006f2bac47b917241a7846121b9b8414c9eb8bc890b31264013872b",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/3",
-      "digest": "sha256:87067855386352f6fd8c6f9ba60ca20fc7c6ffa15071095d4c4bfd9bc754982c",
-      "events": 350
+      "digest": "sha256:b9e852b4728ae12ca3e51298367a44c200e8e22c16a8bfd91c205367221c3e10",
+      "events": 352
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [
       {
-       "challenge_id": "ch-b52b24eaaa6ab8fad315bfb1",
-       "plan": "sha256:9c3049a749e593d34dc6217d94d4b11081c8034c3fb283b2f77a4a23ca832a54",
+       "challenge_id": "ch-e008989beb8a9da6a8c1347f",
+       "plan": "sha256:6d1a544ae4e5a2c86508476cb423c1d2f2c5dc5ec49165404ac0aa0614b7fb80",
        "match_id": "arena-active_challenge-1",
        "status": "followed",
-       "eligible_samples": 153,
-       "tracked_samples": 142,
-       "total_ms": 14200.0,
+       "eligible_samples": 149,
+       "tracked_samples": 140,
+       "total_ms": 14000.0,
        "not_counted": {
-        "seen": 11
+        "seen": 8
        },
        "verification": "per_sample",
-       "verified_samples": 153
+       "verified_samples": 149
       }
      ],
      "fusion": null,
@@ -580,7 +580,7 @@
       },
       "occluded_motion_replay": {
        "eligible": [
-        "ch-b52b24eaaa6ab8fad315bfb1"
+        "ch-e008989beb8a9da6a8c1347f"
        ]
       },
       "leftover": {
@@ -599,7 +599,7 @@
    "realization": {
     "status": "reproduced",
     "challenges": [
-     "ch-b52b24eaaa6ab8fad315bfb1"
+     "ch-e008989beb8a9da6a8c1347f"
     ],
     "problems": []
    },
@@ -607,7 +607,7 @@
    "personal_data": [],
    "client": {
     "entities_received": 3,
-    "probe_updates": 304,
+    "probe_updates": 298,
     "probe_sounds": 0,
     "sounds": 110,
     "fps_median": 145.0
@@ -616,43 +616,43 @@
     "server_tick_hz": 60,
     "match_ms": 32000,
     "ticks": 1920,
-    "tick_us_mean": 1258.0,
-    "tick_us_max": 3382,
-    "knowledge_us_per_tick": 415.8,
-    "challenge_us_per_probe_tick": 381.5,
-    "rays_per_tick": 426.5,
-    "event_bytes_per_s": 12361.6,
-    "event_lines": 1020,
-    "snapshot_bytes_per_s": 5288.8,
-    "feed_bytes_per_s": 94345.4,
-    "scoring_ms_live": 18.8,
+    "tick_us_mean": 865.4,
+    "tick_us_max": 2740,
+    "knowledge_us_per_tick": 338.6,
+    "challenge_us_per_probe_tick": 82.9,
+    "rays_per_tick": 424.5,
+    "event_bytes_per_s": 12424.3,
+    "event_lines": 1022,
+    "snapshot_bytes_per_s": 5276.1,
+    "feed_bytes_per_s": 94256.4,
+    "scoring_ms_live": 19.4,
     "parse_errors": 0,
     "verdicts": {
      "audio": {
-      "absent": 913
+      "absent": 894
      },
      "vision": {
-      "absent": 913
+      "absent": 894
      }
     },
-    "probe_ticks": 913,
-    "memory_static_peak_bytes": 43641501
+    "probe_ticks": 894,
+    "memory_static_peak_bytes": 43641125
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 34.4,
+   "wall_s": 34.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/active_challenge/events.ndjson",
-     "sha256": "sha256:c409fe0d9c10022c558393dead8a08f2891d9b0f424fca57dab442772474d00d",
-     "lines": 1020
+     "sha256": "sha256:a5df569b34f59a740fa23b8c1f5c55b6d66a8e453094f5d8ce8d71e48053d0bc",
+     "lines": 1022
     },
     "plan.json": {
      "file": "examples/fps-arena/captures/active_challenge/plan.json",
-     "sha256": "sha256:dc795b7863230c031faf3d846d70ea1b62e0baa3518e17510bde871019388fac"
+     "sha256": "sha256:f5999f750c75291825e054b270d8e778de562c125259f9d9af6300ea7c7436d6"
     }
    }
   },
@@ -687,7 +687,7 @@
      "occluded_motion_replay"
     ],
     "observations": [
-     "obs-ff977c47d0d8621534c58784"
+     "obs-183656812c2ad92585aeb4fa"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -714,14 +714,14 @@
      "voice": "not_applicable"
     },
     "challenge": {
-     "challenge_id": "ch-da0d610ea81fae2959e0231d",
+     "challenge_id": "ch-7cf6db94b646f12951ab368e",
      "status": "followed",
      "cause": null,
      "verification": "per_sample",
-     "eligible_samples": 142,
-     "tracked_samples": 142,
-     "verified_samples": 142,
-     "total_ms": 14199.0,
+     "eligible_samples": 153,
+     "tracked_samples": 153,
+     "verified_samples": 153,
+     "total_ms": 15289.0,
      "not_counted": {}
     },
     "fusion": null,
@@ -740,8 +740,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:890e754a9d76ea519b32a1f7deae1edbc76de145d8bb6ce77ff755ba4904f8f6",
-    "packet": "sha256:0b2c39208639f2c371105f1ee5d98c690ca9385e84c4e3eb00ad6ea12fafe6f1",
+    "graph": "sha256:2f39822e05dc80c425b7f54d51d6ff9c18f44a7297f8de2e043b63846ac79d63",
+    "packet": "sha256:4afbcc4b5fa94efeeeb010c63e207fee5ec50b2a3d4391e33cf9ca346b511925",
     "experimental": true,
     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
    },
@@ -1009,32 +1009,32 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-ff977c47d0d8621534c58784"
+      "obs-183656812c2ad92585aeb4fa"
      ],
      "kinds": [
       "occluded_motion_replay"
      ],
-     "graph": "sha256:890e754a9d76ea519b32a1f7deae1edbc76de145d8bb6ce77ff755ba4904f8f6",
-     "packet": "sha256:0b2c39208639f2c371105f1ee5d98c690ca9385e84c4e3eb00ad6ea12fafe6f1",
+     "graph": "sha256:2f39822e05dc80c425b7f54d51d6ff9c18f44a7297f8de2e043b63846ac79d63",
+     "packet": "sha256:4afbcc4b5fa94efeeeb010c63e207fee5ec50b2a3d4391e33cf9ca346b511925",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/3",
-      "digest": "sha256:59d9178e2eaf244ee7686cc3e3fd830e39e1d6d88b995165c403c94075937144",
+      "digest": "sha256:d02a11c81b8ab26dfd065f94622a1b9290bf4a426470e2d5c5b5fc1a5e15a46d",
       "events": 338
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [
       {
-       "challenge_id": "ch-da0d610ea81fae2959e0231d",
-       "plan": "sha256:39f7eb83bf011efca4e5aa6c88258e04490869ace45bd621925cf653f386fa95",
+       "challenge_id": "ch-7cf6db94b646f12951ab368e",
+       "plan": "sha256:376c1965c69faf05ffe0c616cc9ac78334db2fbb0799ba684aeb50a4cb3f456a",
        "match_id": "arena-angle_hold_false_positive-1",
        "status": "followed",
-       "eligible_samples": 142,
-       "tracked_samples": 142,
-       "total_ms": 14199.0,
+       "eligible_samples": 153,
+       "tracked_samples": 153,
+       "total_ms": 15289.0,
        "not_counted": {},
        "verification": "per_sample",
-       "verified_samples": 142
+       "verified_samples": 153
       }
      ],
      "fusion": null,
@@ -1140,7 +1140,7 @@
       },
       "occluded_motion_replay": {
        "eligible": [
-        "ch-da0d610ea81fae2959e0231d"
+        "ch-7cf6db94b646f12951ab368e"
        ]
       },
       "leftover": {
@@ -1159,7 +1159,7 @@
    "realization": {
     "status": "reproduced",
     "challenges": [
-     "ch-da0d610ea81fae2959e0231d"
+     "ch-7cf6db94b646f12951ab368e"
     ],
     "problems": []
    },
@@ -1167,7 +1167,7 @@
    "personal_data": [],
    "client": {
     "entities_received": 3,
-    "probe_updates": 284,
+    "probe_updates": 307,
     "probe_sounds": 0,
     "sounds": 58,
     "fps_median": 145.0
@@ -1176,27 +1176,27 @@
     "server_tick_hz": 60,
     "match_ms": 32000,
     "ticks": 1920,
-    "tick_us_mean": 1376.8,
-    "tick_us_max": 4823,
-    "knowledge_us_per_tick": 518.8,
-    "challenge_us_per_probe_tick": 189.0,
-    "rays_per_tick": 582.3,
-    "event_bytes_per_s": 11079.7,
+    "tick_us_mean": 1063.2,
+    "tick_us_max": 3139,
+    "knowledge_us_per_tick": 405.5,
+    "challenge_us_per_probe_tick": 158.1,
+    "rays_per_tick": 588.0,
+    "event_bytes_per_s": 11127.5,
     "event_lines": 978,
-    "snapshot_bytes_per_s": 5189.5,
-    "feed_bytes_per_s": 87190.6,
-    "scoring_ms_live": 21.9,
+    "snapshot_bytes_per_s": 5232.6,
+    "feed_bytes_per_s": 87556.8,
+    "scoring_ms_live": 12.2,
     "parse_errors": 0,
     "verdicts": {
      "audio": {
-      "absent": 852
+      "absent": 921
      },
      "vision": {
-      "absent": 852
+      "absent": 921
      }
     },
-    "probe_ticks": 852,
-    "memory_static_peak_bytes": 43641717
+    "probe_ticks": 921,
+    "memory_static_peak_bytes": 43641341
    },
    "exit_codes": [
     0,
@@ -1207,12 +1207,12 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/angle_hold_false_positive/events.ndjson",
-     "sha256": "sha256:40be1d579cb5e66e64ca563d734d7e90862427918c63f4ad878a77f470d95921",
+     "sha256": "sha256:f1ee795d6f5ba7454d19bb9f018a2d8ec22f772142fc9a8dbceb7025a374d547",
      "lines": 978
     },
     "plan.json": {
      "file": "examples/fps-arena/captures/angle_hold_false_positive/plan.json",
-     "sha256": "sha256:a25ab9b92eadc30350315bfe1656e2ba25c0ddda58099dc9dc45ee88ea0ae12a"
+     "sha256": "sha256:042f92552d16e545f1505480d9ce8a80992d65882e39996e1d4c0ce30c839075"
     }
    }
   },
@@ -1318,7 +1318,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:2322067607f4f2c626791f1844d8514b717b678a76aeb8fcdc84b6bc22029ebf",
+    "packet": "sha256:a35ca29c407b7cd10b3514c248051729de63fd3789fee4e6dae27439f2102cda",
     "experimental": false,
     "label": null
    },
@@ -1332,11 +1332,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:ef664f43f7c9c18ca5ab3e77df5bf429dc625a5c9849ff9ddaf8d0e32e68c4bf",
+     "packet": "sha256:edc300947036e8bdee40123e1ceae180b5aee21571dcfb04f055c6445924c626",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:64f283fab261a0dabe37a575fd701dcb5b41a8a8b4f7b7e286b068bf2cf2ab29",
+      "digest": "sha256:226ea1bccd1945484c762d9f208aa498939b38268dd954276b736d718ea55240",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1460,11 +1460,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:2322067607f4f2c626791f1844d8514b717b678a76aeb8fcdc84b6bc22029ebf",
+     "packet": "sha256:a35ca29c407b7cd10b3514c248051729de63fd3789fee4e6dae27439f2102cda",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:baa00d7b346e7a373779d462ee9543628091b86a0e9c3840257aea80785bb879",
+      "digest": "sha256:8f0297337e869e29fedd1af05b3f024993520c7200631313a96e901b215a54c5",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1606,34 +1606,34 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 953.7,
-    "tick_us_max": 3764,
-    "knowledge_us_per_tick": 282.1,
-    "challenge_us_per_probe_tick": 4712.0,
+    "tick_us_mean": 697.1,
+    "tick_us_max": 2077,
+    "knowledge_us_per_tick": 218.7,
+    "challenge_us_per_probe_tick": 2770.0,
     "rays_per_tick": 377.7,
     "event_bytes_per_s": 9293.0,
     "event_lines": 681,
-    "snapshot_bytes_per_s": 3606.1,
-    "feed_bytes_per_s": 74179.2,
-    "scoring_ms_live": 12.9,
+    "snapshot_bytes_per_s": 3608.0,
+    "feed_bytes_per_s": 74402.7,
+    "scoring_ms_live": 8.7,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641597
+    "memory_static_peak_bytes": 43641221
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.4,
+   "wall_s": 32.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/audible_hidden_enemy/events.ndjson",
-     "sha256": "sha256:2e055f7542fb20c458a1bc160bdf02a2b62345b03d8b4a798f4ef08b65c1f36a",
+     "sha256": "sha256:a3324d34537bc13fab12f898b12389dad09145858b80d42f84ac929f5d0593ec",
      "lines": 681
     }
    }
@@ -1695,7 +1695,7 @@
      "voice": "not_applicable"
     },
     "challenge": {
-     "challenge_id": "ch-b255dc9555594a82a99540c1",
+     "challenge_id": "ch-d4af4e3097f397f32899b327",
      "status": "abstained",
      "cause": "seen",
      "verification": "per_sample",
@@ -1704,7 +1704,7 @@
      "verified_samples": 0,
      "total_ms": 0,
      "not_counted": {
-      "seen": 145
+      "seen": 146
      }
     },
     "fusion": null,
@@ -1741,15 +1741,15 @@
       "majority": "known"
      },
      "arena-bot-b": {
-      "events": 10,
+      "events": 15,
       "statuses": {
-       "unknowable": 10
+       "unknowable": 15
       },
       "causes": {
-       "unknowable": 10
+       "unknowable": 15
       },
       "latest": {
-       "t_ms": 30600,
+       "t_ms": 29700,
        "status": "unknowable",
        "cause": "unknowable",
        "channels": {
@@ -1782,7 +1782,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:884e074e3411850ea442f2b8e7624be98d0ee77abfc1b2d5ac2eb5dfbc6c8798",
+    "packet": "sha256:e720224ddec85e6f17bdac14c5f826610a5895493393d587ab6da4e47fdb9d82",
     "experimental": true,
     "label": null
    },
@@ -1796,11 +1796,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:94ed17c1dafd6dc6d5c3cacab94fea1b1233d0b2b84e93d81bb7d287459d3ce1",
+     "packet": "sha256:09b8ad7bf5757875a66e5751d326f05a5bcdc0c4408e768ba069ba9c41b5001a",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:85cc1686d8e12e50a4a915f25fb0c4ef87c388bd56b7bc6652cc22d709abde60",
+      "digest": "sha256:80c0ffa55212f108ec9b4fb8b14f7621d4f82cf47127335a3f10448818a2ff77",
       "events": 320
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -1924,11 +1924,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:a32a7f249bcf2239b9b76f885304039377e6fa3081ac0f2267afcf2f433a8926",
+     "packet": "sha256:ceda074a39bae2db4d0d427ea95ca00913ef88d3515c9eba01d10cbb684ae516",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:d782bc3b30329f35c16d84a75ae02d8ef8acc5c3a9884eea89f79110b9ae2d13",
+      "digest": "sha256:3126171d84079bcb897c6ed9c552c497d5187bbcc9caa500bb6a4346e358b132",
       "events": 320
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2052,25 +2052,25 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:884e074e3411850ea442f2b8e7624be98d0ee77abfc1b2d5ac2eb5dfbc6c8798",
+     "packet": "sha256:e720224ddec85e6f17bdac14c5f826610a5895493393d587ab6da4e47fdb9d82",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/3",
-      "digest": "sha256:128452695b954246fd77f7b3dd4ef91ea43ea75f28fbed5736fce46592fb2621",
+      "digest": "sha256:c21638ef1ad4ec0072064a603857dc7710b330417d0c5a7be25ed5e8ba82bb93",
       "events": 353
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [
       {
-       "challenge_id": "ch-b255dc9555594a82a99540c1",
-       "plan": "sha256:3c85e71ac483009cc8c0a49024253f5ff86a219d6ec3b85f07eb35127b4d90ae",
+       "challenge_id": "ch-d4af4e3097f397f32899b327",
+       "plan": "sha256:172da39925e0a4c6b29a226f94d543e3cefa87ff66c06abf66bea72457b42b08",
        "match_id": "arena-exposed_challenge_control-1",
        "status": "abstained",
        "eligible_samples": 0,
        "tracked_samples": 0,
        "total_ms": 0,
        "not_counted": {
-        "seen": 145
+        "seen": 146
        },
        "cause": "seen",
        "verification": "per_sample",
@@ -2180,7 +2180,7 @@
       },
       "occluded_motion_replay": {
        "not_applicable": [
-        "ch-b255dc9555594a82a99540c1"
+        "ch-d4af4e3097f397f32899b327"
        ]
       },
       "leftover": {
@@ -2199,7 +2199,7 @@
    "realization": {
     "status": "reproduced",
     "challenges": [
-     "ch-b255dc9555594a82a99540c1"
+     "ch-d4af4e3097f397f32899b327"
     ],
     "problems": []
    },
@@ -2207,7 +2207,7 @@
    "personal_data": [],
    "client": {
     "entities_received": 3,
-    "probe_updates": 291,
+    "probe_updates": 292,
     "probe_sounds": 0,
     "sounds": 80,
     "fps_median": 145.0
@@ -2216,43 +2216,43 @@
     "server_tick_hz": 60,
     "match_ms": 32000,
     "ticks": 1920,
-    "tick_us_mean": 1013.3,
-    "tick_us_max": 3357,
-    "knowledge_us_per_tick": 303.4,
-    "challenge_us_per_probe_tick": 114.2,
-    "rays_per_tick": 350.2,
-    "event_bytes_per_s": 12197.9,
+    "tick_us_mean": 749.2,
+    "tick_us_max": 1991,
+    "knowledge_us_per_tick": 236.0,
+    "challenge_us_per_probe_tick": 70.0,
+    "rays_per_tick": 350.8,
+    "event_bytes_per_s": 12227.3,
     "event_lines": 993,
-    "snapshot_bytes_per_s": 5265.0,
-    "feed_bytes_per_s": 93289.1,
-    "scoring_ms_live": 17.9,
+    "snapshot_bytes_per_s": 5268.8,
+    "feed_bytes_per_s": 93712.0,
+    "scoring_ms_live": 13.6,
     "parse_errors": 0,
     "verdicts": {
      "audio": {
-      "absent": 871
+      "absent": 876
      },
      "vision": {
-      "known": 871
+      "known": 876
      }
     },
-    "probe_ticks": 871,
-    "memory_static_peak_bytes": 43641717
+    "probe_ticks": 876,
+    "memory_static_peak_bytes": 43641341
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 34.4,
+   "wall_s": 34.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/exposed_challenge_control/events.ndjson",
-     "sha256": "sha256:8703bfc2cb225faf7fa8ff97e091b7deb229aa88fbcd436d94f94d03c5f9efab",
+     "sha256": "sha256:b89ee7200e58fc5d85bf0a801ba11c5d7487a4f1185fc03afebff16fdf2fa840",
      "lines": 993
     },
     "plan.json": {
      "file": "examples/fps-arena/captures/exposed_challenge_control/plan.json",
-     "sha256": "sha256:2ed7dbb424194ea3ec103f6d4ccd99cae249a2eb885508418ade4289a1f31770"
+     "sha256": "sha256:fc7eaf2a9b1f309c7336d69e9bbcc1b23f561afe87b68b658648b74dfceb6c5e"
     }
    }
   },
@@ -2375,7 +2375,7 @@
      "detail": ""
     },
     "graph": "sha256:906155e739e1c46b1755eddb67fcf99f60098ca45583bfd900fd0c1b7ece9bfa",
-    "packet": "sha256:4fed278117dee06a764b1b5d910eb35fa12de5a56953ed9d5a5b01098d266f04",
+    "packet": "sha256:bb5da8f068afe884c4b54a4ccfe5a569a8a3ab22e33b19762b84faec90a92384",
     "experimental": false,
     "label": null
    },
@@ -2389,11 +2389,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:51f787b588656979f933f913abe94721a8db832f9c32e1f10563b9b21c2abd57",
+     "packet": "sha256:34e92209d5f513ce3a535689578f021ed5f9f43f7fc135f6b60c100a3c8bf4e8",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:47e2218a19f2b1eedc6c727ee0811e5b5dc9ede498cf179d00f3e29029b0a11c",
+      "digest": "sha256:02675fec1588ae861276a2b98ac2153b859cf48bcad9b27c6f01fbe60b8e9555",
       "events": 330
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2534,12 +2534,12 @@
       "external_signal"
      ],
      "graph": "sha256:906155e739e1c46b1755eddb67fcf99f60098ca45583bfd900fd0c1b7ece9bfa",
-     "packet": "sha256:4fed278117dee06a764b1b5d910eb35fa12de5a56953ed9d5a5b01098d266f04",
+     "packet": "sha256:bb5da8f068afe884c4b54a4ccfe5a569a8a3ab22e33b19762b84faec90a92384",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:9c8a79039e766ccf3003be00c53e23e0e355d6c3ec7684a31a7a8f2e9704946c",
-      "events": 353
+      "digest": "sha256:23a65a48ebf77c29b7275b7464f83368263b981ffcc69aabf9ea7c96d4353f9d",
+      "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -2693,35 +2693,35 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 334.5,
-    "tick_us_max": 3106,
-    "knowledge_us_per_tick": 33.5,
-    "challenge_us_per_probe_tick": 4915.0,
+    "tick_us_mean": 236.3,
+    "tick_us_max": 877,
+    "knowledge_us_per_tick": 23.1,
+    "challenge_us_per_probe_tick": 3266.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9209.5,
-    "event_lines": 683,
-    "snapshot_bytes_per_s": 3466.5,
-    "feed_bytes_per_s": 74921.6,
-    "scoring_ms_live": 15.6,
+    "event_bytes_per_s": 9174.7,
+    "event_lines": 680,
+    "snapshot_bytes_per_s": 3464.4,
+    "feed_bytes_per_s": 74956.0,
+    "scoring_ms_live": 9.5,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641477
+    "memory_static_peak_bytes": 43641101
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.4,
+   "wall_s": 32.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/external_record/events.ndjson",
-     "sha256": "sha256:1e8654a3b4e15d8e6dec238ab18ca2dcebd4e975ba11557821d02ba4c33105af",
-     "lines": 683
+     "sha256": "sha256:a349282f059232e3809c1cdfc7cbc0fe61c385f728d8312ef853cc424496e0cc",
+     "lines": 680
     },
     "external.ndjson": {
      "file": "examples/fps-arena/captures/external_record/external.ndjson",
@@ -2757,7 +2757,7 @@
      "fire_rate"
     ],
     "observations": [
-     "obs-5518fda556da3182bff7dd58"
+     "obs-70236ba14c30e03c828ebd5c"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -2790,12 +2790,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 492,
+      "events": 491,
       "statuses": {
-       "known": 492
+       "known": 491
       },
       "causes": {
-       "seen": 492
+       "seen": 491
       },
       "latest": {
        "t_ms": 30000,
@@ -2830,8 +2830,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:89910819a69699abf43bc4c4e88126b7a5eb5af1c7c26e2e3b6e76a9e6665503",
-    "packet": "sha256:4cf2e56e5ceb73790f2a1c9545a7cb54a22ba3b5837eb344e0e58a562329ce59",
+    "graph": "sha256:63685d7386a46bb004fbaa5663b0800df415aac6b71e28f44936716a21678f5d",
+    "packet": "sha256:d1426022ea959d8e0bb5972395936ef770ee5ed425780ed82eab96a6234ad2e2",
     "experimental": false,
     "label": null
    },
@@ -2845,11 +2845,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:e89081e153c0b0d98393a8b78c7182c354b212b9e5d65764e9c3e5e521401afb",
+     "packet": "sha256:4ac895f8c67e1b07d0ea1b8438c594def29a8bc429ae676d9163f30dea41195e",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:21cfe7d91b97716196661158427f68c437237905508a09ce2bf0f1b291676fcf",
+      "digest": "sha256:309c0b47c1c8378ad3037c116b056da1423efb3ade3bb310ac357023cddf4fa4",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -2971,18 +2971,18 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-5518fda556da3182bff7dd58"
+      "obs-70236ba14c30e03c828ebd5c"
      ],
      "kinds": [
       "fire_rate"
      ],
-     "graph": "sha256:89910819a69699abf43bc4c4e88126b7a5eb5af1c7c26e2e3b6e76a9e6665503",
-     "packet": "sha256:4cf2e56e5ceb73790f2a1c9545a7cb54a22ba3b5837eb344e0e58a562329ce59",
+     "graph": "sha256:63685d7386a46bb004fbaa5663b0800df415aac6b71e28f44936716a21678f5d",
+     "packet": "sha256:d1426022ea959d8e0bb5972395936ef770ee5ed425780ed82eab96a6234ad2e2",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:95538d83604dcd099c108cee1f5c1ebbcec7b334265fda3d35569230efc07b1d",
-      "events": 538
+      "digest": "sha256:c0de70e4d6cb13a359edb7547c1beb8f9f0c52ffa615a4b5b62fc3d950a031b8",
+      "events": 537
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -3121,23 +3121,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 344.9,
-    "tick_us_max": 3559,
-    "knowledge_us_per_tick": 31.4,
-    "challenge_us_per_probe_tick": 5506.0,
+    "tick_us_mean": 242.7,
+    "tick_us_max": 996,
+    "knowledge_us_per_tick": 21.8,
+    "challenge_us_per_probe_tick": 3031.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 12105.2,
-    "event_lines": 838,
+    "event_bytes_per_s": 12100.1,
+    "event_lines": 837,
     "snapshot_bytes_per_s": 3519.5,
-    "feed_bytes_per_s": 79176.7,
-    "scoring_ms_live": 24.9,
+    "feed_bytes_per_s": 79234.8,
+    "scoring_ms_live": 13.0,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641333
+    "memory_static_peak_bytes": 43640957
    },
    "exit_codes": [
     0,
@@ -3148,8 +3148,8 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/fire_rate/events.ndjson",
-     "sha256": "sha256:05e25e1473b808e238d46c7b5e4e702f092c2d43d6101b3d84a832e6d39956da",
-     "lines": 838
+     "sha256": "sha256:fc3588657c64a9b74d84c4c007fc1612cc6af86a073c1d5e482358f238be41b0",
+     "lines": 837
     }
    }
   },
@@ -3190,7 +3190,7 @@
      "mirror": "eligible",
      "recoil_learned": "not_applicable",
      "accuracy": "baseline_too_thin",
-     "headshot_rate": "baseline_too_thin",
+     "headshot_rate": "insufficient_samples",
      "median_distance": "insufficient_samples",
      "geometry_rate": "insufficient_samples",
      "extra": "disabled",
@@ -3213,15 +3213,15 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 264,
+      "events": 276,
       "statuses": {
-       "known": 264
+       "known": 276
       },
       "causes": {
-       "seen": 264
+       "seen": 276
       },
       "latest": {
-       "t_ms": 29700,
+       "t_ms": 30000,
        "status": "known",
        "cause": "seen",
        "channels": {
@@ -3254,7 +3254,7 @@
      "detail": "Ground speed stayed over the gear cap for 151 samples with displacement_cause none. Cap source: server. If this was a ragdoll or explosion, the server did not mark it."
     },
     "graph": "sha256:0dcf9c7867e75c074704b6c892e7cc4421b886d536fb197c50c6d88ce1ebf7f5",
-    "packet": "sha256:ff7ce1b2be3e564d587b9e359470fc43a5e574a40bc02e1402cde464c543e758",
+    "packet": "sha256:bf4ed6408723d3c67c61364b6c4e188bdff64029202a628a66982a637b9aa0c2",
     "experimental": false,
     "label": null
    },
@@ -3268,11 +3268,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:89743307d3f16f3e1a6b4fc1f738bb786d4ccb2ab5eabcc90fa466c72fc23e0f",
+     "packet": "sha256:aebdf1d197f216aca283e6f9a1efc5ed6e1de0d12f65ed156ddc2599acd70cf6",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:9ad51ddd2396de11bfda00df5c3543bbe3f2b50d2d9d04abd2e7a3cce25ef8c6",
+      "digest": "sha256:8814a7e07036453c5e73b84230cba2bca8a91c817e97142a333d9a5dab2f0ba4",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -3400,12 +3400,439 @@
       "speed"
      ],
      "graph": "sha256:0dcf9c7867e75c074704b6c892e7cc4421b886d536fb197c50c6d88ce1ebf7f5",
-     "packet": "sha256:ff7ce1b2be3e564d587b9e359470fc43a5e574a40bc02e1402cde464c543e758",
+     "packet": "sha256:bf4ed6408723d3c67c61364b6c4e188bdff64029202a628a66982a637b9aa0c2",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:1a86946472943209ab0a5c535febeb83ccdaf28fac7cd43684e7234363545f2f",
-      "events": 357
+      "digest": "sha256:4368810fc713f18c0006cafbc3f372cdd0371616e03e6dd5a2e055f2b64454d5",
+      "events": 352
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "not_applicable": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "baseline_too_thin": [
+        "accuracy:rifle"
+       ],
+       "insufficient_samples": [
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "baseline_too_thin": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    }
+   },
+   "realization": {
+    "status": "no_challenge"
+   },
+   "secret_leaks": [],
+   "personal_data": [],
+   "client": {
+    "entities_received": 1,
+    "probe_updates": 0,
+    "probe_sounds": 0,
+    "sounds": 75,
+    "fps_median": 145.0
+   },
+   "timing": {
+    "server_tick_hz": 60,
+    "match_ms": 30000,
+    "ticks": 1800,
+    "tick_us_mean": 227.5,
+    "tick_us_max": 1121,
+    "knowledge_us_per_tick": 22.3,
+    "challenge_us_per_probe_tick": 3261.0,
+    "rays_per_tick": 2.3,
+    "event_bytes_per_s": 8492.4,
+    "event_lines": 652,
+    "snapshot_bytes_per_s": 3465.9,
+    "feed_bytes_per_s": 74350.4,
+    "scoring_ms_live": 8.3,
+    "parse_errors": 0,
+    "verdicts": {
+     "audio": {},
+     "vision": {}
+    },
+    "probe_ticks": 0,
+    "memory_static_peak_bytes": 43641125
+   },
+   "exit_codes": [
+    0,
+    0
+   ],
+   "wall_s": 32.4,
+   "deterministic": false,
+   "files": {
+    "events.ndjson": {
+     "file": "examples/fps-arena/captures/impossible_speed/events.ndjson",
+     "sha256": "sha256:7a603dc15b9e2bc98f64dd511d8d9042965cf03d83230c401422360581eec936",
+     "lines": 652
+    }
+   }
+  },
+  {
+   "id": "normal_play",
+   "title": "Normal play",
+   "match_id": "arena-normal_play-1",
+   "actor": {
+    "label": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)",
+    "subject_input": "honest autopilot (scripted, not a human)",
+    "standin": null,
+    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
+   },
+   "pixels": null,
+   "expected": {
+    "decision": [
+     "clean",
+     "insufficient_data"
+    ],
+    "no_review": true,
+    "kinds": [],
+    "eligibility": {
+     "speed": "eligible",
+     "hidden": "eligible"
+    },
+    "knowledge": {
+     "arena-bot-a": "known"
+    }
+   },
+   "observed": {
+    "decision": "insufficient_data",
+    "automated_action": "none",
+    "kinds": [],
+    "observations": [],
+    "eligibility": {
+     "speed": "eligible",
+     "fire_rate": "eligible",
+     "metronome": "not_applicable",
+     "recoil_floor": "insufficient_samples",
+     "mirror": "eligible",
+     "recoil_learned": "not_applicable",
+     "accuracy": "baseline_too_thin",
+     "headshot_rate": "baseline_too_thin",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
+     "extra": "disabled",
+     "rank_tail": "baseline_too_thin",
+     "view_snaps": "telemetry_unavailable",
+     "acquire_timing": "telemetry_unavailable",
+     "supporting_extra": "disabled",
+     "account_jump": "telemetry_unavailable",
+     "hidden": "eligible",
+     "quiet_aim": "telemetry_unavailable",
+     "wire": "eligible",
+     "occluded_motion_replay": "telemetry_unavailable",
+     "leftover": "baseline_too_thin",
+     "voice": "not_applicable"
+    },
+    "challenge": null,
+    "fusion": null,
+    "knowledge": {
+     "arena-bot-a": "known"
+    },
+    "knowledge_detail": {
+     "arena-bot-a": {
+      "events": 313,
+      "statuses": {
+       "known": 313
+      },
+      "causes": {
+       "seen": 313
+      },
+      "latest": {
+       "t_ms": 30000,
+       "status": "known",
+       "cause": "seen",
+       "channels": {
+        "audio": "known",
+        "recent_perception": "known",
+        "vision": "known"
+       },
+       "required": [
+        "vision",
+        "audio"
+       ],
+       "since_perceived_ms": 0.0,
+       "hidden_track_ms": null,
+       "event_type": "movement"
+      },
+      "majority": "known"
+     }
+    },
+    "speed": {
+     "eligible": 300,
+     "excluded_innocent": 0,
+     "excluded_unknown": 0,
+     "excluded_airborne": 0,
+     "missing_cap": 0,
+     "violations": 0,
+     "longest_run": 0,
+     "sustained": false,
+     "spike_samples": 0,
+     "cap_source": "server",
+     "detail": ""
+    },
+    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+    "packet": "sha256:83e427e637a88d19984f7893501a6cf96b7a6ce05a88a7c0c5a3f6a595a9fccc",
+    "experimental": false,
+    "label": null
+   },
+   "problems": [],
+   "as_expected": true,
+   "live_vs_offline": "identical",
+   "case_problems": {},
+   "cases": {
+    "arena-bot-a": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
+     "packet": "sha256:04135a890897fe28fde7764bbb7720de130080f6c5cf510a17e41cbb902402e6",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:a573cfc71331f8721d3294315e5a7fd23d3c43d43d3afeb9246ea6667a3df653",
+      "events": 330
+     },
+     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
+     "challenges": [],
+     "fusion": null,
+     "eligibility": {
+      "speed": {
+       "eligible": [
+        ""
+       ]
+      },
+      "fire_rate": {
+       "eligible": [
+        "rifle"
+       ]
+      },
+      "metronome": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "recoil_floor": {
+       "insufficient_samples": [
+        "arena-rifle|"
+       ]
+      },
+      "mirror": {
+       "eligible": [
+        "arena-rifle|"
+       ]
+      },
+      "recoil_learned": {
+       "not_applicable": [
+        "arena-rifle|"
+       ]
+      },
+      "accuracy": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "headshot_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "median_distance": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "geometry_rate": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "rank_tail": {
+       "insufficient_samples": [
+        "accuracy:rifle",
+        "geometry_rate:rifle",
+        "headshot_rate:rifle",
+        "median_distance:rifle",
+        "recoil:arena-rifle|"
+       ]
+      },
+      "view_snaps": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "acquire_timing": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "supporting_extra": {
+       "disabled": [
+        ""
+       ]
+      },
+      "account_jump": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "hidden": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "quiet_aim": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "wire": {
+       "telemetry_unavailable": [
+        "rifle"
+       ]
+      },
+      "occluded_motion_replay": {
+       "telemetry_unavailable": [
+        ""
+       ]
+      },
+      "leftover": {
+       "insufficient_samples": [
+        "rifle"
+       ]
+      },
+      "voice": {
+       "not_applicable": [
+        ""
+       ]
+      }
+     }
+    },
+    "arena-player": {
+     "decision": "insufficient_data",
+     "observations": [],
+     "kinds": [],
+     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
+     "packet": "sha256:83e427e637a88d19984f7893501a6cf96b7a6ce05a88a7c0c5a3f6a595a9fccc",
+     "packet_recipe": "fpsdet.packet/5",
+     "inputs": {
+      "recipe": "fpsdet.player-events/2",
+      "digest": "sha256:8f0d3618e4c5da786240cd8d175330e82888e518486682de58b95e1be965ddf2",
+      "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -3539,433 +3966,6 @@
     "entities_received": 1,
     "probe_updates": 0,
     "probe_sounds": 0,
-    "sounds": 75,
-    "fps_median": 145.0
-   },
-   "timing": {
-    "server_tick_hz": 60,
-    "match_ms": 30000,
-    "ticks": 1800,
-    "tick_us_mean": 334.9,
-    "tick_us_max": 3834,
-    "knowledge_us_per_tick": 33.1,
-    "challenge_us_per_probe_tick": 4791.0,
-    "rays_per_tick": 2.3,
-    "event_bytes_per_s": 8500.8,
-    "event_lines": 657,
-    "snapshot_bytes_per_s": 3468.1,
-    "feed_bytes_per_s": 74599.9,
-    "scoring_ms_live": 9.0,
-    "parse_errors": 0,
-    "verdicts": {
-     "audio": {},
-     "vision": {}
-    },
-    "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641501
-   },
-   "exit_codes": [
-    0,
-    0
-   ],
-   "wall_s": 32.4,
-   "deterministic": false,
-   "files": {
-    "events.ndjson": {
-     "file": "examples/fps-arena/captures/impossible_speed/events.ndjson",
-     "sha256": "sha256:8120b34a34be008ea4bb8d33a9e22e5ea08534e9119d459d00ae3c0928dc66ad",
-     "lines": 657
-    }
-   }
-  },
-  {
-   "id": "normal_play",
-   "title": "Normal play",
-   "match_id": "arena-normal_play-1",
-   "actor": {
-    "label": "NO STAND-IN: the person at the keyboard, or in qualification the honest autopilot (scripted, not a human)",
-    "subject_input": "honest autopilot (scripted, not a human)",
-    "standin": null,
-    "statement": "Every subject in qualification is a scripted autopilot; where a stand-in holds the aim it is a server-side script, never a human and never real cheat software."
-   },
-   "pixels": null,
-   "expected": {
-    "decision": [
-     "clean",
-     "insufficient_data"
-    ],
-    "no_review": true,
-    "kinds": [],
-    "eligibility": {
-     "speed": "eligible",
-     "hidden": "eligible"
-    },
-    "knowledge": {
-     "arena-bot-a": "known"
-    }
-   },
-   "observed": {
-    "decision": "insufficient_data",
-    "automated_action": "none",
-    "kinds": [],
-    "observations": [],
-    "eligibility": {
-     "speed": "eligible",
-     "fire_rate": "eligible",
-     "metronome": "not_applicable",
-     "recoil_floor": "insufficient_samples",
-     "mirror": "eligible",
-     "recoil_learned": "not_applicable",
-     "accuracy": "baseline_too_thin",
-     "headshot_rate": "baseline_too_thin",
-     "median_distance": "baseline_too_thin",
-     "geometry_rate": "baseline_too_thin",
-     "extra": "disabled",
-     "rank_tail": "baseline_too_thin",
-     "view_snaps": "telemetry_unavailable",
-     "acquire_timing": "telemetry_unavailable",
-     "supporting_extra": "disabled",
-     "account_jump": "telemetry_unavailable",
-     "hidden": "eligible",
-     "quiet_aim": "telemetry_unavailable",
-     "wire": "eligible",
-     "occluded_motion_replay": "telemetry_unavailable",
-     "leftover": "baseline_too_thin",
-     "voice": "not_applicable"
-    },
-    "challenge": null,
-    "fusion": null,
-    "knowledge": {
-     "arena-bot-a": "known"
-    },
-    "knowledge_detail": {
-     "arena-bot-a": {
-      "events": 311,
-      "statuses": {
-       "known": 311
-      },
-      "causes": {
-       "seen": 311
-      },
-      "latest": {
-       "t_ms": 30000,
-       "status": "known",
-       "cause": "seen",
-       "channels": {
-        "audio": "known",
-        "recent_perception": "known",
-        "vision": "known"
-       },
-       "required": [
-        "vision",
-        "audio"
-       ],
-       "since_perceived_ms": 0.0,
-       "hidden_track_ms": null,
-       "event_type": "movement"
-      },
-      "majority": "known"
-     }
-    },
-    "speed": {
-     "eligible": 300,
-     "excluded_innocent": 0,
-     "excluded_unknown": 0,
-     "excluded_airborne": 0,
-     "missing_cap": 0,
-     "violations": 0,
-     "longest_run": 0,
-     "sustained": false,
-     "spike_samples": 0,
-     "cap_source": "server",
-     "detail": ""
-    },
-    "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:7d59e06584ad5b92209b1d6b9970ed767dc75fd6af3de1049ff54ede32c18c49",
-    "experimental": false,
-    "label": null
-   },
-   "problems": [],
-   "as_expected": true,
-   "live_vs_offline": "identical",
-   "case_problems": {},
-   "cases": {
-    "arena-bot-a": {
-     "decision": "insufficient_data",
-     "observations": [],
-     "kinds": [],
-     "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:08c25d95f4a91080a1e6f904a6dfda9e2acd17ea1813da37b6fb6b078808b926",
-     "packet_recipe": "fpsdet.packet/5",
-     "inputs": {
-      "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:04ea35b3f52830f407494e6f7dd7505ec4a97ba2905718004bbba8648e040c18",
-      "events": 330
-     },
-     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
-     "challenges": [],
-     "fusion": null,
-     "eligibility": {
-      "speed": {
-       "eligible": [
-        ""
-       ]
-      },
-      "fire_rate": {
-       "eligible": [
-        "rifle"
-       ]
-      },
-      "metronome": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "recoil_floor": {
-       "insufficient_samples": [
-        "arena-rifle|"
-       ]
-      },
-      "mirror": {
-       "eligible": [
-        "arena-rifle|"
-       ]
-      },
-      "recoil_learned": {
-       "not_applicable": [
-        "arena-rifle|"
-       ]
-      },
-      "accuracy": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "headshot_rate": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "median_distance": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "geometry_rate": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "extra": {
-       "disabled": [
-        ""
-       ]
-      },
-      "rank_tail": {
-       "insufficient_samples": [
-        "accuracy:rifle",
-        "geometry_rate:rifle",
-        "headshot_rate:rifle",
-        "median_distance:rifle",
-        "recoil:arena-rifle|"
-       ]
-      },
-      "view_snaps": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "acquire_timing": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "supporting_extra": {
-       "disabled": [
-        ""
-       ]
-      },
-      "account_jump": {
-       "telemetry_unavailable": [
-        ""
-       ]
-      },
-      "hidden": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "quiet_aim": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "wire": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "occluded_motion_replay": {
-       "telemetry_unavailable": [
-        ""
-       ]
-      },
-      "leftover": {
-       "insufficient_samples": [
-        "rifle"
-       ]
-      },
-      "voice": {
-       "not_applicable": [
-        ""
-       ]
-      }
-     }
-    },
-    "arena-player": {
-     "decision": "insufficient_data",
-     "observations": [],
-     "kinds": [],
-     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:7d59e06584ad5b92209b1d6b9970ed767dc75fd6af3de1049ff54ede32c18c49",
-     "packet_recipe": "fpsdet.packet/5",
-     "inputs": {
-      "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:d6facb177051dd520aa19a7d3d83f8e65e6013a2f3b8d201fa81e2ff0698b810",
-      "events": 352
-     },
-     "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
-     "challenges": [],
-     "fusion": null,
-     "eligibility": {
-      "speed": {
-       "eligible": [
-        ""
-       ]
-      },
-      "fire_rate": {
-       "eligible": [
-        "rifle"
-       ]
-      },
-      "metronome": {
-       "not_applicable": [
-        "rifle"
-       ]
-      },
-      "recoil_floor": {
-       "insufficient_samples": [
-        "arena-rifle|"
-       ]
-      },
-      "mirror": {
-       "eligible": [
-        "arena-rifle|"
-       ]
-      },
-      "recoil_learned": {
-       "not_applicable": [
-        "arena-rifle|"
-       ]
-      },
-      "accuracy": {
-       "baseline_too_thin": [
-        "rifle"
-       ]
-      },
-      "headshot_rate": {
-       "baseline_too_thin": [
-        "rifle"
-       ]
-      },
-      "median_distance": {
-       "baseline_too_thin": [
-        "rifle"
-       ]
-      },
-      "geometry_rate": {
-       "baseline_too_thin": [
-        "rifle"
-       ]
-      },
-      "extra": {
-       "disabled": [
-        ""
-       ]
-      },
-      "rank_tail": {
-       "baseline_too_thin": [
-        "accuracy:rifle",
-        "geometry_rate:rifle",
-        "headshot_rate:rifle",
-        "median_distance:rifle"
-       ],
-       "insufficient_samples": [
-        "recoil:arena-rifle|"
-       ]
-      },
-      "view_snaps": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "acquire_timing": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "supporting_extra": {
-       "disabled": [
-        ""
-       ]
-      },
-      "account_jump": {
-       "telemetry_unavailable": [
-        ""
-       ]
-      },
-      "hidden": {
-       "eligible": [
-        "rifle"
-       ]
-      },
-      "quiet_aim": {
-       "telemetry_unavailable": [
-        "rifle"
-       ]
-      },
-      "wire": {
-       "eligible": [
-        "rifle"
-       ]
-      },
-      "occluded_motion_replay": {
-       "telemetry_unavailable": [
-        ""
-       ]
-      },
-      "leftover": {
-       "baseline_too_thin": [
-        "rifle"
-       ]
-      },
-      "voice": {
-       "not_applicable": [
-        ""
-       ]
-      }
-     }
-    }
-   },
-   "realization": {
-    "status": "no_challenge"
-   },
-   "secret_leaks": [],
-   "personal_data": [],
-   "client": {
-    "entities_received": 1,
-    "probe_updates": 0,
-    "probe_sounds": 0,
     "sounds": 105,
     "fps_median": 145.0
    },
@@ -3973,23 +3973,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 336.5,
-    "tick_us_max": 2965,
-    "knowledge_us_per_tick": 33.0,
-    "challenge_us_per_probe_tick": 5042.0,
+    "tick_us_mean": 224.4,
+    "tick_us_max": 1630,
+    "knowledge_us_per_tick": 21.6,
+    "challenge_us_per_probe_tick": 3134.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9097.4,
-    "event_lines": 682,
-    "snapshot_bytes_per_s": 3466.5,
-    "feed_bytes_per_s": 74745.5,
-    "scoring_ms_live": 14.3,
+    "event_bytes_per_s": 9064.0,
+    "event_lines": 680,
+    "snapshot_bytes_per_s": 3465.3,
+    "feed_bytes_per_s": 74642.1,
+    "scoring_ms_live": 8.1,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641381
+    "memory_static_peak_bytes": 43641005
    },
    "exit_codes": [
     0,
@@ -4000,8 +4000,8 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/normal_play/events.ndjson",
-     "sha256": "sha256:b07d6ec3f52df37e6b2b0ba5d1389b033305d2439bb1e2b1ad177d241ff09ba1",
-     "lines": 682
+     "sha256": "sha256:34f8596624f4db279ddec32062c3c4157cb85cfd68e7b4c43cc45ad0c1ec16a9",
+     "lines": 680
     }
    }
   },
@@ -4106,7 +4106,7 @@
      "detail": ""
     },
     "graph": "sha256:7058168a8eedc891d46544307488596cb53685d06b606f1fd29d12cf2f0323a8",
-    "packet": "sha256:d370d13159d11d2ab39a6ab0736e62cbf8565cbe9710c06efab50ccde8dfa103",
+    "packet": "sha256:fb3785c261a921b4779875e137937b10b77b66afef5709894ee26bec7dcea5d6",
     "experimental": false,
     "label": null
    },
@@ -4120,11 +4120,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:3f66c751abc40cb2f735f073c97f39af45a85847dddaa63881ab51ca4c23ae36",
+     "packet": "sha256:4d3623c892837c8e7f8c7c1c4cffc85b8f489bb29c281b27f2f76b6acc87269f",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:d40fef2a8817bdd85a48a1c97b0d9a4e8e470863d0b9c18ccb9df3cd277ada82",
+      "digest": "sha256:29f6c7d37903a91dabee3f64463ba2be152d9d4a07dc5951db7fe7784d8d58e2",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4252,11 +4252,11 @@
       "recoil_floor"
      ],
      "graph": "sha256:7058168a8eedc891d46544307488596cb53685d06b606f1fd29d12cf2f0323a8",
-     "packet": "sha256:d370d13159d11d2ab39a6ab0736e62cbf8565cbe9710c06efab50ccde8dfa103",
+     "packet": "sha256:fb3785c261a921b4779875e137937b10b77b66afef5709894ee26bec7dcea5d6",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:bcdf75a4f620a649f3fbe24f8309b44c67b8feebb99f6546a518332f8da2cccf",
+      "digest": "sha256:37ff08775e5a8f888b3c7afdc07fbdc80a3c96ca6e0e87411fb9f5d82a04b25e",
       "events": 508
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4398,23 +4398,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 274.8,
-    "tick_us_max": 2836,
-    "knowledge_us_per_tick": 27.2,
-    "challenge_us_per_probe_tick": 3487.0,
+    "tick_us_mean": 259.5,
+    "tick_us_max": 1152,
+    "knowledge_us_per_tick": 23.7,
+    "challenge_us_per_probe_tick": 3508.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 11662.7,
+    "event_bytes_per_s": 11713.2,
     "event_lines": 808,
-    "snapshot_bytes_per_s": 3479.5,
-    "feed_bytes_per_s": 77157.2,
-    "scoring_ms_live": 15.1,
+    "snapshot_bytes_per_s": 3481.1,
+    "feed_bytes_per_s": 78510.3,
+    "scoring_ms_live": 15.8,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641405
+    "memory_static_peak_bytes": 43641029
    },
    "exit_codes": [
     0,
@@ -4425,7 +4425,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/recoil_floor/events.ndjson",
-     "sha256": "sha256:1a3b47f3acb6750977da2ef1ce5458bb31ed8573c26cd5a94df89035ec927c11",
+     "sha256": "sha256:59d94e74fb012501c21886f91a37c1399d0b0f7459cc4b81be07273121735db1",
      "lines": 808
     }
    }
@@ -4490,12 +4490,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 450,
+      "events": 448,
       "statuses": {
-       "known": 450
+       "known": 448
       },
       "causes": {
-       "seen": 450
+       "seen": 448
       },
       "latest": {
        "t_ms": 30000,
@@ -4531,7 +4531,7 @@
      "detail": ""
     },
     "graph": "sha256:f8ae819d8ac2a31010322cae1af27793c710fa9d1893975a988444c049f7fa91",
-    "packet": "sha256:a0b09073611900f7376304ce52fb02732689853027ea009d0388e5163169bfcb",
+    "packet": "sha256:f0bfe5bd642727dbf5a795684b8f2d8ce23c0ee77a7b91e9b116b0cb2256ec9a",
     "experimental": false,
     "label": null
    },
@@ -4677,11 +4677,11 @@
       "mirror"
      ],
      "graph": "sha256:f8ae819d8ac2a31010322cae1af27793c710fa9d1893975a988444c049f7fa91",
-     "packet": "sha256:a0b09073611900f7376304ce52fb02732689853027ea009d0388e5163169bfcb",
+     "packet": "sha256:f0bfe5bd642727dbf5a795684b8f2d8ce23c0ee77a7b91e9b116b0cb2256ec9a",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:91543e9ddaf09b314ad1db042b3aa3945cdb60d65083cdab0565efdad3839034",
+      "digest": "sha256:e2d74696d76ec1794bc637776889fd24c3f8a99dd5108d036f44fa30192b1c05",
       "events": 508
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -4821,23 +4821,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 271.8,
-    "tick_us_max": 1407,
-    "knowledge_us_per_tick": 25.5,
-    "challenge_us_per_probe_tick": 3744.0,
+    "tick_us_mean": 248.6,
+    "tick_us_max": 744,
+    "knowledge_us_per_tick": 23.6,
+    "challenge_us_per_probe_tick": 3295.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 11584.3,
+    "event_bytes_per_s": 11573.1,
     "event_lines": 808,
-    "snapshot_bytes_per_s": 3543.1,
-    "feed_bytes_per_s": 78495.1,
-    "scoring_ms_live": 14.0,
+    "snapshot_bytes_per_s": 3542.7,
+    "feed_bytes_per_s": 78506.1,
+    "scoring_ms_live": 17.2,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641429
+    "memory_static_peak_bytes": 43641053
    },
    "exit_codes": [
     0,
@@ -4848,7 +4848,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/recoil_mirror/events.ndjson",
-     "sha256": "sha256:f8283fe46eaeae17260a829c877a398c15d454d2064d2e9d5fe3a1b4e430c857",
+     "sha256": "sha256:674002ed46a5204e71ff8d8b253f0d85e2ad975c7f43070014cf57d8ff8b6a5b",
      "lines": 808
     }
    }
@@ -4955,7 +4955,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:22333f1c9599c9e195128bb7aa8327a9749951f838063e18ac8b296f4ca15257",
+    "packet": "sha256:f9b81f7d4d64a2119ac724cebde4601fb5a44f23d4e7fcd3f18f513931eec9ad",
     "experimental": false,
     "label": null
    },
@@ -5097,11 +5097,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:22333f1c9599c9e195128bb7aa8327a9749951f838063e18ac8b296f4ca15257",
+     "packet": "sha256:f9b81f7d4d64a2119ac724cebde4601fb5a44f23d4e7fcd3f18f513931eec9ad",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:0247bdb3a9c07bb6be5c28ff5a418408b2f332bf6ca4d981547fbd1e72b9c9d9",
+      "digest": "sha256:5565cf491b95259b184e6b3d5a93b86b185f5f6e64dc43915454d8d1122f467d",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5243,23 +5243,23 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 785.8,
-    "tick_us_max": 3105,
-    "knowledge_us_per_tick": 242.5,
-    "challenge_us_per_probe_tick": 3645.0,
+    "tick_us_mean": 756.8,
+    "tick_us_max": 2279,
+    "knowledge_us_per_tick": 234.6,
+    "challenge_us_per_probe_tick": 3346.0,
     "rays_per_tick": 378.0,
-    "event_bytes_per_s": 8925.5,
+    "event_bytes_per_s": 8925.9,
     "event_lines": 681,
-    "snapshot_bytes_per_s": 3607.1,
-    "feed_bytes_per_s": 70654.1,
-    "scoring_ms_live": 11.7,
+    "snapshot_bytes_per_s": 3607.5,
+    "feed_bytes_per_s": 70664.5,
+    "scoring_ms_live": 9.8,
     "parse_errors": 0,
     "verdicts": {
      "audio": {},
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641669
+    "memory_static_peak_bytes": 43641293
    },
    "exit_codes": [
     0,
@@ -5270,7 +5270,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unchecked_audio_channel/events.ndjson",
-     "sha256": "sha256:673e93f903ab1435c4c2ba79bdfe27cf361ccf244902147088f9fe1c52d7bb46",
+     "sha256": "sha256:b49c02f8ecf5a8b277fe859e4e5638b550fb3aac0b8f24e2da5161c8d11a4c91",
      "lines": 681
     }
    }
@@ -5317,8 +5317,8 @@
      "recoil_learned": "not_applicable",
      "accuracy": "baseline_too_thin",
      "headshot_rate": "baseline_too_thin",
-     "median_distance": "baseline_too_thin",
-     "geometry_rate": "baseline_too_thin",
+     "median_distance": "insufficient_samples",
+     "geometry_rate": "insufficient_samples",
      "extra": "disabled",
      "rank_tail": "baseline_too_thin",
      "view_snaps": "telemetry_unavailable",
@@ -5340,12 +5340,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 301,
+      "events": 300,
       "statuses": {
-       "known": 301
+       "known": 300
       },
       "causes": {
-       "seen": 301
+       "seen": 300
       },
       "latest": {
        "t_ms": 30000,
@@ -5367,15 +5367,15 @@
       "majority": "known"
      },
      "arena-bot-b": {
-      "events": 17,
+      "events": 20,
       "statuses": {
-       "unknowable": 17
+       "unknowable": 20
       },
       "causes": {
-       "unknowable": 17
+       "unknowable": 20
       },
       "latest": {
-       "t_ms": 28633,
+       "t_ms": 25700,
        "status": "unknowable",
        "cause": "unknowable",
        "channels": {
@@ -5388,8 +5388,8 @@
         "audio"
        ],
        "since_perceived_ms": null,
-       "hidden_track_ms": 33.333,
-       "event_type": "shot"
+       "hidden_track_ms": null,
+       "event_type": "movement"
       },
       "majority": "unknowable"
      }
@@ -5408,7 +5408,7 @@
      "detail": ""
     },
     "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-    "packet": "sha256:85724cf0bd0d7019cfb1788d0ce1e211559c9a7de525745e8305cd11746f1380",
+    "packet": "sha256:59e22b745452828a7efc3f40c8785651f3fceafad0cfba9fc4eaefe28af8cd33",
     "experimental": false,
     "label": null
    },
@@ -5422,11 +5422,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:d19e5c2f8dd6c77e9dc9bccf35b15772e39fdb45ab144ecbc382de8528697dbc",
+     "packet": "sha256:24184e0327fb68356b0dcd0a935c3241c9783063efcee7fbdeef86fef55d6afa",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:4a2f03c5566a28628a6726c01dd69a05aba809d43619151c1f16caf4fbdcceae",
+      "digest": "sha256:a4b38fc293c729b0a5ebb2d0ddcd39a8b198d5e3f0c21801e8c8f0365f7aff58",
       "events": 330
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5554,11 +5554,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:06a2e4418b28d268b81e166372d378332848988d80c151e3c0bc8c4f9bb78495",
+     "packet": "sha256:ca93e14be6d9d424d1e14508034d94929f69c923253be0919d4284d7312cbf0e",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:88cd2c326934b4a486660f9a4e7808d5631afaf525eb6f76d6a33edd3d83e85a",
+      "digest": "sha256:625ce660b78db5bf0924195078e1f0a01754c58475021875fe667136b3fea0fe",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -5682,12 +5682,12 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:85724cf0bd0d7019cfb1788d0ce1e211559c9a7de525745e8305cd11746f1380",
+     "packet": "sha256:59e22b745452828a7efc3f40c8785651f3fceafad0cfba9fc4eaefe28af8cd33",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:9b03db70cbab3397460d3cef2864240e6ecb556338ac387111b3c7cf1a0d448d",
-      "events": 357
+      "digest": "sha256:65396232e01f450df4a2cc40bdf114a977729420e03ec7c7ff7519c120e2724f",
+      "events": 350
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -5734,12 +5734,12 @@
        ]
       },
       "median_distance": {
-       "baseline_too_thin": [
+       "insufficient_samples": [
         "rifle"
        ]
       },
       "geometry_rate": {
-       "baseline_too_thin": [
+       "insufficient_samples": [
         "rifle"
        ]
       },
@@ -5751,11 +5751,11 @@
       "rank_tail": {
        "baseline_too_thin": [
         "accuracy:rifle",
-        "geometry_rate:rifle",
-        "headshot_rate:rifle",
-        "median_distance:rifle"
+        "headshot_rate:rifle"
        ],
        "insufficient_samples": [
+        "geometry_rate:rifle",
+        "median_distance:rifle",
         "recoil:arena-rifle|"
        ]
       },
@@ -5828,15 +5828,15 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 802.1,
-    "tick_us_max": 2196,
-    "knowledge_us_per_tick": 251.8,
-    "challenge_us_per_probe_tick": 3482.0,
-    "rays_per_tick": 350.5,
-    "event_bytes_per_s": 13143.3,
-    "event_lines": 987,
-    "snapshot_bytes_per_s": 4668.7,
-    "feed_bytes_per_s": 83785.7,
+    "tick_us_mean": 764.8,
+    "tick_us_max": 1926,
+    "knowledge_us_per_tick": 246.7,
+    "challenge_us_per_probe_tick": 3582.0,
+    "rays_per_tick": 351.2,
+    "event_bytes_per_s": 13063.4,
+    "event_lines": 980,
+    "snapshot_bytes_per_s": 4664.9,
+    "feed_bytes_per_s": 83562.7,
     "scoring_ms_live": 16.5,
     "parse_errors": 0,
     "verdicts": {
@@ -5844,19 +5844,19 @@
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641669
+    "memory_static_peak_bytes": 43641293
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.4,
+   "wall_s": 32.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unknowable_hidden_enemy/events.ndjson",
-     "sha256": "sha256:31f7ec15cf94f8fadd677201a35dc328c182073911af2ea12c22e642378a4e3b",
-     "lines": 987
+     "sha256": "sha256:afa05cb2097d8795cefa35645e1a034badcaf6d416868dc45d5f571b506d483c",
+     "lines": 980
     }
    }
   },
@@ -5964,7 +5964,7 @@
      "detail": ""
     },
     "graph": "sha256:cfac11f634fb0275a5a70cfb2022f75615bfb83e2300c8356fb0c9aa5ce51303",
-    "packet": "sha256:2e03ad77361d0d4d186624d4d384a96f7735ae348048c6d3547d23b387b5d947",
+    "packet": "sha256:9da6364ad699cf387d8f67931f21b485bc56f982da318ddb37c804ac2d9b5867",
     "experimental": false,
     "label": null
    },
@@ -5978,11 +5978,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:b2305b600d9a2077c58b02314d09333860b0b64d524944866ead1e3af2470ab0",
-     "packet": "sha256:a99bbeb3a20987ae3eb9a8ee72e676b9c93bc18a5b4b8d696e81d48941d5678c",
+     "packet": "sha256:cead3b64917c039171a942610ac6a58f67b43a0f5bb5475140bad586bb7d0086",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:f164458f302986e97c59346ba510b1a402c14af54af860ae7e4079bb8a882cf6",
+      "digest": "sha256:d23ee48219493f89bcdbc91dc480f9d6d88325360cf9012c9e4a260845f2f85e",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -6110,11 +6110,11 @@
       "hidden"
      ],
      "graph": "sha256:cfac11f634fb0275a5a70cfb2022f75615bfb83e2300c8356fb0c9aa5ce51303",
-     "packet": "sha256:2e03ad77361d0d4d186624d4d384a96f7735ae348048c6d3547d23b387b5d947",
+     "packet": "sha256:9da6364ad699cf387d8f67931f21b485bc56f982da318ddb37c804ac2d9b5867",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:ac83524930c85859e30d255e89ce699216723c3bced6821447f851fe173883ae",
+      "digest": "sha256:e47ffd3f2b1ca51359cd046497ed709ad83993527dbd5e25ccc10ce681516340",
       "events": 381
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -6256,15 +6256,15 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 778.1,
-    "tick_us_max": 2857,
-    "knowledge_us_per_tick": 242.2,
-    "challenge_us_per_probe_tick": 3582.0,
+    "tick_us_mean": 750.7,
+    "tick_us_max": 2215,
+    "knowledge_us_per_tick": 232.8,
+    "challenge_us_per_probe_tick": 3249.0,
     "rays_per_tick": 378.0,
     "event_bytes_per_s": 9170.1,
     "event_lines": 681,
-    "snapshot_bytes_per_s": 3607.2,
-    "feed_bytes_per_s": 71165.2,
+    "snapshot_bytes_per_s": 3606.8,
+    "feed_bytes_per_s": 71021.9,
     "scoring_ms_live": 11.3,
     "parse_errors": 0,
     "verdicts": {
@@ -6272,7 +6272,7 @@
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641717
+    "memory_static_peak_bytes": 43641341
    },
    "exit_codes": [
     0,
@@ -6283,7 +6283,7 @@
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/unknowable_hidden_tracked/events.ndjson",
-     "sha256": "sha256:f17e7364d031b17d721daef962870126db117bcf146a0a94b3403ba1af9535c3",
+     "sha256": "sha256:ae7dafda3a0472c0d50c2d8063994650e354f37f41c5cdced84d783a4bb31d74",
      "lines": 681
     }
    }
@@ -6315,7 +6315,7 @@
      "wire"
     ],
     "observations": [
-     "obs-9f3cb52387b67b6010e81b33"
+     "obs-aa708247f09735c9031d9f53"
     ],
     "eligibility": {
      "speed": "eligible",
@@ -6348,12 +6348,12 @@
     },
     "knowledge_detail": {
      "arena-bot-a": {
-      "events": 344,
+      "events": 342,
       "statuses": {
-       "known": 344
+       "known": 342
       },
       "causes": {
-       "seen": 344
+       "seen": 342
       },
       "latest": {
        "t_ms": 30000,
@@ -6388,8 +6388,8 @@
      "cap_source": "server",
      "detail": ""
     },
-    "graph": "sha256:b4a7a2c78eb7d378d56393d5059ca04e0a8c9d41be2a29eebbf27f4375b708fd",
-    "packet": "sha256:e6d3d92fe842649fda723ee261512e853fd449a0f032bc724f49dee21ca2635b",
+    "graph": "sha256:b8de78d2993bda8ca4107b8d521198e943a1ca562a1b86169cb78f21ba1f3b2c",
+    "packet": "sha256:9e20157cfcaea4cedb7e8ed338915dea34d84bc546568f439cfac478c9d5481d",
     "experimental": false,
     "label": null
    },
@@ -6403,11 +6403,11 @@
      "observations": [],
      "kinds": [],
      "graph": "sha256:d9669c5e04618356dc3f5652bb9f2fb6d8559db7c35158a20e53f9437e1af861",
-     "packet": "sha256:76a16e4bdbc0438bb4f01a970a2662d663333c0f87013fd73cbc60c29c4d2d45",
+     "packet": "sha256:2e77c6ead42a6a09e29035111fd512c3b0088f80343df4f94404f80841d23cc7",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:a4c27c46fbbed7b03e5eb7ee6b87efb491f57a0e7c9e64f682a5c0e6c460701c",
+      "digest": "sha256:f30609aa9dfa491dff7bb260b7c4d36b2cc302d383e9545797c546d1d4c70383",
       "events": 300
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
@@ -6529,18 +6529,18 @@
     "arena-player": {
      "decision": "review",
      "observations": [
-      "obs-9f3cb52387b67b6010e81b33"
+      "obs-aa708247f09735c9031d9f53"
      ],
      "kinds": [
       "wire"
      ],
-     "graph": "sha256:b4a7a2c78eb7d378d56393d5059ca04e0a8c9d41be2a29eebbf27f4375b708fd",
-     "packet": "sha256:e6d3d92fe842649fda723ee261512e853fd449a0f032bc724f49dee21ca2635b",
+     "graph": "sha256:b8de78d2993bda8ca4107b8d521198e943a1ca562a1b86169cb78f21ba1f3b2c",
+     "packet": "sha256:9e20157cfcaea4cedb7e8ed338915dea34d84bc546568f439cfac478c9d5481d",
      "packet_recipe": "fpsdet.packet/5",
      "inputs": {
       "recipe": "fpsdet.player-events/2",
-      "digest": "sha256:ed79809e073f5198392d6e741420e8567c84cf130fe9b174d0e310358846b448",
-      "events": 422
+      "digest": "sha256:833bb65dbcd3fe0708878a7c7a259e64a1f41c990e13145ff70454b05772aaf5",
+      "events": 420
      },
      "detector": "sha256:411c8bf6f6eb8e3c13daa7e8d0c33f68feb70ba787c68844eb0dbf378f73a0d9",
      "challenges": [],
@@ -6679,15 +6679,15 @@
     "server_tick_hz": 60,
     "match_ms": 30000,
     "ticks": 1800,
-    "tick_us_mean": 261.5,
-    "tick_us_max": 1234,
-    "knowledge_us_per_tick": 24.9,
-    "challenge_us_per_probe_tick": 3320.0,
+    "tick_us_mean": 255.6,
+    "tick_us_max": 853,
+    "knowledge_us_per_tick": 24.6,
+    "challenge_us_per_probe_tick": 3740.0,
     "rays_per_tick": 2.4,
-    "event_bytes_per_s": 9884.1,
-    "event_lines": 722,
-    "snapshot_bytes_per_s": 3601.2,
-    "feed_bytes_per_s": 77661.7,
+    "event_bytes_per_s": 9838.1,
+    "event_lines": 720,
+    "snapshot_bytes_per_s": 3600.4,
+    "feed_bytes_per_s": 77528.1,
     "scoring_ms_live": 11.7,
     "parse_errors": 0,
     "verdicts": {
@@ -6695,19 +6695,19 @@
      "vision": {}
     },
     "probe_ticks": 0,
-    "memory_static_peak_bytes": 43641477
+    "memory_static_peak_bytes": 43641101
    },
    "exit_codes": [
     0,
     0
    ],
-   "wall_s": 32.4,
+   "wall_s": 32.3,
    "deterministic": false,
    "files": {
     "events.ndjson": {
      "file": "examples/fps-arena/captures/wire_vs_picture/events.ndjson",
-     "sha256": "sha256:845d85991a509ba2dfbd472236916d5979a9f73781483bf00ebbce22bb8f410d",
-     "lines": 722
+     "sha256": "sha256:27fc520599e61e1b3e50cce423bdff9c3a079b31560e34a662594a2680c633a0",
+     "lines": 720
     }
    }
   }
@@ -6726,16 +6726,201 @@
   "method": "the P12 pilot's: freeze the frame, draw it again with each body hidden in turn, count the pixels that changed",
   "hidden_scenario": "active_challenge",
   "visible_scenario": "exposed_challenge_control",
-  "hidden_checks": 8,
+  "hidden_checks": 7,
   "hidden_pixels": 0,
-  "hidden_bot_checks_with_pixels": 14,
+  "hidden_bot_checks_with_pixels": 15,
   "hidden_frame_stable": true,
-  "visible_checks": 7,
-  "visible_pixels": 1769,
+  "visible_checks": 8,
+  "visible_pixels": 1490,
   "pass": true,
   "problems": [],
-  "statement": "PLAYER PIXEL PROOF  hidden: 0 challenge pixels in 8 checks  visible control: 1769 changed pixels  PASS",
+  "statement": "PLAYER PIXEL PROOF  hidden: 0 challenge pixels in 7 checks  visible control: 1490 changed pixels  PASS",
   "runs": {
+   "active_challenge": {
+    "match_id": "arena-active_challenge-1",
+    "observed": {
+     "decision": "review",
+     "automated_action": "none",
+     "kinds": [
+      "occluded_motion_replay"
+     ],
+     "observations": [
+      "obs-465d84da45371505086b13d1"
+     ],
+     "eligibility": {
+      "speed": "eligible",
+      "fire_rate": "eligible",
+      "metronome": "not_applicable",
+      "recoil_floor": "insufficient_samples",
+      "mirror": "eligible",
+      "recoil_learned": "not_applicable",
+      "accuracy": "insufficient_samples",
+      "headshot_rate": "insufficient_samples",
+      "median_distance": "insufficient_samples",
+      "geometry_rate": "insufficient_samples",
+      "extra": "disabled",
+      "rank_tail": "insufficient_samples",
+      "view_snaps": "telemetry_unavailable",
+      "acquire_timing": "telemetry_unavailable",
+      "supporting_extra": "disabled",
+      "account_jump": "telemetry_unavailable",
+      "hidden": "eligible",
+      "quiet_aim": "telemetry_unavailable",
+      "wire": "eligible",
+      "occluded_motion_replay": "eligible",
+      "leftover": "baseline_too_thin",
+      "voice": "not_applicable"
+     },
+     "challenge": {
+      "challenge_id": "ch-a2403f951a427432acdd80d5",
+      "status": "followed",
+      "cause": null,
+      "verification": "per_sample",
+      "eligible_samples": 141,
+      "tracked_samples": 134,
+      "verified_samples": 141,
+      "total_ms": 13350.0,
+      "not_counted": {
+       "seen": 7
+      }
+     },
+     "fusion": null,
+     "knowledge": {
+      "arena-bot-a": "known",
+      "arena-bot-b": "unknowable"
+     },
+     "knowledge_detail": {
+      "arena-bot-a": {
+       "events": 189,
+       "statuses": {
+        "known": 189
+       },
+       "causes": {
+        "seen": 189
+       },
+       "latest": {
+        "t_ms": 32000,
+        "status": "known",
+        "cause": "seen",
+        "channels": {
+         "audio": "known",
+         "recent_perception": "known",
+         "vision": "known"
+        },
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "since_perceived_ms": 0.0,
+        "hidden_track_ms": null,
+        "event_type": "movement"
+       },
+       "majority": "known"
+      },
+      "arena-bot-b": {
+       "events": 11,
+       "statuses": {
+        "unknowable": 11
+       },
+       "causes": {
+        "unknowable": 11
+       },
+       "latest": {
+        "t_ms": 29000,
+        "status": "unknowable",
+        "cause": "unknowable",
+        "channels": {
+         "audio": "absent",
+         "recent_perception": "unchecked",
+         "vision": "absent"
+        },
+        "required": [
+         "vision",
+         "audio"
+        ],
+        "since_perceived_ms": null,
+        "hidden_track_ms": null,
+        "event_type": "movement"
+       },
+       "majority": "unknowable"
+      }
+     },
+     "speed": {
+      "eligible": 320,
+      "excluded_innocent": 0,
+      "excluded_unknown": 0,
+      "excluded_airborne": 0,
+      "missing_cap": 0,
+      "violations": 0,
+      "longest_run": 0,
+      "sustained": false,
+      "spike_samples": 0,
+      "cap_source": "server",
+      "detail": ""
+     },
+     "graph": "sha256:1ca62d4999f07b1984d74b44abe576074334908a5b6af7b93e4c073a93ba32be",
+     "packet": "sha256:5382cf748ebb8556ba7d281f006d39a94957b7b84268e040f4f358e4e15522b0",
+     "experimental": true,
+     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
+    },
+    "as_expected": true,
+    "problems": [],
+    "live_vs_offline": "identical",
+    "pixels": {
+     "checks": 16,
+     "probe_checks_drawn": 7,
+     "probe_pixels_max": 0,
+     "probe_checks_with_pixels": 0,
+     "bot_checks_with_pixels": 15,
+     "bot_pixels_max": 6387,
+     "unchanged_frame_pixels_max": 0,
+     "screenshots": [
+      "view-000100.png",
+      "view-002100.png",
+      "view-004100.png",
+      "view-006100.png",
+      "view-008100.png",
+      "view-010100.png",
+      "view-012100.png",
+      "view-014100.png",
+      "view-016100.png",
+      "view-018100.png",
+      "view-020100.png",
+      "view-022150.png",
+      "view-024150.png",
+      "view-026150.png",
+      "view-028150.png",
+      "view-030150.png"
+     ],
+     "resolution": "640x360, software OpenGL in a private virtual display"
+    },
+    "timing": {
+     "server_tick_hz": 60,
+     "match_ms": 32000,
+     "ticks": 1920,
+     "tick_us_mean": 955.2,
+     "tick_us_max": 2178,
+     "knowledge_us_per_tick": 347.9,
+     "challenge_us_per_probe_tick": 195.6,
+     "rays_per_tick": 421.0,
+     "event_bytes_per_s": 12423.1,
+     "event_lines": 1023,
+     "snapshot_bytes_per_s": 5245.6,
+     "feed_bytes_per_s": 94120.2,
+     "scoring_ms_live": 13.8,
+     "parse_errors": 0,
+     "verdicts": {
+      "audio": {
+       "absent": 849
+      },
+      "vision": {
+       "absent": 849
+      }
+     },
+     "probe_ticks": 849,
+     "memory_static_peak_bytes": 43641061
+    }
+   },
    "exposed_challenge_control": {
     "match_id": "arena-exposed_challenge_control-1",
     "observed": {
@@ -6764,11 +6949,11 @@
       "quiet_aim": "telemetry_unavailable",
       "wire": "eligible",
       "occluded_motion_replay": "not_applicable",
-      "leftover": "insufficient_samples",
+      "leftover": "baseline_too_thin",
       "voice": "not_applicable"
      },
      "challenge": {
-      "challenge_id": "ch-39c328b254fa7e5cc2a83253",
+      "challenge_id": "ch-f6d2de2f2dc5258959d55552",
       "status": "abstained",
       "cause": "seen",
       "verification": "per_sample",
@@ -6777,7 +6962,7 @@
       "verified_samples": 0,
       "total_ms": 0,
       "not_counted": {
-       "seen": 152
+       "seen": 142
       }
      },
      "fusion": null,
@@ -6787,12 +6972,12 @@
      },
      "knowledge_detail": {
       "arena-bot-a": {
-       "events": 174,
+       "events": 186,
        "statuses": {
-        "known": 174
+        "known": 186
        },
        "causes": {
-        "seen": 174
+        "seen": 186
        },
        "latest": {
         "t_ms": 32000,
@@ -6814,15 +6999,15 @@
        "majority": "known"
       },
       "arena-bot-b": {
-       "events": 12,
+       "events": 11,
        "statuses": {
-        "unknowable": 12
+        "unknowable": 11
        },
        "causes": {
-        "unknowable": 12
+        "unknowable": 11
        },
        "latest": {
-        "t_ms": 30500,
+        "t_ms": 30300,
         "status": "unknowable",
         "cause": "unknowable",
         "channels": {
@@ -6855,7 +7040,7 @@
       "detail": ""
      },
      "graph": "sha256:f8eb42575ed4da3c43687b81c22198549c93a7dfb5eead07445ef96392007146",
-     "packet": "sha256:25c298cc710bb116a4ea42d3e7ddd367a862219353dff9745f615458e7dd8d4f",
+     "packet": "sha256:f1a41f3e65c9e2a4c339d88e03a419aec4a5360a69c7c286f962f1b8f97cae51",
      "experimental": true,
      "label": null
     },
@@ -6864,196 +7049,11 @@
     "live_vs_offline": "identical",
     "pixels": {
      "checks": 16,
-     "probe_checks_drawn": 7,
-     "probe_pixels_max": 1769,
-     "probe_checks_with_pixels": 7,
-     "bot_checks_with_pixels": 13,
-     "bot_pixels_max": 6534,
-     "unchanged_frame_pixels_max": 0,
-     "screenshots": [
-      "view-000100.png",
-      "view-002100.png",
-      "view-004100.png",
-      "view-006100.png",
-      "view-008100.png",
-      "view-010100.png",
-      "view-012100.png",
-      "view-014150.png",
-      "view-016100.png",
-      "view-018100.png",
-      "view-020150.png",
-      "view-022150.png",
-      "view-024100.png",
-      "view-026150.png",
-      "view-028150.png",
-      "view-030150.png"
-     ],
-     "resolution": "640x360, software OpenGL in a private virtual display"
-    },
-    "timing": {
-     "server_tick_hz": 60,
-     "match_ms": 32000,
-     "ticks": 1920,
-     "tick_us_mean": 888.5,
-     "tick_us_max": 2011,
-     "knowledge_us_per_tick": 266.6,
-     "challenge_us_per_probe_tick": 186.5,
-     "rays_per_tick": 350.4,
-     "event_bytes_per_s": 12176.7,
-     "event_lines": 990,
-     "snapshot_bytes_per_s": 5291.2,
-     "feed_bytes_per_s": 93497.5,
-     "scoring_ms_live": 12.1,
-     "parse_errors": 0,
-     "verdicts": {
-      "audio": {
-       "absent": 909
-      },
-      "vision": {
-       "known": 909
-      }
-     },
-     "probe_ticks": 909,
-     "memory_static_peak_bytes": 43641525
-    }
-   },
-   "active_challenge": {
-    "match_id": "arena-active_challenge-1",
-    "observed": {
-     "decision": "review",
-     "automated_action": "none",
-     "kinds": [
-      "occluded_motion_replay"
-     ],
-     "observations": [
-      "obs-959d44048380c30da0639fef"
-     ],
-     "eligibility": {
-      "speed": "eligible",
-      "fire_rate": "eligible",
-      "metronome": "not_applicable",
-      "recoil_floor": "insufficient_samples",
-      "mirror": "eligible",
-      "recoil_learned": "not_applicable",
-      "accuracy": "insufficient_samples",
-      "headshot_rate": "insufficient_samples",
-      "median_distance": "insufficient_samples",
-      "geometry_rate": "insufficient_samples",
-      "extra": "disabled",
-      "rank_tail": "insufficient_samples",
-      "view_snaps": "telemetry_unavailable",
-      "acquire_timing": "telemetry_unavailable",
-      "supporting_extra": "disabled",
-      "account_jump": "telemetry_unavailable",
-      "hidden": "eligible",
-      "quiet_aim": "telemetry_unavailable",
-      "wire": "eligible",
-      "occluded_motion_replay": "eligible",
-      "leftover": "insufficient_samples",
-      "voice": "not_applicable"
-     },
-     "challenge": {
-      "challenge_id": "ch-223bd49254313c0eeac07ce0",
-      "status": "followed",
-      "cause": null,
-      "verification": "per_sample",
-      "eligible_samples": 152,
-      "tracked_samples": 144,
-      "verified_samples": 152,
-      "total_ms": 14388.0,
-      "not_counted": {
-       "seen": 8
-      }
-     },
-     "fusion": null,
-     "knowledge": {
-      "arena-bot-a": "known",
-      "arena-bot-b": "unknowable"
-     },
-     "knowledge_detail": {
-      "arena-bot-a": {
-       "events": 176,
-       "statuses": {
-        "known": 176
-       },
-       "causes": {
-        "seen": 176
-       },
-       "latest": {
-        "t_ms": 32000,
-        "status": "known",
-        "cause": "seen",
-        "channels": {
-         "audio": "known",
-         "recent_perception": "known",
-         "vision": "known"
-        },
-        "required": [
-         "vision",
-         "audio"
-        ],
-        "since_perceived_ms": 0.0,
-        "hidden_track_ms": null,
-        "event_type": "movement"
-       },
-       "majority": "known"
-      },
-      "arena-bot-b": {
-       "events": 11,
-       "statuses": {
-        "unknowable": 11
-       },
-       "causes": {
-        "unknowable": 11
-       },
-       "latest": {
-        "t_ms": 28650,
-        "status": "unknowable",
-        "cause": "unknowable",
-        "channels": {
-         "audio": "absent",
-         "recent_perception": "unchecked",
-         "vision": "absent"
-        },
-        "required": [
-         "vision",
-         "audio"
-        ],
-        "since_perceived_ms": null,
-        "hidden_track_ms": 100.0,
-        "event_type": "shot"
-       },
-       "majority": "unknowable"
-      }
-     },
-     "speed": {
-      "eligible": 320,
-      "excluded_innocent": 0,
-      "excluded_unknown": 0,
-      "excluded_airborne": 0,
-      "missing_cap": 0,
-      "violations": 0,
-      "longest_run": 0,
-      "sustained": false,
-      "spike_samples": 0,
-      "cap_source": "server",
-      "detail": ""
-     },
-     "graph": "sha256:99836b5c61e85e245c10be85920680a3bd812f8ebfce2bb98b1470a2d84f0469",
-     "packet": "sha256:c6168ae693c446d27dc4270e1191e576dcc65d770b46ed0666730d4d1441d66e",
-     "experimental": true,
-     "label": "EXPERIMENTAL CHALLENGE RESULT: NOT PRODUCTION QUALIFIED"
-    },
-    "as_expected": true,
-    "problems": [],
-    "live_vs_offline": "identical",
-    "pixels": {
-     "checks": 16,
      "probe_checks_drawn": 8,
-     "probe_pixels_max": 0,
-     "probe_checks_with_pixels": 0,
-     "bot_checks_with_pixels": 14,
-     "bot_pixels_max": 9491,
+     "probe_pixels_max": 1490,
+     "probe_checks_with_pixels": 8,
+     "bot_checks_with_pixels": 13,
+     "bot_pixels_max": 12848,
      "unchanged_frame_pixels_max": 0,
      "screenshots": [
       "view-000100.png",
@@ -7064,8 +7064,8 @@
       "view-010100.png",
       "view-012100.png",
       "view-014100.png",
-      "view-016100.png",
-      "view-018100.png",
+      "view-016150.png",
+      "view-018150.png",
       "view-020150.png",
       "view-022150.png",
       "view-024150.png",
@@ -7079,27 +7079,27 @@
      "server_tick_hz": 60,
      "match_ms": 32000,
      "ticks": 1920,
-     "tick_us_mean": 926.4,
-     "tick_us_max": 2142,
-     "knowledge_us_per_tick": 363.5,
-     "challenge_us_per_probe_tick": 73.8,
-     "rays_per_tick": 426.1,
-     "event_bytes_per_s": 12365.6,
-     "event_lines": 1019,
-     "snapshot_bytes_per_s": 5293.9,
-     "feed_bytes_per_s": 94141.2,
-     "scoring_ms_live": 11.8,
+     "tick_us_mean": 878.5,
+     "tick_us_max": 2408,
+     "knowledge_us_per_tick": 258.2,
+     "challenge_us_per_probe_tick": 234.7,
+     "rays_per_tick": 350.5,
+     "event_bytes_per_s": 12275.6,
+     "event_lines": 996,
+     "snapshot_bytes_per_s": 5248.4,
+     "feed_bytes_per_s": 93207.6,
+     "scoring_ms_live": 15.2,
      "parse_errors": 0,
      "verdicts": {
       "audio": {
-       "absent": 915
+       "absent": 850
       },
       "vision": {
-       "absent": 915
+       "known": 850
       }
      },
-     "probe_ticks": 915,
-     "memory_static_peak_bytes": 43641437
+     "probe_ticks": 850,
+     "memory_static_peak_bytes": 43641149
     }
    }
   }
@@ -7112,5 +7112,5 @@
   "exit_code": 3,
   "listener_after_exit": false
  },
- "digest": "sha256:f3ad5551afb07902db0b3adfc8169ed107453056961291eaa278317e77325b32"
+ "digest": "sha256:91eaec7553dcc7cede2bb9c381eeb261cba5c831ac7610325945e1308da1510f"
 }
